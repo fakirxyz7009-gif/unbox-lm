@@ -1,0 +1,594 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --rack-width: 100%;
+    --rack-unit-height: 120px;
+    --unboxed-chassis-light: #f1f5f9;
+    --unboxed-chassis-metal: #e2e8f0;
+    --unboxed-chassis-dark: #1e293b;
+    --unboxed-white-panel: #ffffff;
+    --unboxed-dark-green: #064e3b;
+    --unboxed-forest-green: #047857;
+    --unboxed-emerald-active: #10b981;
+    --unboxed-mint-accent: #34d399;
+    --unboxed-wood-mahogany: #3f2313;
+    --unboxed-wood-walnut: #4a2916;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #064e3b 100%);
+    color: #f8fafc;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom audio scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #2d1810;
+    border: 1px solid #4a2916;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6e4428;
+    border-radius: 4px;
+    border: 1px solid #3f2313;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8c5836;
+  }
+}
+
+/* Vibrant Cyber-Metallic Studio Chassis & Trims */
+.studio-wood-cabinet, .wooden-box-chassis {
+  background: 
+    linear-gradient(90deg, rgba(6, 182, 212, 0.3) 0%, transparent 8%, transparent 92%, rgba(236, 72, 153, 0.3) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #1e1b4b 0px,
+      #312e81 4px,
+      #065f46 8px,
+      #1e3a8a 14px,
+      #0f172a 20px
+    );
+  box-shadow: 
+    inset 0 2px 6px rgba(6, 182, 212, 0.5),
+    inset 0 -3px 8px rgba(15, 23, 42, 0.9),
+    0 25px 60px rgba(0, 0, 0, 0.85),
+    0 0 0 2px #06b6d4;
+  position: relative;
+}
+
+.studio-wood-top {
+  background: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    repeating-linear-gradient(
+      0deg,
+      #312e81 0px,
+      #1e1b4b 2px,
+      #065f46 5px,
+      #1e3a8a 8px
+    );
+  box-shadow: inset 0 1px 3px rgba(6, 182, 212, 0.6), 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.wooden-cheek {
+  background: 
+    linear-gradient(180deg, rgba(6, 182, 212, 0.3) 0%, transparent 15%, transparent 85%, rgba(15, 23, 42, 0.8) 100%),
+    repeating-linear-gradient(
+      180deg,
+      #1e1b4b 0px,
+      #312e81 4px,
+      #065f46 8px,
+      #1e3a8a 13px,
+      #0f172a 18px
+    );
+  box-shadow: 
+    inset 1px 0 3px rgba(6, 182, 212, 0.5),
+    inset -1px 0 3px rgba(15, 23, 42, 0.9),
+    0 4px 10px rgba(0, 0, 0, 0.75);
+  position: relative;
+}
+
+/* Brass Countersunk Screw on Cheeks */
+.brass-screw {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fde047 0%, #eab308 40%, #b45309 80%, #78350f 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.8);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brass-screw::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 1.5px;
+  background: #422006;
+  transform: rotate(45deg);
+}
+
+/* Knurled Metal Knob Ring Edge */
+.knurled-edge-ring {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #06b6d4 0deg 4deg,
+    #1e1b4b 4deg 8deg,
+    #38bdf8 8deg 12deg,
+    #0f172a 12deg 16deg
+  );
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.9), 0 1px 2px rgba(255,255,255,0.2);
+}
+
+/* Textured Cyber Molding & Metal Screw Corners */
+.wooden-mold-trim {
+  background: 
+    linear-gradient(180deg, rgba(6, 182, 212, 0.35) 0%, transparent 20%, transparent 80%, rgba(15, 23, 42, 0.8) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #1e1b4b 0px,
+      #312e81 4px,
+      #065f46 8px,
+      #1e3a8a 14px,
+      #0f172a 20px
+    );
+  box-shadow: inset 0 2px 6px rgba(6, 182, 212, 0.5), inset 0 -3px 8px rgba(15, 23, 42, 0.9), 0 6px 16px rgba(0,0,0,0.5);
+  border: 1px solid #06b6d4;
+}
+
+/* Electrical Spark Animation */
+@keyframes electrical-spark {
+  0% { opacity: 0.2; transform: scale(0.95); filter: drop-shadow(0 0 2px rgba(6,182,212,0.5)); }
+  50% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(6,182,212,0.9)) drop-shadow(0 0 20px rgba(236,72,153,0.8)); }
+  100% { opacity: 0.3; transform: scale(0.98); filter: drop-shadow(0 0 3px rgba(6,182,212,0.4)); }
+}
+
+.electrical-spark-effect {
+  animation: electrical-spark 1.8s ease-in-out infinite;
+}
+
+/* Super-Duper Textured Chassis & Holographic Backgrounds */
+.super-textured-chassis {
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.25) 0%, transparent 85%),
+    linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(236, 72, 153, 0.2) 100%),
+    repeating-linear-gradient(
+      45deg,
+      #1e1b4b 0px,
+      #312e81 8px,
+      #065f46 16px,
+      #1e3a8a 24px
+    );
+  box-shadow: inset 0 0 40px rgba(6, 182, 212, 0.4), inset 0 0 70px rgba(16, 185, 129, 0.3);
+}
+
+/* Colorful Click Sparkle Animation */
+@keyframes colorful-click-sparkle {
+  0% { transform: scale(1); filter: hue-rotate(0deg) drop-shadow(0 0 6px rgba(236, 72, 153, 0.9)); }
+  33% { transform: scale(1.1); filter: hue-rotate(120deg) drop-shadow(0 0 20px rgba(6, 182, 212, 1)); }
+  66% { transform: scale(0.94); filter: hue-rotate(240deg) drop-shadow(0 0 20px rgba(16, 185, 129, 1)); }
+  100% { transform: scale(1); filter: hue-rotate(360deg) drop-shadow(0 0 10px rgba(245, 158, 11, 1)); }
+}
+
+.colorful-click-btn:active {
+  animation: colorful-click-sparkle 0.4s ease-in-out;
+}
+
+/* Heavy Industrial Brushed Aluminum & Dark Charcoal Faceplates */
+.faceplate-brushed-aluminum {
+  background: 
+    linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 35%, rgba(0,0,0,0.3) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #3f4754 0px,
+      #373e4b 1px,
+      #444c5a 2px,
+      #323943 3px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.65);
+}
+
+.faceplate-dark-charcoal {
+  background: 
+    linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.2) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #5c2f16 0px,
+      #482310 1px,
+      #6e391b 2px,
+      #3f200d 3px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Realistic Physical Heavy-Duty Bat Toggle Switch */
+.toggle-switch-bezel {
+  width: 24px;
+  height: 38px;
+  border-radius: 4px;
+  background: radial-gradient(circle at 50% 50%, #d97706 0%, #92400e 80%, #451a03 100%);
+  border: 1px solid #f59e0b;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch-nut {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fde047 0%, #eab308 60%, #854d0e 100%);
+  border: 1px solid #fef08a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.toggle-switch-bat {
+  width: 7px;
+  height: 16px;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(90deg, #fef08a 0%, #eab308 40%, #fef08a 70%, #ca8a04 100%);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom center;
+}
+
+.toggle-switch-bat.bat-up {
+  transform: translateY(-4px) rotate(0deg);
+}
+
+.toggle-switch-bat.bat-down {
+  transform: translateY(4px) rotate(180deg);
+}
+
+/* Studio Vertical Warm Copper Rack Rails with unit markings */
+.studio-rack-rail {
+  background: linear-gradient(90deg, #4a2916 0%, #6e4428 50%, #3f2313 100%);
+  box-shadow: inset 1px 0 0 rgba(255, 220, 180, 0.2), inset -1px 0 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.rack-hole {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2d1810;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 0 1px #8c5836;
+}
+
+/* Authentic Real Studio Faceplate Colorways: Crisp White, Light Grey Metal, Rich Wood, Dark Green Accents */
+
+/* 1. Precision Anodized Light Grey Metal (Rupert Neve Designs / SSL Origin / Grace Design style) */
+.faceplate-light-grey-metal, .faceplate-brushed-grey {
+  background: 
+    linear-gradient(180deg, #f1f4f8 0%, #dfe4eb 30%, #cad1db 70%, #b8c2ce 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.4) 0px,
+      rgba(255, 255, 255, 0.1) 1px,
+      rgba(0, 0, 0, 0.04) 2px,
+      transparent 3px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  color: #1e293b;
+}
+
+/* 2. Studio Crisp White / Porcelain Enamel (Vintage Teletronix / EMT / German Broadcast style) */
+.faceplate-crisp-white, .faceplate-studio-white {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #edf2f7 75%, #e2e8f0 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.35);
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+/* 3. Deep Forest & Dark Green Studio Faceplate */
+.faceplate-forest-green {
+  background: linear-gradient(180deg, #064e3b 0%, #065f46 45%, #044e3b 75%, #022c22 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.9), 0 4px 14px rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(52, 211, 153, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
+  color: #ecfdf5;
+}
+
+/* 4. Studio Blue (Elysia / Focusrite style) */
+.faceplate-studio-blue {
+  background: linear-gradient(180deg, #1e3a5f 0%, #152943 40%, #17304e 70%, #0f1c2d 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.9), 0 4px 14px rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+  color: #f8fafc;
+}
+
+/* 5. Vibrant Terracotta Copper Faceplate */
+.faceplate-slate-black {
+  background: linear-gradient(180deg, #7c3f1e 0%, #5c2f16 45%, #482310 75%, #351a0b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 180, 100, 0.4);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+  color: #fffbeb;
+}
+
+/* Ultra-Realistic Machined Brushed Titanium & Anodized Aluminum */
+.metallic-brushed-titanium {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.3) 100%),
+    repeating-linear-gradient(
+      0deg,
+      #94a3b8 0px,
+      #cbd5e1 1px,
+      #64748b 2px,
+      #475569 3px
+    );
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 6px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4);
+  border: 1px solid #cbd5e1;
+}
+
+/* Polished Studio Gold / Bronze Bezel */
+.metallic-studio-gold {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 60%),
+    repeating-linear-gradient(
+      90deg,
+      #fbbf24 0px,
+      #f59e0b 2px,
+      #d97706 5px,
+      #b45309 8px
+    );
+  box-shadow: inset 0 1px 3px rgba(255,255,255,0.9), inset 0 -2px 5px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
+  border: 1px solid #fde047;
+}
+
+/* Rich Copper Hardware Plate */
+.metallic-copper-plate {
+  background: 
+    linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 40%, rgba(0,0,0,0.4) 100%),
+    repeating-linear-gradient(
+      0deg,
+      #ea580c 0px,
+      #c2410c 2px,
+      #9a3412 5px,
+      #7c2d12 8px
+    );
+  box-shadow: inset 0 2px 4px rgba(255,200,150,0.4), inset 0 -2px 6px rgba(0,0,0,0.7);
+  border: 1px solid #fdba74;
+}
+
+/* Sterling Silver Machined Metal */
+.metallic-sterling-silver {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.7) 0%, transparent 50%, rgba(100,116,139,0.4) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #e2e8f0 0px,
+      #cbd5e1 2px,
+      #f1f5f9 5px,
+      #94a3b8 8px
+    );
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.9), inset 0 -2px 6px rgba(71,85,105,0.8), 0 8px 20px rgba(0,0,0,0.4);
+  border: 1px solid #f8fafc;
+  color: #0f172a;
+}
+
+/* Pure 24K Gold Plated Hardware */
+.metallic-pure-gold {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.8) 0%, transparent 45%, rgba(180,83,9,0.5) 100%),
+    repeating-linear-gradient(
+      0deg,
+      #fde047 0px,
+      #facc15 2px,
+      #eab308 5px,
+      #ca8a04 9px
+    );
+  box-shadow: inset 0 2px 5px rgba(254,240,138,0.95), inset 0 -2px 6px rgba(120,53,15,0.85), 0 10px 25px rgba(0,0,0,0.4);
+  border: 1px solid #fef08a;
+  color: #422006;
+}
+
+/* Embossed Studio Gold Crest Logo Badge */
+.unboxed-gold-crest {
+  background: radial-gradient(circle at 30% 30%, #fde047 0%, #eab308 40%, #a16207 80%, #713f12 100%);
+  box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 4px 10px rgba(0,0,0,0.5);
+  border: 1px solid #fef08a;
+}
+
+/* Sci-Fi Holographic Glass & Neon Cyber Accents */
+.scifi-glass-panel {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(16, 185, 129, 0.15) 50%, rgba(236, 72, 153, 0.2) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+.scifi-cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(6, 182, 212, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 182, 212, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.neon-cyan-glow {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.9), inset 0 0 10px rgba(6, 182, 212, 0.6);
+}
+
+.neon-magenta-glow {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.9), inset 0 0 10px rgba(236, 72, 153, 0.6);
+}
+
+.neon-emerald-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.9), inset 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+/* Studio Masking Tape label strips */
+.masking-tape {
+  background: #fbf7e8;
+  color: #17181c;
+  font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(0, 0, 0, 0.2);
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+  transform: rotate(-0.4deg);
+}
+
+/* Back of rack warm stamped chassis */
+.metal-chassis-back {
+  background: #3c2415 repeating-linear-gradient(0deg, #3c2415, #3c2415 2px, #4d2f1c 2px, #4d2f1c 4px);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* Vacuum tube filament glow */
+.tube-glow {
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.85) 0%, rgba(255, 69, 0, 0.45) 40%, rgba(200, 30, 0, 0.1) 70%, transparent 100%);
+  filter: drop-shadow(0 0 14px rgba(255, 120, 0, 0.8));
+  animation: tube-flicker 4s ease-in-out infinite alternate;
+}
+
+@keyframes tube-flicker {
+  0% { opacity: 0.88; transform: scale(0.99); }
+  50% { opacity: 0.96; transform: scale(1.01); }
+  70% { opacity: 0.92; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Rack screw styling with chrome washer */
+.rack-screw {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #a8b0bd 0%, #4a505b 50%, #202327 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.9);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rack-screw::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #121316;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: rotate(35deg);
+}
+.rack-screw::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background: #121316;
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.15);
+  transform: rotate(35deg);
+}
+
+/* Jack socket 1/4" phone jack styling */
+.patch-jack {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #7d8491 0%, #373b42 45%, #18191c 80%, #0d0e10 100%);
+  box-shadow: 0 0 0 2px #444953, 0 3px 6px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.patch-jack:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px #38bdf8, 0 4px 12px rgba(56, 189, 248, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+.patch-jack-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 1), 0 0 0 1px #222;
+}
+
+/* Jack CV styling */
+.patch-jack-cv {
+  box-shadow: 0 0 0 2px #f59e0b, 0 3px 6px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+.patch-jack-cv:hover {
+  box-shadow: 0 0 0 2px #fbbf24, 0 4px 12px rgba(251, 191, 36, 0.6);
+}
+
+/* Intelligent Cable Patching Connection Helper States */
+.jack-compatible-target {
+  animation: pulse-compatible 1.2s ease-in-out infinite;
+  box-shadow: 0 0 0 3px #10b981, 0 0 16px rgba(16, 185, 129, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.7) !important;
+  transform: scale(1.12);
+  cursor: pointer;
+}
+
+@keyframes pulse-compatible {
+  0% { box-shadow: 0 0 0 2px #10b981, 0 0 8px rgba(16, 185, 129, 0.6); }
+  50% { box-shadow: 0 0 0 4px #34d399, 0 0 18px rgba(52, 211, 153, 0.9); }
+  100% { box-shadow: 0 0 0 2px #10b981, 0 0 8px rgba(16, 185, 129, 0.6); }
+}
+
+.jack-incompatible {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(80%);
+}
+
+.jack-source-active {
+  box-shadow: 0 0 0 3px #f59e0b, 0 0 16px rgba(245, 158, 11, 0.85) !important;
+  transform: scale(1.1);
+}
+
+/* LED Indicator lights */
+.led-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #23262b;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.8);
+  transition: all 0.08s ease;
+}
+.led-indicator.active-blue {
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-green {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-amber {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-red {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* LCD Screen style */
+.lcd-display {
+  background: #09120c;
+  border: 2px solid #16281b;
+  color: #38ef7d;
+  font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
+  text-shadow: 0 0 6px rgba(56, 239, 125, 0.6);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95);
+}

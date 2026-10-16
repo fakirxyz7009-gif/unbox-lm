@@ -1,0 +1,6 @@
+{
+  "name": "Unboxed - Modular Studio DAW & AI Co-Pilot",
+  "description": "Tactile rock-studio modular hardware rack DAW featuring zero-latency Web Audio DSP, interactive back-rack patch cabling, CV modulation matrix, and Gemini-powered generative AI co-pilot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
