@@ -4,104 +4,90 @@
   :root {
     --rack-width: 100%;
     --rack-unit-height: 120px;
-    --unboxed-chassis-light: #f1f5f9;
-    --unboxed-chassis-metal: #e2e8f0;
-    --unboxed-chassis-dark: #1e293b;
-    --unboxed-white-panel: #ffffff;
+    --unboxed-chassis-light: #e2e8f0;
+    --unboxed-chassis-metal: #94a3b8;
+    --unboxed-chassis-dark: #070a10;
+    --unboxed-white-panel: #f8fafc;
     --unboxed-dark-green: #064e3b;
     --unboxed-forest-green: #047857;
     --unboxed-emerald-active: #10b981;
-    --unboxed-mint-accent: #34d399;
-    --unboxed-wood-mahogany: #3f2313;
-    --unboxed-wood-walnut: #4a2916;
+    --unboxed-mint-accent: #00f0ff;
+    --unboxed-techno-obsidian: #06090f;
+    --unboxed-techno-slate: #0d131f;
   }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #064e3b 100%);
+    background: radial-gradient(circle at 50% 0%, #0f172a 0%, #070a11 60%, #030509 100%);
     color: #f8fafc;
     user-select: none;
     -webkit-user-select: none;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Custom audio scrollbar */
+  /* Custom Hi-Fi Techno Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-track {
-    background: #2d1810;
-    border: 1px solid #4a2916;
+    background: #06090f;
+    border: 1px solid #1e293b;
   }
   ::-webkit-scrollbar-thumb {
-    background: #6e4428;
+    background: linear-gradient(180deg, #0891b2, #0f766e);
     border-radius: 4px;
-    border: 1px solid #3f2313;
+    border: 1px solid #06b6d4;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #8c5836;
+    background: linear-gradient(180deg, #06b6d4, #10b981);
   }
 }
 
-/* Vibrant Cyber-Metallic Studio Chassis & Trims */
+/* Sleek Anodized Carbon & Titanium Techno Studio Chassis */
 .studio-wood-cabinet, .wooden-box-chassis {
   background: 
-    linear-gradient(90deg, rgba(6, 182, 212, 0.3) 0%, transparent 8%, transparent 92%, rgba(236, 72, 153, 0.3) 100%),
+    linear-gradient(180deg, rgba(6, 182, 212, 0.08) 0%, rgba(15, 23, 42, 0.95) 15%, rgba(7, 10, 17, 0.98) 100%),
     repeating-linear-gradient(
       90deg,
-      #1e1b4b 0px,
-      #312e81 4px,
-      #065f46 8px,
-      #1e3a8a 14px,
-      #0f172a 20px
+      #090d16 0px,
+      #0f172a 4px,
+      #0b111e 8px,
+      #090d16 12px
     );
   box-shadow: 
-    inset 0 2px 6px rgba(6, 182, 212, 0.5),
-    inset 0 -3px 8px rgba(15, 23, 42, 0.9),
-    0 25px 60px rgba(0, 0, 0, 0.85),
-    0 0 0 2px #06b6d4;
+    inset 0 1px 0 rgba(34, 211, 238, 0.35),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.95),
+    0 20px 50px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(6, 182, 212, 0.35);
   position: relative;
 }
 
 .studio-wood-top {
   background: 
-    linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
-    repeating-linear-gradient(
-      0deg,
-      #312e81 0px,
-      #1e1b4b 2px,
-      #065f46 5px,
-      #1e3a8a 8px
-    );
-  box-shadow: inset 0 1px 3px rgba(6, 182, 212, 0.6), 0 4px 12px rgba(0, 0, 0, 0.7);
+    linear-gradient(90deg, #081221 0%, #0d1f33 50%, #081221 100%);
+  box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.4), 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 
 .wooden-cheek {
   background: 
-    linear-gradient(180deg, rgba(6, 182, 212, 0.3) 0%, transparent 15%, transparent 85%, rgba(15, 23, 42, 0.8) 100%),
-    repeating-linear-gradient(
-      180deg,
-      #1e1b4b 0px,
-      #312e81 4px,
-      #065f46 8px,
-      #1e3a8a 13px,
-      #0f172a 18px
-    );
+    linear-gradient(180deg, #0c1424 0%, #070b14 50%, #0c1424 100%);
   box-shadow: 
-    inset 1px 0 3px rgba(6, 182, 212, 0.5),
-    inset -1px 0 3px rgba(15, 23, 42, 0.9),
-    0 4px 10px rgba(0, 0, 0, 0.75);
+    inset 1px 0 2px rgba(34, 211, 238, 0.3),
+    inset -1px 0 3px rgba(0, 0, 0, 0.9),
+    0 4px 10px rgba(0, 0, 0, 0.8);
   position: relative;
 }
 
-/* Brass Countersunk Screw on Cheeks */
+/* Precision Titanium Hex Screw on Rack Rails */
 .brass-screw {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fde047 0%, #eab308 40%, #b45309 80%, #78350f 100%);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.8);
+  background: radial-gradient(circle at 35% 35%, #e2e8f0 0%, #64748b 45%, #1e293b 85%, #090d16 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(6, 182, 212, 0.3);
   position: relative;
   display: flex;
   align-items: center;
@@ -110,9 +96,9 @@
 .brass-screw::before {
   content: '';
   position: absolute;
-  width: 6px;
+  width: 5px;
   height: 1.5px;
-  background: #422006;
+  background: #020617;
   transform: rotate(45deg);
 }
 
@@ -121,65 +107,48 @@
   background: repeating-conic-gradient(
     from 0deg,
     #06b6d4 0deg 4deg,
-    #1e1b4b 4deg 8deg,
+    #0f172a 4deg 8deg,
     #38bdf8 8deg 12deg,
-    #0f172a 12deg 16deg
+    #090d16 12deg 16deg
   );
   box-shadow: inset 0 0 3px rgba(0,0,0,0.9), 0 1px 2px rgba(255,255,255,0.2);
 }
 
-/* Textured Cyber Molding & Metal Screw Corners */
+/* Techno Hi-Fi Top Bezel Trim */
 .wooden-mold-trim {
-  background: 
-    linear-gradient(180deg, rgba(6, 182, 212, 0.35) 0%, transparent 20%, transparent 80%, rgba(15, 23, 42, 0.8) 100%),
-    repeating-linear-gradient(
-      90deg,
-      #1e1b4b 0px,
-      #312e81 4px,
-      #065f46 8px,
-      #1e3a8a 14px,
-      #0f172a 20px
-    );
-  box-shadow: inset 0 2px 6px rgba(6, 182, 212, 0.5), inset 0 -3px 8px rgba(15, 23, 42, 0.9), 0 6px 16px rgba(0,0,0,0.5);
-  border: 1px solid #06b6d4;
+  background: linear-gradient(90deg, #050811 0%, #0a192f 35%, #06283d 50%, #0a192f 65%, #050811 100%);
+  box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(6, 182, 212, 0.35);
 }
 
-/* Electrical Spark Animation */
+/* Subtle Pulse Glow Effect */
 @keyframes electrical-spark {
-  0% { opacity: 0.2; transform: scale(0.95); filter: drop-shadow(0 0 2px rgba(6,182,212,0.5)); }
-  50% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(6,182,212,0.9)) drop-shadow(0 0 20px rgba(236,72,153,0.8)); }
-  100% { opacity: 0.3; transform: scale(0.98); filter: drop-shadow(0 0 3px rgba(6,182,212,0.4)); }
+  0% { opacity: 0.85; }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(6,182,212,0.45)); }
+  100% { opacity: 0.85; }
 }
 
 .electrical-spark-effect {
-  animation: electrical-spark 1.8s ease-in-out infinite;
+  animation: electrical-spark 3s ease-in-out infinite;
 }
 
-/* Super-Duper Textured Chassis & Holographic Backgrounds */
+/* High-Contrast Obsidian & Carbon Techno Chassis Background */
 .super-textured-chassis {
   background: 
-    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.25) 0%, transparent 85%),
-    linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(236, 72, 153, 0.2) 100%),
-    repeating-linear-gradient(
-      45deg,
-      #1e1b4b 0px,
-      #312e81 8px,
-      #065f46 16px,
-      #1e3a8a 24px
-    );
-  box-shadow: inset 0 0 40px rgba(6, 182, 212, 0.4), inset 0 0 70px rgba(16, 185, 129, 0.3);
+    radial-gradient(circle at 20% 0%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, #06090f 0%, #090d16 50%, #05070c 100%);
 }
 
 /* Colorful Click Sparkle Animation */
 @keyframes colorful-click-sparkle {
-  0% { transform: scale(1); filter: hue-rotate(0deg) drop-shadow(0 0 6px rgba(236, 72, 153, 0.9)); }
-  33% { transform: scale(1.1); filter: hue-rotate(120deg) drop-shadow(0 0 20px rgba(6, 182, 212, 1)); }
-  66% { transform: scale(0.94); filter: hue-rotate(240deg) drop-shadow(0 0 20px rgba(16, 185, 129, 1)); }
-  100% { transform: scale(1); filter: hue-rotate(360deg) drop-shadow(0 0 10px rgba(245, 158, 11, 1)); }
+  0% { transform: scale(1); }
+  50% { transform: scale(0.96); filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.8)); }
+  100% { transform: scale(1); }
 }
 
 .colorful-click-btn:active {
-  animation: colorful-click-sparkle 0.4s ease-in-out;
+  animation: colorful-click-sparkle 0.2s ease-in-out;
 }
 
 /* Heavy Industrial Brushed Aluminum & Dark Charcoal Faceplates */
@@ -198,15 +167,14 @@
 
 .faceplate-dark-charcoal {
   background: 
-    linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.2) 100%),
+    linear-gradient(180deg, rgba(6, 182, 212, 0.08) 0%, transparent 40%, rgba(0,0,0,0.4) 100%),
     repeating-linear-gradient(
       90deg,
-      #5c2f16 0px,
-      #482310 1px,
-      #6e391b 2px,
-      #3f200d 3px
+      #0f172a 0px,
+      #111827 2px,
+      #1e293b 4px
     );
-  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 /* Realistic Physical Heavy-Duty Bat Toggle Switch */
@@ -214,8 +182,8 @@
   width: 24px;
   height: 38px;
   border-radius: 4px;
-  background: radial-gradient(circle at 50% 50%, #d97706 0%, #92400e 80%, #451a03 100%);
-  border: 1px solid #f59e0b;
+  background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 80%, #020617 100%);
+  border: 1px solid #06b6d4;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
@@ -230,8 +198,8 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fde047 0%, #eab308 60%, #854d0e 100%);
-  border: 1px solid #fef08a;
+  background: radial-gradient(circle, #67e8f9 0%, #06b6d4 60%, #0e7490 100%);
+  border: 1px solid #cffafe;
   box-shadow: 0 1px 2px rgba(0,0,0,0.5);
   position: relative;
 }
@@ -240,7 +208,7 @@
   width: 7px;
   height: 16px;
   border-radius: 4px 4px 2px 2px;
-  background: linear-gradient(90deg, #fef08a 0%, #eab308 40%, #fef08a 70%, #ca8a04 100%);
+  background: linear-gradient(90deg, #f8fafc 0%, #94a3b8 40%, #e2e8f0 70%, #475569 100%);
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: bottom center;
@@ -254,10 +222,10 @@
   transform: translateY(4px) rotate(180deg);
 }
 
-/* Studio Vertical Warm Copper Rack Rails with unit markings */
+/* Studio Vertical Anodized Titanium Rack Rails with unit markings */
 .studio-rack-rail {
-  background: linear-gradient(90deg, #4a2916 0%, #6e4428 50%, #3f2313 100%);
-  box-shadow: inset 1px 0 0 rgba(255, 220, 180, 0.2), inset -1px 0 0 rgba(0, 0, 0, 0.5);
+  background: linear-gradient(90deg, #090d16 0%, #1e293b 50%, #090d16 100%);
+  box-shadow: inset 1px 0 0 rgba(56, 189, 248, 0.2), inset -1px 0 0 rgba(0, 0, 0, 0.8);
   position: relative;
 }
 
@@ -265,8 +233,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #2d1810;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 0 1px #8c5836;
+  background: #020617;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 0 1px #334155;
 }
 
 /* Authentic Real Studio Faceplate Colorways: Crisp White, Light Grey Metal, Rich Wood, Dark Green Accents */
@@ -385,41 +353,33 @@
   color: #0f172a;
 }
 
-/* Pure 24K Gold Plated Hardware */
+/* Techno Hi-Fi Laser Cyan & Titanium Badge */
 .metallic-pure-gold {
-  background: 
-    linear-gradient(135deg, rgba(255,255,255,0.8) 0%, transparent 45%, rgba(180,83,9,0.5) 100%),
-    repeating-linear-gradient(
-      0deg,
-      #fde047 0px,
-      #facc15 2px,
-      #eab308 5px,
-      #ca8a04 9px
-    );
-  box-shadow: inset 0 2px 5px rgba(254,240,138,0.95), inset 0 -2px 6px rgba(120,53,15,0.85), 0 10px 25px rgba(0,0,0,0.4);
-  border: 1px solid #fef08a;
-  color: #422006;
+  background: linear-gradient(135deg, #083344 0%, #0e7490 50%, #064e3b 100%);
+  box-shadow: inset 0 1px 2px rgba(103, 232, 249, 0.5), 0 0 12px rgba(6, 182, 212, 0.35);
+  border: 1px solid #22d3ee;
+  color: #ecfeff;
 }
 
-/* Embossed Studio Gold Crest Logo Badge */
+/* Techno Hi-Fi Emblem Badge */
 .unboxed-gold-crest {
-  background: radial-gradient(circle at 30% 30%, #fde047 0%, #eab308 40%, #a16207 80%, #713f12 100%);
-  box-shadow: inset 0 1px 3px rgba(255,255,255,0.8), 0 4px 10px rgba(0,0,0,0.5);
-  border: 1px solid #fef08a;
+  background: radial-gradient(circle at 30% 30%, #0f172a 0%, #083344 60%, #020617 100%);
+  box-shadow: inset 0 1px 3px rgba(34, 211, 238, 0.5), 0 0 14px rgba(6, 182, 212, 0.4);
+  border: 1px solid #06b6d4;
 }
 
 /* Sci-Fi Holographic Glass & Neon Cyber Accents */
 .scifi-glass-panel {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(16, 185, 129, 0.15) 50%, rgba(236, 72, 153, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.14) 0%, rgba(16, 185, 129, 0.1) 50%, rgba(99, 102, 241, 0.14) 100%);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(6, 182, 212, 0.6);
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.15);
 }
 
 .scifi-cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(6, 182, 212, 0.15) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(6, 182, 212, 0.15) 1px, transparent 1px);
+    linear-gradient(to right, rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -437,19 +397,18 @@
 
 /* Studio Masking Tape label strips */
 .masking-tape {
-  background: #fbf7e8;
-  color: #17181c;
+  background: #e2e8f0;
+  color: #090d16;
   font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(0, 0, 0, 0.2);
   border-top: 1px dashed rgba(0, 0, 0, 0.15);
   border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
-  transform: rotate(-0.4deg);
 }
 
-/* Back of rack warm stamped chassis */
+/* Back of rack anodized dark carbon chassis */
 .metal-chassis-back {
-  background: #3c2415 repeating-linear-gradient(0deg, #3c2415, #3c2415 2px, #4d2f1c 2px, #4d2f1c 4px);
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
+  background: #080c14 repeating-linear-gradient(0deg, #080c14, #080c14 2px, #0d1320 2px, #0d1320 4px);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
 /* Vacuum tube filament glow */

@@ -264,7 +264,20 @@ export class MimicDevice extends BaseDevice {
   }
 
   public noteOn(midiNote: number, velocity: number = 0.8, time: number = this.ctx.currentTime): void {
-    const padIndex = (midiNote - 60 + 8) % 8;
-    this.triggerPad(padIndex, velocity, time);
+    const padIndex = ((midiNote % 8) + 8) % 8;
+    // Also adjust pitchSemi slightly based on octave relative to C4 (60)
+    const pad = this.pads[padIndex];
+    if (pad) {
+      const prevPitch = pad.pitchSemi;
+      pad.pitchSemi = Math.max(-24, Math.min(24, midiNote - 60));
+      this.triggerPad(padIndex, velocity, time);
+      pad.pitchSemi = prevPitch;
+    } else {
+      this.triggerPad(padIndex, velocity, time);
+    }
+  }
+
+  public noteOff(_midiNote: number, _time?: number): void {
+    // Sampler pads use one-shot envelope decay
   }
 }

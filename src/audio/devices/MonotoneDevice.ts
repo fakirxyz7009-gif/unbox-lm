@@ -51,70 +51,102 @@ export class MonotoneDevice extends BaseDevice {
     });
   }
 
+  private resolveCutoffHz(val: number): number {
+    const n = Number(val);
+    if (isNaN(n)) return 480;
+    if (n <= 1.5) return Math.round(55 * Math.pow(220, Math.max(0.02, Math.min(1.0, n))));
+    return Math.max(35, Math.min(16000, n));
+  }
+
+  private resolveResonanceQ(val: number): number {
+    const n = Number(val);
+    if (isNaN(n)) return 6.0;
+    if (n <= 1.0) return 1.0 + Math.max(0, Math.min(1, n)) * 14.0;
+    return Math.max(0.5, Math.min(20, n));
+  }
+
   public setParam(key: string, value: any): void {
-    this.params[key] = value;
     if (key === 'volume') {
-      this.masterOutput.gain.setValueAtTime(Math.max(0, Math.min(1.5, Number(value))), this.ctx.currentTime);
+      const v = Math.max(0, Math.min(1.5, Number(value)));
+      this.params.volume = v;
+      this.masterOutput.gain.setTargetAtTime(v, this.ctx.currentTime, 0.015);
+    } else if (key === 'cutoff') {
+      this.params.cutoff = this.resolveCutoffHz(value);
+      if (this.currentVoice) {
+        this.currentVoice.filter.frequency.setTargetAtTime(this.params.cutoff, this.ctx.currentTime, 0.02);
+      }
+    } else if (key === 'resonance') {
+      this.params.resonance = this.resolveResonanceQ(value);
+      if (this.currentVoice) {
+        this.currentVoice.filter.Q.setTargetAtTime(this.params.resonance, this.ctx.currentTime, 0.02);
+      }
+    } else {
+      this.params[key] = value;
     }
   }
 
   public noteOn(midiNote: number, velocity: number = 0.9, time: number = this.ctx.currentTime): void {
     if (!this.isPowered || this.isBypassed) return;
-    this.noteOff(midiNote, time);
+    const startTime = Math.max(this.ctx.currentTime, time);
+    this.noteOff(midiNote, startTime);
 
-    const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
+    const freq = Math.max(20, Math.min(16000, 440 * Math.pow(2, (midiNote - 69) / 12)));
 
     const osc = this.ctx.createOscillator();
     osc.type = this.params.waveform;
-    osc.frequency.setValueAtTime(freq, time);
+    osc.frequency.setValueAtTime(freq, startTime);
 
     const sub = this.ctx.createOscillator();
     sub.type = 'sine';
-    sub.frequency.setValueAtTime(freq * 0.5, time);
+    sub.frequency.setValueAtTime(Math.max(20, freq * 0.5), startTime);
 
     const subGain = this.ctx.createGain();
-    subGain.gain.setValueAtTime(this.params.subLevel, time);
+    subGain.gain.setValueAtTime(this.params.subLevel, startTime);
     sub.connect(subGain);
 
+    const baseCutoff = this.resolveCutoffHz(this.params.cutoff);
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.Q.setValueAtTime(this.params.resonance, time);
+    filter.Q.setValueAtTime(this.resolveResonanceQ(this.params.resonance), startTime);
 
-    const peakCutoff = Math.min(14000, this.params.cutoff + this.params.envAmount * 5000);
-    filter.frequency.setValueAtTime(peakCutoff, time);
-    filter.frequency.exponentialRampToValueAtTime(Math.max(30, this.params.cutoff), time + this.params.decay);
+    const decay = Math.max(0.05, this.params.decay);
+    const peakCutoff = Math.min(15000, baseCutoff + this.params.envAmount * 4500);
+    filter.frequency.setValueAtTime(peakCutoff, startTime);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(40, baseCutoff), startTime + decay);
 
     const amp = this.ctx.createGain();
-    amp.gain.setValueAtTime(velocity * 0.9, time);
-    amp.gain.exponentialRampToValueAtTime(0.0001, time + this.params.decay * 1.5);
+    amp.gain.setValueAtTime(Math.max(0.05, velocity) * 0.88, startTime);
+    amp.gain.exponentialRampToValueAtTime(0.0001, startTime + decay * 1.6);
 
     osc.connect(filter);
     subGain.connect(filter);
     filter.connect(amp);
     amp.connect(this.masterOutput);
 
-    osc.start(time);
-    sub.start(time);
+    osc.start(startTime);
+    sub.start(startTime);
 
     this.currentVoice = { osc, sub, filter, amp };
   }
 
-  public noteOff(midiNote: number, time: number = this.ctx.currentTime): void {
+  public noteOff(_midiNote: number, time: number = this.ctx.currentTime): void {
     if (!this.currentVoice) return;
+    const v = this.currentVoice;
+    this.currentVoice = null;
+    const relTime = Math.max(this.ctx.currentTime, time);
     try {
-      this.currentVoice.amp.gain.setTargetAtTime(0.0001, time, 0.02);
-      const v = this.currentVoice;
+      v.amp.gain.cancelScheduledValues(relTime);
+      v.amp.gain.setTargetAtTime(0.0001, relTime, 0.02);
+      v.osc.stop(relTime + 0.08);
+      v.sub.stop(relTime + 0.08);
       setTimeout(() => {
         try {
-          v.osc.stop();
-          v.sub.stop();
           v.osc.disconnect();
           v.sub.disconnect();
           v.filter.disconnect();
           v.amp.disconnect();
         } catch (e) {}
-      }, 50);
-      this.currentVoice = null;
+      }, Math.max(60, (relTime - this.ctx.currentTime) * 1000 + 100));
     } catch (e) {}
   }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AudioEngine } from '../audio/AudioEngine.ts';
-import { DeviceType, WorkspaceViewMode } from '../audio/types.ts';
+import { DeviceType, WorkspaceViewMode, InternalOptionCategory } from '../audio/types.ts';
 import { Knob } from './Knob.tsx';
 import { VUMeter } from './VUMeter.tsx';
 import { UnboxedLogoIcon } from './UnboxedLogoIcon.tsx';
@@ -21,6 +21,12 @@ import {
   SplitSquareVertical,
   Columns,
   LayoutGrid,
+  Rewind,
+  FastForward,
+  Repeat,
+  Cpu,
+  Save,
+  Keyboard,
 } from 'lucide-react';
 
 interface HeaderTransportProps {
@@ -29,7 +35,9 @@ interface HeaderTransportProps {
   onToggleBackView: () => void;
   onOpenAICoPilot: () => void;
   onOpenCVMatrix: () => void;
-  onAddDevice: (type: DeviceType) => void;
+  onOpenInternalInspector?: (category: InternalOptionCategory) => void;
+  onOpenShortcuts?: () => void;
+  onAddDevice: (type: DeviceType, customName?: string) => void;
   onAutoPatchMaster: () => void;
   activeViewMode: WorkspaceViewMode;
   onViewModeChange: (mode: WorkspaceViewMode) => void;
@@ -43,6 +51,8 @@ export const HeaderTransport: React.FC<HeaderTransportProps> = ({
   onToggleBackView,
   onOpenAICoPilot,
   onOpenCVMatrix,
+  onOpenInternalInspector,
+  onOpenShortcuts,
   onAddDevice,
   onAutoPatchMaster,
   activeViewMode,
@@ -55,7 +65,7 @@ export const HeaderTransport: React.FC<HeaderTransportProps> = ({
   const [bpm, setBpm] = useState(audioEngine.bpm);
 
   const t = audioEngine.telemetry;
-  const bar = Math.floor(t.currentStep / 16) + 1;
+  const bar = (audioEngine.currentSongBar || 0) + 1;
   const beat = (Math.floor(t.currentStep / 4) % 4) + 1;
   const sixteenth = (t.currentStep % 4) + 1;
 
@@ -71,17 +81,34 @@ export const HeaderTransport: React.FC<HeaderTransportProps> = ({
 
   const deviceCategories: { label: string; badge: string; color: string; items: { type: DeviceType; name: string; desc: string; u: number }[] }[] = [
     {
-      label: 'Native Synths & Tone Generators',
-      badge: 'INSTRUMENTS',
+      label: '🎹 Reason Rack Instruments & Synthesizers',
+      badge: 'SYNTHS & KEYS',
       color: 'border-emerald-500/40 text-emerald-400',
       items: [
+        { type: 'europa', name: 'Europa: Shapeshifting Wavetable Synth', desc: '3-engine spectral wavetable & harmonic modifier synth', u: 3 },
+        { type: 'thor', name: 'Thor: Polysonic Synthesizer', desc: 'Semi-modular triple-oscillator polysonic powerhouse', u: 3 },
+        { type: 'malstrom', name: 'Malström: Graintable Synthesizer', desc: 'Dual graintable engine with wave-shaper & dual filters', u: 3 },
+        { type: 'subtractor', name: 'Subtractor: Analog Modeling Synth', desc: 'Dual-oscillator phase-diff subtractive lead & bass synth', u: 2 },
+        { type: 'algoritm', name: 'Algoritm: 9-Slot FM Synthesizer', desc: '9-slot programmable FM operators, filters & wave-shapers', u: 3 },
+        { type: 'complex1', name: 'Complex-1: Modular Synthesizer', desc: 'West-Coast wavefolder, lowpass gate & patchable modular synth', u: 3 },
+        { type: 'parsec2', name: 'Parsec 2: Spectral Synthesizer', desc: 'Dual 512-partial additive spectral generator & formant filter', u: 3 },
+        { type: 'polytone', name: 'Polytone: Dual-Layer Synthesizer', desc: 'Dual-layer vintage analog morphing polysynth with age drift', u: 2 },
+        { type: 'monotone', name: 'Monotone: Bass Synthesizer', desc: 'Punchy monophonic 24dB ladder filter bass synth', u: 1 },
+        { type: 'objekt', name: 'Objekt: Physical Modeling Synth', desc: 'Exciter + 3 modal acoustic resonators (Bell, Plate, String)', u: 3 },
+        { type: 'grain', name: 'Grain: Sample Manipulator / Granular Synth', desc: 'Spectral & long-grain cloud synthesizer with jitter & spray', u: 3 },
+        { type: 'friktion', name: 'Friktion: Modeled Strings', desc: 'Physical modeling bowed strings (Violin, Viola, Cello, Bass)', u: 3 },
+        { type: 'scenic', name: 'Scenic: Hybrid Instrument', desc: 'Dual-engine cinematic atmospheric hybrid synth & shimmer', u: 3 },
+        { type: 'humana', name: 'Humana: Vocal Ensemble Instrument', desc: 'Cathedral choir & soloist vocal ensemble formant instrument', u: 2 },
+        { type: 'pangea', name: 'Pangea: World Instrument', desc: 'Multi-sampled world plucked & wind instruments (Saz, Oud, Duduk)', u: 2 },
+        { type: 'klang', name: 'Klang: Tuned Percussion', desc: 'Glockenspiel, Kalimba, Music Box & singing wine glass percussion', u: 2 },
+        { type: 'radical_piano', name: 'Radical Piano / Radical Keys', desc: 'Acoustic Grand, Upright, Suitcase Rhodes & Wurlitzer pianos', u: 3 },
+        { type: 'reason_performance', name: 'Reason Drum Kits / Reason Electric Bass', desc: 'Multi-mic sampled studio drum kits & precision electric bass', u: 2 },
+        { type: 'layers_id8', name: 'Layers / ID8: Sample Players & Toolbox', desc: 'Quad-wave vintage synth stack & songwriter instrument toolbox', u: 2 },
+        { type: 'wyvern', name: 'Wyvern Synthesizer Module', desc: 'Stock virtual dual-wavetable, FM & comb-resonator dragon synth', u: 3 },
+        { type: 'ember', name: 'Ember Synthesizer Module', desc: 'Stock virtual thermal-drift, formant & tube-saturation synth', u: 3 },
         { type: 'three_osc', name: '3x OSC Power Synth', desc: 'Triple oscillator synth with detune, shape & fat unison', u: 2 },
         { type: 'sytrus', name: 'Sytrus FM / Additive Synth', desc: 'Multi-operator FM synthesis & harmonic modulation', u: 2 },
         { type: 'flex', name: 'FLEX Advanced Rompler', desc: 'Preset-driven sound generator with acoustic & synth macros', u: 2 },
-        { type: 'subtractor', name: 'Subtractor Analog Synth', desc: 'Dual-osc analog subtractive lead & bass', u: 2 },
-        { type: 'thor', name: 'Thor Polysonic Synth', desc: 'Triple-oscillator polysonic powerhouse with chorus', u: 3 },
-        { type: 'europa', name: 'Europa Wavetable Synth', desc: 'Shapeshifting spectral wavetable synth', u: 3 },
-        { type: 'monotone', name: 'Monotone Bass Synth', desc: 'Punchy 24dB ladder filter bass synth', u: 1 },
       ],
     },
     {
@@ -144,7 +171,7 @@ export const HeaderTransport: React.FC<HeaderTransportProps> = ({
         { type: 'percussion_electronic' as DeviceType, name: 'Snare Drum', desc: 'Wire-snares membrane percussion', u: 2 },
         { type: 'percussion_electronic' as DeviceType, name: 'Steelpan', desc: 'Caribbean hammered oil drum pan', u: 2 },
         { type: 'percussion_electronic' as DeviceType, name: 'Tablilla', desc: 'Wooden clapper rhythm instrument', u: 1 },
-        { type: 'percussion_electronic' as DeviceType, name: 'Tabla', desc: 'Indian classical hand drum pair', u: 2 },
+        { type: 'tabla' as DeviceType, name: 'Tabla (Dayan & Bayan)', desc: 'Indian classical hand drum pair with Syahi & Meend', u: 2 },
         { type: 'percussion_electronic' as DeviceType, name: 'Taiko', desc: 'Japanese traditional barrel drum', u: 3 },
         { type: 'percussion_electronic' as DeviceType, name: 'Tambourine', desc: 'Jingled frame drum', u: 1 },
         { type: 'percussion_electronic' as DeviceType, name: 'Temple Block', desc: 'Wooden hollow slit drum cluster', u: 1 },
@@ -344,316 +371,457 @@ export const HeaderTransport: React.FC<HeaderTransportProps> = ({
       ],
     },
     {
-      label: 'Drums & Samplers',
-      badge: 'RHYTHM',
+      label: '🥁 Samplers, Drum Designers & Loop Players',
+      badge: 'SAMPLERS & DRUMS',
       color: 'border-amber-500/40 text-amber-400',
       items: [
-        { type: 'redrum', name: 'Redrum 16-Step Drum Machine', desc: '8-channel drum computer with step sequencer', u: 3 },
-        { type: 'mimic', name: 'Mimic Creative Sampler', desc: '8-pad instrument with acoustic & sample playback', u: 3 },
+        { type: 'mimic', name: 'Mimic: Creative Sampler', desc: '8-slot multi-mode slice, pitch & time-stretch creative sampler', u: 3 },
+        { type: 'nnxt', name: 'NN-XT: Advanced Sampler', desc: 'Multi-zone velocity-crossfade hierarchical studio sampler', u: 3 },
+        { type: 'nn19', name: 'NN-19: Digital Sampler', desc: 'Classic low-CPU rack digital sampler with resonant filter', u: 2 },
+        { type: 'kong', name: 'Kong: 16-Pad Drum Designer', desc: '16-pad physical drum modeling, Nurse Rex & transient FX studio', u: 3 },
+        { type: 'redrum', name: 'Redrum: 16-Step Drum Computer', desc: '10-channel classic pattern drum machine with step sequencer', u: 3 },
+        { type: 'dr_octo_rex', name: 'Dr. Octo Rex: 8-Slot Loop Player', desc: '8-slot REX loop slicer with per-slice pitch & filter modulation', u: 3 },
+        { type: 'umpf', name: 'Umpf Club Drums / Umpf Retro Beats', desc: 'Dual-edition club & 80s retro gated-reverb drum workstation', u: 3 },
       ],
     },
     {
-      label: 'Sequencing & Modulation',
-      badge: 'CONTROL',
-      color: 'border-emerald-500/40 text-emerald-400',
-      items: [
-        { type: 'matrix', name: 'Matrix Pattern / CV Sequencer', desc: '16-step pitch, gate, and curve CV sequencer', u: 2 },
-        { type: 'pulsar', name: 'Pulsar Dual LFO Modulator', desc: 'Dual low-frequency oscillators for dynamic modulation', u: 1 },
-        { type: 'spider_cv', name: 'Spider CV Splitter / Merger', desc: 'Multi-channel CV splitter, inverter & merger', u: 1 },
-        { type: 'automation_clip', name: 'Automation Clip Modulator', desc: 'Envelope & LFO curve parameter modulator', u: 1 },
-      ],
-    },
-    {
-      label: 'Outboard DSP & Dynamics',
-      badge: 'PROCESSING',
+      label: '🎛️ Reason Rack Audio Effects',
+      badge: 'AUDIO EFFECTS',
       color: 'border-teal-500/40 text-teal-400',
       items: [
-        { type: 'scream4', name: 'Scream 4 Tape Distortion', desc: 'Harmonic saturation, tube warmth & overdrive', u: 1 },
-        { type: 'echo', name: 'The Echo Stereo Delay', desc: 'Stereo delay with feedback and ping-pong bounce', u: 1 },
-        { type: 'rv7000', name: 'RV7000 Studio Reverb', desc: 'Convolution & algorithmic reverb with decay & damping', u: 2 },
-        { type: 'mclass_master', name: 'MClass Mastering Suite', desc: '4-band parametric EQ, bus compressor & limiter', u: 3 },
-        { type: 'spider_audio', name: 'Spider Audio Splitter / Merger', desc: 'Signal routing and parallel split utility', u: 1 },
+        { type: 'rv7000', name: 'RV7000 MkII: Advanced IR Reverb', desc: 'Convolution & algorithmic reverb with impulse response & EQ', u: 2 },
+        { type: 'rv9', name: 'RV-9: Flagorous Reverb Station', desc: 'Abyssal shimmer, vortex & hall reverberation processor', u: 2 },
+        { type: 'ripley', name: 'Ripley: Space Delay', desc: 'Space delay with tape wobble, diffusion reverb, ducker & bitcrush', u: 2 },
+        { type: 'echo', name: 'The Echo: Tape Delay Emulation', desc: 'Stereo ping-pong & analog tape echo with roll-off & feedback', u: 1 },
+        { type: 'scream4', name: 'Scream 4: Sound Destruction Unit', desc: '10-algorithm distortion, tape saturation & body resonator', u: 1 },
+        { type: 'osmium', name: 'Osmium: Distortion Matrix', desc: 'Multiband crossover tube, wavefold & fuzz distortion matrix', u: 2 },
+        { type: 'pulveriser', name: 'Pulveriser: Demolition Unit', desc: 'Parallel squash compressor, dirt distortion & tremor filter', u: 2 },
+        { type: 'alligator', name: 'Alligator: 3-Ch Pattern Filter', desc: 'Three-channel (HP/BP/LP) 16-step pattern gate filter & drive', u: 3 },
+        { type: 'bvx_vocoder', name: 'BV-X / BV512: Digital & Analog Vocoders', desc: '512-band FFT & 32-band vintage vocoder with formant shift', u: 3 },
+        { type: 'neptune', name: 'Neptune: Pitch Adjuster & Voice Synth', desc: 'Live pitch correction, formant shift & 4-voice harmonizer', u: 2 },
+        { type: 'quartet', name: 'Quartet: Chorus Ensemble', desc: '4-algorithm (BBD, FFT, Granular, Ensemble) stereo chorus', u: 2 },
+        { type: 'sweeper', name: 'Sweeper: Phaser / Flanger / Chorus', desc: 'Dynamic envelope-following phaser, flanger & wide chorus', u: 2 },
+        { type: 'audiomatic', name: 'Audiomatic: Retro Transformer', desc: 'One-click Tape, Vinyl, VHS, Psyche & Circuit transformer', u: 2 },
+        { type: 'rotor', name: 'Rotor: Rotary Speaker Emulation', desc: 'Doppler horn & drum rotary cabinet with tube amp drive', u: 2 },
+        { type: 'mclass_master', name: 'MClass Mastery Suite', desc: '4-band parametric EQ, stereo imager, bus compressor & maximizer', u: 3 },
+        { type: 'softube_amp', name: 'Softube Guitar Amp / Softube Bass Amp', desc: 'Hardware valve guitar & bass amplifiers with 4x12 / 8x10 cabs', u: 2 },
+      ],
+    },
+    {
+      label: '🧩 Utilities & Routing Components',
+      badge: 'UTILITIES & CV',
+      color: 'border-emerald-500/40 text-emerald-400',
+      items: [
+        { type: 'combinator', name: 'Combinator: Multi-Device Macro Container', desc: '4 rotary macros, 4 switches & multi-device layer patch container', u: 3 },
+        { type: 'pulsar', name: 'Pulsar: Dual LFO Modulation Device', desc: 'Dual syncable low-frequency oscillators with cross-modulation', u: 1 },
+        { type: 'spider_audio', name: 'Spider Audio Merger & Splitter', desc: '4-to-1 stereo audio merger & 1-to-4 parallel signal splitter', u: 1 },
+        { type: 'spider_cv', name: 'Spider CV Merger & Splitter', desc: 'Modular control voltage router, inverter & scale trimmer', u: 1 },
+        { type: 'matrix', name: 'Matrix: Pattern Sequencer', desc: '32-step analog note, gate & curve CV pattern sequencer', u: 2 },
+        { type: 'rpg8', name: 'RPG-8: Monophonic Arpeggiator', desc: 'Arpeggiator with Up/Down/Random modes, octave range & pattern mask', u: 2 },
+        { type: 'midi_out', name: 'MIDI Out Device: External Control', desc: '16-channel external hardware & plugin MIDI CC / Program module', u: 2 },
+        { type: 'line_mixer', name: 'Line Mixer 6:2 / 14:2 Mixer', desc: 'Switchable 6:2 & 14:2 rack line mixer with aux send/return', u: 2 },
+        { type: 'automation_clip', name: 'Automation Clip Modulator', desc: 'Envelope & LFO curve parameter modulator', u: 1 },
       ],
     },
   ];
 
   return (
-    <header className="w-full bg-[#3c2415] border-b-2 border-amber-900/60 shadow-2xl flex flex-col select-none sticky top-0 z-50">
-      {/* Top Polished Solid Mahogany Wood Trim Bar */}
-      <div className="h-3 w-full wooden-mold-trim electrical-spark-effect flex items-center justify-between px-3 border-b border-[#2b160b]">
-        <div className="flex space-x-12 opacity-60">
+    <header className="w-full bg-[#060911]/95 backdrop-blur-md border-b border-cyan-500/40 shadow-[0_8px_30px_rgba(0,0,0,0.85)] flex flex-col select-none sticky top-0 z-50">
+      {/* Top Anodized Titanium & Laser-Cyan Telemetry Bezel */}
+      <div className="h-3.5 w-full wooden-mold-trim electrical-spark-effect flex items-center justify-between px-4 border-b border-cyan-950/80">
+        <div className="flex items-center space-x-3 opacity-80">
           <div className="brass-screw" style={{ width: 6, height: 6 }} />
-          <div className="brass-screw" style={{ width: 6, height: 6 }} />
+          <span className="text-[7px] font-mono tracking-widest text-cyan-400 font-bold">
+            DSP CLOCK: {audioEngine.sampleRateTarget / 1000}kHz / {audioEngine.bufferSize} SMP ({audioEngine.driverModel})
+          </span>
         </div>
-        <span className="text-[7px] font-mono tracking-widest text-amber-200/60 uppercase">UNBOXED PRO AUDIO WORKSTATION</span>
-        <div className="flex space-x-12 opacity-60">
-          <div className="brass-screw" style={{ width: 6, height: 6 }} />
+        <span className="text-[7.5px] font-mono tracking-[0.22em] text-cyan-200/80 font-bold uppercase">
+          UNBOXED // TECHNO HI-FI DIGITAL AUDIO WORKSTATION
+        </span>
+        <div className="flex items-center space-x-3 opacity-80">
+          <span className="text-[7px] font-mono tracking-widest text-emerald-400 font-bold">
+            LUFS: {audioEngine.lufsMetering.momentary} dB &bull; CORR: {audioEngine.lufsMetering.phaseCorrelation}
+          </span>
           <div className="brass-screw" style={{ width: 6, height: 6 }} />
         </div>
       </div>
 
-      <div className="px-4 py-2 flex flex-wrap items-center justify-between gap-3">
-        {/* Brand & Front/Back Toggle (Studio Light Grey, Wood & Dark Green theme) */}
-        <div className="flex items-center space-x-3.5">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-10 h-10 rounded-md unboxed-gold-crest flex items-center justify-center p-0.5 shadow-lg">
+      <div className="px-4 py-2 flex flex-wrap items-center justify-between gap-2.5">
+        {/* Brand & Workspace Deck Switcher */}
+        <div className="flex items-center space-x-3">
+          <div
+            onClick={() => onOpenInternalInspector?.('unboxed_gold')}
+            className="flex items-center space-x-2.5 cursor-pointer group"
+            title="Click to inspect UNBOXED // TECHNO HI-FI Core DSP Engine & Graphics Pipeline [Shortcut: I]"
+          >
+            <div className="w-10 h-10 rounded-lg unboxed-gold-crest flex items-center justify-center p-0.5 shadow-lg group-hover:scale-105 transition-transform">
               <UnboxedLogoIcon className="w-9 h-9" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className="text-base font-black tracking-widest font-mono bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent uppercase drop-shadow">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-base font-black tracking-widest font-mono bg-gradient-to-r from-cyan-300 via-teal-200 to-emerald-400 bg-clip-text text-transparent uppercase drop-shadow">
                   UNBOXED
                 </span>
-                <span className="text-[9px] font-mono font-black metallic-pure-gold px-2 py-0.5 rounded shadow-md">
-                  GOLD EDITION
+                <span className="text-[9px] font-mono font-black metallic-pure-gold px-2 py-0.5 rounded shadow-md tracking-wider">
+                  TECHNO HI-FI
                 </span>
               </div>
-              <span className="text-[8px] font-mono text-amber-200/80 tracking-widest font-bold">
-                24K MASTER STUDIO RACK &bull; STERLING SILVER DSP
+              <span className="text-[8px] font-mono text-cyan-300/80 tracking-widest font-bold">
+                64-BIT NEURAL DSP STUDIO &bull; [I] INSPECT
               </span>
             </div>
           </div>
 
-          {/* Parallel Workspace Multi-View Tabs (F1, F2, F3 & Split) with Dark Green active state */}
-          <div className="flex items-center bg-black/60 p-1 rounded-lg border border-neutral-800 space-x-1">
+          {/* Parallel Workspace Multi-View Tabs (F1, F2, F3 & F4 Split) */}
+          <div className="flex items-center bg-[#030509] p-1 rounded-lg border border-slate-800 space-x-1 shadow-inner">
             <button
               onClick={() => onViewModeChange('sequencer')}
-              className={`px-3 py-1.5 rounded font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenInternalInspector?.('f1_sequencer');
+              }}
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 activeViewMode === 'sequencer' && !isParallelView
-                  ? 'bg-[#064e3b] text-emerald-200 border border-emerald-500/70 shadow-[0_0_12px_rgba(16,185,129,0.35)]'
-                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+                  ? 'bg-gradient-to-r from-cyan-950 to-emerald-950 text-cyan-200 border border-cyan-400/80 shadow-[0_0_14px_rgba(6,182,212,0.35)]'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
               }`}
-              title="Channel Rack & Sequencer: 16-512 Steps, Piano Roll & Graph Editor (F1 Key)"
+              title="Channel Rack, Piano Roll & Sequencer [Shortcut: F1] | Right-click for F1 SEQUENCER Internal Tools"
             >
-              <span className="text-[10px] px-1 py-0.2 rounded bg-black/40 text-emerald-400 font-bold">F1</span>
+              <kbd className="text-[9px] px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black">F1</kbd>
               <span>SEQUENCER</span>
             </button>
 
             <button
               onClick={() => onViewModeChange('mixer')}
-              className={`px-3 py-1.5 rounded font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenInternalInspector?.('f2_mixer');
+              }}
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 activeViewMode === 'mixer' && !isParallelView
-                  ? 'bg-[#064e3b] text-emerald-200 border border-emerald-500/70 shadow-[0_0_12px_rgba(16,185,129,0.35)]'
-                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+                  ? 'bg-gradient-to-r from-cyan-950 to-emerald-950 text-cyan-200 border border-cyan-400/80 shadow-[0_0_14px_rgba(6,182,212,0.35)]'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
               }`}
-              title="Mixing Console: 500 Inserts, 1 Master, 1 Utility Strip & 10 FX Slots (F2 Key)"
+              title="500-Track Hi-Fi Mixing Console [Shortcut: F2] | Right-click for F2 MIXER Internal Tools"
             >
-              <span className="text-[10px] px-1 py-0.2 rounded bg-black/40 text-emerald-400 font-bold">F2</span>
+              <kbd className="text-[9px] px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black">F2</kbd>
               <span>MIXER</span>
             </button>
 
             <button
               onClick={() => onViewModeChange('rack')}
-              className={`px-3 py-1.5 rounded font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenInternalInspector?.('f3_rack');
+              }}
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 activeViewMode === 'rack' && !isParallelView
-                  ? 'bg-[#064e3b] text-emerald-200 border border-emerald-500/70 shadow-[0_0_12px_rgba(16,185,129,0.35)]'
-                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+                  ? 'bg-gradient-to-r from-cyan-950 to-emerald-950 text-cyan-200 border border-cyan-400/80 shadow-[0_0_14px_rgba(6,182,212,0.35)]'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
               }`}
-              title="Device Rack: Modular Wooden Box Chassis & Cable Patching (F3 Key)"
+              title="19-Inch Modular Hardware Rack [Shortcut: F3] | Right-click for F3 RACK Internal Tools"
             >
-              <span className="text-[10px] px-1 py-0.2 rounded bg-black/40 text-emerald-400 font-bold">F3</span>
+              <kbd className="text-[9px] px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black">F3</kbd>
               <span>RACK</span>
             </button>
 
-            <div className="w-px h-5 bg-neutral-800 mx-0.5" />
+            <div className="w-px h-5 bg-slate-800 mx-0.5" />
 
             {/* Parallel Split Mode Toggle */}
             <button
               onClick={onToggleParallelView}
-              className={`px-2.5 py-1.5 rounded font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenInternalInspector?.('split_view');
+              }}
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 isParallelView
-                  ? 'bg-[#047857] text-white shadow-[0_0_10px_#10b981]'
-                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+                  ? 'bg-emerald-600 text-white border border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
               }`}
-              title="Toggle Parallel View (Sequencer + Rack/Mixer Stacked)"
+              title="Toggle Parallel Dual-Deck Split View [Shortcut: F4] | Right-click for SPLIT Internal Tools"
             >
               <SplitSquareVertical className="w-3.5 h-3.5" />
               <span className="text-[10px]">SPLIT</span>
+              <kbd className="text-[8px] px-1 rounded bg-black/50 text-emerald-300 border border-emerald-500/30">F4</kbd>
             </button>
           </div>
 
-        {/* Front / Back Rack Flip Switch */}
-        <button
-          onClick={onToggleBackView}
-          className={`flex items-center space-x-2 px-3 py-1.5 rounded border font-mono text-xs font-bold transition-all shadow-md ${
-            isBackView
-              ? 'bg-amber-500 text-black border-amber-300 ring-2 ring-amber-400/50'
-              : 'bg-gradient-to-b from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-neutral-100 border-neutral-700'
-          }`}
-          title="Toggle Front Hardware Controls / Back Modular Patch Bay (Tab Key)"
-        >
-          <RotateCcw className={`w-3.5 h-3.5 transition-transform duration-300 ${isBackView ? 'rotate-180 text-black' : 'text-blue-400'}`} />
-          <span className="hidden sm:inline">{isBackView ? 'FRONT CONTROLS' : 'FLIP RACK (TAB)'}</span>
-        </button>
-
-        {/* Auto Patch Helper Button */}
-        <button
-          onClick={onAutoPatchMaster}
-          className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 text-xs font-mono transition-colors"
-          title="Auto-wire all unpatched audio outputs to the Master Bus"
-        >
-          <Cable className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Auto-Route</span>
-        </button>
-      </div>
-
-      {/* Center Transport & Clock (Studio Grey & Black) */}
-      <div className="flex items-center space-x-3 bg-neutral-900/90 px-3 py-1.5 rounded-lg border border-neutral-800 shadow-inner">
-        {/* Transport Buttons */}
-        <div className="flex items-center space-x-1 bg-black/70 p-1 rounded border border-neutral-800">
+          {/* Front / Back Rack Flip Switch */}
           <button
-            onClick={() => audioEngine.togglePlay()}
-            className={`p-2 rounded transition-colors ${
-              t.isPlaying
-                ? 'bg-emerald-600 text-white shadow-[0_0_12px_#10b981]'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+            onClick={onToggleBackView}
+            className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border font-mono text-xs font-bold transition-all shadow-md ${
+              isBackView
+                ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-[0_0_14px_rgba(6,182,212,0.6)]'
+                : 'bg-[#0b101b] hover:bg-slate-800 text-slate-200 border-slate-700/80'
             }`}
-            title="Play / Pause (Spacebar)"
+            title="Flip Hardware Rack between Front Controls & Rear Modular Patch Bay [Shortcut: TAB]"
           >
-            <Play className="w-4 h-4 fill-current" />
+            <RotateCcw className={`w-3.5 h-3.5 transition-transform duration-300 ${isBackView ? 'rotate-180 text-slate-950' : 'text-cyan-400'}`} />
+            <span className="hidden sm:inline">{isBackView ? 'FRONT PANEL' : 'PATCH BAY'}</span>
+            <kbd className={`text-[8px] px-1 rounded ${isBackView ? 'bg-slate-950/30 text-slate-950' : 'bg-slate-900 text-cyan-300 border border-cyan-500/30'}`}>TAB</kbd>
           </button>
 
+          {/* Auto Patch Helper Button */}
           <button
-            onClick={() => audioEngine.stopTransport()}
-            className="p-2 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-            title="Stop & Reset Timecode"
+            onClick={onAutoPatchMaster}
+            className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border border-slate-800 bg-[#0b101b] hover:bg-slate-800 text-slate-300 text-xs font-mono transition-colors"
+            title="Auto-wire all unpatched audio outputs to the Master Bus"
           >
-            <Square className="w-4 h-4 fill-current" />
-          </button>
-
-          <button
-            onClick={() => {
-              if (t.isRecording) audioEngine.stopRecording();
-              else audioEngine.startRecording();
-            }}
-            className={`p-2 rounded transition-colors flex items-center space-x-1 ${
-              t.isRecording
-                ? 'bg-red-600 text-white shadow-[0_0_14px_#ef4444] animate-pulse'
-                : 'text-neutral-400 hover:text-red-400 hover:bg-neutral-800'
-            }`}
-            title="Record Studio Master to Audio File"
-          >
-            <Circle className="w-4 h-4 fill-current" />
+            <Cable className="w-3.5 h-3.5 text-emerald-400" />
+            <span>AUTO-ROUTE</span>
           </button>
         </div>
 
-        {/* Timecode LCD Display */}
-        <div className="lcd-display px-3 py-1.5 rounded flex items-center space-x-2 text-sm font-mono tracking-wider shadow-inner">
-          <Clock className="w-3.5 h-3.5 text-emerald-400 opacity-80" />
-          <span>
-            {String(bar).padStart(2, '0')}:{String(beat).padStart(2, '0')}:{String(sixteenth).padStart(2, '0')}
-          </span>
+        {/* Center Transport & Clock (Rewind, Play, Stop, Fast-Forward, Record, Loop, Timecode & BPM) */}
+        <div className="flex items-center space-x-2 bg-[#090d16] px-3 py-1 rounded-lg border border-slate-800/90 shadow-inner">
+          {/* Full Transport Bar Buttons */}
+          <div className="flex items-center space-x-1 bg-[#030509] p-1 rounded-md border border-slate-800/80">
+            <button
+              onClick={() => audioEngine.rewindTransport(4)}
+              className="px-1.5 py-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-900 transition-colors flex items-center space-x-0.5"
+              title="Rewind 1 Beat (-4 Steps) [Shortcut: ←]"
+            >
+              <Rewind className="w-3.5 h-3.5 fill-current" />
+              <span className="text-[8px] font-mono text-slate-500">←</span>
+            </button>
+
+            <button
+              onClick={() => audioEngine.togglePlay()}
+              className={`px-2.5 py-1 rounded-md transition-all flex items-center space-x-1 font-mono text-[10px] font-bold ${
+                t.isPlaying
+                  ? 'bg-emerald-500 text-slate-950 shadow-[0_0_14px_#10b981]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-900'
+              }`}
+              title="Play / Pause Master Transport [Shortcut: SPACE]"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span className="hidden md:inline">SPC</span>
+            </button>
+
+            <button
+              onClick={() => audioEngine.stopTransport()}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-900 transition-colors flex items-center space-x-1 font-mono text-[10px]"
+              title="Stop & Reset Timecode [Shortcut: S]"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span className="text-[8px] text-slate-500">S</span>
+            </button>
+
+            <button
+              onClick={() => audioEngine.fastForwardTransport(4)}
+              className="px-1.5 py-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-900 transition-colors flex items-center space-x-0.5"
+              title="Fast-Forward 1 Beat (+4 Steps) [Shortcut: →]"
+            >
+              <FastForward className="w-3.5 h-3.5 fill-current" />
+              <span className="text-[8px] font-mono text-slate-500">→</span>
+            </button>
+
+            <button
+              onClick={() => audioEngine.toggleLoop()}
+              className={`px-2 py-1 rounded-md transition-colors flex items-center space-x-1 font-mono text-[9px] font-bold ${
+                audioEngine.loopEnabled
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
+                  : 'text-slate-500 hover:text-white'
+              }`}
+              title="Toggle Pattern / Timeline Loop [Shortcut: L]"
+            >
+              <Repeat className="w-3.5 h-3.5" />
+              <span>L</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (t.isRecording) audioEngine.stopRecording();
+                else audioEngine.startRecording();
+              }}
+              className={`px-2 py-1 rounded-md transition-colors flex items-center space-x-1 font-mono text-[9px] font-bold ${
+                t.isRecording
+                  ? 'bg-red-600 text-white shadow-[0_0_14px_#ef4444] animate-pulse'
+                  : 'text-slate-400 hover:text-red-400 hover:bg-slate-900'
+              }`}
+              title="Record Studio Master to Audio File [Shortcut: R]"
+            >
+              <Circle className="w-3.5 h-3.5 fill-current" />
+              <span>R</span>
+            </button>
+          </div>
+
+          {/* Timecode LCD Display */}
+          <div className="lcd-display px-3 py-1.5 rounded-md flex items-center space-x-2 text-sm font-mono tracking-wider shadow-inner border border-emerald-500/30">
+            <Clock className="w-3.5 h-3.5 text-cyan-400 opacity-90" />
+            <span className="text-cyan-300 font-bold">
+              {String(bar).padStart(2, '0')}:{String(beat).padStart(2, '0')}:{String(sixteenth).padStart(2, '0')}
+            </span>
+          </div>
+
+          {/* BPM Knob */}
+          <div className="flex items-center bg-[#030509] px-2 py-0.5 rounded-md border border-slate-800">
+            <Knob
+              label="BPM"
+              value={bpm}
+              min={40}
+              max={220}
+              step={1}
+              unit=" BPM"
+              size="sm"
+              variant="yellow"
+              onChange={handleBpmChange}
+            />
+          </div>
         </div>
 
-        {/* BPM Knob (Studio Yellow Cap) */}
-        <div className="flex items-center bg-black/50 px-2 py-0.5 rounded border border-neutral-800">
-          <Knob
-            label="BPM"
-            value={bpm}
-            min={40}
-            max={220}
-            step={1}
-            unit=" BPM"
-            size="sm"
-            variant="yellow"
-            onChange={handleBpmChange}
-          />
-        </div>
-      </div>
+        {/* Right Controls: Add Device, AI Co-Pilot, CV Matrix, Internal Tools, Shortcuts [?], Master VU */}
+        <div className="flex items-center space-x-2">
+          {/* Add Device Dropdown (Equipment Locker) */}
+          <div className="relative">
+            <button
+              onClick={() => setDeviceMenuOpen(!deviceMenuOpen)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenInternalInspector?.('add_module');
+              }}
+              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border border-cyan-500/60 bg-gradient-to-b from-[#0c192c] to-[#07101d] hover:from-[#11243e] hover:to-[#0a1628] text-cyan-100 font-mono text-xs font-bold transition-all shadow-md"
+              title="Mount Instrument or FX Module into Rack & Sequencer | Right-click for VST3/CLAP Host Tools"
+            >
+              <Plus className="w-3.5 h-3.5 text-cyan-400" />
+              <span>ADD MODULE</span>
+              <ChevronDown className="w-3 h-3 text-cyan-300" />
+            </button>
 
-      {/* Right Controls: Add Device, AI Co-Pilot, CV Matrix, Master VU */}
-      <div className="flex items-center space-x-3">
-        {/* Add Device Dropdown (Equipment Locker) */}
-        <div className="relative">
-          <button
-            onClick={() => setDeviceMenuOpen(!deviceMenuOpen)}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded border border-amber-600 bg-[#4a2e1b] hover:bg-[#57351f] text-amber-100 font-mono text-xs font-bold transition-all shadow-md"
-          >
-            <Plus className="w-3.5 h-3.5 text-amber-400" />
-            <span>ADD MODULE</span>
-            <ChevronDown className="w-3 h-3 text-amber-300" />
-          </button>
-
-          {deviceMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#4a2e1b] border border-amber-600 rounded-lg shadow-2xl p-2 z-50 text-xs font-mono animate-in fade-in max-h-[80vh] overflow-y-auto">
-              <div className="px-2 py-1 mb-2 border-b border-amber-800 flex justify-between items-center">
-                <span className="font-bold text-amber-200">STUDIO RACK LOCKER</span>
-                <span className="text-[10px] text-amber-300/80">19&quot; OUTBOARD</span>
-              </div>
-              {deviceCategories.map((cat) => (
-                <div key={cat.label} className="mb-2.5">
-                  <div className="px-2 py-0.5 flex justify-between items-center text-[9px] uppercase tracking-wider font-bold mb-1">
-                    <span className="text-amber-200">{cat.label}</span>
-                    <span className={`px-1 rounded border ${cat.color}`}>{cat.badge}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {cat.items.map((item) => (
-                      <button
-                        key={item.name}
-                        onClick={() => {
-                          onAddDevice(item.type);
-                          setDeviceMenuOpen(false);
-                        }}
-                        className="w-full text-left p-2 rounded bg-[#351a0b] hover:bg-[#57351f] border border-amber-800/60 hover:border-amber-500 transition-colors flex items-center justify-between group"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-bold text-amber-100 group-hover:text-amber-300">
-                            {item.name}
-                          </span>
-                          <span className="text-[10px] text-amber-200/70 line-clamp-1">{item.desc}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="text-[8px] px-1 py-0.2 rounded bg-[#2d1810] text-amber-300 border border-amber-800">
-                            {item.u}U
-                          </span>
-                          <Plus className="w-3.5 h-3.5 text-amber-400 opacity-60 group-hover:opacity-100" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+            {deviceMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-84 bg-[#080d18] border border-cyan-500/60 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-2.5 z-50 text-xs font-mono animate-in fade-in max-h-[80vh] overflow-y-auto">
+                <div className="px-2 py-1.5 mb-2 border-b border-slate-800 flex justify-between items-center">
+                  <span className="font-bold text-cyan-300 tracking-wider">TECHNO HI-FI MODULE LOCKER</span>
+                  <button
+                    onClick={() => {
+                      setDeviceMenuOpen(false);
+                      onOpenInternalInspector?.('add_module');
+                    }}
+                    className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-900"
+                  >
+                    VST3/CLAP HOST
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                {deviceCategories.map((cat) => (
+                  <div key={cat.label} className="mb-3">
+                    <div className="px-2 py-0.5 flex justify-between items-center text-[9px] uppercase tracking-wider font-bold mb-1">
+                      <span className="text-slate-300">{cat.label}</span>
+                      <span className={`px-1.5 py-0.2 rounded border ${cat.color}`}>{cat.badge}</span>
+                    </div>
+                    <div className="space-y-1">
+                      {cat.items.map((item) => (
+                        <button
+                          key={item.name}
+                          onClick={() => {
+                            onAddDevice(item.type, item.name);
+                            setDeviceMenuOpen(false);
+                          }}
+                          className="w-full text-left p-2 rounded-lg bg-[#0d1424] hover:bg-[#132038] border border-slate-800 hover:border-cyan-500/60 transition-colors flex items-center justify-between group"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-100 group-hover:text-cyan-300">
+                              {item.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 line-clamp-1">{item.desc}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-[8px] px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300 border border-cyan-900">
+                              {item.u}U
+                            </span>
+                            <Plus className="w-3.5 h-3.5 text-cyan-400 opacity-60 group-hover:opacity-100" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* AI Co-Pilot Button */}
-        <button
-          onClick={onOpenAICoPilot}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded border border-blue-500/60 bg-gradient-to-r from-blue-950/80 to-slate-900 hover:from-blue-900 hover:to-slate-800 text-blue-200 font-mono text-xs font-bold transition-all shadow-md"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-          <span>AI CO-PILOT</span>
-        </button>
+          {/* AI Co-Pilot Button */}
+          <button
+            onClick={onOpenAICoPilot}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              onOpenInternalInspector?.('ai_copilot');
+            }}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border border-indigo-500/60 bg-gradient-to-r from-indigo-950/90 to-slate-900 hover:from-indigo-900 hover:to-slate-800 text-indigo-200 font-mono text-xs font-bold transition-all shadow-md"
+            title="Open AI Studio Co-Pilot [Shortcut: A] | Right-click for AI CO-PILOT Internal Neural Tools"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="hidden lg:inline">AI CO-PILOT</span>
+            <kbd className="text-[8px] px-1 rounded bg-black/50 text-indigo-300 border border-indigo-500/40">A</kbd>
+          </button>
 
-        {/* CV Modulation Matrix Button */}
-        <button
-          onClick={onOpenCVMatrix}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-mono text-xs font-bold transition-colors shadow"
-        >
-          <Sliders className="w-3.5 h-3.5 text-amber-400" />
-          <span>CV MATRIX</span>
-        </button>
+          {/* CV Modulation Matrix Button */}
+          <button
+            onClick={onOpenCVMatrix}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              onOpenInternalInspector?.('cv_matrix');
+            }}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border border-slate-700 bg-[#0b101b] hover:bg-slate-800 text-slate-200 font-mono text-xs font-bold transition-colors shadow"
+            title="Open CV Modulation Matrix [Shortcut: C] | Right-click for CV MATRIX Internal Tools"
+          >
+            <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden lg:inline">CV MATRIX</span>
+            <kbd className="text-[8px] px-1 rounded bg-black/50 text-cyan-300 border border-cyan-500/30">C</kbd>
+          </button>
 
-        {/* Master Output Volume Knob */}
-        <Knob
-          label="MASTER"
-          value={masterVol}
-          min={0}
-          max={1.5}
-          step={0.05}
-          size="sm"
-          variant="metal"
-          onChange={handleMasterVolChange}
-        />
+          {/* Dedicated Internal Subsystems, Modulators & Auto-Save Daemon Launcher */}
+          <button
+            onClick={() => onOpenInternalInspector?.('unboxed_gold')}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border border-emerald-500/60 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 font-mono text-xs font-bold transition-all shadow-md"
+            title="Open Internal Subsystems, 19 Advanced Engines, LFO/ADSR & Auto-Save Daemon [Shortcut: I]"
+          >
+            <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden xl:inline">SUBSYSTEMS</span>
+            <kbd className="text-[8px] px-1 rounded bg-black/50 text-emerald-300 border border-emerald-500/40">I</kbd>
+          </button>
 
-        {/* Stereo Backlit Analog VU Meters (Cream Dial + Needle) */}
-        <div className="flex space-x-1 bg-black/80 p-1 rounded border border-neutral-800 shadow-inner">
-          <VUMeter label="OUT L" rms={t.rmsL} peak={t.peakL} width={62} height={42} />
-          <VUMeter label="OUT R" rms={t.rmsR} peak={t.peakR} width={62} height={42} />
+          {/* Global Keyboard Shortcuts Matrix Button */}
+          <button
+            onClick={onOpenShortcuts}
+            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-md border border-cyan-500/50 bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-200 font-mono text-xs font-bold transition-all shadow-md"
+            title="Open Global Keyboard Shortcuts & Hotkey Command Matrix [Shortcut: ? or H]"
+          >
+            <Keyboard className="w-3.5 h-3.5 text-cyan-300" />
+            <kbd className="text-[9px] px-1 rounded bg-black/60 text-cyan-300 border border-cyan-400/40 font-black">?</kbd>
+          </button>
+
+          {/* Master Output Volume Knob */}
+          <div
+            onContextMenu={(e) => {
+              e.preventDefault();
+              onOpenInternalInspector?.('master_knob');
+            }}
+            title="Master Gain Knob | Right-click for MASTER (Knob) Internal Tools"
+          >
+            <Knob
+              label="MASTER"
+              value={masterVol}
+              min={0}
+              max={1.5}
+              step={0.05}
+              size="sm"
+              variant="metal"
+              onChange={handleMasterVolChange}
+            />
+          </div>
+
+          {/* Stereo Backlit Analog VU Meters */}
+          <div
+            onClick={() => onOpenInternalInspector?.('vu_dials')}
+            className="flex space-x-1 bg-[#030509] p-1 rounded-md border border-slate-800 shadow-inner cursor-pointer hover:border-cyan-500/50 transition-colors"
+            title="Click to inspect OUT L / OUT R (VU Dials) Internal Ballistics & FFT RMS Tools"
+          >
+            <VUMeter label="OUT L" rms={t.rmsL} peak={t.peakL} width={60} height={40} />
+            <VUMeter label="OUT R" rms={t.rmsR} peak={t.peakR} width={60} height={40} />
+          </div>
         </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
 };

@@ -68,4 +68,33 @@ export class TanpuraDroneDevice extends BaseDevice {
       this.masterOutput.gain.setValueAtTime(Math.max(0, Math.min(1.5, Number(val))), this.ctx.currentTime);
     }
   }
+
+  public noteOn(midiNote: number, velocity: number = 0.8, time: number = this.ctx.currentTime): void {
+    if (!this.isPowered || this.isBypassed) return;
+    const now = Math.max(this.ctx.currentTime, time);
+    const freq = 440.0 * Math.pow(2.0, (midiNote - 69.0) / 12.0);
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(velocity * 0.45, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(freq * 3.5, now);
+
+    [1, 1.5, 2].forEach((ratio, idx) => {
+      const osc = this.ctx.createOscillator();
+      osc.type = idx === 0 ? 'sawtooth' : 'triangle';
+      osc.frequency.setValueAtTime(freq * ratio, now);
+      osc.detune.setValueAtTime((idx - 1) * 6, now);
+      osc.connect(filter);
+      osc.start(now);
+      osc.stop(now + 2.3);
+    });
+
+    filter.connect(gain);
+    gain.connect(this.masterOutput);
+  }
+
+  public noteOff(_midiNote: number, _time?: number): void {}
 }

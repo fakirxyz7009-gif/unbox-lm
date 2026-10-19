@@ -292,14 +292,17 @@ export class RedrumDevice extends BaseDevice {
     return whiteNoise;
   }
 
-  public onStepTick(step: number, time: number = this.ctx.currentTime): void {
+  public noteOn(midiNote: number, velocity: number = 0.9, time: number = this.ctx.currentTime): void {
+    const voiceIndex = (((midiNote - 60) % this.voices.length) + this.voices.length) % this.voices.length;
+    this.triggerPad(voiceIndex, velocity, Math.max(this.ctx.currentTime, time || this.ctx.currentTime));
+  }
+
+  public noteOff(_midiNote: number, _time?: number): void {
+    // One-shot drum synthesis handles its own decay envelope
+  }
+
+  public onStepTick(step: number, _time: number = this.ctx.currentTime): void {
+    // Rack step visual counter only — main pattern & song playback is driven exclusively by the Sequencer
     this.currentStep = step % 16;
-    this.voices.forEach((v, index) => {
-      if (v.pattern[this.currentStep]) {
-        const isAccent = v.accentPattern[this.currentStep];
-        const vel = isAccent ? 1.0 * this.params.accentLevel : 0.8;
-        this.triggerPad(index, Math.min(1.0, vel), time);
-      }
-    });
   }
 }

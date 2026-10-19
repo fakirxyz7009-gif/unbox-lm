@@ -77,21 +77,8 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
       peakR: 0,
     });
 
-    // 500 Insert Tracks
+    // 500 Clean Insert Tracks (Dynamically bound to mounted Rack & Sequencer instruments)
     for (let i = 1; i <= 500; i++) {
-      const defaultName =
-        i === 1 ? 'Insert 1 (Lead)' :
-        i === 2 ? 'Insert 2 (3x OSC)' :
-        i === 3 ? 'Insert 3 (FLEX)' :
-        i === 4 ? 'Insert 4 (Redrum)' :
-        `Insert ${i}`;
-
-      const defaultColor =
-        i === 1 ? '#10b981' :
-        i === 2 ? '#34d399' :
-        i === 3 ? '#059669' :
-        i === 4 ? '#f59e0b' : '#64748b';
-
       const fxSlots: MixerFxSlot[] = Array.from({ length: 10 }).map((_, slotIdx) => ({
         id: `trk_${i}_slot_${slotIdx + 1}`,
         name: `Slot ${slotIdx + 1} (Empty)`,
@@ -100,20 +87,10 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
         mix: 1.0,
       }));
 
-      // Give default inserts some starter effects
-      if (i === 1) {
-        fxSlots[0] = { id: `trk_1_slot_1`, name: 'Parametric EQ', type: 'eq', enabled: true, mix: 1.0 };
-        fxSlots[1] = { id: `trk_1_slot_2`, name: 'Scream Tape Warmer', type: 'distortion', enabled: true, mix: 0.85 };
-        fxSlots[2] = { id: `trk_1_slot_3`, name: 'Ping-Pong Delay', type: 'delay', enabled: true, mix: 0.4 };
-      } else if (i === 4) {
-        fxSlots[0] = { id: `trk_4_slot_1`, name: 'Drum Bus Compressor', type: 'compressor', enabled: true, mix: 1.0 };
-        fxSlots[1] = { id: `trk_4_slot_2`, name: 'PDC Gate / Transient', type: 'gate', enabled: true, mix: 0.9 };
-      }
-
       list.push({
         index: i,
-        name: defaultName,
-        color: defaultColor,
+        name: `Insert ${i}`,
+        color: '#475569',
         volume: 0.85,
         pan: 0,
         mute: false,
@@ -135,6 +112,32 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
 
     return list;
   });
+
+  // Automatically synchronize Mixer Insert Strips (1..500) with mounted SequencerTracks & Rack Devices
+  useEffect(() => {
+    setTracks((prev) =>
+      prev.map((mTrk) => {
+        if (mTrk.index === 0) return mTrk;
+        const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === mTrk.index);
+        if (seqTrack) {
+          return {
+            ...mTrk,
+            name: seqTrack.name,
+            color: seqTrack.color || '#10b981',
+            volume: seqTrack.volume ?? 0.85,
+            pan: seqTrack.pan ?? 0,
+            mute: seqTrack.mute,
+            solo: seqTrack.solo,
+          };
+        }
+        return {
+          ...mTrk,
+          name: `Insert ${mTrk.index}`,
+          color: '#475569',
+        };
+      })
+    );
+  }, [devices.length, audioEngine.tracks.length, audioEngine.currentStep]);
 
   // Selected track index for Current Selected Utility Track Strip
   const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(initialSelectedTrack);
@@ -185,12 +188,33 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, mute: !t.mute } : t))
     );
+    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    if (seqTrack) {
+      audioEngine.toggleTrackMute(seqTrack.id);
+    }
   };
 
   const handleSoloToggle = (trackIndex: number) => {
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, solo: !t.solo } : t))
     );
+    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    if (seqTrack) {
+      audioEngine.toggleTrackSolo(seqTrack.id);
+    }
+  };
+
+  const auditionMixerTrack = (trackIndex: number) => {
+    audioEngine.resumeContext();
+    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    if (seqTrack) {
+      const dev = devices.find((d) => d.id === seqTrack.deviceId);
+      if (dev?.noteOn) {
+        const midi = 60 + audioEngine.rootKey;
+        dev.noteOn(midi, 0.92);
+        setTimeout(() => dev.noteOff?.(midi), 260);
+      }
+    }
   };
 
   const handlePhaseInvertToggle = (trackIndex: number) => {
@@ -634,10 +658,12 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
           </div>
 
           {/* B. HORIZONTAL CHANNEL STRIPS ROW (SCROLLABLE INSERTS 1..500) */}
-          <div className="flex-1 flex overflow-x-auto overflow-y-hidden p-2.5 gap-2 bg-[#3c2415]">
+          <div className="flex-1 flex overflow-x-auto overflow-y-hidden p-2.5 gap-2 bg-[#090d16]">
             {visibleTracks.map((track) => {
               const isSelected = track.index === selectedTrackIndex;
               const activeFxCount = track.fxSlots.filter((s) => s.enabled).length;
+              const linkedSeqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === track.index);
+              const linkedDevice = linkedSeqTrack ? devices.find((d) => d.id === linkedSeqTrack.deviceId) : undefined;
 
               return (
                 <div
@@ -646,16 +672,32 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                   className={`w-28 flex-shrink-0 flex flex-col rounded-lg border transition-all p-2 cursor-pointer ${
                     isSelected
                       ? 'bg-gradient-to-b from-[#1e3a8a] via-[#312e81] to-[#1e1b4b] border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
-                      : 'bg-[#1f2937] hover:bg-[#374151] border-cyan-600/60'
+                      : linkedSeqTrack
+                      ? 'bg-[#131d31] hover:bg-[#1b2944] border-emerald-500/60'
+                      : 'bg-[#111622] hover:bg-[#1a2234] border-slate-800'
                   }`}
                 >
-                  {/* Strip Header: Number, Color Tag & Name */}
-                  <div className="flex flex-col items-center pb-2 border-b border-neutral-800/80">
-                    <span className="text-[10px] font-mono font-bold text-emerald-400">
-                      #{track.index}
-                    </span>
+                  {/* Strip Header: Number, Color Tag, Name & Direct Audition Trigger */}
+                  <div className="flex flex-col items-center pb-1.5 border-b border-neutral-800/80">
+                    <div className="w-full flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold text-emerald-400">
+                        #{track.index}
+                      </span>
+                      {linkedDevice && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            auditionMixerTrack(track.index);
+                          }}
+                          className="px-1.5 py-0.2 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-[8px] font-mono font-black"
+                          title={`Audition ${track.name} directly from Mixer`}
+                        >
+                          TEST
+                        </button>
+                      )}
+                    </div>
                     <span
-                      className="text-xs font-mono font-bold text-white truncate max-w-full text-center"
+                      className="text-xs font-mono font-bold text-white truncate max-w-full text-center mt-0.5"
                       title={track.name}
                     >
                       {track.name}

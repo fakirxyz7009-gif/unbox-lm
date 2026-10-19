@@ -15,6 +15,7 @@ import { MClassMasterSuite } from '../../audio/devices/MClassMasterSuite.ts';
 import { Knob } from '../Knob.tsx';
 import { VacuumTube } from '../VacuumTube.tsx';
 import { DeviceVisualizer } from '../visualizers/DeviceVisualizer.tsx';
+import { ReasonRackFaceplate } from './ReasonRackFaceplates.tsx';
 import { Volume2, Play, Upload, Waves, Radio } from 'lucide-react';
 
 interface DeviceFaceplateProps {
@@ -400,43 +401,19 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           ))}
         </div>
 
-        {/* 16-Step Pattern Sequencer Grid */}
-        <div className="bg-neutral-900/90 p-2.5 rounded border border-neutral-700 space-y-1.5 shadow-inner">
-          <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 mb-1">
-            <span className="font-bold text-neutral-300">16-STEP PATTERN DRUM PROGRAMMER</span>
-            <span className="text-amber-400 font-bold">STEP: {redrum.currentStep + 1} / 16</span>
+        {/* CV Modulation & Sound Synthesis Status Strip (Sequencing handled by Main Sequencer) */}
+        <div className="bg-neutral-900/90 px-3 py-2 rounded border border-cyan-500/30 flex flex-wrap items-center justify-between gap-2 shadow-inner text-[10px] font-mono">
+          <div className="flex items-center space-x-2">
+            <span className="px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 font-bold">
+              CV &amp; SOUND ENGINE MODE
+            </span>
+            <span className="text-neutral-300">
+              Pads 1&ndash;8 mapped to MIDI Notes <strong className="text-amber-400">C4 (60) &ndash; G4 (67)</strong> &bull; Pattern &amp; Song playback controlled exclusively by <strong className="text-cyan-300">Main Sequencer [F1]</strong>
+            </span>
           </div>
-
-          {redrum.voices.map((v, vIdx) => (
-            <div key={v.id} className="flex items-center space-x-1">
-              <span className="w-16 text-[9px] font-mono text-neutral-400 truncate text-right pr-2">
-                {v.name.slice(0, 8)}
-              </span>
-              <div className="flex-1 grid grid-cols-16 gap-1">
-                {v.pattern.map((stepActive, sIdx) => {
-                  const isCurrent = redrum.currentStep === sIdx;
-                  const isBeatStart = sIdx % 4 === 0;
-
-                  return (
-                    <button
-                      key={sIdx}
-                      onClick={() => {
-                        redrum.toggleStep(vIdx, sIdx);
-                        onUpdate();
-                      }}
-                      className={`h-5 rounded-sm border transition-all ${
-                        stepActive
-                          ? 'bg-amber-500 border-amber-400 shadow-[0_0_6px_#f59e0b]'
-                          : isBeatStart
-                          ? 'bg-neutral-800 border-neutral-600'
-                          : 'bg-neutral-950 border-neutral-800'
-                      } ${isCurrent ? 'ring-2 ring-white scale-105' : ''}`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          <div className="flex items-center space-x-2">
+            <span className="text-emerald-400 font-bold">CV GATE IN: CH 1&ndash;8 READY</span>
+          </div>
         </div>
       </div>
     );
@@ -1199,12 +1176,12 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <div className="flex items-center space-x-3 bg-cyan-950/60 p-2.5 rounded border border-cyan-500/50 shadow-inner">
           <div className="flex flex-col">
             <span className="text-[9px] font-mono font-bold text-cyan-300 uppercase">BANSURI FLUTE</span>
-            <span className="text-[8px] font-mono text-cyan-400/80">MEEND & MICROTONAL BENDING</span>
+            <span className="text-[8px] font-mono text-cyan-400/80">MEEND &amp; CV BREATH SYNTH</span>
           </div>
           <Knob
             label="BREATH"
-            value={(device as any).breathPressure ?? 0.75}
-            min={0}
+            value={p.breathPressure ?? (device as any).breathPressure ?? 0.85}
+            min={0.1}
             max={1}
             step={0.05}
             size="sm"
@@ -1213,7 +1190,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           />
           <Knob
             label="VIBRATO"
-            value={(device as any).vibratoDepth ?? 0.15}
+            value={p.vibratoDepth ?? (device as any).vibratoDepth ?? 0.15}
             min={0}
             max={0.5}
             step={0.02}
@@ -1223,7 +1200,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           />
           <Knob
             label="MEEND"
-            value={(device as any).meendBending ?? 0.0}
+            value={p.meendBending ?? (device as any).meendBending ?? 0.0}
             min={-0.2}
             max={0.2}
             step={0.01}
@@ -1232,7 +1209,17 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             onChange={(v) => setP('meendBending', v)}
           />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+        <DeviceVisualizer device={device} width={150} height={56} />
+        <button
+          onClick={() => {
+            device.noteOn?.(64, 0.9);
+            setTimeout(() => device.noteOff?.(64), 380);
+          }}
+          className="px-3 py-2 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>TEST FLUTE TONE</span>
+        </button>
       </div>
     );
   }
@@ -1245,11 +1232,11 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <div className="flex items-center space-x-3 bg-rose-950/60 p-2.5 rounded border border-rose-500/50 shadow-inner">
           <div className="flex flex-col">
             <span className="text-[9px] font-mono font-bold text-rose-300 uppercase">HARMONIUM</span>
-            <span className="text-[8px] font-mono text-rose-400/80">AIR RESERVOIR & REEDS</span>
+            <span className="text-[8px] font-mono text-rose-400/80">AIR RESERVOIR &amp; REEDS</span>
           </div>
           <Knob
             label="RESERVOIR"
-            value={(device as any).airReservoir ?? 0.85}
+            value={p.airReservoir ?? (device as any).airReservoir ?? 0.85}
             min={0.2}
             max={1}
             step={0.05}
@@ -1259,7 +1246,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           />
           <Knob
             label="COUPLING"
-            value={(device as any).droneCoupling ?? 0.4}
+            value={p.droneCoupling ?? (device as any).droneCoupling ?? 0.4}
             min={0}
             max={1}
             step={0.05}
@@ -1268,24 +1255,38 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             onChange={(v) => setP('droneCoupling', v)}
           />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+        <DeviceVisualizer device={device} width={150} height={56} />
+        <button
+          onClick={() => {
+            device.noteOn?.(60, 0.9);
+            device.noteOn?.(67, 0.85);
+            setTimeout(() => {
+              device.noteOff?.(60);
+              device.noteOff?.(67);
+            }, 420);
+          }}
+          className="px-3 py-2 rounded bg-rose-500 hover:bg-rose-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>TEST REED CHORD</span>
+        </button>
       </div>
     );
   }
 
-  // 21. TABLA PERCUSSION (Mandala & Warm Yellow Motif)
+  // 21. TABLA PERCUSSION (Physical-Modeled Dayan & Bayan with Bol Triggers & CV)
   if (device.type === 'tabla') {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-4 p-2 relative overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 relative overflow-hidden">
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(circle_at_30%_50%,_#f59e0b_0%,_transparent_70%)]" />
-        <div className="flex items-center space-x-3 bg-amber-950/60 p-2.5 rounded border border-amber-500/50 shadow-inner">
+        <div className="flex items-center space-x-2.5 bg-amber-950/60 p-2 rounded border border-amber-500/50 shadow-inner">
           <div className="flex flex-col">
-            <span className="text-[9px] font-mono font-bold text-amber-300 uppercase">TABLA PERCUSSION</span>
-            <span className="text-[8px] font-mono text-amber-400/80">SKIN TENSION & BAYAN RESONANCE</span>
+            <span className="text-[9px] font-mono font-bold text-amber-300 uppercase">TABLA (DAYAN &amp; BAYAN)</span>
+            <span className="text-[8px] font-mono text-amber-400/80">SYAHI HARMONICS &amp; MEEND</span>
           </div>
           <Knob
             label="TENSION"
-            value={(device as any).skinTension ?? 0.8}
+            value={p.skinTension ?? (device as any).skinTension ?? 0.85}
             min={0.3}
             max={1.5}
             step={0.05}
@@ -1294,17 +1295,62 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             onChange={(v) => setP('skinTension', v)}
           />
           <Knob
-            label="BAYAN"
-            value={(device as any).bayanResonance ?? 0.7}
+            label="BAYAN SUB"
+            value={p.bayanResonance ?? (device as any).bayanResonance ?? 0.8}
             min={0.2}
-            max={1.2}
+            max={1.3}
             step={0.05}
             size="sm"
             variant="metal"
             onChange={(v) => setP('bayanResonance', v)}
           />
+          <Knob
+            label="SYAHI"
+            value={p.syahiHarmonics ?? (device as any).syahiHarmonics ?? 0.78}
+            min={0.1}
+            max={1.0}
+            step={0.05}
+            size="sm"
+            variant="yellow"
+            onChange={(v) => setP('syahiHarmonics', v)}
+          />
+          <Knob
+            label="MEEND"
+            value={p.bayanMeend ?? (device as any).bayanMeend ?? 0.45}
+            min={0}
+            max={1.0}
+            step={0.05}
+            size="sm"
+            variant="white"
+            onChange={(v) => setP('bayanMeend', v)}
+          />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+
+        {/* Authentic Multi-Bol Strike Test Pads */}
+        <div className="flex items-center space-x-1.5 bg-black/50 p-2 rounded border border-amber-500/30">
+          {[
+            { label: 'NA (Rim)', midi: 60 },
+            { label: 'TIN (Syahi)', midi: 62 },
+            { label: 'TUN (Open)', midi: 64 },
+            { label: 'GE (Bayan)', midi: 48 },
+            { label: 'DHA (Both)', midi: 65 },
+            { label: 'DHIN (Full)', midi: 67 },
+          ].map((bol) => (
+            <button
+              key={bol.label}
+              onClick={() => {
+                device.noteOn?.(bol.midi, 0.95);
+                setTimeout(() => device.noteOff?.(bol.midi), 250);
+              }}
+              className="px-2 py-1.5 rounded bg-amber-500/20 hover:bg-amber-500 text-amber-200 hover:text-slate-950 border border-amber-500/50 font-mono font-black text-[9px] transition-all"
+              title={`Trigger Tabla Bol ${bol.label} (MIDI ${bol.midi})`}
+            >
+              {bol.label}
+            </button>
+          ))}
+        </div>
+
+        <DeviceVisualizer device={device} width={140} height={54} />
       </div>
     );
   }
@@ -1316,12 +1362,12 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(circle_at_70%_50%,_#06b6d4_0%,_transparent_70%)]" />
         <div className="flex items-center space-x-3 bg-teal-950/60 p-2.5 rounded border border-teal-500/50 shadow-inner">
           <div className="flex flex-col">
-            <span className="text-[9px] font-mono font-bold text-teal-300 uppercase">TANPURA & DRONE</span>
+            <span className="text-[9px] font-mono font-bold text-teal-300 uppercase">TANPURA &amp; DRONE</span>
             <span className="text-[8px] font-mono text-teal-400/80">SA-PA CONTINUOUS HARMONICS</span>
           </div>
           <Knob
             label="ROOT SA"
-            value={(device as any).droneRoot ?? 110.0}
+            value={p.droneRoot ?? (device as any).droneRoot ?? 110.0}
             min={55}
             max={220}
             step={1}
@@ -1331,7 +1377,17 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             onChange={(v) => setP('droneRoot', v)}
           />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+        <DeviceVisualizer device={device} width={150} height={56} />
+        <button
+          onClick={() => {
+            device.noteOn?.(48, 0.9);
+            setTimeout(() => device.noteOff?.(48), 500);
+          }}
+          className="px-3 py-2 rounded bg-teal-500 hover:bg-teal-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_10px_rgba(20,184,166,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>PLUCK JAWARI DRONE</span>
+        </button>
       </div>
     );
   }
@@ -1344,11 +1400,11 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <div className="flex items-center space-x-3 bg-orange-950/60 p-2.5 rounded border border-orange-500/50 shadow-inner">
           <div className="flex flex-col">
             <span className="text-[9px] font-mono font-bold text-orange-300 uppercase">DHOL FOLK DRUM</span>
-            <span className="text-[8px] font-mono text-orange-400/80">DUAL-HEADED TRANSIENT PUNCH</span>
+            <span className="text-[8px] font-mono text-orange-400/80">DUGGA BASS &amp; TILLI STICK</span>
           </div>
           <Knob
             label="PUNCH"
-            value={(device as any).punchTension ?? 0.85}
+            value={p.punchTension ?? (device as any).punchTension ?? 0.85}
             min={0.4}
             max={1.5}
             step={0.05}
@@ -1356,8 +1412,47 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             variant="yellow"
             onChange={(v) => setP('punchTension', v)}
           />
+          <Knob
+            label="SHELL RES"
+            value={p.shellResonance ?? (device as any).shellResonance ?? 0.78}
+            min={0.2}
+            max={1.3}
+            step={0.05}
+            size="sm"
+            variant="metal"
+            onChange={(v) => setP('shellResonance', v)}
+          />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+        <div className="flex items-center space-x-1.5 bg-black/50 p-2 rounded border border-orange-500/30">
+          <button
+            onClick={() => {
+              device.noteOn?.(48, 0.95);
+              setTimeout(() => device.noteOff?.(48), 250);
+            }}
+            className="px-2.5 py-1.5 rounded bg-orange-500/20 hover:bg-orange-500 text-orange-200 hover:text-slate-950 border border-orange-500/50 font-mono font-black text-[9px]"
+          >
+            DUGGA BASS
+          </button>
+          <button
+            onClick={() => {
+              device.noteOn?.(64, 0.95);
+              setTimeout(() => device.noteOff?.(64), 250);
+            }}
+            className="px-2.5 py-1.5 rounded bg-amber-500/20 hover:bg-amber-500 text-amber-200 hover:text-slate-950 border border-amber-500/50 font-mono font-black text-[9px]"
+          >
+            TILLI HIGH
+          </button>
+          <button
+            onClick={() => {
+              device.noteOn?.(60, 0.98);
+              setTimeout(() => device.noteOff?.(60), 250);
+            }}
+            className="px-2.5 py-1.5 rounded bg-orange-500 hover:bg-orange-400 text-slate-950 font-mono font-black text-[9px]"
+          >
+            FULL DHOL HIT
+          </button>
+        </div>
+        <DeviceVisualizer device={device} width={140} height={54} />
       </div>
     );
   }
@@ -1374,7 +1469,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           </div>
           <Knob
             label="TENSION"
-            value={(device as any).stringTension ?? 0.9}
+            value={p.stringTension ?? (device as any).stringTension ?? 0.9}
             min={0.5}
             max={1.4}
             step={0.05}
@@ -1383,14 +1478,132 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             onChange={(v) => setP('stringTension', v)}
           />
         </div>
-        <DeviceVisualizer device={device} width={160} height={58} />
+        <DeviceVisualizer device={device} width={150} height={56} />
+        <button
+          onClick={() => {
+            device.noteOn?.(67, 0.92);
+            setTimeout(() => device.noteOff?.(67), 260);
+          }}
+          className="px-3 py-2 rounded bg-purple-500 hover:bg-purple-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>PLUCK TUMBI</span>
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className="p-3 text-center text-xs font-mono text-neutral-300">
-      MODULAR SIGNAL ROUTER // FLIP RACK (TAB) TO ROUTE PATCH CABLES
-    </div>
-  );
+  // 25. WYVERN SYNTHESIZER MODULE (Dual-Wavetable / FM / Sub-Harmonic Dragon Synth + Mod Containers & Macros)
+  if (device.type === 'wyvern') {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-gradient-to-r from-[#07111e] via-[#0a1829] to-[#07111e] rounded border border-cyan-500/40 relative overflow-hidden">
+        <div className="flex items-center space-x-3 bg-black/50 p-2 rounded border border-cyan-500/30">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-mono font-black text-cyan-300 tracking-wider">WYVERN SYNTH</span>
+            <span className="text-[8px] font-mono text-emerald-400">WAVETABLE &bull; FM &bull; COMB DSP</span>
+            <select
+              value={p.wavetableA || 'sawtooth'}
+              onChange={(e) => setP('wavetableA', e.target.value)}
+              className="mt-1 bg-slate-950 border border-cyan-500/40 text-[10px] px-1.5 py-0.5 rounded font-mono text-cyan-200"
+            >
+              <option value="sawtooth">WT-A: Cyber Saw</option>
+              <option value="square">WT-A: Pulse Matrix</option>
+              <option value="triangle">WT-A: Sub Triangle</option>
+            </select>
+          </div>
+          <Knob label="MORPH" value={p.morph ?? 0.45} min={0} max={1} step={0.02} size="sm" variant="yellow" onChange={(v) => setP('morph', v)} />
+          <Knob label="FM DEPTH" value={p.fmDepth ?? 140} min={0} max={600} step={10} unit="Hz" size="sm" variant="metal" onChange={(v) => setP('fmDepth', v)} />
+          <Knob label="DRAGON DRV" value={p.dragonDrive ?? 0.35} min={0} max={1} step={0.05} size="sm" variant="yellow" onChange={(v) => setP('dragonDrive', v)} />
+          <Knob label="CUTOFF" value={p.cutoff ?? 3200} min={60} max={16000} step={20} unit="Hz" size="sm" variant="white" onChange={(v) => setP('cutoff', v)} />
+          <Knob label="RESO" value={p.resonance ?? 5.2} min={0.5} max={16} step={0.2} size="sm" variant="dark" onChange={(v) => setP('resonance', v)} />
+        </div>
+
+        {/* Modulation Container Slots & Bounded Macro Knobs */}
+        <div className="flex items-center space-x-2 bg-black/50 p-2 rounded border border-emerald-500/30">
+          <div className="flex flex-col space-y-1 text-[8px] font-mono pr-2 border-r border-slate-800">
+            <span className="text-emerald-400 font-bold">MOD CONTAINERS</span>
+            <div className="px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40 text-cyan-200">
+              S1: {p.modSlot1Source} &rarr; {p.modSlot1Target}
+            </div>
+            <div className="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-200">
+              S2: {p.modSlot2Source} &rarr; {p.modSlot2Target}
+            </div>
+          </div>
+          <Knob label="M1: ROAR" value={p.macroRoar ?? 0.45} min={0} max={1} step={0.02} size="xs" variant="yellow" onChange={(v) => setP('macroRoar', v)} />
+          <Knob label="M2: SCALE" value={p.macroScale ?? 0.6} min={0} max={1} step={0.02} size="xs" variant="metal" onChange={(v) => setP('macroScale', v)} />
+        </div>
+
+        <DeviceVisualizer device={device} width={140} height={54} />
+
+        <button
+          onClick={() => {
+            (device as any).noteOn?.(60, 0.92);
+            setTimeout(() => (device as any).noteOff?.(60), 280);
+          }}
+          className="px-3 py-2 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>AUDITION WYVERN</span>
+        </button>
+      </div>
+    );
+  }
+
+  // 26. EMBER SYNTHESIZER MODULE (Analog Warmth / Formant & Thermal Saturation Synth + Mod Containers & Macros)
+  if (device.type === 'ember') {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-gradient-to-r from-[#1a0c08] via-[#26120b] to-[#1a0c08] rounded border border-amber-500/40 relative overflow-hidden">
+        <div className="flex items-center space-x-3 bg-black/50 p-2 rounded border border-amber-500/30">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-mono font-black text-amber-300 tracking-wider">EMBER SYNTH</span>
+            <span className="text-[8px] font-mono text-orange-400">THERMAL FORMANT &bull; TUBE DSP</span>
+            <select
+              value={p.oscWave || 'sawtooth'}
+              onChange={(e) => setP('oscWave', e.target.value)}
+              className="mt-1 bg-slate-950 border border-amber-500/40 text-[10px] px-1.5 py-0.5 rounded font-mono text-amber-200"
+            >
+              <option value="sawtooth">CORE: Warm Saw</option>
+              <option value="triangle">CORE: Ember Tri</option>
+              <option value="square">CORE: HollowReed</option>
+            </select>
+          </div>
+          <Knob label="DRIFT" value={p.thermalDrift ?? 12} min={0} max={40} step={1} unit="¢" size="sm" variant="yellow" onChange={(v) => setP('thermalDrift', v)} />
+          <Knob label="HARMONICS" value={p.emberHarmonics ?? 0.55} min={0} max={1} step={0.05} size="sm" variant="metal" onChange={(v) => setP('emberHarmonics', v)} />
+          <Knob label="FORMANT" value={p.formantFreq ?? 1150} min={300} max={4500} step={25} unit="Hz" size="sm" variant="yellow" onChange={(v) => setP('formantFreq', v)} />
+          <Knob label="CUTOFF" value={p.cutoff ?? 2600} min={60} max={16000} step={20} unit="Hz" size="sm" variant="white" onChange={(v) => setP('cutoff', v)} />
+          <Knob label="WARMTH" value={p.warmthDrive ?? 0.4} min={0} max={1} step={0.05} size="sm" variant="dark" onChange={(v) => setP('warmthDrive', v)} />
+        </div>
+
+        {/* Modulation Container Slots & Bounded Macro Knobs */}
+        <div className="flex items-center space-x-2 bg-black/50 p-2 rounded border border-amber-500/30">
+          <div className="flex flex-col space-y-1 text-[8px] font-mono pr-2 border-r border-slate-800">
+            <span className="text-amber-400 font-bold">MOD CONTAINERS</span>
+            <div className="px-1.5 py-0.5 rounded bg-amber-950/70 border border-amber-500/40 text-amber-200">
+              S1: {p.modSlot1Source} &rarr; {p.modSlot1Target}
+            </div>
+            <div className="px-1.5 py-0.5 rounded bg-orange-950/70 border border-orange-500/40 text-orange-200">
+              S2: {p.modSlot2Source} &rarr; {p.modSlot2Target}
+            </div>
+          </div>
+          <Knob label="M1: GLOW" value={p.macroGlow ?? 0.55} min={0} max={1} step={0.02} size="xs" variant="yellow" onChange={(v) => setP('macroGlow', v)} />
+          <Knob label="M2: HEAT" value={p.macroHeat ?? 0.4} min={0} max={1} step={0.02} size="xs" variant="metal" onChange={(v) => setP('macroHeat', v)} />
+        </div>
+
+        <DeviceVisualizer device={device} width={140} height={54} />
+
+        <button
+          onClick={() => {
+            (device as any).noteOn?.(60, 0.92);
+            setTimeout(() => (device as any).noteOff?.(60), 280);
+          }}
+          className="px-3 py-2 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-mono font-black text-[10px] flex items-center space-x-1 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>AUDITION EMBER</span>
+        </button>
+      </div>
+    );
+  }
+
+  return <ReasonRackFaceplate device={device} onUpdate={onUpdate} />;
 };

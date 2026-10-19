@@ -28,7 +28,45 @@ export type DeviceType =
   | 'dhol'
   | 'tumbi'
   | 'world_instrument'
-  | 'percussion_electronic';
+  | 'percussion_electronic'
+  | 'wyvern'
+  | 'ember'
+  | 'malstrom'
+  | 'algoritm'
+  | 'complex1'
+  | 'parsec2'
+  | 'polytone'
+  | 'objekt'
+  | 'grain'
+  | 'nnxt'
+  | 'nn19'
+  | 'kong'
+  | 'dr_octo_rex'
+  | 'umpf'
+  | 'friktion'
+  | 'scenic'
+  | 'humana'
+  | 'pangea'
+  | 'klang'
+  | 'radical_piano'
+  | 'reason_performance'
+  | 'layers_id8'
+  | 'rv9'
+  | 'ripley'
+  | 'osmium'
+  | 'pulveriser'
+  | 'alligator'
+  | 'bvx_vocoder'
+  | 'neptune'
+  | 'quartet'
+  | 'sweeper'
+  | 'audiomatic'
+  | 'rotor'
+  | 'softube_amp'
+  | 'combinator'
+  | 'rpg8'
+  | 'midi_out'
+  | 'line_mixer';
 
 export type PortType = 'audio_in' | 'audio_out' | 'cv_in' | 'cv_out';
 
@@ -118,7 +156,74 @@ export interface TelemetryData {
 export interface SequencerNote {
   note: number;      // MIDI note number 24 (C1) to 84 (C6)
   velocity: number;  // 0.0 to 1.0
-  length: number;    // In 16th steps (1, 2, 4...)
+  length: number;    // In 16th steps (1, 2, 4, 8, 16...)
+  muted?: boolean;   // Per-note mute state (Mute Tool)
+  chordNotes?: number[]; // Additional chord intervals/notes triggered on this step
+  finePitch?: number; // Vari-Pitch / fine cents offset (-100 to +100)
+  microOffset?: number; // Micro-timing offset (-0.5 to +0.5 step)
+  probability?: number; // Per-Step Random Number Note Chance Probability (0.1 to 1.0, default 1.0)
+  ratchet?: number;     // Step Ratchet Note Subdivision Repetition Sub-Loop (1, 2, 3, 4)
+  aftertouch?: number;  // Polyphonic Aftertouch Continuous Pressure Value (0.0 to 1.0)
+  mpePitch?: number;    // MPE Per-Note Pitch Bend (-24 to +24 semitones)
+  mpePressure?: number; // MPE Per-Note Pressure (0.0 to 1.0)
+  mpeSlide?: number;    // MPE Per-Note Y-Axis Slide / Timbre (0.0 to 1.0)
+}
+
+export type InternalOptionCategory =
+  | 'unboxed_gold'
+  | 'f1_sequencer'
+  | 'f2_mixer'
+  | 'f3_rack'
+  | 'split_view'
+  | 'add_module'
+  | 'ai_copilot'
+  | 'cv_matrix'
+  | 'master_knob'
+  | 'vu_dials'
+  | 'step_grid'
+  | 'piano_roll'
+  | 'arrangement'
+  | 'graph_cc'
+  | 'sample_warp'
+  | 'dsp_analyzer';
+
+export type AdvancedOptionCategory =
+  | 'neural_stem_sep'
+  | 'ai_text_to_inst'
+  | 'algo_chord_harm'
+  | 'style_midi_mutator'
+  | 'formant_pitch_core'
+  | 'vocal_layer_harm'
+  | 'granular_vocal_resynth'
+  | 'sibilance_deesser'
+  | 'tag_db_browser'
+  | 'smart_preview_vocoder'
+  | 'multi_col_streamer'
+  | 'predictive_preroll'
+  | 'vintage_tube_sat'
+  | 'opto_leveling_amp'
+  | 'fet_dynamic_limiter'
+  | 'vari_mu_glue_comp'
+  | 'convolution_ir_space'
+  | 'spring_plate_reverb'
+  | 'bbd_analog_delay';
+
+export interface ArrangementClip {
+  id: string;
+  startBar: number;   // 0-indexed bar position (0..31)
+  lengthBars: number; // Duration in bars (1..16)
+  patternIndex: number; // Pattern 0..7
+  name: string;
+  color?: string;
+  muted?: boolean;
+  stretchRatio?: number; // 0.5x to 2.0x
+}
+
+export interface ProjectMarker {
+  id: string;
+  bar: number;
+  name: string;
+  color: string;
 }
 
 export interface SequencerTrack {
@@ -139,12 +244,20 @@ export interface SequencerTrack {
   cutoff?: number;       // 0 to 1
   resonance?: number;    // 0 to 1
   generatorType?: string;
+  frozen?: boolean;      // Multi-track Stem Freeze state
+  activeTake?: number;   // Comping multi-take index (0, 1, 2)
+  takes?: Record<number, (SequencerNote | null)[]>;
+  patterns?: Record<number, (SequencerNote | null)[]>; // Pattern bank 0..7 per instrument
+  arrangementClips?: ArrangementClip[];
   graphData?: {
     velocity: number[];
     pitch: number[];
     pan: number[];
     cutoff: number[];
     resonance: number[];
+    cc1?: number[];  // Mod Wheel
+    cc74?: number[]; // Filter Brightness
+    cc91?: number[]; // Reverb Send
   };
 }
 

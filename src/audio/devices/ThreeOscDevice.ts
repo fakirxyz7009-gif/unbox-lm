@@ -55,44 +55,66 @@ export class ThreeOscDevice extends BaseDevice {
     ];
   }
 
+  private resolveCutoffHz(val: number): number {
+    const n = Number(val);
+    if (isNaN(n)) return 2400;
+    if (n <= 1.5) return Math.round(60 * Math.pow(260, Math.max(0.02, Math.min(1.0, n))));
+    return Math.max(40, Math.min(18000, n));
+  }
+
+  private resolveResonanceQ(val: number): number {
+    const n = Number(val);
+    if (isNaN(n)) return 3.5;
+    if (n <= 1.0) return 0.7 + Math.max(0, Math.min(1, n)) * 12.0;
+    return Math.max(0.5, Math.min(20, n));
+  }
+
   public setParam(key: string, value: any): void {
-    this.params[key] = value;
     if (key === 'volume') {
-      this.masterGain.gain.setTargetAtTime(value, this.ctx.currentTime, 0.02);
+      const v = Math.max(0, Math.min(1.5, Number(value)));
+      this.params.volume = v;
+      this.masterGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
     } else if (key === 'cutoff') {
+      const hz = this.resolveCutoffHz(value);
+      this.params.cutoff = hz;
       this.activeVoices.forEach((v) => {
-        v.filter.frequency.setTargetAtTime(value, this.ctx.currentTime, 0.02);
+        v.filter.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.02);
       });
     } else if (key === 'resonance') {
+      const q = this.resolveResonanceQ(value);
+      this.params.resonance = q;
       this.activeVoices.forEach((v) => {
-        v.filter.Q.setTargetAtTime(value, this.ctx.currentTime, 0.02);
+        v.filter.Q.setTargetAtTime(q, this.ctx.currentTime, 0.02);
       });
+    } else {
+      this.params[key] = value;
     }
   }
 
   public noteOn(note: number, velocity: number = 0.85, time: number = this.ctx.currentTime): void {
     if (!this.isPowered || this.isBypassed) return;
-    this.noteOff(note, time);
+    const startTime = Math.max(this.ctx.currentTime, time);
+    this.noteOff(note, startTime);
 
-    const baseFreq = 440 * Math.pow(2, (note - 69) / 12);
+    const baseFreq = Math.max(20, Math.min(18000, 440 * Math.pow(2, (note - 69) / 12)));
 
     // Osc 1
     const osc1 = this.ctx.createOscillator();
     osc1.type = this.params.osc1Type;
-    const f1 = baseFreq * Math.pow(2, (this.params.osc1Coarse + this.params.osc1Fine / 100) / 12);
-    osc1.frequency.setValueAtTime(f1, time);
+    const f1 = Math.max(20, Math.min(18000, baseFreq * Math.pow(2, (this.params.osc1Coarse + this.params.osc1Fine / 100) / 12)));
+    osc1.frequency.setValueAtTime(f1, startTime);
 
     // Osc 2
     const osc2 = this.ctx.createOscillator();
     osc2.type = this.params.osc2Type;
-    const f2 = baseFreq * Math.pow(2, (this.params.osc2Coarse + this.params.osc2Fine / 100) / 12);
-    osc2.frequency.setValueAtTime(f2, time);
+    const f2 = Math.max(20, Math.min(18000, baseFreq * Math.pow(2, (this.params.osc2Coarse + this.params.osc2Fine / 100) / 12)));
+    osc2.frequency.setValueAtTime(f2, startTime);
 
     // Osc 3
     const osc3 = this.ctx.createOscillator();
     osc3.type = this.params.osc3Type;
-    const f3 = baseFreq * Math.pow(2, (this.params.osc3Coarse + this.params.osc3Fine / 100) / 12);
-    osc3.frequency.setValueAtTime(f3, time);
+    const f3 = Math.max(20, Math.min(18000, baseFreq * Math.pow(2, (this.params.osc3Coarse + this.params.osc3Fine / 100) / 12)));
+    osc3.frequency.setValueAtTime(f3, startTime);
 
     const v1Gain = this.ctx.createGain();
     v1Gain.gain.value = this.params.osc1Vol;
@@ -108,29 +130,29 @@ export class ThreeOscDevice extends BaseDevice {
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(Math.max(60, this.params.cutoff), time);
-    filter.Q.setValueAtTime(this.params.resonance, time);
+    filter.frequency.setValueAtTime(this.resolveCutoffHz(this.params.cutoff), startTime);
+    filter.Q.setValueAtTime(this.resolveResonanceQ(this.params.resonance), startTime);
 
     v1Gain.connect(filter);
     v2Gain.connect(filter);
     v3Gain.connect(filter);
 
     const vGain = this.ctx.createGain();
-    const peak = velocity * this.params.volume * 0.4;
+    const peak = Math.max(0.05, velocity) * this.params.volume * 0.45;
     const att = Math.max(0.005, this.params.attack);
-    const dec = Math.max(0.01, this.params.decay);
-    const sus = peak * this.params.sustain;
+    const dec = Math.max(0.015, this.params.decay);
+    const sus = Math.max(0.001, peak * this.params.sustain);
 
-    vGain.gain.setValueAtTime(0.0001, time);
-    vGain.gain.exponentialRampToValueAtTime(peak, time + att);
-    vGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, sus), time + att + dec);
+    vGain.gain.setValueAtTime(0.0001, startTime);
+    vGain.gain.linearRampToValueAtTime(peak, startTime + att);
+    vGain.gain.exponentialRampToValueAtTime(sus, startTime + att + dec);
 
     filter.connect(vGain);
     vGain.connect(this.masterGain);
 
-    osc1.start(time);
-    osc2.start(time);
-    osc3.start(time);
+    osc1.start(startTime);
+    osc2.start(startTime);
+    osc3.start(startTime);
 
     this.activeVoices.set(note, { osc1, osc2, osc3, filter, gain: vGain });
   }
@@ -138,27 +160,28 @@ export class ThreeOscDevice extends BaseDevice {
   public noteOff(note: number, time: number = this.ctx.currentTime): void {
     const v = this.activeVoices.get(note);
     if (!v) return;
+    this.activeVoices.delete(note);
 
-    const rel = Math.max(0.02, this.params.release);
+    const relTime = Math.max(this.ctx.currentTime, time);
+    const rel = Math.max(0.03, Math.min(2.5, this.params.release));
     try {
-      v.gain.gain.cancelScheduledValues(time);
-      v.gain.gain.setValueAtTime(v.gain.gain.value, time);
-      v.gain.gain.exponentialRampToValueAtTime(0.0001, time + rel);
-
-      setTimeout(() => {
-        try {
-          v.osc1.stop();
-          v.osc2.stop();
-          v.osc3.stop();
-          v.osc1.disconnect();
-          v.osc2.disconnect();
-          v.osc3.disconnect();
-          v.filter.disconnect();
-          v.gain.disconnect();
-        } catch (e) {}
-      }, rel * 1000 + 50);
+      v.gain.gain.cancelScheduledValues(relTime);
+      v.gain.gain.setValueAtTime(Math.max(0.001, v.gain.gain.value || 0.25), relTime);
+      v.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + rel);
+      const stopAt = relTime + rel + 0.02;
+      v.osc1.stop(stopAt);
+      v.osc2.stop(stopAt);
+      v.osc3.stop(stopAt);
     } catch (e) {}
 
-    this.activeVoices.delete(note);
+    setTimeout(() => {
+      try {
+        v.osc1.disconnect();
+        v.osc2.disconnect();
+        v.osc3.disconnect();
+        v.filter.disconnect();
+        v.gain.disconnect();
+      } catch (e) {}
+    }, Math.max(60, (relTime - this.ctx.currentTime + rel) * 1000 + 80));
   }
 }
