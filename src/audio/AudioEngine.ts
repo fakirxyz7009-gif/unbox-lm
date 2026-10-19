@@ -67,7 +67,19 @@ import {
   LineMixerDevice,
 } from './devices/ReasonEffectsAndUtilitiesSuite.ts';
 import { CVEngine } from './CVEngine.ts';
+import { sharedAudioContext } from './AudioEngineGraph.ts';
 import { AudioConnection, CVConnection, DeviceType, TelemetryData, SequencerTrack, SequencerNote } from './types.ts';
+
+export interface TrackChannelStripNodes {
+  gainL: GainNode;
+  gainR: GainNode;
+  duckL: GainNode;
+  duckR: GainNode;
+  channelGain: GainNode;
+  channelPan: StereoPannerNode;
+  channelAnalyser: AnalyserNode;
+  analyserData: Float32Array;
+}
 
 export class AudioEngine {
   public ctx: AudioContext;
@@ -75,6 +87,32 @@ export class AudioEngine {
   public masterBusR: GainNode;
   public masterGain: GainNode;
   public masterLimiter: DynamicsCompressorNode;
+
+  // Real Web Audio Outboard Mastering & Hardware Emulation Chain
+  private outboardDeEsser!: BiquadFilterNode;
+  private outboardTubeShaper!: WaveShaperNode;
+  private outboardOptoComp!: DynamicsCompressorNode;
+  private outboardConvolver!: ConvolverNode;
+  public outboardReverbWet!: GainNode;
+  private outboardBbdDelay!: DelayNode;
+  private outboardBbdFilter!: BiquadFilterNode;
+  private outboardBbdFeedback!: GainNode;
+  public outboardBbdWet!: GainNode;
+  public masterEqLow!: BiquadFilterNode;
+  public masterEqMid!: BiquadFilterNode;
+  public masterEqHigh!: BiquadFilterNode;
+  public masterSpectrumState = {
+    low: 0.62,
+    mid: 0.54,
+    high: 0.68,
+    width: 0.72,
+    mix: 0.88,
+    reverbSend: 0.32,
+    delaySend: 0.18,
+  };
+
+  // Per-Device/Track Real-Time Mixer Channel Strips (Volume, Mute, Solo, Stereo Pan & Sidechain Ducking)
+  public trackChannelStrips: Map<string, TrackChannelStripNodes> = new Map();
 
   public analyserL: AnalyserNode;
   public analyserR: AnalyserNode;
@@ -277,8 +315,7 @@ export class AudioEngine {
   }
 
   constructor() {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    this.ctx = new AudioCtx({ latencyHint: 'interactive' });
+    this.ctx = sharedAudioContext;
 
     this.cvEngine = new CVEngine();
 
@@ -313,13 +350,281 @@ export class AudioEngine {
     this.masterBusL.connect(merger, 0, 0);
     this.masterBusR.connect(merger, 0, 1);
 
-    merger.connect(this.masterGain);
-    this.masterGain.connect(this.masterLimiter);
+    // Real Web Audio Outboard Mastering & Hardware Emulation Chain
+    this.outboardDeEsser = this.ctx.createBiquadFilter();
+    this.outboardDeEsser.type = 'peaking';
+    this.outboardDeEsser.frequency.value = 6800;
+    this.outboardDeEsser.Q.value = 2.4;
+    this.outboardDeEsser.gain.value = 0;
+
+    this.outboardTubeShaper = this.ctx.createWaveShaper();
+    this.outboardTubeShaper.oversample = '2x';
+
+    this.outboardOptoComp = this.ctx.createDynamicsCompressor();
+    this.outboardOptoComp.threshold.value = -16;
+    this.outboardOptoComp.knee.value = 12;
+    this.outboardOptoComp.ratio.value = 3.5;
+    this.outboardOptoComp.attack.value = 0.015;
+    this.outboardOptoComp.release.value = 0.25;
+
+    this.outboardConvolver = this.ctx.createConvolver();
+    this.outboardConvolver.buffer = this.buildImpulseResponse(this.ctx, 1.85, 2.8);
+    this.outboardReverbWet = this.ctx.createGain();
+    this.outboardReverbWet.gain.value = 0.16;
+
+    this.outboardBbdDelay = this.ctx.createDelay(2.0);
+    this.outboardBbdDelay.delayTime.value = 0.28;
+    this.outboardBbdFeedback = this.ctx.createGain();
+    this.outboardBbdFeedback.gain.value = 0.28;
+    this.outboardBbdFilter = this.ctx.createBiquadFilter();
+    this.outboardBbdFilter.type = 'lowpass';
+    this.outboardBbdFilter.frequency.value = 3200;
+    this.outboardBbdWet = this.ctx.createGain();
+    this.outboardBbdWet.gain.value = 0.14;
+
+    // Wire Master Sum -> DeEsser -> Tube Saturation -> Opto/FET Comp -> MasterGain -> MasterLimiter -> Destination
+    merger.connect(this.outboardDeEsser);
+    this.outboardDeEsser.connect(this.outboardTubeShaper);
+    this.outboardTubeShaper.connect(this.outboardOptoComp);
+    this.outboardOptoComp.connect(this.masterGain);
+
+    // Parallel Convolution IR Space & Plate Reverb send
+    this.outboardOptoComp.connect(this.outboardConvolver);
+    this.outboardConvolver.connect(this.outboardReverbWet);
+    this.outboardReverbWet.connect(this.masterGain);
+
+    // Parallel BBD Analog Delay feedback loop
+    this.outboardOptoComp.connect(this.outboardBbdDelay);
+    this.outboardBbdDelay.connect(this.outboardBbdFilter);
+    this.outboardBbdFilter.connect(this.outboardBbdFeedback);
+    this.outboardBbdFeedback.connect(this.outboardBbdDelay);
+    this.outboardBbdFilter.connect(this.outboardBbdWet);
+    this.outboardBbdWet.connect(this.masterGain);
+
+    // 3-Band Master Parametric Spectrum EQ (Low / Mid / High)
+    this.masterEqLow = this.ctx.createBiquadFilter();
+    this.masterEqLow.type = 'lowshelf';
+    this.masterEqLow.frequency.value = 160;
+    this.masterEqLow.gain.value = 2.0;
+
+    this.masterEqMid = this.ctx.createBiquadFilter();
+    this.masterEqMid.type = 'peaking';
+    this.masterEqMid.frequency.value = 1250;
+    this.masterEqMid.Q.value = 1.1;
+    this.masterEqMid.gain.value = 0.8;
+
+    this.masterEqHigh = this.ctx.createBiquadFilter();
+    this.masterEqHigh.type = 'highshelf';
+    this.masterEqHigh.frequency.value = 6500;
+    this.masterEqHigh.gain.value = 2.5;
+
+    this.masterGain.connect(this.masterEqLow);
+    this.masterEqLow.connect(this.masterEqMid);
+    this.masterEqMid.connect(this.masterEqHigh);
+    this.masterEqHigh.connect(this.masterLimiter);
     this.masterLimiter.connect(this.ctx.destination);
 
+    this.syncOutboardHardwareChain();
     this.initDefaultSession();
     this.startTelemetryLoop();
     this.startAutoSaveDaemon();
+  }
+
+  private buildImpulseResponse(context: BaseAudioContext, durationSec: number, decay: number): AudioBuffer {
+    const rate = context.sampleRate || 48000;
+    const len = Math.max(1, Math.floor(rate * durationSec));
+    const buf = context.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        const t = i / len;
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay) * 0.5;
+      }
+    }
+    return buf;
+  }
+
+  private buildSaturationCurve(drivePct: number): Float32Array {
+    const samples = 1024;
+    const curve = new Float32Array(samples);
+    const k = Math.max(0.1, (drivePct / 100) * 18);
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  public syncOutboardHardwareChain(): void {
+    const tube = this.outboardRackState.vintage_tube_sat;
+    const opto = this.outboardRackState.opto_leveling_amp;
+    const fet = this.outboardRackState.fet_dynamic_limiter;
+    const variMu = this.outboardRackState.vari_mu_glue_comp;
+    const irSpace = this.outboardRackState.convolution_ir_space;
+    const plate = this.outboardRackState.spring_plate_reverb;
+    const bbd = this.outboardRackState.bbd_analog_delay;
+
+    const totalDrive =
+      (tube?.enabled ? tube.drive * (tube.mix / 100) * 0.55 : 0) +
+      (variMu?.enabled ? variMu.drive * (variMu.mix / 100) * 0.35 : 0);
+    this.outboardTubeShaper.curve = this.buildSaturationCurve(totalDrive) as any;
+
+    const now = this.ctx.currentTime;
+    if (fet?.enabled || opto?.enabled) {
+      const thresh = fet?.enabled ? -18 - (fet.drive / 100) * 12 : -14 - ((opto?.drive || 50) / 100) * 8;
+      const ratio = fet?.enabled ? 8 + (fet.drive / 100) * 12 : 3.5;
+      this.outboardOptoComp.threshold.setTargetAtTime(thresh, now, 0.02);
+      this.outboardOptoComp.ratio.setTargetAtTime(ratio, now, 0.02);
+    } else {
+      this.outboardOptoComp.threshold.setTargetAtTime(0, now, 0.02);
+      this.outboardOptoComp.ratio.setTargetAtTime(1, now, 0.02);
+    }
+
+    const revWet =
+      (irSpace?.enabled ? (irSpace.mix / 100) * 0.25 : 0) +
+      (plate?.enabled ? (plate.mix / 100) * 0.2 : 0);
+    this.outboardReverbWet.gain.setTargetAtTime(Math.min(0.45, revWet), now, 0.02);
+
+    const delayWet = bbd?.enabled ? (bbd.mix / 100) * 0.28 : 0;
+    const delayFb = bbd?.enabled ? Math.min(0.72, 0.18 + (bbd.drive / 100) * 0.45) : 0;
+    this.outboardBbdWet.gain.setTargetAtTime(delayWet, now, 0.02);
+    this.outboardBbdFeedback.gain.setTargetAtTime(delayFb, now, 0.02);
+  }
+
+  public setMasterSpectrumParam(param: 'low' | 'mid' | 'high' | 'width' | 'mix' | 'reverbSend' | 'delaySend', val: number): void {
+    const clamped = Math.max(0, Math.min(1, val));
+    this.masterSpectrumState[param] = clamped;
+    const now = this.ctx.currentTime;
+    if (param === 'low') {
+      this.masterEqLow.gain.setTargetAtTime((clamped - 0.5) * 18, now, 0.015);
+    } else if (param === 'mid') {
+      this.masterEqMid.gain.setTargetAtTime((clamped - 0.5) * 16, now, 0.015);
+    } else if (param === 'high') {
+      this.masterEqHigh.gain.setTargetAtTime((clamped - 0.5) * 18, now, 0.015);
+    } else if (param === 'mix') {
+      this.masterGain.gain.setTargetAtTime(0.2 + clamped * 0.9, now, 0.015);
+    } else if (param === 'reverbSend') {
+      this.outboardReverbWet.gain.setTargetAtTime(clamped * 0.55, now, 0.015);
+    } else if (param === 'delaySend') {
+      this.outboardBbdWet.gain.setTargetAtTime(clamped * 0.5, now, 0.015);
+    }
+    this.notify();
+  }
+
+  public isPlayableInstrument(type: DeviceType): boolean {
+    const nonPlayable: DeviceType[] = [
+      'scream4',
+      'echo',
+      'rv7000',
+      'mclass_master',
+      'pulsar',
+      'matrix',
+      'spider_cv',
+      'spider_audio',
+      'rv9',
+      'ripley',
+      'osmium',
+      'pulveriser',
+      'alligator',
+      'bvx_vocoder',
+      'neptune',
+      'quartet',
+      'sweeper',
+      'audiomatic',
+      'rotor',
+      'softube_amp',
+      'rpg8',
+      'midi_out',
+      'line_mixer',
+      'automation_clip',
+    ];
+    return !nonPlayable.includes(type);
+  }
+
+  public getOrCreateTrackStrip(deviceId: string): TrackChannelStripNodes {
+    let strip = this.trackChannelStrips.get(deviceId);
+    if (!strip) {
+      const gainL = this.ctx.createGain();
+      const gainR = this.ctx.createGain();
+      const duckL = this.ctx.createGain();
+      const duckR = this.ctx.createGain();
+      const channelGain = this.ctx.createGain();
+      channelGain.gain.value = 0.85;
+      const channelPan = this.ctx.createStereoPanner();
+      channelPan.pan.value = 0;
+      const channelAnalyser = this.ctx.createAnalyser();
+      channelAnalyser.fftSize = 128;
+      const analyserData = new Float32Array(channelAnalyser.fftSize);
+      const splitter = this.ctx.createChannelSplitter(2);
+      const merger = this.ctx.createChannelMerger(2);
+
+      // Route Left & Right through per-track Input -> Sidechain Duck -> Stereo Merger -> channelGain -> channelPan -> channelAnalyser -> Splitter -> MasterBusL/R
+      gainL.connect(duckL);
+      gainR.connect(duckR);
+      duckL.connect(merger, 0, 0);
+      duckR.connect(merger, 0, 1);
+      merger.connect(channelGain);
+      channelGain.connect(channelPan);
+      channelPan.connect(channelAnalyser);
+      channelAnalyser.connect(splitter);
+      splitter.connect(this.masterBusL, 0);
+      splitter.connect(this.masterBusR, 1);
+
+      strip = {
+        gainL,
+        gainR,
+        duckL,
+        duckR,
+        channelGain,
+        channelPan,
+        channelAnalyser,
+        analyserData,
+      };
+      this.trackChannelStrips.set(deviceId, strip);
+    }
+    return strip;
+  }
+
+  public getTrackStereoLevels(deviceId: string): { rmsL: number; rmsR: number; peakL: number; peakR: number } {
+    const strip = this.trackChannelStrips.get(deviceId);
+    const dev = this.devices.get(deviceId);
+    const analyser = strip?.channelAnalyser || dev?.analyser;
+    if (!analyser) {
+      return { rmsL: 0, rmsR: 0, peakL: 0, peakR: 0 };
+    }
+    const buf = strip?.analyserData || new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf as any);
+    let sumSq = 0;
+    let peak = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = Math.abs(buf[i]);
+      sumSq += v * v;
+      if (v > peak) peak = v;
+    }
+    const rms = Math.sqrt(sumSq / buf.length);
+    const pan = strip ? strip.channelPan.pan.value : 0;
+    const leftScale = pan <= 0 ? 1 : Math.max(0.1, 1 - pan);
+    const rightScale = pan >= 0 ? 1 : Math.max(0.1, 1 + pan);
+    return {
+      rmsL: Math.min(1, rms * leftScale * 2.2),
+      rmsR: Math.min(1, rms * rightScale * 2.2),
+      peakL: Math.min(1, peak * leftScale * 1.6),
+      peakR: Math.min(1, peak * rightScale * 1.6),
+    };
+  }
+
+  public updateTrackChannelStrip(trackId?: string): void {
+    const hasSolo = this.tracks.some((t) => t.solo);
+    const now = this.ctx.currentTime;
+    this.tracks.forEach((t) => {
+      if (trackId && t.id !== trackId && !hasSolo) return;
+      const strip = this.getOrCreateTrackStrip(t.deviceId);
+      const isAudible = !t.mute && (!hasSolo || t.solo);
+      const targetGain = isAudible ? Math.max(0, Math.min(1.5, t.volume ?? 0.85)) : 0;
+      const targetPan = Math.max(-1, Math.min(1, t.pan ?? 0));
+      strip.channelGain.gain.setTargetAtTime(targetGain, now, 0.015);
+      strip.channelPan.pan.setTargetAtTime(targetPan, now, 0.015);
+    });
   }
 
   public subscribe(cb: () => void): () => void {
@@ -549,39 +854,34 @@ export class AudioEngine {
     dev.isPowered = true;
     this.cvEngine.registerDevice(dev);
 
-    // Automatically spawn corresponding Sequencer track, Arrangement clips & Mixer routing for EVERY device added in Rack
-    const track = this.getOrCreateTrackForDevice(id);
+    // Only spawn Sequencer track, seed starter pattern, and auto-patch to Master Bus if playable instrument
+    if (this.isPlayableInstrument(type)) {
+      const track = this.getOrCreateTrackForDevice(id);
 
-    // Seed a musical starter pattern on the newly added track so Sequencer Play immediately detects & plays it
-    if (track && !track.steps.some((s) => s !== null)) {
-      const defaultStyle =
-        track.group === 'Drums'
-          ? 'drums'
-          : track.group === 'World'
-          ? 'melody'
-          : type === 'monotone' || type === 'subtractor'
-          ? 'bass'
-          : type === 'europa' || type === 'flex' || type === 'radical_piano'
-          ? 'chords'
-          : 'industrial';
-      this.generateInstrumentPattern(track.id, defaultStyle);
-    }
+      if (track && !track.steps.some((s) => s !== null)) {
+        const defaultStyle =
+          track.group === 'Drums'
+            ? 'drums'
+            : track.group === 'World'
+            ? 'melody'
+            : type === 'monotone' || type === 'subtractor'
+            ? 'bass'
+            : type === 'europa' || type === 'flex' || type === 'radical_piano'
+            ? 'chords'
+            : 'industrial';
+        this.generateInstrumentPattern(track.id, defaultStyle);
+      }
 
-    // Guaranteed Stereo Audio Routing to Master Bus so every instrument/device always produces audible sound
-    const hasOutL = dev.ports.some((p) => p.id === 'out_l');
-    const hasOutR = dev.ports.some((p) => p.id === 'out_r');
+      const hasOutL = dev.ports.some((p) => p.id === 'out_l');
+      const hasOutR = dev.ports.some((p) => p.id === 'out_r');
 
-    if (hasOutL && hasOutR) {
-      try {
-        this.connectAudio(id, 'out_l', 'master', 'master_l');
-        this.connectAudio(id, 'out_r', 'master', 'master_r');
-      } catch (e) {}
-    } else {
-      // For pure CV/Utility devices without explicit audio_out ports, connect analyser to masterBus so sequencer excitation is audible
-      try {
-        dev.analyser.connect(this.masterBusL);
-        dev.analyser.connect(this.masterBusR);
-      } catch (e) {}
+      if (hasOutL && hasOutR) {
+        try {
+          this.connectAudio(id, 'out_l', 'master', 'master_l');
+          this.connectAudio(id, 'out_r', 'master', 'master_r');
+        } catch (e) {}
+      }
+      this.updateTrackChannelStrip(track?.id);
     }
 
     this.notify();
@@ -603,6 +903,21 @@ export class AudioEngine {
       (c) => c.sourceDeviceId === deviceId || c.targetDeviceId === deviceId
     );
     toRemoveCV.forEach((c) => this.disconnectCV(c.id));
+
+    // Remove per-track mixer channel strip nodes if any
+    const strip = this.trackChannelStrips.get(deviceId);
+    if (strip) {
+      try {
+        strip.gainL.disconnect();
+        strip.gainR.disconnect();
+        strip.duckL.disconnect();
+        strip.duckR.disconnect();
+        strip.channelGain.disconnect();
+        strip.channelPan.disconnect();
+        strip.channelAnalyser.disconnect();
+      } catch (e) {}
+      this.trackChannelStrips.delete(deviceId);
+    }
 
     // Remove associated sequencer tracks
     this.tracks = this.tracks.filter((t) => t.deviceId !== deviceId);
@@ -629,7 +944,8 @@ export class AudioEngine {
 
     let targetIn: GainNode | null = null;
     if (targetDeviceId === 'master') {
-      targetIn = targetPortId === 'master_r' ? this.masterBusR : this.masterBusL;
+      const strip = this.getOrCreateTrackStrip(sourceDeviceId);
+      targetIn = targetPortId === 'master_r' ? strip.gainR : strip.gainL;
     } else {
       const tgtDev = this.devices.get(targetDeviceId);
       if (!tgtDev) return null;
@@ -672,7 +988,12 @@ export class AudioEngine {
       const srcOut = srcDev.audioOutputs.get(conn.sourcePortId);
       let targetIn: GainNode | null = null;
       if (conn.targetDeviceId === 'master') {
-        targetIn = conn.targetPortId === 'master_r' ? this.masterBusR : this.masterBusL;
+        const strip = this.trackChannelStrips.get(conn.sourceDeviceId);
+        if (strip) {
+          targetIn = conn.targetPortId === 'master_r' ? strip.gainR : strip.gainL;
+        } else {
+          targetIn = conn.targetPortId === 'master_r' ? this.masterBusR : this.masterBusL;
+        }
       } else {
         const tgt = this.devices.get(conn.targetDeviceId);
         targetIn = tgt?.audioInputs.get(conn.targetPortId) || null;
@@ -706,6 +1027,17 @@ export class AudioEngine {
     const chosenColor = color || cvColors[this.cvConnections.length % cvColors.length];
     const connId = `cv_conn_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
 
+    // Register in CV Engine matrix for live modulation calculations and store matrixEntryId
+    const matrixEntryId = this.cvEngine.addMatrixEntry({
+      sourceDeviceId,
+      sourcePortId,
+      targetDeviceId,
+      targetParam: targetPortId,
+      amount,
+      offset: 0,
+      inverted: false,
+    });
+
     this.cvConnections.push({
       id: connId,
       sourceDeviceId,
@@ -714,17 +1046,7 @@ export class AudioEngine {
       targetPortId,
       amount,
       color: chosenColor,
-    });
-
-    // Also register in CV Engine matrix for live modulation calculations
-    this.cvEngine.addMatrixEntry({
-      sourceDeviceId,
-      sourcePortId,
-      targetDeviceId,
-      targetParam: targetPortId,
-      amount,
-      offset: 0,
-      inverted: false,
+      matrixEntryId,
     });
 
     this.playJackSnapSound();
@@ -785,6 +1107,22 @@ export class AudioEngine {
     const idx = this.cvConnections.findIndex((c) => c.id === connectionId);
     if (idx === -1) return;
 
+    const conn = this.cvConnections[idx];
+    if (conn.matrixEntryId) {
+      this.cvEngine.removeMatrixEntry(conn.matrixEntryId);
+    } else {
+      const fallback = this.cvEngine.matrixEntries.find(
+        (m) =>
+          m.sourceDeviceId === conn.sourceDeviceId &&
+          m.sourcePortId === conn.sourcePortId &&
+          m.targetDeviceId === conn.targetDeviceId &&
+          m.targetParam === conn.targetPortId
+      );
+      if (fallback) {
+        this.cvEngine.removeMatrixEntry(fallback.id);
+      }
+    }
+
     this.cvConnections.splice(idx, 1);
     this.notify();
   }
@@ -794,9 +1132,11 @@ export class AudioEngine {
     await this.resumeContext();
     if (this.isPlaying) return;
 
-    // Ensure every existing device in the Rack is registered as a Sequencer Track
+    // Ensure every playable instrument in the Rack is registered as a Sequencer Track
     this.devices.forEach((dev) => {
-      this.getOrCreateTrackForDevice(dev.id);
+      if (this.isPlayableInstrument(dev.type)) {
+        this.getOrCreateTrackForDevice(dev.id);
+      }
     });
 
     // If tracks exist but all steps are empty when user clicks Play, auto-seed patterns so the song plays immediately
@@ -884,6 +1224,16 @@ export class AudioEngine {
         activePatternIndex: this.activePatternIndex,
         rootKey: this.rootKey,
         scaleType: this.scaleType,
+        devices: Array.from(this.devices.values()).map((d) => ({
+          id: d.id,
+          type: d.type,
+          name: d.name,
+          isPowered: d.isPowered,
+          isBypassed: d.isBypassed,
+          params: { ...d.params },
+        })),
+        audioConnections: this.audioConnections.map((c) => ({ ...c })),
+        cvConnections: this.cvConnections.map((c) => ({ ...c })),
         tracks: this.tracks.map((t) => ({
           id: t.id,
           deviceId: t.deviceId,
@@ -893,8 +1243,14 @@ export class AudioEngine {
           solo: t.solo,
           volume: t.volume,
           pan: t.pan,
+          group: t.group,
           pitchOffset: t.pitchOffset,
+          cutoff: t.cutoff,
+          resonance: t.resonance,
           steps: t.steps,
+          patterns: t.patterns,
+          arrangementClips: t.arrangementClips,
+          graphData: t.graphData,
         })),
       });
       localStorage.setItem('unboxed_studio_autosave_v1', serialized);
@@ -925,7 +1281,66 @@ export class AudioEngine {
       if (data.globalSwing !== undefined) this.globalSwing = data.globalSwing;
       if (data.rootKey !== undefined) this.rootKey = data.rootKey;
       if (data.scaleType) this.scaleType = data.scaleType;
-      if (Array.isArray(data.tracks)) {
+
+      // Restore full rack devices, parameters, and cables if present in snapshot
+      if (Array.isArray(data.devices)) {
+        Array.from(this.devices.keys()).forEach((devId) => this.removeDevice(devId));
+        this.tracks = [];
+        this.audioConnections = [];
+        this.cvConnections = [];
+
+        const idRemap = new Map<string, string>();
+        data.devices.forEach((savedDev: any) => {
+          const created = this.createDevice(savedDev.type, savedDev.name);
+          idRemap.set(savedDev.id, created.id);
+          created.isPowered = savedDev.isPowered ?? true;
+          created.isBypassed = savedDev.isBypassed ?? false;
+          if (savedDev.params && typeof savedDev.params === 'object') {
+            Object.entries(savedDev.params).forEach(([k, v]) => {
+              if (typeof v === 'number') {
+                created.setParam(k, v);
+              }
+            });
+          }
+        });
+
+        // Clear auto-created default audio cables and restore exact saved audio cables
+        if (Array.isArray(data.audioConnections)) {
+          const autoAudioIds = this.audioConnections.map((c) => c.id);
+          autoAudioIds.forEach((cid) => this.disconnectAudio(cid));
+          data.audioConnections.forEach((c: any) => {
+            const srcId = idRemap.get(c.sourceDeviceId) || c.sourceDeviceId;
+            const tgtId = c.targetDeviceId === 'master' ? 'master' : idRemap.get(c.targetDeviceId) || c.targetDeviceId;
+            this.connectAudio(srcId, c.sourcePortId, tgtId, c.targetPortId, c.color);
+          });
+        }
+
+        if (Array.isArray(data.cvConnections)) {
+          data.cvConnections.forEach((c: any) => {
+            const srcId = idRemap.get(c.sourceDeviceId) || c.sourceDeviceId;
+            const tgtId = idRemap.get(c.targetDeviceId) || c.targetDeviceId;
+            this.connectCV(srcId, c.sourcePortId, tgtId, c.targetPortId, c.amount, c.color);
+          });
+        }
+
+        if (Array.isArray(data.tracks)) {
+          data.tracks.forEach((savedTrack: any) => {
+            const mappedDevId = idRemap.get(savedTrack.deviceId) || savedTrack.deviceId;
+            const liveTrack = this.tracks.find((t) => t.deviceId === mappedDevId || t.name === savedTrack.name);
+            if (liveTrack && Array.isArray(savedTrack.steps)) {
+              liveTrack.steps = savedTrack.steps;
+              liveTrack.mute = !!savedTrack.mute;
+              liveTrack.solo = !!savedTrack.solo;
+              if (savedTrack.volume !== undefined) liveTrack.volume = savedTrack.volume;
+              if (savedTrack.pan !== undefined) liveTrack.pan = savedTrack.pan;
+              if (savedTrack.patterns) liveTrack.patterns = savedTrack.patterns;
+              if (savedTrack.arrangementClips) liveTrack.arrangementClips = savedTrack.arrangementClips;
+              if (savedTrack.graphData) liveTrack.graphData = savedTrack.graphData;
+              this.updateTrackChannelStrip(liveTrack.id);
+            }
+          });
+        }
+      } else if (Array.isArray(data.tracks)) {
         data.tracks.forEach((savedTrack: any) => {
           const liveTrack = this.tracks.find((t) => t.id === savedTrack.id || t.name === savedTrack.name);
           if (liveTrack && Array.isArray(savedTrack.steps)) {
@@ -934,6 +1349,7 @@ export class AudioEngine {
             liveTrack.solo = !!savedTrack.solo;
             if (savedTrack.volume !== undefined) liveTrack.volume = savedTrack.volume;
             if (savedTrack.pan !== undefined) liveTrack.pan = savedTrack.pan;
+            this.updateTrackChannelStrip(liveTrack.id);
           }
         });
       }
@@ -1050,7 +1466,7 @@ export class AudioEngine {
   // Sequencer Track Methods
   public getOrCreateTrackForDevice(deviceId: string): SequencerTrack | null {
     const dev = this.devices.get(deviceId);
-    if (!dev) return null;
+    if (!dev || !this.isPlayableInstrument(dev.type)) return null;
     let track = this.tracks.find((t) => t.deviceId === deviceId);
     if (!track) {
       const colors = ['#10b981', '#059669', '#34d399', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
@@ -1089,72 +1505,57 @@ export class AudioEngine {
         dev.type === 'pangea' ||
         dev.type === 'klang' ||
         dev.type === 'humana';
-      const isFxOrUtil =
-        dev.type === 'rv9' ||
-        dev.type === 'ripley' ||
-        dev.type === 'osmium' ||
-        dev.type === 'pulveriser' ||
-        dev.type === 'alligator' ||
-        dev.type === 'bvx_vocoder' ||
-        dev.type === 'neptune' ||
-        dev.type === 'quartet' ||
-        dev.type === 'sweeper' ||
-        dev.type === 'audiomatic' ||
-        dev.type === 'rotor' ||
-        dev.type === 'softube_amp' ||
-        dev.type === 'combinator' ||
-        dev.type === 'rpg8' ||
-        dev.type === 'midi_out' ||
-        dev.type === 'line_mixer';
       const stepsCount = Math.max(16, this.patternLength);
+      const trackColor = colors[this.tracks.length % colors.length];
       track = {
         id: `track_${deviceId}`,
         deviceId,
         name: dev.name,
-        color: colors[this.tracks.length % colors.length],
+        color: trackColor,
         mute: false,
         solo: false,
         volume: 0.85,
         pan: 0,
         mixerTrack: this.tracks.length + 1,
         swingMix: 0,
-        group: isDrum ? 'Drums' : isSynth ? 'Synths' : isWorld ? 'World' : isFxOrUtil ? 'FX' : dev.type === 'automation_clip' ? 'Automation' : 'Samplers',
+        group: isDrum ? 'Drums' : isSynth ? 'Synths' : isWorld ? 'World' : 'Samplers',
         pitchOffset: 0,
         cutoff: 0.8,
         resonance: 0.3,
         steps: Array(stepsCount).fill(null),
+        patterns: {},
         arrangementClips: [
           {
             id: `clip_${deviceId}_0`,
             startBar: 0,
             lengthBars: 4,
             patternIndex: 0,
-            name: `${dev.name} [PAT 1]`,
-            color: colors[this.tracks.length % colors.length],
+            name: `${dev.name} [PAT 1 // INTRO]`,
+            color: trackColor,
           },
           {
             id: `clip_${deviceId}_1`,
             startBar: 4,
             lengthBars: 4,
-            patternIndex: 0,
-            name: `${dev.name} [PAT 1]`,
-            color: colors[this.tracks.length % colors.length],
+            patternIndex: 1,
+            name: `${dev.name} [PAT 2 // DROP]`,
+            color: trackColor,
           },
           {
             id: `clip_${deviceId}_2`,
             startBar: 8,
             lengthBars: 4,
-            patternIndex: 0,
-            name: `${dev.name} [PAT 1]`,
-            color: colors[this.tracks.length % colors.length],
+            patternIndex: 2,
+            name: `${dev.name} [PAT 3 // BREAK]`,
+            color: trackColor,
           },
           {
             id: `clip_${deviceId}_3`,
             startBar: 12,
             lengthBars: 4,
-            patternIndex: 0,
-            name: `${dev.name} [PAT 1]`,
-            color: colors[this.tracks.length % colors.length],
+            patternIndex: 3,
+            name: `${dev.name} [PAT 4 // CLIMAX]`,
+            color: trackColor,
           },
         ],
         graphData: {
@@ -1166,6 +1567,8 @@ export class AudioEngine {
         },
       };
       this.tracks.push(track);
+      this.getOrCreateTrackStrip(deviceId);
+      this.updateTrackChannelStrip(track.id);
       this.notify();
     }
     return track;
@@ -1179,6 +1582,8 @@ export class AudioEngine {
       track.steps = [...track.steps, ...extra];
     }
     track.steps[stepIndex] = note;
+    if (!track.patterns) track.patterns = {};
+    track.patterns[this.activePatternIndex] = track.steps.map((s) => (s ? { ...s } : null));
     this.notify();
   }
 
@@ -1186,25 +1591,72 @@ export class AudioEngine {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
     track.steps = Array(Math.max(16, this.patternLength)).fill(null);
+    if (!track.patterns) track.patterns = {};
+    track.patterns[this.activePatternIndex] = track.steps.map(() => null);
     this.notify();
   }
 
   public cloneTrack(trackId: string): void {
     const orig = this.tracks.find((t) => t.id === trackId);
     if (!orig) return;
+    const origDev = this.devices.get(orig.deviceId);
+
+    // Instantiate an independent synth/instrument instance so cloned tracks never fight over DSP state or voice tokens
+    if (origDev) {
+      const clonedDev = this.createDevice(origDev.type, `${orig.name} (Copy)`);
+      Object.entries(origDev.params).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          clonedDev.setParam(k, v);
+        }
+      });
+      const clonedTrack = this.tracks.find((t) => t.deviceId === clonedDev.id);
+      if (clonedTrack) {
+        clonedTrack.volume = orig.volume;
+        clonedTrack.pan = orig.pan;
+        clonedTrack.pitchOffset = orig.pitchOffset;
+        clonedTrack.cutoff = orig.cutoff;
+        clonedTrack.resonance = orig.resonance;
+        clonedTrack.steps = orig.steps.map((s) =>
+          s ? { ...s, chordNotes: s.chordNotes ? [...s.chordNotes] : undefined } : null
+        );
+        if (orig.patterns) {
+          clonedTrack.patterns = {};
+          Object.entries(orig.patterns).forEach(([pIdx, pSteps]) => {
+            clonedTrack.patterns![Number(pIdx)] = pSteps.map((s) =>
+              s ? { ...s, chordNotes: s.chordNotes ? [...s.chordNotes] : undefined } : null
+            );
+          });
+        }
+        if (orig.graphData) {
+          clonedTrack.graphData = {
+            velocity: [...orig.graphData.velocity],
+            pitch: [...orig.graphData.pitch],
+            pan: [...orig.graphData.pan],
+            cutoff: [...orig.graphData.cutoff],
+            resonance: [...orig.graphData.resonance],
+          };
+        }
+        this.updateTrackChannelStrip(clonedTrack.id);
+      }
+      this.notify();
+      return;
+    }
+
     const cloneId = `track_${orig.deviceId}_clone_${Date.now().toString(36).slice(-4)}`;
     const cloned: SequencerTrack = {
       ...orig,
       id: cloneId,
       name: `${orig.name} (Copy)`,
       steps: [...orig.steps],
-      graphData: orig.graphData ? {
-        velocity: [...orig.graphData.velocity],
-        pitch: [...orig.graphData.pitch],
-        pan: [...orig.graphData.pan],
-        cutoff: [...orig.graphData.cutoff],
-        resonance: [...orig.graphData.resonance],
-      } : undefined,
+      graphData: orig.graphData
+        ? {
+            velocity: [...orig.graphData.velocity],
+            pitch: [...orig.graphData.pitch],
+            pan: [...orig.graphData.pan],
+            cutoff: [...orig.graphData.cutoff],
+            resonance: [...orig.graphData.resonance],
+          }
+        : undefined,
     };
     this.tracks.push(cloned);
     this.notify();
@@ -1214,6 +1666,7 @@ export class AudioEngine {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
     track.mute = !track.mute;
+    this.updateTrackChannelStrip(track.id);
     this.notify();
   }
 
@@ -1221,6 +1674,7 @@ export class AudioEngine {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
     track.solo = !track.solo;
+    this.updateTrackChannelStrip();
     this.notify();
   }
 
@@ -1229,6 +1683,7 @@ export class AudioEngine {
       t.solo = t.id === trackId;
       if (t.id === trackId) t.mute = false;
     });
+    this.updateTrackChannelStrip();
     if (!this.isPlaying) {
       this.startTransport();
     } else {
@@ -1241,6 +1696,7 @@ export class AudioEngine {
       t.solo = false;
       t.mute = false;
     });
+    this.updateTrackChannelStrip();
     if (!this.isPlaying) {
       this.startTransport();
     } else {
@@ -1380,7 +1836,6 @@ export class AudioEngine {
 
     for (let barOffset = 0; barOffset < len; barOffset += 16) {
       if (style === 'industrial') {
-        // Relentless EBM / Industrial 16th-note driving sequence with sustained accents
         const pattern = [0, 0, 12, 0, 1, 0, 7, 0, 0, 12, 3, 0, 5, 3, 1, 0];
         const lengths = [2, 0, 1, 1, 2, 0, 1, 1, 1, 1, 2, 0, 2, 0, 1, 1];
         for (let i = 0; i < 16 && barOffset + i < len; i++) {
@@ -1395,7 +1850,6 @@ export class AudioEngine {
           }
         }
       } else if (style === 'acid') {
-        // 303 Acid squelch pattern with slides (length 2-3) and octave jumps
         const degrees = [0, 0, 12, 0, 3, 7, 10, 12, 0, 12, 7, 3, 1, 0, -12, 0];
         for (let i = 0; i < 16 && barOffset + i < len; i++) {
           if (i % 2 === 0 || i === 3 || i === 7 || i === 11 || i === 14) {
@@ -1410,15 +1864,12 @@ export class AudioEngine {
           }
         }
       } else if (style === 'bass') {
-        // Sustained sub & rolling bassline (multi-step notes: 4, 2, 3 steps)
         const placements = [
-          { s: 0, semi: 0, l: 3, v: 0.98 },
-          { s: 3, semi: 0, l: 1, v: 0.82 },
-          { s: 4, semi: 3, l: 2, v: 0.9 },
-          { s: 6, semi: 7, l: 2, v: 0.88 },
+          { s: 0, semi: 0, l: 4, v: 0.98 },
+          { s: 4, semi: 3, l: 4, v: 0.92 },
           { s: 8, semi: 0, l: 4, v: 0.98 },
-          { s: 12, semi: 5, l: 2, v: 0.92 },
-          { s: 14, semi: 3, l: 2, v: 0.86 },
+          { s: 12, semi: 7, l: 2, v: 0.92 },
+          { s: 14, semi: 5, l: 2, v: 0.88 },
         ];
         placements.forEach((p) => {
           if (barOffset + p.s < len) {
@@ -1430,33 +1881,28 @@ export class AudioEngine {
           }
         });
       } else if (style === 'chords') {
-        // Multi-step sustained polyphonic chord blocks (length 4 steps each)
+        // Multi-step sustained polyphonic chord blocks (8-step and 16-step full-bar sustained pads/harmoniums)
         const prog = [
-          { s: 0, root: rootC4, chord: [3, 7, 12], l: 4 },
-          { s: 4, root: rootC4 - 4, chord: [4, 7, 11], l: 4 },
-          { s: 8, root: rootC4 - 2, chord: [3, 7, 10], l: 4 },
-          { s: 12, root: rootC4 - 5, chord: [4, 7, 12], l: 4 },
+          { s: 0, root: rootC4, chord: [3, 7, 12], l: 8 },
+          { s: 8, root: rootC4 - 4, chord: [4, 7, 11], l: 8 },
         ];
         prog.forEach((p) => {
           if (barOffset + p.s < len) {
             const base = this.snapMidiToScale(p.root);
             newSteps[barOffset + p.s] = {
               note: base,
-              velocity: 0.9,
+              velocity: 0.92,
               length: p.l,
               chordNotes: p.chord.map((c) => this.snapMidiToScale(base + c)),
             };
           }
         });
       } else if (style === 'melody' || style === 'world') {
-        // Expressive lead / world instrument phrasing with mixed short and long sustained notes
         const phrase = [
-          { s: 0, deg: 0, l: 2, v: 0.9 },
-          { s: 2, deg: 2, l: 1, v: 0.82 },
-          { s: 3, deg: 3, l: 1, v: 0.85 },
-          { s: 4, deg: 4, l: 3, v: 0.95 },
-          { s: 7, deg: 3, l: 1, v: 0.78 },
-          { s: 8, deg: 2, l: 2, v: 0.88 },
+          { s: 0, deg: 0, l: 3, v: 0.92 },
+          { s: 3, deg: 2, l: 1, v: 0.85 },
+          { s: 4, deg: 4, l: 4, v: 0.95 },
+          { s: 8, deg: 3, l: 2, v: 0.88 },
           { s: 10, deg: 1, l: 2, v: 0.84 },
           { s: 12, deg: 0, l: 4, v: 0.94 },
         ];
@@ -1471,7 +1917,6 @@ export class AudioEngine {
           }
         });
       } else if (style === 'arp') {
-        // 16th-note rising & falling arpeggiator
         const arpDegs = [0, 2, 4, 6, 7, 6, 4, 2, 1, 3, 5, 7, 8, 7, 5, 3];
         for (let i = 0; i < 16 && barOffset + i < len; i++) {
           const deg = arpDegs[i];
@@ -1483,7 +1928,6 @@ export class AudioEngine {
           };
         }
       } else if (style === 'drums' || style === 'euclidean') {
-        // Syncopated industrial / euclidean percussion groove
         for (let i = 0; i < 16 && barOffset + i < len; i++) {
           if (style === 'euclidean') {
             if (i % 8 === 0 || i % 8 === 3 || i % 8 === 6 || i === 15) {
@@ -1509,6 +1953,32 @@ export class AudioEngine {
     track.steps = newSteps;
     if (!track.patterns) track.patterns = {};
     track.patterns[this.activePatternIndex] = newSteps.map((s) => (s ? { ...s } : null));
+
+    // Seed musical variations across Patterns 1..3 so Song Arrangement Clips [PAT 1..4] play distinct progressions
+    for (let patIdx = 0; patIdx < 4; patIdx++) {
+      if (patIdx === this.activePatternIndex) continue;
+      if (!track.patterns[patIdx] || !track.patterns[patIdx].some(Boolean)) {
+        const shiftSemi = patIdx === 1 ? 3 : patIdx === 2 ? 5 : 7;
+        track.patterns[patIdx] = newSteps.map((s, idx) => {
+          if (!s) return null;
+          if (track.group === 'Drums') {
+            return {
+              ...s,
+              ratchet: patIdx === 3 && idx % 8 === 7 ? 2 : s.ratchet,
+            };
+          }
+          const shiftedNote = this.snapMidiToScale(s.note + (patIdx % 2 === 1 ? shiftSemi : -shiftSemi));
+          return {
+            ...s,
+            note: shiftedNote,
+            chordNotes: s.chordNotes
+              ? s.chordNotes.map((cn) => this.snapMidiToScale(cn + (patIdx % 2 === 1 ? shiftSemi : -shiftSemi)))
+              : undefined,
+          };
+        });
+      }
+    }
+
     this.notify();
   }
 
@@ -1534,6 +2004,9 @@ export class AudioEngine {
   private scheduleStep(step: number, time: number): void {
     // 0. Metronome click if enabled
     this.triggerMetronomeClick(step, time);
+
+    // Tick CV modulation matrix in lockstep with audio lookahead scheduler (background-tab safe)
+    this.cvEngine.tickCV(time);
 
     const hasSolo = this.tracks.some((t) => t.solo);
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -1562,6 +2035,8 @@ export class AudioEngine {
     const secondsPerBeat = 60.0 / this.bpm;
     const stepDuration = 0.25 * secondsPerBeat;
 
+    let drumHitOnStep = false;
+
     this.tracks.forEach((track) => {
       if (hasSolo && !track.solo) return;
       if (track.mute) return;
@@ -1573,7 +2048,6 @@ export class AudioEngine {
           track.arrangementClips.find(
             (c) => !c.muted && this.currentSongBar >= c.startBar && this.currentSongBar < c.startBar + c.lengthBars
           ) || null;
-        // If track has clips defined on timeline and none covers this bar, only play if no clips exist at all
         const hasUnmutedClips = track.arrangementClips.some((c) => !c.muted);
         if (hasUnmutedClips && !activeClip) return;
       }
@@ -1597,15 +2071,18 @@ export class AudioEngine {
       const dev = this.devices.get(track.deviceId);
       if (!dev || !dev.isPowered || dev.isBypassed) return;
 
-      // Calculate effective velocity with channel volume & graph velocity
-      const chanVol = track.volume !== undefined ? track.volume : 0.85;
+      if (track.group === 'Drums' && (stepIdx % 4 === 0 || note.note === 60 || note.note === 48)) {
+        drumHitOnStep = true;
+      }
+
+      // Effective velocity uses note velocity and per-step graph velocity (track.volume is applied continuously by Web Audio GainNode)
       const graphVel = track.graphData?.velocity?.[stepIdx] ?? 1.0;
-      const effVelocity = Math.max(0.05, Math.min(1.0, note.velocity * chanVol * graphVel));
+      const effVelocity = Math.max(0.05, Math.min(1.0, note.velocity * graphVel));
 
       // Apply graph filter cutoff/resonance modulation + LFO Modulator if enabled
       let lfoMod = 0;
       if (this.lfoEngine.enabled) {
-        const phase = (this.ctx.currentTime * this.lfoEngine.rateHz) % 1;
+        const phase = (time * this.lfoEngine.rateHz) % 1;
         const rawWave =
           this.lfoEngine.waveform === 'sine'
             ? Math.sin(phase * Math.PI * 2)
@@ -1635,28 +2112,28 @@ export class AudioEngine {
       const effNote = Math.max(0, Math.min(127, note.note + pitchOffset));
       const baseNoteTime = Math.max(this.ctx.currentTime, time + (note.microOffset || 0) * stepDuration);
 
-      // Record live detection telemetry in Sequencer Detector Body
+      // Record live detection telemetry (capped ring buffer of 12 items)
       const oct = Math.floor(effNote / 12) - 1;
       const nName = `${noteNames[effNote % 12]}${oct}`;
       const freqHz = Number(this.midiToFreq(effNote).toFixed(1));
-      this.detectedEvents = [
-        {
-          id: `det_${Date.now()}_${track.id}_${stepIdx}`,
-          trackId: track.id,
-          trackName: track.name,
-          deviceType: dev.type,
-          noteName: nName,
-          midi: effNote,
-          freqHz,
-          velocity: Math.round(effVelocity * 100),
-          bar: this.currentSongBar + 1,
-          step: stepIdx + 1,
-          clipName: activeClip ? activeClip.name : `PAT ${this.activePatternIndex + 1}`,
-          color: track.color || '#10b981',
-          timestamp: Date.now(),
-        },
-        ...this.detectedEvents.slice(0, 15),
-      ];
+      if (this.detectedEvents.length >= 12) {
+        this.detectedEvents.pop();
+      }
+      this.detectedEvents.unshift({
+        id: `det_${step}_${track.id}`,
+        trackId: track.id,
+        trackName: track.name,
+        deviceType: dev.type,
+        noteName: nName,
+        midi: effNote,
+        freqHz,
+        velocity: Math.round(effVelocity * 100),
+        bar: this.currentSongBar + 1,
+        step: stepIdx + 1,
+        clipName: activeClip ? activeClip.name : `PAT ${this.activePatternIndex + 1}`,
+        color: track.color || '#10b981',
+        timestamp: Date.now(),
+      });
 
       // Step Ratchet Note Subdivision Repetition Sub-Loop Engine (1x, 2x, 3x, 4x)
       const ratchetCount = Math.max(1, Math.min(4, note.ratchet || 1));
@@ -1681,22 +2158,36 @@ export class AudioEngine {
             ratchetCount > 1
               ? subStepDur * 0.85
               : Math.max(1, note.length || 1) * stepDuration * 0.92;
-          allNotes.forEach((n) => {
-            const voiceKey = `${dev.id}:${n}`;
-            const nextToken = (this.voiceGenTokens.get(voiceKey) || 0) + 1;
-            this.voiceGenTokens.set(voiceKey, nextToken);
 
+          // Hardware-timed noteOn & noteOff without main-thread setTimeout jitter
+          allNotes.forEach((n) => {
             dev.noteOn!(n, ratchetVel, noteTime);
-            const delayMs = Math.max(25, (noteTime - this.ctx.currentTime + noteDuration) * 1000);
-            setTimeout(() => {
-              if (this.voiceGenTokens.get(voiceKey) === nextToken && dev.noteOff) {
-                dev.noteOff(n, noteTime + noteDuration);
-              }
-            }, delayMs);
+            if (dev.noteOff) {
+              dev.noteOff(n, noteTime + noteDuration);
+            }
           });
         }
       }
     });
+
+    // Apply real Web Audio Multiband Sidechain Ducking envelope on non-drum tracks when kick/drum triggers
+    if (drumHitOnStep && this.multibandSidechain.enabled) {
+      const duckRatio = Math.max(0.12, 1 - (this.multibandSidechain.lowDuckPct / 100) * 0.82);
+      const releaseSec = 0.14;
+      this.tracks.forEach((t) => {
+        if (t.group === 'Drums') return;
+        const strip = this.trackChannelStrips.get(t.deviceId);
+        if (strip) {
+          strip.duckL.gain.setValueAtTime(1.0, time);
+          strip.duckL.gain.linearRampToValueAtTime(duckRatio, time + 0.008);
+          strip.duckL.gain.exponentialRampToValueAtTime(1.0, time + releaseSec);
+
+          strip.duckR.gain.setValueAtTime(1.0, time);
+          strip.duckR.gain.linearRampToValueAtTime(duckRatio, time + 0.008);
+          strip.duckR.gain.exponentialRampToValueAtTime(1.0, time + releaseSec);
+        }
+      });
+    }
   }
 
   private advanceStep(): void {
@@ -1710,16 +2201,22 @@ export class AudioEngine {
     }
     this.nextNoteTime += Math.max(0.015, stepDuration);
     const next = this.currentStep + 1;
+    let barChanged = false;
     if (this.loopEnabled && this.loopEndStep > this.loopStartStep && next >= Math.min(this.patternLength, this.loopEndStep)) {
       this.currentStep = Math.max(0, this.loopStartStep);
       this.currentSongBar = (this.currentSongBar + 1) % this.totalSongBars;
+      barChanged = true;
     } else {
       if (next >= this.patternLength) {
         this.currentSongBar = (this.currentSongBar + 1) % this.totalSongBars;
+        barChanged = true;
       }
       this.currentStep = next % this.patternLength;
     }
-    this.notify();
+    // Throttle full React tree notifications to quarter-note boundaries or bar changes to prevent 60fps/16th-note UI lag
+    if (barChanged || this.currentStep % 2 === 0) {
+      this.notify();
+    }
   }
 
   // Master WAV Recording & Download
@@ -1762,91 +2259,257 @@ export class AudioEngine {
     this.notify();
   }
 
-  // Native Uncompressed Audio Exporter (.wav / .aif / .flac Stem Bounce & Master Render)
-  public exportUncompressedWav(trackId?: string, ext: 'wav' | 'aif' | 'flac' = 'wav'): void {
+  public exportMasterWav(): void {
+    this.exportUncompressedWav(undefined, 'wav');
+  }
+
+  private instantiateDeviceOnContext(ctx: AudioContext, type: DeviceType, id: string, name: string): BaseDevice {
+    switch (type) {
+      case 'subtractor': return new SubtractorDevice(ctx, id, name);
+      case 'thor': return new ThorDevice(ctx, id, name);
+      case 'europa': return new EuropaDevice(ctx, id, name);
+      case 'monotone': return new MonotoneDevice(ctx, id, name);
+      case 'redrum': return new RedrumDevice(ctx, id, name);
+      case 'mimic': return new MimicDevice(ctx, id, name);
+      case 'matrix': return new MatrixDevice(ctx, id, name);
+      case 'pulsar': return new PulsarDevice(ctx, id, name);
+      case 'scream4': return new Scream4Device(ctx, id, name);
+      case 'echo': return new EchoDevice(ctx, id, name);
+      case 'rv7000': return new RV7000Device(ctx, id, name);
+      case 'mclass_master': return new MClassMasterSuite(ctx, id, name);
+      case 'spider_cv': return new SpiderCVDevice(ctx, id, name);
+      case 'spider_audio': return new SpiderAudioDevice(ctx, id, name);
+      case 'bansuri': return new BansuriDevice(ctx, id, name);
+      case 'harmonium': return new HarmoniumDevice(ctx, id, name);
+      case 'tabla': return new TablaDevice(ctx, id, name);
+      case 'dhol': return new DholDevice(ctx, id, name);
+      case 'tanpura': return new TanpuraDroneDevice(ctx, id, name);
+      case 'tumbi': return new TumbiDevice(ctx, id, name);
+      case 'three_osc': return new ThreeOscDevice(ctx, id, name);
+      case 'sytrus': return new SytrusDevice(ctx, id, name);
+      case 'flex': return new FlexDevice(ctx, id, name);
+      case 'wyvern': return new WyvernDevice(ctx, id, name);
+      case 'ember': return new EmberDevice(ctx, id, name);
+      case 'world_instrument': return new UniversalWorldInstrumentDevice(ctx, id, name, 'string');
+      case 'percussion_electronic': return new UniversalPercussionElectronicDevice(ctx, id, name, 'percussion');
+      case 'malstrom': return new MalstromDevice(ctx, id, name);
+      case 'algoritm': return new AlgoritmDevice(ctx, id, name);
+      case 'complex1': return new Complex1Device(ctx, id, name);
+      case 'parsec2': return new Parsec2Device(ctx, id, name);
+      case 'polytone': return new PolytoneDevice(ctx, id, name);
+      case 'objekt': return new ObjektDevice(ctx, id, name);
+      case 'grain': return new GrainDevice(ctx, id, name);
+      case 'nnxt': return new NNXTDevice(ctx, id, name);
+      case 'nn19': return new NN19Device(ctx, id, name);
+      case 'kong': return new KongDevice(ctx, id, name);
+      case 'dr_octo_rex': return new DrOctoRexDevice(ctx, id, name);
+      case 'umpf': return new UmpfDevice(ctx, id, name);
+      case 'friktion': return new FriktionDevice(ctx, id, name);
+      case 'scenic': return new ScenicDevice(ctx, id, name);
+      case 'humana': return new HumanaDevice(ctx, id, name);
+      case 'pangea': return new PangeaDevice(ctx, id, name);
+      case 'klang': return new KlangDevice(ctx, id, name);
+      case 'radical_piano': return new RadicalPianoDevice(ctx, id, name);
+      case 'reason_performance': return new ReasonPerformanceDevice(ctx, id, name);
+      case 'layers_id8': return new LayersID8Device(ctx, id, name);
+      case 'rv9': return new RV9Device(ctx, id, name);
+      case 'ripley': return new RipleyDevice(ctx, id, name);
+      case 'osmium': return new OsmiumDevice(ctx, id, name);
+      case 'pulveriser': return new PulveriserDevice(ctx, id, name);
+      case 'alligator': return new AlligatorDevice(ctx, id, name);
+      case 'bvx_vocoder': return new BVXVocoderDevice(ctx, id, name);
+      case 'neptune': return new NeptuneDevice(ctx, id, name);
+      case 'quartet': return new QuartetDevice(ctx, id, name);
+      case 'sweeper': return new SweeperDevice(ctx, id, name);
+      case 'audiomatic': return new AudiomaticDevice(ctx, id, name);
+      case 'rotor': return new RotorDevice(ctx, id, name);
+      case 'softube_amp': return new SoftubeAmpDevice(ctx, id, name);
+      case 'combinator': return new CombinatorDevice(ctx, id, name);
+      case 'rpg8': return new RPG8Device(ctx, id, name);
+      case 'midi_out': return new MidiOutDevice(ctx, id, name);
+      case 'line_mixer': return new LineMixerDevice(ctx, id, name);
+      default: return new SubtractorDevice(ctx, id, name);
+    }
+  }
+
+  // Native Uncompressed Audio Exporter (.wav / .aif / .flac Stem Bounce & Master Render via OfflineAudioContext)
+  public async exportUncompressedWav(trackId?: string, ext: 'wav' | 'aif' | 'flac' = 'wav'): Promise<void> {
     const sampleRate = this.sampleRateTarget || 48000;
     const secondsPerBeat = 60.0 / this.bpm;
     const stepDuration = 0.25 * secondsPerBeat;
     const totalSteps = Math.max(16, this.patternLength);
-    const durationSec = Math.min(30, totalSteps * stepDuration);
+    const durationSec = Math.min(30, totalSteps * stepDuration + 0.5);
     const numSamples = Math.floor(sampleRate * durationSec);
     const numChannels = 2;
 
-    const left = new Float32Array(numSamples);
-    const right = new Float32Array(numSamples);
+    const OfflineCtx = window.OfflineAudioContext || (window as any).webkitOfflineAudioContext;
+    const offlineCtx: OfflineAudioContext = new OfflineCtx(numChannels, numSamples, sampleRate);
 
+    // Master limiter on OfflineAudioContext
+    const offMasterGain = offlineCtx.createGain();
+    offMasterGain.gain.value = 0.9;
+    const offLimiter = offlineCtx.createDynamicsCompressor();
+    offLimiter.threshold.value = -0.5;
+    offLimiter.knee.value = 0;
+    offLimiter.ratio.value = 20;
+    offLimiter.attack.value = 0.002;
+    offLimiter.release.value = 0.08;
+    offMasterGain.connect(offLimiter);
+    offLimiter.connect(offlineCtx.destination);
+
+    const hasSolo = this.tracks.some((t) => t.solo);
     const targetTracks = trackId
       ? this.tracks.filter((t) => t.id === trackId)
-      : this.tracks.filter((t) => !t.mute);
+      : this.tracks.filter((t) => !t.mute && (!hasSolo || t.solo));
 
-    targetTracks.forEach((track) => {
-      const vol = (track.volume ?? 0.85) * 0.45;
-      const pan = track.pan ?? 0;
-      const panL = Math.cos(((pan + 1) * Math.PI) / 4);
-      const panR = Math.sin(((pan + 1) * Math.PI) / 4);
+    // Instantiate real Web Audio devices on the OfflineAudioContext and schedule exact pattern events
+    for (const track of targetTracks) {
+      const liveDev = this.devices.get(track.deviceId);
+      if (!liveDev || !liveDev.isPowered || liveDev.isBypassed) continue;
 
-      for (let s = 0; s < totalSteps; s++) {
-        const note = track.steps[s];
-        if (!note || note.muted) continue;
-        const startSample = Math.floor(s * stepDuration * sampleRate);
-        const noteLenSamples = Math.floor(Math.max(1, note.length || 1) * stepDuration * 0.92 * sampleRate);
-        const pitch = note.note + (track.pitchOffset || 0);
-        const notesToRender = [pitch, ...(note.chordNotes || [])];
+      const offDev = this.instantiateDeviceOnContext(
+        offlineCtx as unknown as AudioContext,
+        liveDev.type,
+        liveDev.id,
+        liveDev.name
+      );
 
-        notesToRender.forEach((midi) => {
-          const freq = 440 * Math.pow(2, (midi - 69) / 12);
-          for (let i = 0; i < noteLenSamples && startSample + i < numSamples; i++) {
-            const t = i / sampleRate;
-            const env = Math.min(1, i / (0.008 * sampleRate)) * Math.exp(-t * 3.2);
-            const sig = (Math.sin(2 * Math.PI * freq * t) * 0.65 + Math.sin(4 * Math.PI * freq * t) * 0.35) * env * note.velocity * vol;
-            left[startSample + i] += sig * panL;
-            right[startSample + i] += sig * panR;
+      // Copy live device knob parameters
+      Object.entries(liveDev.params).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          offDev.setParam(k, v);
+        }
+      });
+
+      // Copy custom sample buffers if Mimic or DrOctoRex
+      if (liveDev.type === 'mimic' && (liveDev as MimicDevice).pads) {
+        (liveDev as MimicDevice).pads.forEach((pad, idx) => {
+          if (pad.buffer && (offDev as MimicDevice).pads[idx]) {
+            (offDev as MimicDevice).pads[idx].buffer = pad.buffer;
           }
         });
       }
-    });
+      if (liveDev.type === 'dr_octo_rex' && (liveDev as DrOctoRexDevice).customLoopBuffers) {
+        (liveDev as DrOctoRexDevice).customLoopBuffers.forEach((buf, slot) => {
+          (offDev as DrOctoRexDevice).customLoopBuffers.set(slot, buf);
+        });
+      }
 
-    // Encode standard 16-bit PCM WAV container
-    const dataSize = numSamples * numChannels * 2;
-    const buffer = new ArrayBuffer(44 + dataSize);
-    const view = new DataView(buffer);
-    const writeStr = (offset: number, str: string) => {
-      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    };
+      // Wire device stereo outputs through per-track Gain + StereoPanner into Offline Master Bus
+      const chanGain = offlineCtx.createGain();
+      chanGain.gain.value = Math.max(0, Math.min(1.5, track.volume ?? 0.85));
+      const chanPan = offlineCtx.createStereoPanner();
+      chanPan.pan.value = Math.max(-1, Math.min(1, track.pan ?? 0));
+      const merger = offlineCtx.createChannelMerger(2);
 
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + dataSize, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * 2, true);
-    view.setUint16(32, numChannels * 2, true);
-    view.setUint16(34, 16, true);
-    writeStr(36, 'data');
-    view.setUint32(40, dataSize, true);
+      const outL = offDev.audioOutputs.get('out_l');
+      const outR = offDev.audioOutputs.get('out_r');
+      if (outL && outR) {
+        outL.connect(merger, 0, 0);
+        outR.connect(merger, 0, 1);
+        merger.connect(chanGain);
+        chanGain.connect(chanPan);
+        chanPan.connect(offMasterGain);
+      }
 
-    let offset = 44;
-    for (let i = 0; i < numSamples; i++) {
-      const sL = Math.max(-1, Math.min(1, left[i]));
-      const sR = Math.max(-1, Math.min(1, right[i]));
-      view.setInt16(offset, sL < 0 ? sL * 0x8000 : sL * 0x7fff, true);
-      offset += 2;
-      view.setInt16(offset, sR < 0 ? sR * 0x8000 : sR * 0x7fff, true);
-      offset += 2;
+      // Schedule all steps on the OfflineAudioContext timeline
+      for (let s = 0; s < totalSteps; s++) {
+        const note = track.steps[s];
+        if (!note || note.muted) continue;
+
+        const stepTime = s * stepDuration + (note.microOffset || 0) * stepDuration;
+        const graphVel = track.graphData?.velocity?.[s] ?? 1.0;
+        const effVel = Math.max(0.05, Math.min(1.0, note.velocity * graphVel));
+        const pitchOffset = (track.pitchOffset || 0) + (track.graphData?.pitch?.[s] ?? 0);
+        const effNote = Math.max(0, Math.min(127, note.note + pitchOffset));
+        const ratchetCount = Math.max(1, Math.min(4, note.ratchet || 1));
+        const subStepDur = stepDuration / ratchetCount;
+
+        for (let r = 0; r < ratchetCount; r++) {
+          const noteTime = Math.max(0, stepTime + r * subStepDur);
+          const rVel = effVel * (r === 0 ? 1.0 : 0.82);
+          const noteDur =
+            ratchetCount > 1
+              ? subStepDur * 0.85
+              : Math.max(1, note.length || 1) * stepDuration * 0.92;
+
+          const notesToPlay = [
+            effNote,
+            ...(note.chordNotes || []).map((cn) => Math.max(0, Math.min(127, cn + pitchOffset))),
+          ];
+
+          notesToPlay.forEach((n) => {
+            if (offDev.noteOn) {
+              offDev.noteOn(n, rVel, noteTime);
+            }
+            if (offDev.noteOff) {
+              offDev.noteOff(n, noteTime + noteDur);
+            }
+          });
+        }
+      }
     }
 
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const label = trackId
-      ? this.tracks.find((t) => t.id === trackId)?.name.replace(/\s+/g, '_') || 'Stem'
-      : 'Master_Bus';
-    a.href = url;
-    a.download = `Unboxed_${label}_${sampleRate}Hz.${ext}`;
-    a.click();
+    try {
+      const renderedBuffer = await offlineCtx.startRendering();
+      const left = renderedBuffer.getChannelData(0);
+      const right = renderedBuffer.numberOfChannels > 1 ? renderedBuffer.getChannelData(1) : left;
+
+      // Encode true broadcast-ready 24-bit PCM stereo WAV container (3 bytes per sample)
+      const bytesPerSample = 3;
+      const blockAlign = numChannels * bytesPerSample;
+      const byteRate = sampleRate * blockAlign;
+      const dataSize = numSamples * blockAlign;
+      const buffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(buffer);
+      const writeStr = (offset: number, str: string) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
+
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + dataSize, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true); // PCM format = 1
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, byteRate, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, 24, true); // 24-Bit PCM
+      writeStr(36, 'data');
+      view.setUint32(40, dataSize, true);
+
+      let offset = 44;
+      for (let i = 0; i < numSamples; i++) {
+        const sL = Math.max(-1, Math.min(1, left[i] || 0));
+        const sR = Math.max(-1, Math.min(1, right[i] || 0));
+        const int24L = Math.round(sL < 0 ? sL * 8388608 : sL * 8388607);
+        const int24R = Math.round(sR < 0 ? sR * 8388608 : sR * 8388607);
+
+        view.setUint8(offset, int24L & 0xff);
+        view.setUint8(offset + 1, (int24L >> 8) & 0xff);
+        view.setUint8(offset + 2, (int24L >> 16) & 0xff);
+        offset += 3;
+
+        view.setUint8(offset, int24R & 0xff);
+        view.setUint8(offset + 1, (int24R >> 8) & 0xff);
+        view.setUint8(offset + 2, (int24R >> 16) & 0xff);
+        offset += 3;
+      }
+
+      const blob = new Blob([buffer], { type: 'audio/wav' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const label = trackId
+        ? this.tracks.find((t) => t.id === trackId)?.name.replace(/\s+/g, '_') || 'Stem'
+        : 'Master_24Bit_Bus';
+      a.href = url;
+      a.download = `Unboxed_${label}_${sampleRate}Hz_24bit.${ext}`;
+      a.click();
+    } catch (err) {
+      console.error('WAV export failed:', err);
+    }
   }
 
   // Telemetry loop for reactive VU meters
@@ -1917,25 +2580,57 @@ export class AudioEngine {
     requestAnimationFrame(update);
   }
 
-  // Manual Unbox Experience: Start with a completely clean slate (no instruments or devices pre-added)
+  // Initialize the signature Reference Studio Rack (Combinator + RV-7000 + Scream 4 + MClass Compressor) & Multi-Track Session
   private initDefaultSession(): void {
     this.devices.clear();
     this.tracks = [];
     this.audioConnections = [];
     this.cvConnections = [];
+    this.bpm = 128;
+
+    // 1. Mount the 4 signature color-coded rack units matching the reference studio UI
+    this.createDevice('combinator', 'COMBINATOR');
+    this.createDevice('rv7000', 'RV-7000');
+    this.createDevice('scream4', 'Scream 4');
+    this.createDevice('mclass_master', 'MClass Compressor');
+
+    // 2. Also mount multi-track SoundFont & Synth instruments so Drums, Bass, Synth Lead, Pad, Guitar, and Tabla are ready to play
+    const drumsDev = this.createDevice('redrum', 'Drums');
+    const bassDev = this.createDevice('monotone', 'Bass');
+    const leadDev = this.createDevice('subtractor', 'Synth Lead');
+    const padDev = this.createDevice('europa', 'Pad');
+    const guitarDev = this.createDevice('world_instrument', 'Guitar');
+    const tablaDev = this.createDevice('tabla', 'Vocal / Tabla SF2');
+
+    // Assign vibrant reference colors to tracks
+    const colorPalette = ['#f43f5e', '#0ea5e9', '#22c55e', '#a855f7', '#f97316', '#06b6d4', '#8b5cf6'];
+    this.tracks.forEach((t, idx) => {
+      t.color = colorPalette[idx % colorPalette.length];
+      t.arrangementClips.forEach((c) => {
+        c.color = t.color;
+      });
+    });
+
+    void drumsDev;
+    void bassDev;
+    void leadDev;
+    void padDev;
+    void guitarDev;
+    void tablaDev;
+  }
+
+  public clearAllRackDevices(): void {
+    Array.from(this.devices.keys()).forEach((id) => this.removeDevice(id));
+    this.tracks = [];
+    this.audioConnections = [];
+    this.cvConnections = [];
+    this.notify();
   }
 
   // Optional 1-click manual starter kit if user chooses to unbox a pre-wired ensemble
   public unboxStarterEnsemble(): void {
-    const sub = this.createDevice('subtractor', 'Subtractor Analog Synth');
-    const tabla = this.createDevice('tabla', 'Tabla (Dayan & Bayan)');
-    const redrum = this.createDevice('redrum', 'Redrum Drum Computer');
-    const europa = this.createDevice('europa', 'Europa Wavetable Synth');
-    const pulsar = this.createDevice('pulsar', 'Pulsar Dual LFO');
-    this.connectCV(pulsar.id, 'lfo1_out', sub.id, 'cv_cutoff', 0.65, '#06b6d4');
-    void tabla;
-    void redrum;
-    void europa;
+    this.clearAllRackDevices();
+    this.initDefaultSession();
     this.notify();
   }
 
@@ -1970,13 +2665,13 @@ export class AudioEngine {
 
     switch (engineId) {
       case 'neural_stem_sep': {
-        // Ensure 4 separated stem tracks (Drums, Bass, Synths, Vocal/Lead) have distinct patterns
         const styles = ['industrial', 'acid', 'chords', 'melody'] as const;
         this.tracks.slice(0, 4).forEach((t, i) => {
           this.generateInstrumentPattern(t.id, styles[i % styles.length]);
           t.mute = false;
           t.solo = false;
         });
+        this.updateTrackChannelStrip();
         this.notify();
         return 'Separated Master Mix into 4 Phase-Coherent Stems (Drums, Bass, Synths, Lead) @ -96.4 dBFS Null.';
       }
@@ -1984,8 +2679,8 @@ export class AudioEngine {
       case 'ai_text_to_inst': {
         const p = (promptText || 'Industrial Cyberpunk Acid Lead').toLowerCase();
         if (dev) {
-          dev.setParam('cutoff', p.includes('dark') || p.includes('sub') ? 0.38 : 0.84);
-          dev.setParam('resonance', p.includes('acid') || p.includes('scream') ? 0.78 : 0.42);
+          dev.setParam('cutoff', p.includes('dark') || p.includes('sub') ? 380 : 3400);
+          dev.setParam('resonance', p.includes('acid') || p.includes('scream') ? 8.5 : 2.4);
         }
         this.generateInstrumentPattern(
           track.id,
@@ -1997,15 +2692,15 @@ export class AudioEngine {
         );
         if (dev?.noteOn) {
           const note = 60 + this.rootKey;
-          dev.noteOn(note, 0.92);
-          setTimeout(() => dev.noteOff?.(note), 320);
+          const now = this.ctx.currentTime;
+          dev.noteOn(note, 0.92, now);
+          dev.noteOff?.(note, now + 0.32);
         }
         this.notify();
         return `Synthesized Latent Wavetable & MIDI Patch for "${promptText || 'Industrial Acid Lead'}" on ${track.name}.`;
       }
 
       case 'algo_chord_harm': {
-        // Add diatonic 3rd, 5th, and 7th voice-leading chord stacks to active notes on track
         let count = 0;
         for (let i = 0; i < this.patternLength; i++) {
           const st = track.steps[i];
@@ -2023,9 +2718,10 @@ export class AudioEngine {
         }
         if (dev?.noteOn) {
           const root = 60 + this.rootKey;
+          const now = this.ctx.currentTime;
           [root, root + 3, root + 7, root + 12].forEach((n) => {
-            dev.noteOn?.(n, 0.85);
-            setTimeout(() => dev.noteOff?.(n), 380);
+            dev.noteOn?.(n, 0.85, now);
+            dev.noteOff?.(n, now + 0.38);
           });
         }
         this.notify();
@@ -2052,7 +2748,9 @@ export class AudioEngine {
       case 'vocal_layer_harm':
       case 'granular_vocal_resynth':
       case 'sibilance_deesser': {
-        // Vocal engines: stack formant/choir harmonies or granular shimmer and audition
+        if (engineId === 'sibilance_deesser') {
+          this.outboardDeEsser.gain.setTargetAtTime(-7.5, this.ctx.currentTime, 0.02);
+        }
         for (let i = 0; i < this.patternLength; i++) {
           const st = track.steps[i];
           if (st) {
@@ -2071,13 +2769,14 @@ export class AudioEngine {
         }
         if (dev?.noteOn) {
           const base = 60 + this.rootKey;
+          const now = this.ctx.currentTime;
           const chord =
             engineId === 'vocal_layer_harm'
               ? [base - 12, base, base + 3, base + 7, base + 12]
               : [base, base + 7, base + 12];
           chord.forEach((n) => {
-            dev.noteOn?.(n, 0.86);
-            setTimeout(() => dev.noteOff?.(n), 360);
+            dev.noteOn?.(n, 0.86, now);
+            dev.noteOff?.(n, now + 0.36);
           });
         }
         this.notify();
@@ -2085,7 +2784,6 @@ export class AudioEngine {
       }
 
       case 'predictive_preroll': {
-        // Commit a freshly captured 16-step inspired performance into the active track
         const intervals = scaleIntervals.length > 0 ? scaleIntervals : [0, 2, 3, 5, 7, 8, 10];
         const base = 48 + this.rootKey;
         const stepsToFill = [0, 2, 3, 6, 8, 10, 11, 14, 15];
@@ -2093,7 +2791,7 @@ export class AudioEngine {
           if (sIdx < this.patternLength) {
             const deg = intervals[(idx * 2) % intervals.length];
             track.steps[sIdx] = {
-              note: dev?.type === 'redrum' ? idx % 4 : Math.min(84, base + deg + (idx % 3 === 0 ? 12 : 0)),
+              note: dev?.type === 'redrum' ? 60 + (idx % 4) : Math.min(84, base + deg + (idx % 3 === 0 ? 12 : 0)),
               velocity: Number((0.78 + (idx % 3) * 0.08).toFixed(2)),
               length: idx % 4 === 0 ? 2 : 1,
               ratchet: idx === 8 ? 2 : 1,
@@ -2107,21 +2805,22 @@ export class AudioEngine {
       }
 
       default: {
-        // Browser & Outboard Hardware Emulations: audition with warm saturation/compression/echo
+        // Real Web Audio Outboard Hardware Emulations: update WaveShaper, DynamicsCompressor, Convolver IR & BBD Delay nodes
         if (this.outboardRackState[engineId]) {
           this.outboardRackState[engineId].enabled = true;
         }
+        this.syncOutboardHardwareChain();
         if (dev?.noteOn) {
           const base = 48 + this.rootKey;
+          const now = this.ctx.currentTime;
           [base, base + 7, base + 12].forEach((n, idx) => {
-            setTimeout(() => {
-              dev.noteOn?.(n, 0.9);
-              setTimeout(() => dev.noteOff?.(n), 240);
-            }, idx * 90);
+            const t = now + idx * 0.09;
+            dev.noteOn?.(n, 0.9, t);
+            dev.noteOff?.(n, t + 0.24);
           });
         }
         this.notify();
-        return `Engaged ${engineId.replace(/_/g, ' ').toUpperCase()} DSP Chain (${this.sampleRateTarget / 1000}kHz 64-Bit Float).`;
+        return `Engaged ${engineId.replace(/_/g, ' ').toUpperCase()} Real Web Audio DSP Chain (${this.sampleRateTarget / 1000}kHz 64-Bit Float).`;
       }
     }
   }

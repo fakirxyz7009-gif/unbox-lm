@@ -142,22 +142,14 @@ export class SytrusDevice extends BaseDevice {
     const relTime = Math.max(this.ctx.currentTime, time);
     const rel = Math.max(0.03, Math.min(2.5, this.params.release));
     try {
-      v.voiceGain.gain.cancelScheduledValues(relTime);
-      v.voiceGain.gain.setValueAtTime(Math.max(0.001, v.voiceGain.gain.value || 0.25), relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        v.voiceGain.gain.cancelScheduledValues(relTime);
+        v.voiceGain.gain.setValueAtTime(Math.max(0.001, v.voiceGain.gain.value || 0.35), relTime);
+      }
       v.voiceGain.gain.exponentialRampToValueAtTime(0.0001, relTime + rel);
       const stopAt = relTime + rel + 0.02;
       v.carrier.stop(stopAt);
       v.modulator.stop(stopAt);
     } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        v.carrier.disconnect();
-        v.modulator.disconnect();
-        v.modGain.disconnect();
-        v.filter.disconnect();
-        v.voiceGain.disconnect();
-      } catch (e) {}
-    }, Math.max(60, (relTime - this.ctx.currentTime + rel) * 1000 + 80));
   }
 }

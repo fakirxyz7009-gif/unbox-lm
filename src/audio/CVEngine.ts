@@ -4,11 +4,12 @@ import { CVMatrixEntry } from './types.ts';
 export class CVEngine {
   private devices: Map<string, BaseDevice> = new Map();
   public matrixEntries: CVMatrixEntry[] = [];
-  private loopId: number = 0;
+  private timerId: number | null = null;
   public liveMeterValues: Map<string, number> = new Map();
+  private smoothedValues: Map<string, number> = new Map();
 
   constructor() {
-    this.startLoop();
+    this.startBackgroundSafeLoop();
   }
 
   public registerDevice(device: BaseDevice): void {
@@ -32,6 +33,7 @@ export class CVEngine {
   public removeMatrixEntry(id: string): void {
     this.matrixEntries = this.matrixEntries.filter((m) => m.id !== id);
     this.liveMeterValues.delete(id);
+    this.smoothedValues.delete(id);
   }
 
   public updateMatrixEntry(id: string, updates: Partial<CVMatrixEntry>): void {
@@ -41,41 +43,58 @@ export class CVEngine {
     }
   }
 
-  private startLoop(): void {
-    const tick = () => {
-      for (const entry of this.matrixEntries) {
-        const sourceDev = this.devices.get(entry.sourceDeviceId);
-        const targetDev = this.devices.get(entry.targetDeviceId);
+  /**
+   * Called both from the AudioEngine lookahead scheduler and a background-safe timer
+   * with exponential smoothing + AudioParam.setTargetAtTime to eliminate 60Hz zipper noise.
+   */
+  public tickCV(audioTime?: number): void {
+    for (const entry of this.matrixEntries) {
+      const sourceDev = this.devices.get(entry.sourceDeviceId);
+      const targetDev = this.devices.get(entry.targetDeviceId);
 
-        if (!sourceDev || !targetDev || !sourceDev.isPowered || !targetDev.isPowered) {
-          continue;
-        }
-
-        const cvOut = sourceDev.cvOutputs.get(entry.sourcePortId);
-        if (!cvOut || !cvOut.getter) continue;
-
-        let rawVal = cvOut.getter();
-        if (entry.inverted) {
-          rawVal = -rawVal;
-        }
-
-        const finalVal = rawVal * entry.amount + entry.offset;
-        this.liveMeterValues.set(entry.id, finalVal);
-
-        // Apply to target device CV input setter
-        const cvIn = targetDev.cvInputs.get(entry.targetParam);
-        if (cvIn && cvIn.setter) {
-          cvIn.setter(finalVal);
-        }
+      if (!sourceDev || !targetDev || !sourceDev.isPowered || !targetDev.isPowered) {
+        continue;
       }
 
-      this.loopId = requestAnimationFrame(tick);
-    };
+      const cvOut = sourceDev.cvOutputs.get(entry.sourcePortId);
+      if (!cvOut || !cvOut.getter) continue;
 
-    this.loopId = requestAnimationFrame(tick);
+      let rawVal = cvOut.getter();
+      if (entry.inverted) {
+        rawVal = -rawVal;
+      }
+
+      const targetVal = rawVal * entry.amount + entry.offset;
+      const prevSmoothed = this.smoothedValues.get(entry.id) ?? targetVal;
+      // Anti-zipper one-pole smoothing filter
+      const smoothed = prevSmoothed + (targetVal - prevSmoothed) * 0.35;
+      this.smoothedValues.set(entry.id, smoothed);
+      this.liveMeterValues.set(entry.id, smoothed);
+
+      const cvIn = targetDev.cvInputs.get(entry.targetParam);
+      if (cvIn) {
+        const now = audioTime ?? targetDev.ctx.currentTime;
+        if (cvIn.param) {
+          cvIn.param.setTargetAtTime(smoothed, now, 0.01);
+        }
+        if (cvIn.setter) {
+          cvIn.setter(smoothed);
+        }
+      }
+    }
+  }
+
+  private startBackgroundSafeLoop(): void {
+    if (this.timerId !== null) clearInterval(this.timerId);
+    this.timerId = window.setInterval(() => {
+      this.tickCV();
+    }, 20);
   }
 
   public dispose(): void {
-    cancelAnimationFrame(this.loopId);
+    if (this.timerId !== null) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
   }
 }

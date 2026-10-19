@@ -135,24 +135,22 @@ export class FlexDevice extends BaseDevice {
   public noteOff(note: number, time: number = this.ctx.currentTime): void {
     const v = this.activeVoices.get(note);
     if (!v) return;
+    this.activeVoices.delete(note);
 
+    const relTime = Math.max(this.ctx.currentTime, time);
     const rel = Math.max(0.02, this.params.release);
     try {
-      v.gain.gain.cancelScheduledValues(time);
-      v.gain.gain.setValueAtTime(v.gain.gain.value, time);
-      v.gain.gain.exponentialRampToValueAtTime(0.0001, time + rel);
-
-      setTimeout(() => {
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        v.gain.gain.cancelScheduledValues(relTime);
+        v.gain.gain.setValueAtTime(Math.max(0.001, v.gain.gain.value || 0.35), relTime);
+      }
+      v.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + rel);
+      const stopAt = relTime + rel + 0.02;
+      v.nodes.forEach((n) => {
         try {
-          v.nodes.forEach((n) => {
-            if ((n as any).stop) (n as any).stop();
-            n.disconnect();
-          });
-          v.gain.disconnect();
+          if ((n as any).stop) (n as any).stop(stopAt);
         } catch (e) {}
-      }, rel * 1000 + 50);
+      });
     } catch (e) {}
-
-    this.activeVoices.delete(note);
   }
 }

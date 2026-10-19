@@ -78,8 +78,10 @@ export class TumbiDevice extends BaseDevice {
     this.activeVoices.delete(note);
     const relTime = Math.max(this.ctx.currentTime, time || this.ctx.currentTime);
     try {
-      voice.gain.gain.cancelScheduledValues(relTime);
-      voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.25), relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        voice.gain.gain.cancelScheduledValues(relTime);
+        voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.25), relTime);
+      }
       voice.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + 0.12);
       voice.oscs.forEach((o) => {
         try {

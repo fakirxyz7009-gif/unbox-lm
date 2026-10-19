@@ -165,23 +165,15 @@ export class ThreeOscDevice extends BaseDevice {
     const relTime = Math.max(this.ctx.currentTime, time);
     const rel = Math.max(0.03, Math.min(2.5, this.params.release));
     try {
-      v.gain.gain.cancelScheduledValues(relTime);
-      v.gain.gain.setValueAtTime(Math.max(0.001, v.gain.gain.value || 0.25), relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        v.gain.gain.cancelScheduledValues(relTime);
+        v.gain.gain.setValueAtTime(Math.max(0.001, v.gain.gain.value || 0.35), relTime);
+      }
       v.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + rel);
       const stopAt = relTime + rel + 0.02;
       v.osc1.stop(stopAt);
       v.osc2.stop(stopAt);
       v.osc3.stop(stopAt);
     } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        v.osc1.disconnect();
-        v.osc2.disconnect();
-        v.osc3.disconnect();
-        v.filter.disconnect();
-        v.gain.disconnect();
-      } catch (e) {}
-    }, Math.max(60, (relTime - this.ctx.currentTime + rel) * 1000 + 80));
   }
 }

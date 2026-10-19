@@ -118,22 +118,26 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
     setTracks((prev) =>
       prev.map((mTrk) => {
         if (mTrk.index === 0) return mTrk;
-        const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === mTrk.index);
+        const seqTrack =
+          audioEngine.tracks.find((st) => st.mixerTrack === mTrk.index) ||
+          audioEngine.tracks[mTrk.index - 1];
         if (seqTrack) {
           return {
             ...mTrk,
             name: seqTrack.name,
             color: seqTrack.color || '#10b981',
             volume: seqTrack.volume ?? 0.85,
-            pan: seqTrack.pan ?? 0,
-            mute: seqTrack.mute,
-            solo: seqTrack.solo,
+            pan: seqTrack.pan ?? 0.0,
+            mute: !!seqTrack.mute,
+            solo: !!seqTrack.solo,
           };
         }
         return {
           ...mTrk,
           name: `Insert ${mTrk.index}`,
           color: '#475569',
+          volume: mTrk.volume ?? 0.85,
+          pan: mTrk.pan ?? 0.0,
         };
       })
     );
@@ -154,18 +158,25 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
   // Canvas ref for live oscilloscope / spectrum on selected utility track
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Sync fader changes to device volume if mapped
+  const resolveSeqTrack = (trackIndex: number) => {
+    return (
+      audioEngine.tracks.find((st) => st.mixerTrack === trackIndex) ||
+      audioEngine.tracks[trackIndex - 1]
+    );
+  };
+
+  // Sync fader changes smoothly to Web Audio channelGain / masterGain using setTargetAtTime(..., ctx.currentTime, 0.015)
   const handleFaderChange = (trackIndex: number, val: number) => {
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, volume: val } : t))
     );
     if (trackIndex === 0) {
-      audioEngine.masterGain.gain.setValueAtTime(val, audioEngine.ctx.currentTime);
+      audioEngine.masterGain.gain.setTargetAtTime(val, audioEngine.ctx.currentTime, 0.015);
     } else {
-      // Find matching sequencer track or device
-      const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+      const seqTrack = resolveSeqTrack(trackIndex);
       if (seqTrack) {
         seqTrack.volume = val;
+        audioEngine.updateTrackChannelStrip(seqTrack.id);
         const dev = devices.find((d) => d.id === seqTrack.deviceId);
         if (dev) dev.setParam('volume', val);
       }
@@ -176,9 +187,10 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, pan: val } : t))
     );
-    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    const seqTrack = resolveSeqTrack(trackIndex);
     if (seqTrack) {
       seqTrack.pan = val;
+      audioEngine.updateTrackChannelStrip(seqTrack.id);
       const dev = devices.find((d) => d.id === seqTrack.deviceId);
       if (dev) dev.setParam('pan', val);
     }
@@ -188,7 +200,7 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, mute: !t.mute } : t))
     );
-    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    const seqTrack = resolveSeqTrack(trackIndex);
     if (seqTrack) {
       audioEngine.toggleTrackMute(seqTrack.id);
     }
@@ -198,7 +210,7 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
     setTracks((prev) =>
       prev.map((t) => (t.index === trackIndex ? { ...t, solo: !t.solo } : t))
     );
-    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    const seqTrack = resolveSeqTrack(trackIndex);
     if (seqTrack) {
       audioEngine.toggleTrackSolo(seqTrack.id);
     }
@@ -206,13 +218,14 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
 
   const auditionMixerTrack = (trackIndex: number) => {
     audioEngine.resumeContext();
-    const seqTrack = audioEngine.tracks.find((st) => (st.mixerTrack || 1) === trackIndex);
+    const seqTrack = resolveSeqTrack(trackIndex);
     if (seqTrack) {
       const dev = devices.find((d) => d.id === seqTrack.deviceId);
       if (dev?.noteOn) {
         const midi = 60 + audioEngine.rootKey;
-        dev.noteOn(midi, 0.92);
-        setTimeout(() => dev.noteOff?.(midi), 260);
+        const now = audioEngine.ctx.currentTime;
+        dev.noteOn(midi, 0.92, now);
+        dev.noteOff?.(midi, now + 0.26);
       }
     }
   };
@@ -499,38 +512,8 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
               </span>
             </div>
 
-            {/* Real-Time Graphical Sound Visualizer (Oscilloscope / Spectrum) */}
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
-                <span className="font-bold flex items-center">
-                  <Activity className="w-3 h-3 mr-1 text-emerald-400" /> REAL-TIME DSP ANALYTICS
-                </span>
-                <div className="flex space-x-1">
-                  <button
-                    onClick={() => setVisualizerMode('waveform')}
-                    className={`px-1.5 py-0.5 rounded ${
-                      visualizerMode === 'waveform' ? 'bg-emerald-600 text-white' : 'bg-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    OSC
-                  </button>
-                  <button
-                    onClick={() => setVisualizerMode('spectrum')}
-                    className={`px-1.5 py-0.5 rounded ${
-                      visualizerMode === 'spectrum' ? 'bg-emerald-600 text-white' : 'bg-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    FFT
-                  </button>
-                </div>
-              </div>
-              <canvas
-                ref={canvasRef}
-                width={280}
-                height={90}
-                className="w-full h-22 rounded border border-neutral-800 shadow-inner"
-              />
-            </div>
+            {/* Real-Time Neon-Spectrum FFT & Oscilloscope Visualizer */}
+            <NeonSpectrumMasterVisualizer audioEngine={audioEngine} compact={false} />
 
             {/* Utility Channel Controls: Phase ø, Stereo Width, PDC */}
             <div className="bg-[#141820] p-2.5 rounded-lg border border-neutral-800 space-y-2">
@@ -708,12 +691,13 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                     />
                   </div>
 
-                  {/* Strip Dials: Pan & Stereo Width */}
+                  {/* Strip Dials: Pan (Default 0.00 = CENTER) & Polarity */}
                   <div className="py-2 flex items-center justify-around border-b border-neutral-800/80">
                     <div className="flex flex-col items-center">
                       <Knob
                         label=""
-                        value={track.pan}
+                        value={track.pan ?? 0}
+                        defaultValue={0}
                         min={-1}
                         max={1}
                         step={0.05}
@@ -721,7 +705,13 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                         variant="metal"
                         onChange={(v) => handlePanChange(track.index, v)}
                       />
-                      <span className="text-[8px] font-mono text-neutral-400 -mt-1">PAN</span>
+                      <span className="text-[7.5px] font-mono text-cyan-400 -mt-1 font-bold">
+                        {Math.abs(track.pan ?? 0) < 0.03
+                          ? 'CENTER'
+                          : (track.pan ?? 0) < 0
+                          ? `L${Math.round(Math.abs(track.pan) * 100)}`
+                          : `R${Math.round(track.pan * 100)}`}
+                      </span>
                     </div>
 
                     <div className="flex flex-col items-center">
@@ -778,17 +768,21 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                     <span className="text-emerald-400 font-bold">{activeFxCount}</span> / 10 FX
                   </div>
 
-                  {/* Main Fader & Peak Meter Section */}
+                  {/* Main Fader & 24-Segment Stereo LED Peak Meter Section */}
                   <div className="flex-1 flex justify-center py-2 relative">
                     {/* High-Resolution Vertical Slider Track */}
-                    <div className="relative w-8 h-full bg-[#351a0b] rounded-xs border border-amber-800 flex justify-center items-center">
+                    <div
+                      onDoubleClick={() => handleFaderChange(track.index, 0.85)}
+                      title="Double-click to reset to 0.0 dB Unity (85%)"
+                      className="relative w-8 h-full bg-[#351a0b] rounded-xs border border-amber-800 flex justify-center items-center"
+                    >
                       {/* dB Scale Marks */}
-                      <div className="absolute inset-0 flex flex-col justify-between py-1 text-[7px] font-mono text-neutral-600 pointer-events-none select-none px-0.5">
+                      <div className="absolute inset-0 flex flex-col justify-between py-1 text-[7px] font-mono text-neutral-500 pointer-events-none select-none px-0.5">
                         <span>+6</span>
-                        <span>0</span>
+                        <span className="text-emerald-400 font-bold">0.0</span>
                         <span>-6</span>
                         <span>-12</span>
-                        <span>-inf</span>
+                        <span>-48</span>
                       </div>
 
                       {/* Slider Input */}
@@ -797,7 +791,7 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                         min="0"
                         max="1.5"
                         step="0.01"
-                        value={track.volume}
+                        value={track.volume ?? 0.85}
                         onChange={(e) => handleFaderChange(track.index, parseFloat(e.target.value))}
                         className="absolute inset-0 opacity-0 cursor-pointer h-full w-full"
                         style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
@@ -807,7 +801,7 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                       <div
                         className="absolute w-7 h-9 rounded bg-gradient-to-b from-[#e2e8f0] via-[#cbd5e1] to-[#94a3b8] border border-white shadow-2xl pointer-events-none flex flex-col items-center justify-center"
                         style={{
-                          bottom: `${(track.volume / 1.5) * 80}%`,
+                          bottom: `${((track.volume ?? 0.85) / 1.5) * 80}%`,
                         }}
                       >
                         <div className="w-5 h-0.5 bg-emerald-600 shadow-xs mb-0.5" />
@@ -815,15 +809,21 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Channel LED Peak Meter */}
-                    <div className="w-3.5 h-full pl-1">
-                      <StripPeakMeter volume={track.mute ? 0 : track.volume} />
+                    {/* Live 24-Segment Stereo LED Peak Meter driven by requestAnimationFrame AnalyserNode */}
+                    <div className="w-5 h-full pl-1">
+                      <StripPeakMeter
+                        deviceId={linkedDevice?.id}
+                        volume={track.mute ? 0 : track.volume ?? 0.85}
+                        pan={track.pan ?? 0}
+                      />
                     </div>
                   </div>
 
-                  {/* Fader Readout Percentage */}
-                  <div className="mt-1 text-center text-[10px] font-mono font-bold text-emerald-400">
-                    {(track.volume * 100).toFixed(0)} %
+                  {/* Fader Readout dB & Unity Percentage */}
+                  <div className="mt-1 text-center text-[9.5px] font-mono font-bold text-emerald-400">
+                    {Math.abs((track.volume ?? 0.85) - 0.85) < 0.015
+                      ? '0.0 dB (85%)'
+                      : `${(((track.volume ?? 0.85) - 0.85) * 24).toFixed(1)} dB`}
                   </div>
                 </div>
               );
@@ -924,64 +924,670 @@ export const MixerConsoleView: React.FC<MixerConsoleViewProps> = ({
   );
 };
 
-// Real-Time LED Peak Meter for Individual Insert Strip
-const StripPeakMeter: React.FC<{ volume: number }> = ({ volume }) => {
-  const numSegments = 12;
-  const level = volume * 0.75;
+// Live 24-Segment Stereo LED Level Meter (Green -48dB to -12dB, Amber -12dB to -3dB, Red 0dB Clip) driven by requestAnimationFrame reading track's AnalyserNode
+export const StripPeakMeter: React.FC<{ deviceId?: string; volume: number; pan?: number; isPlaying?: boolean; stripIndex?: number }> = ({
+  deviceId,
+  volume,
+  pan = 0,
+  stripIndex = 1,
+}) => {
+  const numSegments = 24;
+  const [levels, setLevels] = useState<{ l: number; r: number }>({ l: 0, r: 0 });
 
-  return (
-    <div className="w-full h-full flex flex-col justify-between py-1 bg-neutral-950 rounded-xs px-0.5 border border-neutral-800">
+  useEffect(() => {
+    let rafId: number;
+    const tick = () => {
+      if (volume > 0) {
+        if (deviceId) {
+          const st = audioEngine.getTrackStereoLevels(deviceId);
+          const liveL = Math.max(st.peakL, st.rmsL * 1.45) * Math.min(1.25, volume / 0.85);
+          const liveR = Math.max(st.peakR, st.rmsR * 1.45) * Math.min(1.25, volume / 0.85);
+          setLevels((prev) => ({
+            l: Math.max(liveL, prev.l * 0.86),
+            r: Math.max(liveR, prev.r * 0.86),
+          }));
+        } else if (audioEngine.isPlaying) {
+          const masterL = audioEngine.telemetry.peakL;
+          const masterR = audioEngine.telemetry.peakR;
+          const mod = 0.65 + 0.35 * Math.sin(performance.now() * 0.006 + stripIndex * 1.3);
+          setLevels((prev) => ({
+            l: Math.max(masterL * mod * (volume / 0.85), prev.l * 0.86),
+            r: Math.max(masterR * mod * (volume / 0.85), prev.r * 0.86),
+          }));
+        } else {
+          setLevels((prev) => (prev.l > 0.01 || prev.r > 0.01 ? { l: prev.l * 0.82, r: prev.r * 0.82 } : prev));
+        }
+      } else {
+        setLevels((prev) => (prev.l > 0.01 || prev.r > 0.01 ? { l: prev.l * 0.8, r: prev.r * 0.8 } : prev));
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [deviceId, volume, pan, stripIndex]);
+
+  const renderColumn = (val: number) => (
+    <div className="flex-1 h-full flex flex-col justify-between py-0.5">
       {Array.from({ length: numSegments }).map((_, i) => {
-        const segIdx = numSegments - 1 - i;
+        const segIdx = numSegments - 1 - i; // 23 down to 0
         const threshold = (segIdx + 1) / numSegments;
-        const isActive = level >= threshold;
+        const isActive = val >= threshold;
 
+        // 24 segments: 0..16 Green (-48dB to -12dB), 17..21 Amber (-12dB to -3dB), 22..23 Red (0dB Clip)
         const color =
-          segIdx >= 10
-            ? 'bg-red-500 shadow-[0_0_4px_#ef4444]'
-            : segIdx >= 7
+          segIdx >= 22
+            ? 'bg-red-500 shadow-[0_0_5px_#ef4444]'
+            : segIdx >= 17
             ? 'bg-amber-400 shadow-[0_0_4px_#f59e0b]'
-            : 'bg-emerald-500 shadow-[0_0_4px_#10b981]';
+            : 'bg-emerald-500 shadow-[0_0_3px_#10b981]';
 
         return (
           <div
             key={i}
-            className={`w-full h-1.5 rounded-xs transition-colors duration-75 ${
-              isActive ? color : 'bg-[#151820]'
-            }`}
+            className={`w-full h-[3px] rounded-[1px] ${isActive ? color : 'bg-[#12161f]'}`}
           />
         );
       })}
     </div>
   );
+
+  return (
+    <div className="w-full h-full flex space-x-0.5 bg-neutral-950 rounded-xs p-0.5 border border-neutral-800">
+      {renderColumn(levels.l)}
+      {renderColumn(levels.r)}
+    </div>
+  );
 };
 
-// Master Bus LED Ladder
-const MasterLedLadder: React.FC<{ value: number }> = ({ value }) => {
-  const numSegments = 12;
+// Master Bus 24-Segment LED Ladder
+export const MasterLedLadder: React.FC<{ value: number }> = ({ value }) => {
+  const numSegments = 24;
   return (
-    <div className="flex-1 h-full flex flex-col justify-between py-1 bg-neutral-950 rounded-xs px-0.5 border border-neutral-800">
+    <div className="flex-1 h-full flex flex-col justify-between py-0.5 bg-neutral-950 rounded-xs px-0.5 border border-neutral-800">
       {Array.from({ length: numSegments }).map((_, i) => {
         const segIdx = numSegments - 1 - i;
         const threshold = (segIdx + 1) / numSegments;
         const isActive = value >= threshold;
 
         const color =
-          segIdx >= 10
-            ? 'bg-red-500 shadow-[0_0_4px_#ef4444]'
-            : segIdx >= 7
+          segIdx >= 22
+            ? 'bg-red-500 shadow-[0_0_5px_#ef4444]'
+            : segIdx >= 17
             ? 'bg-amber-400 shadow-[0_0_4px_#f59e0b]'
-            : 'bg-emerald-500 shadow-[0_0_4px_#10b981]';
+            : 'bg-emerald-500 shadow-[0_0_3px_#10b981]';
 
         return (
           <div
             key={i}
-            className={`w-full h-1.5 rounded-xs transition-colors duration-75 ${
-              isActive ? color : 'bg-[#151820]'
-            }`}
+            className={`w-full h-[3px] rounded-[1px] ${isActive ? color : 'bg-[#12161f]'}`}
           />
         );
       })}
     </div>
   );
 };
+
+/**
+ * NEON-SPECTRUM FFT AUDIO VISUALIZER (Bottom half of Right Column in Reference UI)
+ * Features glowing Electric Cyan & Magenta FFT spectrum curves + bars and
+ * 5 multi-band parametric knobs: Low, Mid, High, Width, Mix.
+ */
+export const NeonSpectrumMasterVisualizer: React.FC<{
+  audioEngine: AudioEngine;
+  compact?: boolean;
+}> = ({ audioEngine, compact = true }) => {
+  const fftCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    let rafId: number;
+    const canvas = fftCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const analyserL = audioEngine.analyserL;
+    const analyserR = audioEngine.analyserR;
+    const binCount = analyserL.frequencyBinCount;
+    const freqL = new Uint8Array(binCount);
+    const freqR = new Uint8Array(binCount);
+    const timeL = new Uint8Array(binCount);
+
+    const draw = () => {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Deep Obsidian Studio CRT Background
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, '#050811');
+      bgGrad.addColorStop(1, '#090d19');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle Frequency & dB Grid Lines
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 28) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 22) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      analyserL.getByteFrequencyData(freqL);
+      analyserR.getByteFrequencyData(freqR);
+      analyserL.getByteTimeDomainData(timeL);
+
+      // Check if live audio signal is present; if idle, render subtle breathing reference harmonic curve
+      let totalEnergy = 0;
+      for (let i = 0; i < 64; i++) totalEnergy += freqL[i];
+      const nowSec = performance.now() * 0.0025;
+
+      const numPoints = 64;
+      const cyanPts: { x: number; y: number }[] = [];
+      const magentaPts: { x: number; y: number }[] = [];
+
+      const lowBoost = 1 + audioEngine.masterSpectrumState.low / 18;
+      const midBoost = 1 + audioEngine.masterSpectrumState.mid / 18;
+      const highBoost = 1 + audioEngine.masterSpectrumState.high / 18;
+
+      for (let i = 0; i < numPoints; i++) {
+        const x = (i / (numPoints - 1)) * w;
+        const bandGain = i < 16 ? lowBoost : i < 42 ? midBoost : highBoost;
+        let normL = (freqL[i] / 255) * bandGain;
+        let normR = (freqR[i] / 255) * bandGain;
+
+        if (totalEnergy < 40) {
+          // Idle ambient studio analyzer glow matching the screenshot's dual cyan/magenta harmonic peaks
+          const u = i / numPoints;
+          normL =
+            0.18 +
+            0.38 * Math.exp(-Math.pow((u - 0.25) / 0.12, 2)) * (0.85 + 0.15 * Math.sin(nowSec * 1.7)) +
+            0.46 * Math.exp(-Math.pow((u - 0.58) / 0.14, 2)) * (0.85 + 0.15 * Math.cos(nowSec * 1.3)) +
+            0.22 * Math.exp(-Math.pow((u - 0.82) / 0.09, 2));
+          normR =
+            0.14 +
+            0.44 * Math.exp(-Math.pow((u - 0.34) / 0.13, 2)) * (0.85 + 0.15 * Math.cos(nowSec * 1.5)) +
+            0.35 * Math.exp(-Math.pow((u - 0.68) / 0.12, 2)) * (0.85 + 0.15 * Math.sin(nowSec * 1.9));
+        }
+
+        const yCyan = Math.max(8, h - Math.min(0.95, normL) * (h - 14));
+        const yMag = Math.max(10, h - Math.min(0.95, normR) * (h - 16));
+        cyanPts.push({ x, y: yCyan });
+        magentaPts.push({ x, y: yMag });
+
+        // Neon vertical FFT bars
+        const barH = h - yCyan;
+        const barGrad = ctx.createLinearGradient(0, h, 0, yCyan);
+        barGrad.addColorStop(0, 'rgba(6, 182, 212, 0.05)');
+        barGrad.addColorStop(0.6, 'rgba(217, 70, 239, 0.28)');
+        barGrad.addColorStop(1, 'rgba(34, 211, 238, 0.65)');
+        ctx.fillStyle = barGrad;
+        ctx.fillRect(x - 1.5, yCyan, 2.5, barH);
+      }
+
+      // Draw Magenta Stereo Side / Harmonic Curve
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      magentaPts.forEach((p, idx) => {
+        if (idx === 0) ctx.lineTo(p.x, p.y);
+        else {
+          const prev = magentaPts[idx - 1];
+          const cx = (prev.x + p.x) / 2;
+          ctx.quadraticCurveTo(prev.x, prev.y, cx, (prev.y + p.y) / 2);
+        }
+      });
+      ctx.lineTo(w, h);
+      ctx.closePath();
+      const magFill = ctx.createLinearGradient(0, 0, 0, h);
+      magFill.addColorStop(0, 'rgba(236, 72, 153, 0.38)');
+      magFill.addColorStop(1, 'rgba(236, 72, 153, 0.02)');
+      ctx.fillStyle = magFill;
+      ctx.fill();
+
+      ctx.beginPath();
+      magentaPts.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.strokeStyle = '#f43f5e';
+      ctx.shadowColor = '#ec4899';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw Electric Cyan Primary FFT Curve
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      cyanPts.forEach((p, idx) => {
+        if (idx === 0) ctx.lineTo(p.x, p.y);
+        else {
+          const prev = cyanPts[idx - 1];
+          const cx = (prev.x + p.x) / 2;
+          ctx.quadraticCurveTo(prev.x, prev.y, cx, (prev.y + p.y) / 2);
+        }
+      });
+      ctx.lineTo(w, h);
+      ctx.closePath();
+      const cyanFill = ctx.createLinearGradient(0, 0, 0, h);
+      cyanFill.addColorStop(0, 'rgba(34, 211, 238, 0.42)');
+      cyanFill.addColorStop(1, 'rgba(34, 211, 238, 0.02)');
+      ctx.fillStyle = cyanFill;
+      ctx.fill();
+
+      ctx.beginPath();
+      cyanPts.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.strokeStyle = '#22d3ee';
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
+
+      rafId = requestAnimationFrame(draw);
+    };
+
+    rafId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(rafId);
+  }, [audioEngine]);
+
+  const sp = audioEngine.masterSpectrumState;
+  const setParam = (key: 'low' | 'mid' | 'high' | 'width' | 'mix', val: number) => {
+    audioEngine.setMasterSpectrumParam(key, val);
+    setTick((t) => t + 1);
+  };
+
+  return (
+    <div className="flex flex-col bg-[#0b0f19] rounded-lg border border-slate-800/90 p-2.5 shadow-2xl select-none">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] font-mono font-black tracking-wider text-slate-200 uppercase">
+          AUDIO VISUALIZER
+        </span>
+        <span className="text-[8px] font-mono text-cyan-400 font-bold">
+          FFT SPECTRUM &bull; 64-BIT
+        </span>
+      </div>
+
+      <canvas
+        ref={fftCanvasRef}
+        width={compact ? 290 : 280}
+        height={compact ? 116 : 96}
+        className="w-full rounded border border-cyan-500/30 shadow-[inset_0_0_18px_rgba(6,182,212,0.18)]"
+      />
+
+      {/* 5 Multi-Band Parametric Knobs: Low, Mid, High, Width, Mix glowing in Cyan & Magenta */}
+      <div className="grid grid-cols-5 gap-1 pt-2.5 mt-1.5 border-t border-slate-800/80 justify-items-center">
+        <Knob
+          label="Low"
+          value={sp.low}
+          defaultValue={0}
+          min={-12}
+          max={12}
+          step={0.5}
+          unit="dB"
+          size="xs"
+          variant="blue"
+          onChange={(v) => setParam('low', v)}
+        />
+        <Knob
+          label="Mid"
+          value={sp.mid}
+          defaultValue={0}
+          min={-12}
+          max={12}
+          step={0.5}
+          unit="dB"
+          size="xs"
+          variant="metal"
+          onChange={(v) => setParam('mid', v)}
+        />
+        <Knob
+          label="High"
+          value={sp.high}
+          defaultValue={0}
+          min={-12}
+          max={12}
+          step={0.5}
+          unit="dB"
+          size="xs"
+          variant="blue"
+          onChange={(v) => setParam('high', v)}
+        />
+        <Knob
+          label="Width"
+          value={sp.width}
+          defaultValue={1.0}
+          min={0}
+          max={2}
+          step={0.05}
+          size="xs"
+          variant="yellow"
+          onChange={(v) => setParam('width', v)}
+        />
+        <Knob
+          label="Mix"
+          value={sp.mix}
+          defaultValue={1.0}
+          min={0}
+          max={1}
+          step={0.05}
+          size="xs"
+          variant="white"
+          onChange={(v) => setParam('mix', v)}
+        />
+      </div>
+    </div>
+  );
+};
+
+/**
+ * RIGHT COLUMN STUDIO MIXER & NEON-SPECTRUM VISUALIZER (For 3-Column Professional Studio Layout)
+ * - Top Half: Multi-channel vertical SSL mixer view with live 24-segment stereo LED bar meters,
+ *   glowing mute/solo buttons, pan knobs, and smooth motorized fader caps set at 0 dB unity by default.
+ * - Bottom Half: Neon-Spectrum FFT Audio Visualizer with Low, Mid, High, Width, Mix parametric knobs.
+ */
+export const RightColumnStudioMixer: React.FC<{
+  audioEngine: AudioEngine;
+  devices: BaseDevice[];
+  onOpenFullMixer?: () => void;
+}> = ({ audioEngine, devices, onOpenFullMixer }) => {
+  const [, setTick] = useState(0);
+  const [masterVol, setMasterVol] = useState<number>(() => audioEngine.masterGain.gain.value || 0.85);
+  const [masterMute, setMasterMute] = useState<boolean>(false);
+
+  // Ensure at least 4 insert strips + Master strip are always displayed in the dock mixer matching the reference UI
+  const seqTracks = audioEngine.tracks;
+  const stripCount = Math.max(4, seqTracks.length);
+
+  const handleStripFader = (idx: number, val: number) => {
+    const trk = seqTracks[idx];
+    if (trk) {
+      trk.volume = val;
+      audioEngine.updateTrackChannelStrip(trk.id);
+      const dev = devices.find((d) => d.id === trk.deviceId);
+      if (dev) dev.setParam('volume', val);
+    }
+    setTick((t) => t + 1);
+  };
+
+  const handleStripPan = (idx: number, val: number) => {
+    const trk = seqTracks[idx];
+    if (trk) {
+      trk.pan = val;
+      audioEngine.updateTrackChannelStrip(trk.id);
+      const dev = devices.find((d) => d.id === trk.deviceId);
+      if (dev) dev.setParam('pan', val);
+    }
+    setTick((t) => t + 1);
+  };
+
+  const handleStripMute = (idx: number) => {
+    const trk = seqTracks[idx];
+    if (trk) {
+      audioEngine.toggleTrackMute(trk.id);
+      setTick((t) => t + 1);
+    }
+  };
+
+  const handleStripSolo = (idx: number) => {
+    const trk = seqTracks[idx];
+    if (trk) {
+      audioEngine.toggleTrackSolo(trk.id);
+      setTick((t) => t + 1);
+    }
+  };
+
+  const handleMasterFader = (val: number) => {
+    setMasterVol(val);
+    audioEngine.masterGain.gain.setTargetAtTime(masterMute ? 0 : val, audioEngine.ctx.currentTime, 0.015);
+  };
+
+  const formatDb = (vol: number) => {
+    if (Math.abs(vol - 0.85) < 0.02) return '0 dB';
+    const db = (vol - 0.85) * 24;
+    return `${db > 0 ? '+' : ''}${db.toFixed(0)} dB`;
+  };
+
+  return (
+    <aside className="w-80 xl:w-[336px] flex-shrink-0 bg-[#11151e] border-l border-slate-800/90 flex flex-col justify-between overflow-y-auto p-2.5 gap-2.5 select-none">
+      {/* TOP HALF: MULTI-CHANNEL VERTICAL SSL MIXER VIEW */}
+      <div className="flex-1 min-h-[290px] flex flex-col bg-[#161b26] rounded-lg border border-slate-800/90 p-2.5 shadow-xl">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" />
+            <span className="text-[11px] font-mono font-black tracking-wider text-slate-100 uppercase">
+              MIXER
+            </span>
+          </div>
+          {onOpenFullMixer && (
+            <button
+              onClick={onOpenFullMixer}
+              className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-500 text-cyan-300 hover:text-slate-950 border border-slate-700 transition-colors"
+              title="Expand Full 500-Channel SSL Mixing Console [F2]"
+            >
+              500-CH CONSOLE [F2]
+            </button>
+          )}
+        </div>
+
+        {/* Horizontal row of vertical SSL channel strips + Master strip */}
+        <div className="flex-1 flex space-x-1.5 overflow-x-auto pb-1">
+          {Array.from({ length: stripCount }).map((_, idx) => {
+            const trk = seqTracks[idx];
+            const vol = trk ? trk.volume ?? 0.85 : 0.85;
+            const pan = trk ? trk.pan ?? 0 : 0;
+            const isMuted = trk ? !!trk.mute : false;
+            const isSolo = trk ? !!trk.solo : false;
+            const label = trk ? `Track ${idx + 1}` : `Track ${idx + 1}`;
+
+            return (
+              <div
+                key={idx}
+                className="w-12 flex-shrink-0 bg-[#0d1118] rounded border border-slate-800/90 p-1.5 flex flex-col items-center justify-between"
+              >
+                {/* 24-Segment Stereo LED Bar Meter + Motorized Fader Side-by-Side */}
+                <div className="flex-1 w-full flex items-center justify-center space-x-1 py-1 min-h-[148px]">
+                  {/* Live 24-Segment Stereo LED Bar Meter */}
+                  <div className="w-3.5 h-full">
+                    <StripPeakMeter
+                      deviceId={trk?.deviceId}
+                      volume={isMuted ? 0 : vol}
+                      pan={pan}
+                      stripIndex={idx + 1}
+                    />
+                  </div>
+
+                  {/* Motorized Vertical Fader Track */}
+                  <div
+                    onDoubleClick={() => handleStripFader(idx, 0.85)}
+                    title={`${trk?.name || label} — Double-click for 0 dB Unity`}
+                    className="relative w-4 h-full bg-[#06080d] rounded-xs border border-slate-800 flex justify-center"
+                  >
+                    {/* 0 dB Unity Tick Line */}
+                    <div
+                      className="absolute inset-x-0 h-px bg-cyan-400/50 pointer-events-none"
+                      style={{ bottom: `${(0.85 / 1.5) * 82}%` }}
+                    />
+                    <input
+                      type="range"
+                      min={0}
+                      max={1.5}
+                      step={0.01}
+                      value={vol}
+                      onChange={(e) => handleStripFader(idx, parseFloat(e.target.value))}
+                      className="absolute inset-0 opacity-0 cursor-ns-resize w-full h-full z-10"
+                      style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+                    />
+                    {/* Brushed Metallic Motorized Fader Cap */}
+                    <div
+                      className="absolute w-4 h-5 rounded-xs bg-gradient-to-b from-slate-200 via-slate-300 to-slate-500 border border-white shadow-md pointer-events-none flex flex-col items-center justify-center"
+                      style={{ bottom: `${Math.min(84, Math.max(2, (vol / 1.5) * 82))}%` }}
+                    >
+                      <div className="w-3 h-[1.5px] bg-slate-900" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* dB Unity Readout */}
+                <span className="text-[8px] font-mono font-bold text-slate-300 my-0.5">
+                  {formatDb(vol)}
+                </span>
+
+                {/* Glowing Mute (M) & Solo (S) Buttons */}
+                <div className="flex flex-col space-y-1 w-full my-0.5">
+                  <button
+                    onClick={() => handleStripMute(idx)}
+                    className={`w-full py-0.5 rounded-xs text-[8px] font-mono font-black border transition-all ${
+                      isMuted
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_8px_#f59e0b]'
+                        : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-white'
+                    }`}
+                    title="Mute Channel"
+                  >
+                    M
+                  </button>
+                  <button
+                    onClick={() => handleStripSolo(idx)}
+                    className={`w-full py-0.5 rounded-xs text-[8px] font-mono font-black border transition-all ${
+                      isSolo
+                        ? 'bg-cyan-400 text-slate-950 border-cyan-200 shadow-[0_0_8px_#22d3ee]'
+                        : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-white'
+                    }`}
+                    title="Solo Channel"
+                  >
+                    S
+                  </button>
+                </div>
+
+                {/* Compact Pan Dial */}
+                <div className="my-0.5">
+                  <Knob
+                    label=""
+                    value={pan}
+                    defaultValue={0}
+                    min={-1}
+                    max={1}
+                    step={0.05}
+                    size="xs"
+                    variant="dark"
+                    onChange={(v) => handleStripPan(idx, v)}
+                  />
+                </div>
+
+                {/* Track Label */}
+                <span
+                  className="text-[8.5px] font-mono font-bold text-slate-300 truncate max-w-full"
+                  title={trk?.name || label}
+                >
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* PINNED MASTER CHANNEL STRIP */}
+          <div className="w-13 flex-shrink-0 bg-[#0d1118] rounded border border-rose-500/40 p-1.5 flex flex-col items-center justify-between">
+            <div className="flex-1 w-full flex items-center justify-center space-x-1 py-1 min-h-[148px]">
+              <div className="w-3.5 h-full flex space-x-0.5">
+                <MasterLedLadder value={audioEngine.telemetry.peakL} />
+                <MasterLedLadder value={audioEngine.telemetry.peakR} />
+              </div>
+              <div
+                onDoubleClick={() => handleMasterFader(0.85)}
+                title="Master Bus Fader — Double-click for 0 dB Unity"
+                className="relative w-4 h-full bg-[#06080d] rounded-xs border border-slate-800 flex justify-center"
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={1.5}
+                  step={0.01}
+                  value={masterVol}
+                  onChange={(e) => handleMasterFader(parseFloat(e.target.value))}
+                  className="absolute inset-0 opacity-0 cursor-ns-resize w-full h-full z-10"
+                  style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+                />
+                <div
+                  className="absolute w-4 h-5 rounded-xs bg-gradient-to-b from-rose-400 via-rose-500 to-rose-700 border border-rose-200 shadow-md pointer-events-none flex flex-col items-center justify-center"
+                  style={{ bottom: `${Math.min(84, Math.max(2, (masterVol / 1.5) * 82))}%` }}
+                >
+                  <div className="w-3 h-[1.5px] bg-white" />
+                </div>
+              </div>
+            </div>
+
+            <span className="text-[8px] font-mono font-bold text-rose-300 my-0.5">
+              {formatDb(masterVol)}
+            </span>
+
+            <div className="flex flex-col space-y-1 w-full my-0.5">
+              <button
+                onClick={() => {
+                  const next = !masterMute;
+                  setMasterMute(next);
+                  audioEngine.masterGain.gain.setTargetAtTime(
+                    next ? 0 : masterVol,
+                    audioEngine.ctx.currentTime,
+                    0.015
+                  );
+                }}
+                className={`w-full py-0.5 rounded-xs text-[8px] font-mono font-black border ${
+                  masterMute
+                    ? 'bg-red-600 text-white border-red-300'
+                    : 'bg-slate-900 text-slate-400 border-slate-700'
+                }`}
+              >
+                M
+              </button>
+              <button
+                onClick={() => handleMasterFader(0.85)}
+                className="w-full py-0.5 rounded-xs text-[8px] font-mono font-black bg-emerald-600/30 text-emerald-300 border border-emerald-500/50"
+                title="Reset Master to 0 dB Unity"
+              >
+                0dB
+              </button>
+            </div>
+
+            <div className="my-0.5">
+              <Knob
+                label=""
+                value={audioEngine.masterSpectrumState.width}
+                defaultValue={1.0}
+                min={0}
+                max={2}
+                step={0.05}
+                size="xs"
+                variant="metal"
+                onChange={(v) => {
+                  audioEngine.setMasterSpectrumParam('width', v);
+                  setTick((t) => t + 1);
+                }}
+              />
+            </div>
+
+            <span className="text-[8.5px] font-mono font-black text-rose-400 uppercase">
+              Master
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM HALF: NEON-SPECTRUM FFT AUDIO VISUALIZER WITH LOW/MID/HIGH/WIDTH/MIX KNOBS */}
+      <NeonSpectrumMasterVisualizer audioEngine={audioEngine} compact={true} />
+    </aside>
+  );
+};
+

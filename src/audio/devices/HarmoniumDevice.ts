@@ -1,5 +1,6 @@
 import { BaseDevice } from '../BaseDevice.ts';
 import { ShrutiMicrotonalEngine } from '../ShrutiMicrotonalEngine.ts';
+import { soundFontEngine } from '../SoundFontEngine.ts';
 
 export class HarmoniumDevice extends BaseDevice {
   public reedBank: 'single' | 'double' | 'triple' = 'double';
@@ -7,7 +8,7 @@ export class HarmoniumDevice extends BaseDevice {
   public droneCoupling: number = 0.4;
   private masterOutput: GainNode;
   private panner: StereoPannerNode | null = null;
-  private activeVoices: Map<number, { oscs: OscillatorNode[]; gain: GainNode }> = new Map();
+  private activeVoices: Map<number, { stop: (rel?: number) => void }> = new Map();
 
   constructor(ctx: AudioContext, id: string, name: string = 'Classical Harmonium') {
     super(ctx, id, name, 'harmonium', 2);
@@ -42,51 +43,34 @@ export class HarmoniumDevice extends BaseDevice {
     const now = Math.max(this.ctx.currentTime, time || this.ctx.currentTime);
     this.noteOff(note, now);
 
-    const freq = Math.max(45, Math.min(6000, ShrutiMicrotonalEngine.midiToShrutiFrequency(note, 130.81)));
-    const gain = this.ctx.createGain();
-    const peak = Math.max(0.1, velocity) * 0.65 * Math.max(0.3, this.airReservoir);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(peak, now + 0.025);
-    gain.gain.exponentialRampToValueAtTime(peak * 0.8, now + 0.4);
+    const shrutiFreq = ShrutiMicrotonalEngine.midiToShrutiFrequency(note, 130.81);
+    const stdFreq = 440 * Math.pow(2, (note - 69) / 12);
+    const shrutiCents = 1200 * Math.log2(Math.max(20, shrutiFreq) / Math.max(20, stdFreq));
+    const effVel = Math.max(0.15, Math.min(1.0, velocity * Math.max(0.35, this.airReservoir)));
 
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(Math.min(12000, freq * 5.0), now);
+    const voice = soundFontEngine.triggerSampleVoice(
+      this.ctx,
+      'harmonium',
+      note,
+      effVel,
+      this.panner || this.masterOutput,
+      now,
+      {
+        finePitchCents: shrutiCents,
+        sustainSec: 2.2,
+      }
+    );
 
-    const oscs: OscillatorNode[] = [];
-    const ratios = this.reedBank === 'single' ? [1] : this.reedBank === 'double' ? [1, 2] : [0.5, 1, 2];
-
-    ratios.forEach((ratio, idx) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = idx === 0 ? 'sawtooth' : 'triangle';
-      osc.frequency.setValueAtTime(freq * ratio, now);
-      osc.detune.setValueAtTime((idx - 0.5) * 5, now);
-      osc.connect(filter);
-      osc.start(now);
-      osc.stop(now + 2.6);
-      oscs.push(osc);
-    });
-
-    filter.connect(gain);
-    gain.connect(this.panner || this.masterOutput);
-    this.activeVoices.set(note, { oscs, gain });
+    if (voice) {
+      this.activeVoices.set(note, voice);
+    }
   }
 
   public noteOff(note: number, time: number = this.ctx.currentTime): void {
     const voice = this.activeVoices.get(note);
     if (!voice) return;
     this.activeVoices.delete(note);
-    const relTime = Math.max(this.ctx.currentTime, time || this.ctx.currentTime);
-    try {
-      voice.gain.gain.cancelScheduledValues(relTime);
-      voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.25), relTime);
-      voice.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + 0.14);
-      voice.oscs.forEach((o) => {
-        try {
-          o.stop(relTime + 0.16);
-        } catch (e) {}
-      });
-    } catch (e) {}
+    voice.stop(time);
   }
 
   public setParam(param: string, val: any): void {

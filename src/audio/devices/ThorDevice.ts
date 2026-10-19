@@ -168,22 +168,15 @@ export class ThorDevice extends BaseDevice {
 
     const relTime = Math.max(this.ctx.currentTime, time);
     const release = Math.max(0.03, Math.min(2.5, this.params.release));
-    const cur = Math.max(0.001, voice.ampGain.gain.value || 0.25);
 
     try {
-      voice.ampGain.gain.cancelScheduledValues(relTime);
-      voice.ampGain.gain.setValueAtTime(cur, relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        voice.ampGain.gain.cancelScheduledValues(relTime);
+        voice.ampGain.gain.setValueAtTime(Math.max(0.001, voice.ampGain.gain.value || 0.35), relTime);
+      }
       voice.ampGain.gain.exponentialRampToValueAtTime(0.0001, relTime + release);
       const stopAt = relTime + release + 0.02;
       voice.oscs.forEach((o) => o.stop(stopAt));
     } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        voice.oscs.forEach((o) => o.disconnect());
-        voice.filter.disconnect();
-        voice.ampGain.disconnect();
-      } catch (e) {}
-    }, Math.max(60, (relTime - this.ctx.currentTime + release) * 1000 + 80));
   }
 }

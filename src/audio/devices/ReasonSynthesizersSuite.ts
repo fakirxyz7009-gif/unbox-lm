@@ -1,5 +1,6 @@
 import { BaseDevice } from '../BaseDevice.ts';
 import { DeviceType } from '../types.ts';
+import { soundFontEngine } from '../SoundFontEngine.ts';
 
 interface PolyVoice {
   oscs: OscillatorNode[];
@@ -144,8 +145,10 @@ export class ReasonInstrumentBase extends BaseDevice {
     const stopTime = Math.max(this.ctx.currentTime, time);
     const rel = Math.max(0.02, Math.min(4.0, Number(this.params.release) || 0.25));
     try {
-      voice.amp.gain.cancelScheduledValues(stopTime);
-      voice.amp.gain.setValueAtTime(Math.max(0.0001, voice.amp.gain.value), stopTime);
+      if (stopTime <= this.ctx.currentTime + 0.005) {
+        voice.amp.gain.cancelScheduledValues(stopTime);
+        voice.amp.gain.setValueAtTime(Math.max(0.001, voice.amp.gain.value || 0.35), stopTime);
+      }
       voice.amp.gain.exponentialRampToValueAtTime(0.0001, stopTime + rel);
       voice.oscs.forEach((o) => {
         try {
@@ -859,8 +862,10 @@ export class KongDevice extends ReasonInstrumentBase {
   }
 }
 
-// 11. DR. OCTO REX: 8-Slot REX Loop Player
+// 11. DR. OCTO REX: 8-Slot REX Loop Player with Custom Audio Sample Import & Slice Triggering
 export class DrOctoRexDevice extends ReasonInstrumentBase {
+  public customSlots: Map<number, { name: string; buffer: AudioBuffer }> = new Map();
+
   constructor(ctx: AudioContext, id: string = 'dr_octo_rex_1', name: string = 'Dr. Octo Rex Loop Player') {
     super(ctx, id, name, 'dr_octo_rex', 3, {
       activeLoopSlot: 1, // 1..8
@@ -874,11 +879,48 @@ export class DrOctoRexDevice extends ReasonInstrumentBase {
     });
   }
 
+  public async loadSampleFile(slotIndex: number, file: File): Promise<void> {
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+    const cleanName = file.name.replace(/\.[^/.]+$/, '').slice(0, 22);
+    const slot = Math.max(1, Math.min(8, slotIndex));
+    this.customSlots.set(slot, { name: cleanName, buffer: audioBuffer });
+    this.params.activeLoopSlot = slot;
+    this.params.loopBank = `${cleanName}.rx2`;
+  }
+
   public noteOn(midiNote: number, velocity: number = 0.9, time: number = this.ctx.currentTime): void {
     if (!this.isPowered || this.isBypassed) return;
     const startTime = Math.max(this.ctx.currentTime, time);
     const sliceIdx = Math.abs(midiNote) % 16;
-    const slotOffset = ((Number(this.params.activeLoopSlot) || 1) - 1) * 18;
+    const activeSlot = Number(this.params.activeLoopSlot) || 1;
+    const custom = this.customSlots.get(activeSlot);
+
+    if (custom && custom.buffer) {
+      const src = this.ctx.createBufferSource();
+      src.buffer = custom.buffer;
+      const rate = Math.pow(2, (Number(this.params.slicePitch) || 0) / 12);
+      src.playbackRate.setValueAtTime(rate, startTime);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(this.resolveCutoffHz(this.params.cutoff), startTime);
+      filter.Q.setValueAtTime(this.resolveResonanceQ(this.params.resonance), startTime);
+
+      const amp = this.ctx.createGain();
+      const sliceDur = Math.max(0.08, custom.buffer.duration / 16);
+      const offsetSec = (sliceIdx / 16) * Math.max(0, custom.buffer.duration - sliceDur);
+      amp.gain.setValueAtTime(velocity * 0.9, startTime);
+      amp.gain.exponentialRampToValueAtTime(0.0001, startTime + Math.min(1.5, sliceDur * 1.4));
+
+      src.connect(filter);
+      filter.connect(amp);
+      amp.connect(this.masterOutput);
+      src.start(startTime, offsetSec, Math.min(1.6, sliceDur * 1.5));
+      return;
+    }
+
+    const slotOffset = (activeSlot - 1) * 18;
     const baseFreq = 65 + ((sliceIdx * 37 + slotOffset) % 340);
 
     const osc = this.ctx.createOscillator();
@@ -1309,54 +1351,16 @@ export class RadicalPianoDevice extends ReasonInstrumentBase {
     if (!this.isPowered || this.isBypassed) return;
     const startTime = Math.max(this.ctx.currentTime, time);
     this.noteOff(midiNote, startTime);
-    const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
 
-    const str1 = this.ctx.createOscillator();
-    str1.type = 'triangle';
-    str1.frequency.setValueAtTime(freq, startTime);
-
-    const str2 = this.ctx.createOscillator();
-    str2.type = 'sine';
-    str2.frequency.setValueAtTime(freq * 2, startTime);
-    str2.detune.setValueAtTime(3, startTime);
-
-    const tine = this.ctx.createOscillator();
-    tine.type = 'sine';
-    tine.frequency.setValueAtTime(freq * 4, startTime);
-    const tineGain = this.ctx.createGain();
-    tineGain.gain.setValueAtTime((Number(this.params.character) || 0.55) * 0.25, startTime);
-    tineGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.14);
-    tine.connect(tineGain);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(this.resolveCutoffHz(this.params.cutoff) * (0.5 + velocity * 0.7), startTime);
-
-    const amp = this.ctx.createGain();
-    const peak = Math.max(0.05, Math.min(1.0, velocity * 0.82));
-    amp.gain.setValueAtTime(0.0001, startTime);
-    amp.gain.linearRampToValueAtTime(peak, startTime + 0.004);
-    amp.gain.exponentialRampToValueAtTime(
-      Math.max(0.001, peak * this.params.sustain),
-      startTime + Math.max(0.15, this.params.decay)
+    soundFontEngine.triggerSampleVoice(
+      this.ctx,
+      'acoustic_grand_piano',
+      midiNote,
+      Math.max(0.15, Math.min(1.0, velocity)),
+      this.masterOutput,
+      startTime,
+      { sustainSec: Math.max(0.4, Number(this.params.decay) || 1.2) }
     );
-
-    str1.connect(filter);
-    str2.connect(filter);
-    tineGain.connect(filter);
-    filter.connect(amp);
-    amp.connect(this.masterOutput);
-
-    str1.start(startTime);
-    str2.start(startTime);
-    tine.start(startTime);
-
-    this.activeVoices.set(midiNote, {
-      oscs: [str1, str2, tine],
-      gains: [tineGain],
-      filters: [filter],
-      amp,
-    });
   }
 }
 

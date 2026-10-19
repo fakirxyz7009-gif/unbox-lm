@@ -96,6 +96,7 @@ export interface CVConnection {
   amount: number; // -1 to 1 scaling
   inverted?: boolean;
   color: string;
+  matrixEntryId?: string;
 }
 
 export interface CVMatrixEntry {

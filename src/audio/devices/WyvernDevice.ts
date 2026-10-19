@@ -252,8 +252,10 @@ export class WyvernDevice extends BaseDevice {
     const rel = Math.max(0.03, this.params.release || 0.35);
 
     try {
-      voice.gain.gain.cancelScheduledValues(releaseTime);
-      voice.gain.gain.setValueAtTime(Math.max(0.0001, voice.gain.gain.value), releaseTime);
+      if (releaseTime <= this.ctx.currentTime + 0.005) {
+        voice.gain.gain.cancelScheduledValues(releaseTime);
+        voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.35), releaseTime);
+      }
       voice.gain.gain.exponentialRampToValueAtTime(0.0001, releaseTime + rel);
 
       const stopAt = releaseTime + rel + 0.03;

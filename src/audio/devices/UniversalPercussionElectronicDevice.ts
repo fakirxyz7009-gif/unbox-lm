@@ -1,4 +1,5 @@
 import { BaseDevice } from '../BaseDevice.ts';
+import { soundFontEngine } from '../SoundFontEngine.ts';
 
 export class UniversalPercussionElectronicDevice extends BaseDevice {
   public instrumentName: string;
@@ -60,6 +61,45 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     const vel = Math.max(0.15, Math.min(1.2, velocity));
     const lowerName = this.instrumentName.toLowerCase();
 
+    const isTablaOrHandDrum =
+      lowerName.includes('tabla') ||
+      lowerName.includes('mridangam') ||
+      lowerName.includes('darbuka') ||
+      lowerName.includes('doumbek') ||
+      lowerName.includes('bata') ||
+      lowerName.includes('djembe') ||
+      lowerName.includes('conga') ||
+      lowerName.includes('bongo');
+    const isHeavyDrum =
+      lowerName.includes('drum') ||
+      lowerName.includes('timpani') ||
+      lowerName.includes('taiko') ||
+      lowerName.includes('cajon') ||
+      lowerName.includes('bodhran') ||
+      lowerName.includes('toms') ||
+      lowerName.includes('pahu');
+    const isPianoOrKeys =
+      lowerName.includes('piano') ||
+      lowerName.includes('rhodes') ||
+      lowerName.includes('wurlitzer') ||
+      lowerName.includes('clavinet') ||
+      lowerName.includes('harpsichord') ||
+      lowerName.includes('celesta');
+
+    if (isTablaOrHandDrum || isHeavyDrum || isPianoOrKeys) {
+      const preset = isTablaOrHandDrum ? 'tabla' : isHeavyDrum ? 'dhol' : 'acoustic_grand_piano';
+      soundFontEngine.triggerSampleVoice(
+        this.ctx,
+        preset,
+        note,
+        vel,
+        this.panner || this.masterOutput,
+        now,
+        { sustainSec: 0.4 + this.decay * 1.1 }
+      );
+      return;
+    }
+
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
 
@@ -67,105 +107,42 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     const oscs: OscillatorNode[] = [];
 
     if (this.category === 'percussion') {
-      const isTablaOrHandDrum =
-        lowerName.includes('tabla') ||
-        lowerName.includes('mridangam') ||
-        lowerName.includes('darbuka') ||
-        lowerName.includes('doumbek') ||
-        lowerName.includes('bata') ||
-        lowerName.includes('djembe') ||
-        lowerName.includes('conga') ||
-        lowerName.includes('bongo');
-      const isHeavyDrum =
-        lowerName.includes('drum') ||
-        lowerName.includes('timpani') ||
-        lowerName.includes('taiko') ||
-        lowerName.includes('cajon') ||
-        lowerName.includes('bodhran') ||
-        lowerName.includes('toms') ||
-        lowerName.includes('pahu');
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(Math.min(14000, freq * 2.2), now);
+      filter.Q.setValueAtTime(3.5 + this.brilliance * 5.0, now);
 
-      if (isTablaOrHandDrum) {
-        // Tuned hand-drum membrane + harmonic syahi ring + finger slap
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(Math.min(14000, freq * (4.0 + this.brilliance * 5.0)), now);
-        filter.Q.setValueAtTime(2.2, now);
+      const dur = 0.25 + this.decay * 1.1;
+      gain.gain.linearRampToValueAtTime(vel * 0.92, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
-        const dur = 0.32 + this.decay * 0.45;
-        gain.gain.linearRampToValueAtTime(vel * 0.95, now + 0.004);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      const osc1 = this.ctx.createOscillator();
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(freq, now);
+      osc1.connect(filter);
+      osc1.start(now);
+      osc1.stop(now + dur + 0.05);
+      oscs.push(osc1);
 
-        // Bayan / Bass body
-        const bOsc = this.ctx.createOscillator();
-        bOsc.type = 'sine';
-        bOsc.frequency.setValueAtTime(freq * 0.75, now);
-        bOsc.frequency.exponentialRampToValueAtTime(Math.max(45, freq * 0.5), now + 0.08);
-        bOsc.connect(filter);
-        bOsc.start(now);
-        bOsc.stop(now + dur + 0.05);
-        oscs.push(bOsc);
-
-        // Dayan / Singing harmonic head
-        const dOsc = this.ctx.createOscillator();
-        dOsc.type = 'triangle';
-        dOsc.frequency.setValueAtTime(freq * 1.25, now);
-        dOsc.frequency.exponentialRampToValueAtTime(freq, now + 0.02);
-        dOsc.connect(filter);
-        dOsc.start(now);
-        dOsc.stop(now + dur + 0.05);
-        oscs.push(dOsc);
-      } else {
-        filter.type = isHeavyDrum ? 'lowpass' : 'bandpass';
-        filter.frequency.setValueAtTime(Math.min(14000, isHeavyDrum ? freq * 2.8 : freq * 2.2), now);
-        filter.Q.setValueAtTime(isHeavyDrum ? 2.0 : 3.5 + this.brilliance * 5.0, now);
-
-        const dur = 0.25 + this.decay * 1.1;
-        gain.gain.linearRampToValueAtTime(vel * 0.92, now + 0.004);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-        const osc1 = this.ctx.createOscillator();
-        osc1.type = isHeavyDrum ? 'sine' : 'triangle';
-        if (isHeavyDrum) {
-          osc1.frequency.setValueAtTime(freq * 1.8, now);
-          osc1.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.6), now + 0.085);
-        } else {
-          osc1.frequency.setValueAtTime(freq, now);
-        }
-        osc1.connect(filter);
-        osc1.start(now);
-        osc1.stop(now + dur + 0.05);
-        oscs.push(osc1);
-
-        const osc2 = this.ctx.createOscillator();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(freq * (isHeavyDrum ? 1.5 : 2.75), now);
-        const metalGain = this.ctx.createGain();
-        metalGain.gain.value = 0.4;
-        osc2.connect(metalGain);
-        metalGain.connect(filter);
-        osc2.start(now);
-        osc2.stop(now + dur + 0.05);
-        oscs.push(osc2);
-      }
+      const osc2 = this.ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2.75, now);
+      const metalGain = this.ctx.createGain();
+      metalGain.gain.value = 0.4;
+      osc2.connect(metalGain);
+      metalGain.connect(filter);
+      osc2.start(now);
+      osc2.stop(now + dur + 0.05);
+      oscs.push(osc2);
     } else {
-      const isPianoOrKeys =
-        lowerName.includes('piano') ||
-        lowerName.includes('rhodes') ||
-        lowerName.includes('wurlitzer') ||
-        lowerName.includes('clavinet') ||
-        lowerName.includes('harpsichord') ||
-        lowerName.includes('celesta') ||
-        lowerName.includes('organ');
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(Math.min(18000, freq * (3.5 + this.brilliance * 5.0)), now);
-      filter.Q.setValueAtTime(isPianoOrKeys ? 1.4 : 2.8, now);
+      filter.Q.setValueAtTime(2.8, now);
 
-      const attack = isPianoOrKeys ? 0.006 : 0.02;
-      gain.gain.linearRampToValueAtTime(vel * 0.88, now + attack);
+      gain.gain.linearRampToValueAtTime(vel * 0.88, now + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
 
       const osc1 = this.ctx.createOscillator();
-      osc1.type = lowerName.includes('theremin') ? 'sine' : isPianoOrKeys ? 'triangle' : 'sawtooth';
+      osc1.type = lowerName.includes('theremin') ? 'sine' : 'sawtooth';
       osc1.frequency.setValueAtTime(freq, now);
       osc1.connect(filter);
       osc1.start(now);
@@ -173,8 +150,8 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
       oscs.push(osc1);
 
       const osc2 = this.ctx.createOscillator();
-      osc2.type = isPianoOrKeys ? 'sine' : 'square';
-      osc2.frequency.setValueAtTime(freq * (isPianoOrKeys ? 2.0 : 1.004), now);
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(freq * 1.004, now);
       const chorusGain = this.ctx.createGain();
       chorusGain.gain.value = 0.35;
       osc2.connect(chorusGain);
@@ -196,8 +173,10 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     this.activeVoices.delete(note);
     const relTime = time !== undefined ? Math.max(this.ctx.currentTime, time) : this.ctx.currentTime;
     try {
-      voice.gain.gain.cancelScheduledValues(relTime);
-      voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.25), relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        voice.gain.gain.cancelScheduledValues(relTime);
+        voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.25), relTime);
+      }
       voice.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + 0.14);
       voice.oscs.forEach((o) => {
         try {

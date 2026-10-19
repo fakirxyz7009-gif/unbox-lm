@@ -192,27 +192,17 @@ export class EuropaDevice extends BaseDevice {
 
     const relTime = Math.max(this.ctx.currentTime, time);
     const release = Math.max(0.03, Math.min(2.5, this.params.release));
-    const cur = Math.max(0.001, voice.amp.gain.value || 0.25);
 
     try {
-      voice.amp.gain.cancelScheduledValues(relTime);
-      voice.amp.gain.setValueAtTime(cur, relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        voice.amp.gain.cancelScheduledValues(relTime);
+        voice.amp.gain.setValueAtTime(Math.max(0.001, voice.amp.gain.value || 0.35), relTime);
+      }
       voice.amp.gain.exponentialRampToValueAtTime(0.0001, relTime + release);
       const stopAt = relTime + release + 0.02;
       voice.osc1.stop(stopAt);
       voice.osc2.stop(stopAt);
       voice.subOsc.stop(stopAt);
     } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        voice.osc1.disconnect();
-        voice.osc2.disconnect();
-        voice.subOsc.disconnect();
-        voice.filter.disconnect();
-        voice.formantFilter.disconnect();
-        voice.amp.disconnect();
-      } catch (e) {}
-    }, Math.max(60, (relTime - this.ctx.currentTime + release) * 1000 + 80));
   }
 }

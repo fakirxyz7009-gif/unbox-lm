@@ -120,28 +120,37 @@ export class SubtractorDevice extends BaseDevice {
     }
   }
 
+  private lastFreq: number = 0;
+
   public noteOn(midiNote: number, velocity: number = 0.85, time: number = this.ctx.currentTime): void {
     if (!this.isPowered || this.isBypassed) return;
     const startTime = Math.max(this.ctx.currentTime, time);
     this.noteOff(midiNote, startTime);
 
     const freq = Math.max(20, Math.min(18000, 440 * Math.pow(2, (midiNote - 69) / 12)));
+    const prevFreq = this.lastFreq > 0 ? this.lastFreq : freq;
+    const glideTime = Math.max(0.005, Math.min(0.35, Number(this.params.glide) || 0.03));
+    this.lastFreq = freq;
+
     const osc1Freq = Math.max(20, Math.min(18000, freq * Math.pow(2, this.params.osc1Octave)));
     const osc2Freq = Math.max(20, Math.min(18000, freq * Math.pow(2, this.params.osc2Octave)));
     const subFreq = Math.max(20, freq * 0.5);
 
     const osc1 = this.ctx.createOscillator();
     osc1.type = this.params.osc1Type;
-    osc1.frequency.setValueAtTime(osc1Freq, startTime);
+    osc1.frequency.setValueAtTime(Math.max(20, prevFreq * Math.pow(2, this.params.osc1Octave)), startTime);
+    if (prevFreq !== freq) osc1.frequency.exponentialRampToValueAtTime(osc1Freq, startTime + glideTime);
 
     const osc2 = this.ctx.createOscillator();
     osc2.type = this.params.osc2Type;
-    osc2.frequency.setValueAtTime(osc2Freq, startTime);
+    osc2.frequency.setValueAtTime(Math.max(20, prevFreq * Math.pow(2, this.params.osc2Octave)), startTime);
+    if (prevFreq !== freq) osc2.frequency.exponentialRampToValueAtTime(osc2Freq, startTime + glideTime);
     osc2.detune.setValueAtTime(this.params.osc2Detune, startTime);
 
     const subOsc = this.ctx.createOscillator();
     subOsc.type = 'triangle';
-    subOsc.frequency.setValueAtTime(subFreq, startTime);
+    subOsc.frequency.setValueAtTime(Math.max(20, prevFreq * 0.5), startTime);
+    if (prevFreq !== freq) subOsc.frequency.exponentialRampToValueAtTime(subFreq, startTime + glideTime);
 
     const subGain = this.ctx.createGain();
     subGain.gain.setValueAtTime(this.params.subOscLevel, startTime);
@@ -191,26 +200,17 @@ export class SubtractorDevice extends BaseDevice {
 
     const relTime = Math.max(this.ctx.currentTime, time);
     const release = Math.max(0.03, Math.min(2.5, this.params.release));
-    const currentGain = Math.max(0.001, voice.gain.gain.value || 0.25);
 
     try {
-      voice.gain.gain.cancelScheduledValues(relTime);
-      voice.gain.gain.setValueAtTime(currentGain, relTime);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        voice.gain.gain.cancelScheduledValues(relTime);
+        voice.gain.gain.setValueAtTime(Math.max(0.001, voice.gain.gain.value || 0.35), relTime);
+      }
       voice.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + release);
       const stopAt = relTime + release + 0.02;
       voice.osc1.stop(stopAt);
       voice.osc2.stop(stopAt);
       voice.subOsc.stop(stopAt);
     } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        voice.osc1.disconnect();
-        voice.osc2.disconnect();
-        voice.subOsc.disconnect();
-        voice.filter.disconnect();
-        voice.gain.disconnect();
-      } catch (e) {}
-    }, Math.max(60, (relTime - this.ctx.currentTime + release) * 1000 + 80));
   }
 }

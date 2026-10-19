@@ -134,35 +134,8 @@ export class ReasonEffectBase extends BaseDevice {
     this.applyDspParams();
   }
 
-  // Allows auditioning any FX or Utility directly from its rack faceplate or sequencer
-  public noteOn(midiNote: number = 60, velocity: number = 0.85, time: number = this.ctx.currentTime): void {
-    if (!this.isPowered || this.isBypassed) return;
-    const startTime = Math.max(this.ctx.currentTime, time);
-    const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
-
-    const testOsc = this.ctx.createOscillator();
-    testOsc.type = 'sawtooth';
-    testOsc.frequency.setValueAtTime(freq, startTime);
-
-    const subOsc = this.ctx.createOscillator();
-    subOsc.type = 'triangle';
-    subOsc.frequency.setValueAtTime(freq * 1.5, startTime);
-
-    const env = this.ctx.createGain();
-    env.gain.setValueAtTime(0.0001, startTime);
-    env.gain.linearRampToValueAtTime(velocity * 0.55, startTime + 0.01);
-    env.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.32);
-
-    testOsc.connect(env);
-    subOsc.connect(env);
-    env.connect(this.inputL);
-    env.connect(this.inputR);
-
-    testOsc.start(startTime);
-    subOsc.start(startTime);
-    testOsc.stop(startTime + 0.35);
-    subOsc.stop(startTime + 0.35);
-  }
+  // Pure FX and Utility modules are signal processors — noteOn is a no-op so they never emit raw sawtooth tones
+  public noteOn(_midiNote: number = 60, _velocity: number = 0.85, _time: number = this.ctx.currentTime): void {}
 
   public noteOff(_midiNote: number, _time?: number): void {}
 }
@@ -367,18 +340,28 @@ export class SoftubeAmpDevice extends ReasonEffectBase {
   }
 }
 
-// 13. COMBINATOR: Customizable Multi-Device Container Macro Layout
+// 13. COMBINATOR: Polyphonic Synthesizer & Multi-Device Macro Workstation
 export class CombinatorDevice extends ReasonEffectBase {
-  constructor(ctx: AudioContext, id: string = 'combinator_1', name: string = 'Combinator Multi-Device Macro Patch') {
-    super(ctx, id, name, 'combinator', 3, {
-      combiPatchName: 'Hyper-Techno SuperStack.cmb',
-      rotary1Name: 'FILTER CUTOFF',
-      rotary1Val: 0.65,
-      rotary2Name: 'WAVETABLE MORPH',
-      rotary2Val: 0.48,
-      rotary3Name: 'REVERB SPACE',
-      rotary3Val: 0.55,
-      rotary4Name: 'SUB OVERDRIVE',
+  private activeVoices: Map<number, { oscs: OscillatorNode[]; gain: GainNode }> = new Map();
+
+  constructor(ctx: AudioContext, id: string = 'combinator_1', name: string = 'COMBINATOR Polyphonic Synthesizer') {
+    super(ctx, id, name, 'combinator', 2, {
+      combiPatchName: 'Init Patch',
+      osc1Wave: 0.65,
+      osc2Wave: 0.48,
+      filterCutoff: 0.72,
+      amrMod: 0.45,
+      ampLevel: 0.85,
+      lfoRate: 0.4,
+      delayMix: 0.32,
+      reverbMix: 0.28,
+      rotary1Name: 'FILTER',
+      rotary1Val: 0.72,
+      rotary2Name: 'AMR',
+      rotary2Val: 0.45,
+      rotary3Name: 'AMP',
+      rotary3Val: 0.85,
+      rotary4Name: 'LFO',
       rotary4Val: 0.4,
       btn1Name: 'ARP ENABLE',
       btn1Active: true,
@@ -390,6 +373,62 @@ export class CombinatorDevice extends ReasonEffectBase {
       btn4Active: true,
       runPatternDevices: true,
     });
+  }
+
+  public override noteOn(midiNote: number = 60, velocity: number = 0.85, time: number = this.ctx.currentTime): void {
+    if (!this.isPowered || this.isBypassed) return;
+    const startTime = Math.max(this.ctx.currentTime, time);
+    this.noteOff(midiNote, startTime);
+
+    const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
+    const osc1 = this.ctx.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(freq, startTime);
+
+    const osc2 = this.ctx.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(freq * 1.003, startTime);
+
+    const vcf = this.ctx.createBiquadFilter();
+    vcf.type = 'lowpass';
+    const cutNorm = Number(this.params.filterCutoff ?? this.params.rotary1Val ?? 0.72);
+    vcf.frequency.setValueAtTime(Math.max(120, Math.min(16000, 180 * Math.pow(65, cutNorm))), startTime);
+    vcf.Q.setValueAtTime(2.2, startTime);
+
+    const env = this.ctx.createGain();
+    const peak = Math.max(0.08, Math.min(1.0, velocity * 0.65));
+    env.gain.setValueAtTime(0.0001, startTime);
+    env.gain.linearRampToValueAtTime(peak, startTime + 0.01);
+    env.gain.exponentialRampToValueAtTime(peak * 0.6, startTime + 0.25);
+    env.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.4);
+
+    osc1.connect(vcf);
+    osc2.connect(vcf);
+    vcf.connect(env);
+    env.connect(this.outputL);
+    env.connect(this.outputR);
+
+    osc1.start(startTime);
+    osc2.start(startTime);
+    osc1.stop(startTime + 1.45);
+    osc2.stop(startTime + 1.45);
+
+    this.activeVoices.set(midiNote, { oscs: [osc1, osc2], gain: env });
+  }
+
+  public override noteOff(midiNote: number, time: number = this.ctx.currentTime): void {
+    const v = this.activeVoices.get(midiNote);
+    if (!v) return;
+    this.activeVoices.delete(midiNote);
+    const rel = Math.max(this.ctx.currentTime, time);
+    try {
+      v.gain.gain.setTargetAtTime(0.0001, rel, 0.04);
+      v.oscs.forEach((o) => {
+        try {
+          o.stop(rel + 0.16);
+        } catch (e) {}
+      });
+    } catch (e) {}
   }
 }
 

@@ -57,13 +57,30 @@ export const CablePatchBay: React.FC<CablePatchBayProps> = ({
     setJackPositions(newPositions);
   };
 
+  const [swayPhase, setSwayPhase] = useState<number>(0);
+
   useEffect(() => {
     if (!isBackView) return;
     updatePositions();
-    const timer = setTimeout(updatePositions, 100);
+    const t1 = setTimeout(updatePositions, 120);
+    const t2 = setTimeout(updatePositions, 320);
+    const t3 = setTimeout(updatePositions, 540);
     window.addEventListener('resize', updatePositions);
+
+    let rafId: number;
+    const start = performance.now();
+    const animateSway = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      setSwayPhase(elapsed);
+      rafId = requestAnimationFrame(animateSway);
+    };
+    rafId = requestAnimationFrame(animateSway);
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updatePositions);
     };
   }, [isBackView, audioConnections, cvConnections]);
@@ -87,14 +104,16 @@ export const CablePatchBay: React.FC<CablePatchBayProps> = ({
 
   if (!isBackView) return null;
 
-  // Helper to construct realistic catenary curve with sag
-  const getSagPath = (p1: Point, p2: Point) => {
+  // Helper to construct realistic catenary curve with sag + gentle physics pendulum sway
+  const getSagPath = (p1: Point, p2: Point, seed: number = 0) => {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const sag = Math.min(180, 40 + dist * 0.22);
-    const midX = (p1.x + p2.x) / 2;
-    const midY = Math.max(p1.y, p2.y) + sag;
+    const sag = Math.min(185, 42 + dist * 0.24);
+    const swayX = Math.sin(swayPhase * 1.9 + seed * 1.7) * Math.min(10, 3 + dist * 0.015);
+    const swayY = Math.cos(swayPhase * 1.3 + seed) * 2.5;
+    const midX = (p1.x + p2.x) / 2 + swayX;
+    const midY = Math.max(p1.y, p2.y) + sag + swayY;
     return `M ${p1.x} ${p1.y} Q ${midX} ${midY}, ${p2.x} ${p2.y}`;
   };
 

@@ -1,5 +1,6 @@
 import { BaseDevice } from '../BaseDevice.ts';
 import { ShrutiMicrotonalEngine } from '../ShrutiMicrotonalEngine.ts';
+import { soundFontEngine } from '../SoundFontEngine.ts';
 
 export class BansuriDevice extends BaseDevice {
   public breathPressure: number = 0.85;
@@ -8,7 +9,8 @@ export class BansuriDevice extends BaseDevice {
   public ragaScale: string = 'Bilawal (Major)';
   private masterOutput: GainNode;
   private panner: StereoPannerNode | null = null;
-  private activeOscs: Map<number, { oscs: OscillatorNode[]; gain: GainNode; filter: BiquadFilterNode }> = new Map();
+  private activeVoices: Map<number, { stop: (rel?: number) => void }> = new Map();
+  private lastMidiNote: number = 60;
 
   constructor(ctx: AudioContext, id: string, name: string = 'Bansuri Bamboo Flute') {
     super(ctx, id, name, 'bansuri', 2);
@@ -50,60 +52,41 @@ export class BansuriDevice extends BaseDevice {
     const now = Math.max(this.ctx.currentTime, time || this.ctx.currentTime);
     this.noteOff(note, now);
 
-    const rawFreq = ShrutiMicrotonalEngine.midiToShrutiFrequency(note, 261.63, this.ragaScale) * (1 + this.meendBending);
-    const freq = Math.max(55, Math.min(8000, rawFreq));
+    // Compute exact Shruti microtonal deviation in cents relative to 12-TET + user Meend offset
+    const shrutiFreq = ShrutiMicrotonalEngine.midiToShrutiFrequency(note, 261.63, this.ragaScale);
+    const stdFreq = 440 * Math.pow(2, (note - 69) / 12);
+    const shrutiCents = 1200 * Math.log2(Math.max(20, shrutiFreq) / Math.max(20, stdFreq));
+    const meendCents = this.meendBending * 200;
 
-    const osc1 = this.ctx.createOscillator();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(freq * 0.97, now); // Subtle bamboo meend glide-in
-    osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.045);
+    const effVel = Math.max(0.15, Math.min(1.0, velocity * Math.max(0.35, this.breathPressure)));
+    const glideDur = Math.max(0.055, Math.min(0.24, 0.075 + Math.abs(this.meendBending) * 0.35));
 
-    const osc2 = this.ctx.createOscillator();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * 2.0, now);
+    const voice = soundFontEngine.triggerSampleVoice(
+      this.ctx,
+      'bansuri',
+      note,
+      effVel,
+      this.panner || this.masterOutput,
+      now,
+      {
+        glideFromMidi: this.lastMidiNote,
+        glideDurationSec: glideDur,
+        finePitchCents: shrutiCents + meendCents,
+        sustainSec: 2.6,
+      }
+    );
 
-    const h2Gain = this.ctx.createGain();
-    h2Gain.gain.value = 0.28;
-    osc2.connect(h2Gain);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(Math.min(14000, freq * 3.8), now);
-    filter.Q.setValueAtTime(1.8, now);
-
-    const gain = this.ctx.createGain();
-    const peak = Math.max(0.1, velocity) * 0.85 * Math.max(0.3, this.breathPressure);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(peak, now + 0.04);
-    gain.gain.exponentialRampToValueAtTime(peak * 0.78, now + 0.35);
-
-    osc1.connect(filter);
-    h2Gain.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.panner || this.masterOutput);
-
-    osc1.start(now);
-    osc2.start(now);
-    osc1.stop(now + 2.8);
-    osc2.stop(now + 2.8);
-    this.activeOscs.set(note, { oscs: [osc1, osc2], gain, filter });
+    this.lastMidiNote = note;
+    if (voice) {
+      this.activeVoices.set(note, voice);
+    }
   }
 
   public noteOff(note: number, time: number = this.ctx.currentTime): void {
-    const active = this.activeOscs.get(note);
+    const active = this.activeVoices.get(note);
     if (!active) return;
-    this.activeOscs.delete(note);
-    const relTime = Math.max(this.ctx.currentTime, time || this.ctx.currentTime);
-    try {
-      active.gain.gain.cancelScheduledValues(relTime);
-      active.gain.gain.setValueAtTime(Math.max(0.001, active.gain.gain.value || 0.25), relTime);
-      active.gain.gain.exponentialRampToValueAtTime(0.0001, relTime + 0.16);
-      active.oscs.forEach((o) => {
-        try {
-          o.stop(relTime + 0.18);
-        } catch (e) {}
-      });
-    } catch (e) {}
+    this.activeVoices.delete(note);
+    active.stop(time);
   }
 
   public setParam(param: string, val: any): void {

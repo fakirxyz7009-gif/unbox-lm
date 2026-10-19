@@ -85,20 +85,54 @@ export class MonotoneDevice extends BaseDevice {
     }
   }
 
+  private lastFreq: number = 0;
+
   public noteOn(midiNote: number, velocity: number = 0.9, time: number = this.ctx.currentTime): void {
     if (!this.isPowered || this.isBypassed) return;
     const startTime = Math.max(this.ctx.currentTime, time);
-    this.noteOff(midiNote, startTime);
-
     const freq = Math.max(20, Math.min(16000, 440 * Math.pow(2, (midiNote - 69) / 12)));
+    const glideTime = Math.max(0.015, Math.min(0.45, Number(this.params.glide) || 0.055));
+
+    // 808 Mono-Legato Slide: If a voice is already active and overlapping, glide its frequency smoothly without retriggering click
+    if (this.currentVoice && this.lastFreq > 0 && startTime <= this.currentVoiceStopTime) {
+      try {
+        const v = this.currentVoice;
+        v.osc.frequency.cancelScheduledValues(startTime);
+        v.osc.frequency.setValueAtTime(this.lastFreq, startTime);
+        v.osc.frequency.exponentialRampToValueAtTime(freq, startTime + glideTime);
+
+        v.sub.frequency.cancelScheduledValues(startTime);
+        v.sub.frequency.setValueAtTime(Math.max(20, this.lastFreq * 0.5), startTime);
+        v.sub.frequency.exponentialRampToValueAtTime(Math.max(20, freq * 0.5), startTime + glideTime);
+
+        const decay = Math.max(0.08, this.params.decay);
+        v.amp.gain.cancelScheduledValues(startTime);
+        v.amp.gain.setValueAtTime(Math.max(0.2, velocity * 0.88), startTime);
+        v.amp.gain.exponentialRampToValueAtTime(0.0001, startTime + decay * 1.8);
+        this.lastFreq = freq;
+        this.currentVoiceStopTime = startTime + decay * 1.8;
+        return;
+      } catch (e) {}
+    }
+
+    this.noteOff(midiNote, startTime);
 
     const osc = this.ctx.createOscillator();
     osc.type = this.params.waveform;
-    osc.frequency.setValueAtTime(freq, startTime);
+    const startFreq = this.lastFreq > 0 ? this.lastFreq : freq;
+    osc.frequency.setValueAtTime(startFreq, startTime);
+    if (startFreq !== freq) {
+      osc.frequency.exponentialRampToValueAtTime(freq, startTime + glideTime);
+    }
 
     const sub = this.ctx.createOscillator();
     sub.type = 'sine';
-    sub.frequency.setValueAtTime(Math.max(20, freq * 0.5), startTime);
+    const startSub = Math.max(20, startFreq * 0.5);
+    sub.frequency.setValueAtTime(startSub, startTime);
+    if (startFreq !== freq) {
+      sub.frequency.exponentialRampToValueAtTime(Math.max(20, freq * 0.5), startTime + glideTime);
+    }
+    this.lastFreq = freq;
 
     const subGain = this.ctx.createGain();
     subGain.gain.setValueAtTime(this.params.subLevel, startTime);
@@ -115,7 +149,8 @@ export class MonotoneDevice extends BaseDevice {
     filter.frequency.exponentialRampToValueAtTime(Math.max(40, baseCutoff), startTime + decay);
 
     const amp = this.ctx.createGain();
-    amp.gain.setValueAtTime(Math.max(0.05, velocity) * 0.88, startTime);
+    const peakGain = Math.max(0.05, velocity) * 0.88;
+    amp.gain.setValueAtTime(peakGain, startTime);
     amp.gain.exponentialRampToValueAtTime(0.0001, startTime + decay * 1.6);
 
     osc.connect(filter);
@@ -127,7 +162,10 @@ export class MonotoneDevice extends BaseDevice {
     sub.start(startTime);
 
     this.currentVoice = { osc, sub, filter, amp };
+    this.currentVoiceStopTime = startTime + decay * 1.6;
   }
+
+  private currentVoiceStopTime: number = 0;
 
   public noteOff(_midiNote: number, time: number = this.ctx.currentTime): void {
     if (!this.currentVoice) return;
@@ -135,18 +173,13 @@ export class MonotoneDevice extends BaseDevice {
     this.currentVoice = null;
     const relTime = Math.max(this.ctx.currentTime, time);
     try {
-      v.amp.gain.cancelScheduledValues(relTime);
-      v.amp.gain.setTargetAtTime(0.0001, relTime, 0.02);
+      if (relTime <= this.ctx.currentTime + 0.005) {
+        v.amp.gain.cancelScheduledValues(relTime);
+        v.amp.gain.setValueAtTime(Math.max(0.001, v.amp.gain.value || 0.35), relTime);
+      }
+      v.amp.gain.exponentialRampToValueAtTime(0.0001, relTime + 0.06);
       v.osc.stop(relTime + 0.08);
       v.sub.stop(relTime + 0.08);
-      setTimeout(() => {
-        try {
-          v.osc.disconnect();
-          v.sub.disconnect();
-          v.filter.disconnect();
-          v.amp.disconnect();
-        } catch (e) {}
-      }, Math.max(60, (relTime - this.ctx.currentTime) * 1000 + 100));
     } catch (e) {}
   }
 }

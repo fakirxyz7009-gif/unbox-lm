@@ -351,10 +351,11 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     if (!dev) return;
     audioEngine.resumeContext();
     if (dev.noteOn) {
+      const now = audioEngine.ctx.currentTime;
       const all = [midiNote, ...(chordNotes || [])];
       all.forEach((n) => {
-        dev.noteOn!(n, velocity);
-        setTimeout(() => dev.noteOff?.(n), 220);
+        dev.noteOn!(n, velocity, now);
+        dev.noteOff?.(n, now + 0.22);
       });
     } else if (dev.type === 'redrum' || dev.type === 'mimic') {
       (dev as any).triggerPad?.(((midiNote % 8) + 8) % 8, velocity);
