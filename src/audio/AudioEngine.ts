@@ -68,7 +68,7 @@ import {
 } from './devices/ReasonEffectsAndUtilitiesSuite.ts';
 import { CVEngine } from './CVEngine.ts';
 import { sharedAudioContext } from './AudioEngineGraph.ts';
-import { AudioConnection, CVConnection, DeviceType, TelemetryData, SequencerTrack, SequencerNote } from './types.ts';
+import { AudioConnection, CVConnection, DeviceType, TelemetryData, SequencerTrack, SequencerNote, PlaybackMode } from './types.ts';
 
 export interface TrackChannelStripNodes {
   gainL: GainNode;
@@ -254,7 +254,7 @@ export class AudioEngine {
   public loopStartStep: number = 0;
   public loopEndStep: number = 16;
   public currentStep: number = 0;
-  public playbackMode: 'song_arrangement' | 'pattern_loop' = 'song_arrangement';
+  public playbackMode: PlaybackMode = 'song_arrangement';
   public currentSongBar: number = 0;
   public totalSongBars: number = 16;
   public activeArrangementSection: string = 'BAR 01 // INTRO & GROOVE';
@@ -716,6 +716,15 @@ export class AudioEngine {
         break;
       case 'tumbi':
         dev = new TumbiDevice(this.ctx, id, customName || 'Tumbi Folk Resonator');
+        break;
+      case 'sitar':
+        dev = new UniversalWorldInstrumentDevice(this.ctx, id, customName || 'Ravi Sitar (Acoustic Plucked)', 'string');
+        break;
+      case 'sarod':
+        dev = new UniversalWorldInstrumentDevice(this.ctx, id, customName || 'Ali Akbar Sarod (Fretless)', 'string');
+        break;
+      case 'santoor':
+        dev = new UniversalWorldInstrumentDevice(this.ctx, id, customName || 'Kashmiri 100-String Santoor', 'string');
         break;
       case 'world_instrument': {
         const name = customName || 'World Instrument';
@@ -1691,7 +1700,10 @@ export class AudioEngine {
     }
   }
 
-  public playAllTracksTogether(): void {
+  public playAllTracksTogether(mode?: PlaybackMode | string): void {
+    if (mode) {
+      this.playbackMode = mode as PlaybackMode;
+    }
     this.tracks.forEach((t) => {
       t.solo = false;
       t.mute = false;
@@ -1702,6 +1714,18 @@ export class AudioEngine {
     } else {
       this.notify();
     }
+  }
+
+  public jumpToSongBar(bar: number): void {
+    this.currentSongBar = Math.max(0, Math.min(bar, this.totalSongBars - 1));
+    this.currentStep = (this.currentSongBar * 16) % (this.patternLength || 16);
+    this.activeArrangementSection = `BAR ${String(this.currentSongBar + 1).padStart(2, '0')}`;
+    this.notify();
+  }
+
+  public loadReferenceStudioRack(): void {
+    this.initDefaultSession();
+    this.notify();
   }
 
   public switchPatternBank(newIndex: number): void {
@@ -2043,7 +2067,7 @@ export class AudioEngine {
 
       // Detect active Arrangement Clip in currentSongBar when in song_arrangement mode
       let activeClip = null;
-      if (this.playbackMode === 'song_arrangement' && track.arrangementClips && track.arrangementClips.length > 0) {
+      if ((this.playbackMode === 'song_arrangement' || this.playbackMode === 'song') && track.arrangementClips && track.arrangementClips.length > 0) {
         activeClip =
           track.arrangementClips.find(
             (c) => !c.muted && this.currentSongBar >= c.startBar && this.currentSongBar < c.startBar + c.lengthBars
@@ -2290,6 +2314,9 @@ export class AudioEngine {
       case 'flex': return new FlexDevice(ctx, id, name);
       case 'wyvern': return new WyvernDevice(ctx, id, name);
       case 'ember': return new EmberDevice(ctx, id, name);
+      case 'sitar': return new UniversalWorldInstrumentDevice(ctx, id, name, 'string');
+      case 'sarod': return new UniversalWorldInstrumentDevice(ctx, id, name, 'string');
+      case 'santoor': return new UniversalWorldInstrumentDevice(ctx, id, name, 'string');
       case 'world_instrument': return new UniversalWorldInstrumentDevice(ctx, id, name, 'string');
       case 'percussion_electronic': return new UniversalPercussionElectronicDevice(ctx, id, name, 'percussion');
       case 'malstrom': return new MalstromDevice(ctx, id, name);
@@ -2389,10 +2416,14 @@ export class AudioEngine {
           }
         });
       }
-      if (liveDev.type === 'dr_octo_rex' && (liveDev as DrOctoRexDevice).customLoopBuffers) {
-        (liveDev as DrOctoRexDevice).customLoopBuffers.forEach((buf, slot) => {
-          (offDev as DrOctoRexDevice).customLoopBuffers.set(slot, buf);
-        });
+      if (liveDev.type === 'dr_octo_rex') {
+        const liveRex = liveDev as DrOctoRexDevice;
+        const offRex = offDev as DrOctoRexDevice;
+        if (liveRex.customSlots) {
+          liveRex.customSlots.forEach((val, slot) => {
+            offRex.customSlots.set(slot, val);
+          });
+        }
       }
 
       // Wire device stereo outputs through per-track Gain + StereoPanner into Offline Master Bus
@@ -2606,7 +2637,7 @@ export class AudioEngine {
     const colorPalette = ['#f43f5e', '#0ea5e9', '#22c55e', '#a855f7', '#f97316', '#06b6d4', '#8b5cf6'];
     this.tracks.forEach((t, idx) => {
       t.color = colorPalette[idx % colorPalette.length];
-      t.arrangementClips.forEach((c) => {
+      t.arrangementClips?.forEach((c) => {
         c.color = t.color;
       });
     });

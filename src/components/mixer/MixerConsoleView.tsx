@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AudioEngine } from '../../audio/AudioEngine.ts';
+import { AudioEngine, audioEngine } from '../../audio/AudioEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
 import { MixerTrackState, MixerFxSlot } from '../../audio/types.ts';
 import { Knob } from '../Knob.tsx';

@@ -40,7 +40,7 @@ export class ReasonEffectBase extends BaseDevice {
     this.filterNode.Q.value = 2.4;
 
     this.shaperNode = ctx.createWaveShaper();
-    this.shaperNode.curve = this.makeDriveCurve(0.35);
+    this.shaperNode.curve = this.makeDriveCurve(0.35) as any;
 
     this.delayNode = ctx.createDelay(2.0);
     this.delayNode.delayTime.value = 0.22;
@@ -124,7 +124,7 @@ export class ReasonEffectBase extends BaseDevice {
     this.filterNode.frequency.setTargetAtTime(cut, now, 0.02);
     this.filterNode.Q.setTargetAtTime(Math.max(0.5, Math.min(18, Number(this.params.resonance) || 2.5)), now, 0.02);
 
-    this.shaperNode.curve = this.makeDriveCurve(Number(this.params.drive) || 0.35);
+    this.shaperNode.curve = this.makeDriveCurve(Number(this.params.drive) || 0.35) as any;
     this.delayNode.delayTime.setTargetAtTime(Math.max(0.005, Math.min(1.5, Number(this.params.delayTime) || 0.18)), now, 0.02);
     this.feedbackGain.gain.setTargetAtTime(Math.max(0, Math.min(0.88, Number(this.params.feedback) || 0.3)), now, 0.02);
   }

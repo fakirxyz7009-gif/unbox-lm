@@ -211,7 +211,7 @@ export class MalstromDevice extends ReasonInstrumentBase {
     grainGain.connect(oscA.frequency);
 
     const shaper = this.ctx.createWaveShaper();
-    shaper.curve = this.buildSaturationCurve(Number(this.params.drive) || 0.45);
+    shaper.curve = this.buildSaturationCurve(Number(this.params.drive) || 0.45) as any;
 
     const filterA = this.ctx.createBiquadFilter();
     filterA.type = 'lowpass';
@@ -978,7 +978,7 @@ export class UmpfDevice extends ReasonInstrumentBase {
     osc.frequency.exponentialRampToValueAtTime(pad === 0 ? 44 : startF * 0.45, startTime + 0.08);
 
     const shaper = this.ctx.createWaveShaper();
-    shaper.curve = this.buildSaturationCurve(Number(this.params.tapeDrive) || 0.5);
+    shaper.curve = this.buildSaturationCurve(Number(this.params.tapeDrive) || 0.5) as any;
 
     const amp = this.ctx.createGain();
     const dur = pad === 0 ? 0.28 : 0.18;

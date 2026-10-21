@@ -206,7 +206,7 @@ export class WyvernDevice extends BaseDevice {
     filter.Q.setValueAtTime(this.resolveResonanceQ(this.params.resonance), startTime);
 
     const shaper = this.ctx.createWaveShaper();
-    shaper.curve = this.makeDragonCurve(this.params.dragonDrive ?? 0.35);
+    shaper.curve = this.makeDragonCurve(this.params.dragonDrive ?? 0.35) as any;
 
     const voiceGain = this.ctx.createGain();
     const peakGain = Math.max(0.05, Math.min(1.0, velocity * 0.52));

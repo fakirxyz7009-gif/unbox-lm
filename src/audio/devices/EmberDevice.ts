@@ -190,7 +190,7 @@ export class EmberDevice extends BaseDevice {
     ladderFilter.Q.setValueAtTime(this.resolveResonanceQ(this.params.resonance), startTime);
 
     const shaper = this.ctx.createWaveShaper();
-    shaper.curve = this.makeTubeWarmthCurve(this.params.warmthDrive ?? 0.4);
+    shaper.curve = this.makeTubeWarmthCurve(this.params.warmthDrive ?? 0.4) as any;
 
     const voiceGain = this.ctx.createGain();
     const peakGain = Math.max(0.05, Math.min(1.0, velocity * 0.54));

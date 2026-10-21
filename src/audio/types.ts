@@ -27,6 +27,9 @@ export type DeviceType =
   | 'tanpura'
   | 'dhol'
   | 'tumbi'
+  | 'sitar'
+  | 'sarod'
+  | 'santoor'
   | 'world_instrument'
   | 'percussion_electronic'
   | 'wyvern'
@@ -66,7 +69,8 @@ export type DeviceType =
   | 'combinator'
   | 'rpg8'
   | 'midi_out'
-  | 'line_mixer';
+  | 'line_mixer'
+  | 'master';
 
 export type PortType = 'audio_in' | 'audio_out' | 'cv_in' | 'cv_out';
 
@@ -263,6 +267,8 @@ export interface SequencerTrack {
 }
 
 export type WorkspaceViewMode = 'sequencer' | 'mixer' | 'rack' | 'parallel';
+
+export type PlaybackMode = 'song_arrangement' | 'pattern_loop' | 'all' | 'pattern' | 'song';
 
 export interface MixerFxSlot {
   id: string;

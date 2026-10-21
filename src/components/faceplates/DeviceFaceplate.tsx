@@ -209,6 +209,43 @@ export const VerticalAdsrEnvelopeBank: React.FC<{
   );
 };
 
+export const SvgFilterCurve: React.FC<{
+  cutoffHz: number;
+  resonance: number;
+  filterMode?: string;
+  accentColor?: string;
+  onChangeCutoff?: (hz: number) => void;
+  onChangeResonance?: (q: number) => void;
+  onChangeMode?: (m: string) => void;
+}> = ({ cutoffHz, resonance, filterMode = 'LP24', accentColor, onChangeCutoff, onChangeResonance, onChangeMode }) => (
+  <InteractiveFilterCurve
+    cutoff={cutoffHz}
+    resonance={resonance}
+    filterType={filterMode}
+    accentColor={accentColor}
+    onChangeCutoff={onChangeCutoff || (() => {})}
+    onChangeResonance={onChangeResonance || (() => {})}
+    onChangeType={onChangeMode || (() => {})}
+  />
+);
+
+export const VerticalAdsrBank: React.FC<{
+  attack: number;
+  decay: number;
+  sustain: number;
+  release: number;
+  accentColor?: string;
+  onChange: (key: string, val: number) => void;
+}> = ({ attack, decay, sustain, release, onChange }) => (
+  <VerticalAdsrEnvelopeBank
+    attack={attack}
+    decay={decay}
+    sustain={sustain}
+    release={release}
+    onChange={onChange}
+  />
+);
+
 /**
  * Interactive 16-Step Hardware Run-Light Ribbon for Drum Computers & Samplers
  */
