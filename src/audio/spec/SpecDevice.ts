@@ -25,6 +25,13 @@ export interface SpecClock {
   isPlaying(): boolean;
   /** Audio time of song position `pos16` (16ths) if playing, else null. */
   timeOfPosition?(pos16: number): number | null;
+  /**
+   * Ask the engine's shared, worker-backed look-ahead scheduler to service a
+   * live device while transport is stopped. The callback must schedule work at
+   * AudioContext times and return false once it no longer needs service.
+   * Offline clocks deliberately omit this; offline renders call onStepTick.
+   */
+  requestRealtime?(callback: (now: number, until: number) => boolean): () => void;
 }
 
 export interface SpecHost {

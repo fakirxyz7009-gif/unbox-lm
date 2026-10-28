@@ -181,6 +181,11 @@ export class MidiInput {
     return [...this.activeNotes.values()].some((notes) => notes.has(key));
   }
 
+  private isNoteHeldElsewhere(note: number, channel: number, portId: string): boolean {
+    const key = `${channel & 0x0f}:${note & 0x7f}`;
+    return [...this.activeNotes].some(([id, notes]) => id !== portId && notes.has(key));
+  }
+
   private isPitchHeld(note: number): boolean {
     return [...this.activeNotes.values()].some((notes) => [...notes.values()].includes(note));
   }
@@ -215,11 +220,14 @@ export class MidiInput {
     const a = d[1];
     const b = d.length > 2 ? d[2] : 0;
     if (cmd === 0x90 && b > 0) {
+      // Some keyboards are reported on two inputs: a key already down on another input sounds once.
+      const downElsewhere = this.isNoteHeldElsewhere(a, channel, portId);
       const notes = this.activeNotes.get(portId) ?? new Map<string, number>();
       notes.set(`${channel}:${a}`, a);
       this.activeNotes.set(portId, notes);
       this.held.add(a);
       this.version++;
+      if (downElsewhere) return;
     } else if (cmd === 0x80 || cmd === 0x90) {
       const notes = this.activeNotes.get(portId);
       notes?.delete(`${channel}:${a}`);

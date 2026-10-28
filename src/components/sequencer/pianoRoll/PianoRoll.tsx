@@ -13,6 +13,23 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { SequencerNote } from '../../../audio/types.ts';
 import { rollKey, type RollNote } from './rollAdapters.ts';
+import { RollToolbar, type RollAction } from './RollToolbar.tsx';
+import {
+  flipPitch,
+  humanizeNotes,
+  invertKeys,
+  isEditError,
+  legatoNotes,
+  rampVelocity,
+  reverseNotes,
+  rotateNotes,
+  scaleLengths,
+  selectAllKeys,
+  setMuted,
+  splitNotesAt,
+  transposeNotes,
+  type EditOutcome,
+} from './rollEdits.ts';
 
 export type RollTool = 'draw' | 'select' | 'erase' | 'mute' | 'split' | 'glue' | 'stretch' | 'zoom' | 'marquee';
 
@@ -32,6 +49,8 @@ export interface PianoRollProps {
   /** Snap in grid units; 0 = free. */
   snap: number;
   tool: RollTool;
+  /** Called when the left toolbar picks a tool; the owner keeps the tool state. */
+  onToolChange?: (tool: RollTool) => void;
   defaultLength: number;
   defaultVelocity?: number;
   /** Extra notes added with every drawn note (chord stamp), in semitones. */
@@ -96,6 +115,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     unitsPerBeat,
     snap,
     tool,
+    onToolChange,
     defaultLength,
     defaultVelocity = 0.85,
     chordOffsets = [],
@@ -138,6 +158,11 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const hoverUnitRef = useRef<number>(0);
   const clipboardRef = useRef<RollNote[]>([]);
   const drawPending = useRef(false);
+  // Selection size and the short status line are React state: they change on clicks and edits, not per frame.
+  const [selCount, setSelCount] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
+  const noticeTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(noticeTimer.current), []);
 
   const live = (): RollNote[] => workRef.current ?? notes;
 
@@ -523,6 +548,95 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     else if (clientX < rect.left + 28) sc.scrollLeft -= 14;
   };
 
+  // ------------------------------------------------------------------ toolbar and key edits
+
+  const syncSel = () => setSelCount(selRef.current.size);
+  const flash = (text: string) => {
+    setNotice(text);
+    window.clearTimeout(noticeTimer.current);
+    noticeTimer.current = window.setTimeout(() => setNotice(null), 2400);
+  };
+  const applyEdit = (outcome: EditOutcome) => {
+    if (isEditError(outcome)) {
+      flash(outcome.error);
+      return;
+    }
+    commit(outcome.notes, outcome.touched);
+    syncSel();
+  };
+  const deleteSelection = () => {
+    const sel = selRef.current;
+    if (!notes.some((n) => sel.has(rollKey(n)))) return;
+    commit(removeKeys(notes, sel), []);
+    syncSel();
+  };
+  const duplicateSelection = () => {
+    const sel = selRef.current;
+    const selected = notes.filter((n) => sel.has(rollKey(n)));
+    if (!selected.length) return;
+    const a = Math.min(...selected.map((n) => n.step));
+    const b = Math.max(...selected.map((n) => n.step + n.length));
+    const span = Math.max(unitsPerBeat, Math.ceil((b - a) / unitsPerBeat - 1e-6) * unitsPerBeat);
+    const dup = selected.map((n) => ({ ...n, step: n.step + span }));
+    commit(withoutCollisions(notes, dup), dup);
+    syncSel();
+  };
+  const runAction = (action: RollAction) => {
+    const sel = selRef.current;
+    const gridStep = snap > 0 ? snap : 1;
+    const minLength = snap > 0 ? snap : 0.25;
+    switch (action) {
+      case 'selectAll':
+        selRef.current = selectAllKeys(notes);
+        requestDraw();
+        syncSel();
+        return;
+      case 'invertSelection':
+        selRef.current = invertKeys(notes, sel);
+        requestDraw();
+        syncSel();
+        return;
+      case 'reverse':
+        return applyEdit(reverseNotes(notes, sel));
+      case 'flipPitch':
+        return applyEdit(flipPitch(notes, sel));
+      case 'rotateLeft':
+        return applyEdit(rotateNotes(notes, sel, -gridStep, length));
+      case 'rotateRight':
+        return applyEdit(rotateNotes(notes, sel, gridStep, length));
+      case 'transposeUp':
+        return applyEdit(transposeNotes(notes, sel, 1));
+      case 'transposeDown':
+        return applyEdit(transposeNotes(notes, sel, -1));
+      case 'octaveUp':
+        return applyEdit(transposeNotes(notes, sel, 12));
+      case 'octaveDown':
+        return applyEdit(transposeNotes(notes, sel, -12));
+      case 'double':
+        return applyEdit(scaleLengths(notes, sel, 2, minLength));
+      case 'halve':
+        return applyEdit(scaleLengths(notes, sel, 0.5, minLength));
+      case 'legato':
+        return applyEdit(legatoNotes(notes, sel));
+      case 'humanize':
+        return applyEdit(humanizeNotes(notes, sel, gridStep / 2, 0.06));
+      case 'crescendo':
+        return applyEdit(rampVelocity(notes, sel, 0.45, 1));
+      case 'splitAtPlayhead':
+        return applyEdit(splitNotesAt(notes, sel, getPlayhead?.() ?? hoverUnitRef.current));
+      case 'toggleMute': {
+        const targets = sel.size ? notes.filter((n) => sel.has(rollKey(n))) : notes;
+        const allMuted = targets.length > 0 && targets.every((n) => n.muted);
+        return applyEdit(setMuted(notes, sel, !allMuted));
+      }
+      case 'duplicate':
+        return duplicateSelection();
+      case 'delete':
+        return deleteSelection();
+    }
+  };
+  const snapLabel = snap <= 0 ? 'snap off' : snap === 1 ? '1/16' : snap === 0.5 ? '1/32' : snap === 2 ? '1/8' : snap === 4 ? '1/4' : `${snap} steps`;
+
   // ------------------------------------------------------------------ grid pointer
 
   const onGridDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -687,6 +801,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const onGridUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const drag = dragRef.current;
     dragRef.current = null;
+    syncSel();
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
@@ -721,7 +836,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     const mod = e.ctrlKey || e.metaKey;
     let handled = true;
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (selected.length) commit(removeKeys(notes, sel), []);
+      deleteSelection();
     } else if (mod && e.key.toLowerCase() === 'a') {
       selRef.current = new Set(notes.map(rollKey));
       requestDraw();
@@ -736,13 +851,21 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
         commit(withoutCollisions(notes, pasted), pasted);
       }
     } else if (mod && e.key.toLowerCase() === 'd') {
-      if (selected.length) {
-        const a = Math.min(...selected.map((n) => n.step));
-        const b = Math.max(...selected.map((n) => n.step + n.length));
-        const span = Math.max(unitsPerBeat, Math.ceil((b - a) / unitsPerBeat - 1e-6) * unitsPerBeat);
-        const dup = selected.map((n) => ({ ...n, step: n.step + span }));
-        commit(withoutCollisions(notes, dup), dup);
-      }
+      duplicateSelection();
+    } else if (mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      runAction(e.key === 'ArrowLeft' ? 'rotateLeft' : 'rotateRight');
+    } else if (mod && e.key.toLowerCase() === 'i') {
+      runAction('invertSelection');
+    } else if (mod && e.key.toLowerCase() === 'm') {
+      runAction('toggleMute');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'r') {
+      runAction('reverse');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'f') {
+      runAction('flipPitch');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'h') {
+      runAction('humanize');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'l') {
+      runAction('legato');
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       if (selected.length) {
         const d = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 12 : 1);
@@ -764,12 +887,14 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     } else if (e.key === 'Escape') {
       selRef.current = new Set();
       requestDraw();
+      syncSel();
     } else {
       handled = false;
     }
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
+      syncSel();
     }
   };
 
@@ -859,7 +984,15 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const canvasStyle = (w: number, h: number): React.CSSProperties => ({ width: w, height: h, display: 'block' });
 
   return (
-    <div className={`unbox-piano-roll flex flex-col min-h-0 bg-[#14100c] select-none ${className}`} data-testid="piano-roll">
+    <div className={`unbox-piano-roll relative flex min-h-0 bg-[#14100c] select-none ${className}`} data-testid="piano-roll">
+      <RollToolbar
+        tool={tool}
+        onTool={(next) => onToolChange?.(next)}
+        onAction={runAction}
+        selectedCount={selCount}
+        snapLabel={snapLabel}
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       {/* ruler */}
       <div className="flex flex-shrink-0 border-b border-[#59452e]" style={{ height: RULER_H }}>
         <div className="flex-shrink-0 bg-[#1c1611] border-r border-[#59452e] text-[11px] text-[#d6b074] font-mono font-bold flex items-center justify-center tracking-wider" style={{ width: KEY_W }}>
@@ -941,6 +1074,15 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
           title={velCollapsed ? "Click to expand velocity lane" : "Drag to set velocity (selected notes only when a selection exists)"}
         />
       </div>
+      </div>
+      {notice && (
+        <div
+          role="status"
+          className="pointer-events-none absolute left-1/2 top-[30px] z-20 -translate-x-1/2 rounded border border-[#d69b50]/60 bg-[#1c1611]/95 px-3 py-1 font-label text-[12px] font-bold text-[#ffe1a8] shadow-lg"
+        >
+          {notice}
+        </div>
+      )}
     </div>
   );
 };

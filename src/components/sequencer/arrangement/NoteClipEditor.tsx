@@ -75,19 +75,6 @@ export const NoteClipEditor: React.FC<Props> = ({ audioEngine, track, clip, onCl
         <span className="text-ink/75">
           {track.name} · bar {Math.floor(clip.startBar) + 1} · {+clip.lengthBars.toFixed(3)} bars · {all.length} notes
         </span>
-        <div className="flex items-center gap-0.5 us-btn-light rounded p-0.5 border border-[#8a7b68]/40">
-          {(['draw', 'select', 'erase', 'mute', 'split', 'glue'] as RollTool[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTool(t)}
-              className={`px-2 py-0.5 rounded-[3px] font-label font-bold uppercase transition-all ${
-                tool === t ? 'bg-[#282016] text-[#ffc87a] shadow-[0_0_6px_rgba(214,155,80,0.4)]' : 'text-[#40352a] hover:bg-[#eae4d7]'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
         <label className="flex items-center gap-1 text-ink/80 font-label font-bold">
           SNAP
           <select value={snap} onChange={(e) => setSnap(Number(e.target.value))} className="bg-[#282016] text-[#ffc87a] rounded px-1.5 py-0.5 border border-[#d69b50]/60 outline-none">
@@ -140,6 +127,7 @@ export const NoteClipEditor: React.FC<Props> = ({ audioEngine, track, clip, onCl
         unitsPerBeat={beatSteps(audioEngine.timeSignature)}
         snap={snap}
         tool={tool}
+        onToolChange={setTool}
         defaultLength={len}
         color={clip.color || track.color}
         zoomX={zx}

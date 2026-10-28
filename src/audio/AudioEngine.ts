@@ -409,6 +409,14 @@ export class AudioEngine {
     timestamp: number;
   }[] = [];
   private workerTimer: { stop: () => void } | null = null;
+  /**
+   * Device-local look-ahead jobs (granular voices, held note-repeat pads, ...)
+   * share one worker-backed timer when the transport is stopped. This keeps
+   * musical scheduling tied to AudioContext time without each device creating
+   * its own window interval.
+   */
+  private realtimeTasks = new Set<(now: number, until: number) => boolean>();
+  private realtimeTimer: { stop: () => void } | null = null;
   private nextNoteTime: number = 0;
   private scheduleAheadTime: number = 0.12;
   private lookaheadMs: number = 25;
@@ -452,6 +460,7 @@ export class AudioEngine {
       bpm: () => this.bpm,
       isPlaying: () => this.isPlaying,
       timeOfPosition: (pos16: number) => (this.isPlaying ? this.nextNoteTime + (pos16 - this.songPosition) * (60 / this.bpm / 4) : null),
+      requestRealtime: (callback) => this.requestRealtime(callback),
     };
 
     this.cvEngine = new CVEngine();
@@ -1115,7 +1124,7 @@ export class AudioEngine {
             : this.createDeviceInner(d.type, name, this.restoring ? d.id : undefined);
           idMap.set(d.id, nd.id);
           Object.entries(d.params || {}).forEach(([k, v]) => {
-            if (typeof v === 'number' || (isVst && k === 'presetId')) nd.setParam(k, v);
+            if (typeof v === 'number' || (k === 'subVoice' && typeof v === 'string') || (isVst && k === 'presetId')) nd.setParam(k, v);
             else if (k === 'target' && typeof v === 'string' && v) playerTargets.push([nd.id, v]);
           });
           nd.isPowered = d.isPowered !== false;
@@ -1392,6 +1401,22 @@ export class AudioEngine {
     return sel ?? [...this.devices.values()].find((d) => this.isPlayableInstrument(d.type));
   }
 
+  /** The instrument that sounds a key played on `selected`. A drum kit answers only on its pad notes, so any
+   *  other key goes to the first melodic instrument: the keyboard still plays with the kit selected. */
+  public keyboardOwner(selected: BaseDevice, note: number): BaseDevice {
+    if (!this.isDrumKit(selected) || this.drumPadNotes(selected).includes(note)) return selected;
+    return [...this.devices.values()].find((d) => this.isPlayableInstrument(d.type) && !this.isDrumKit(d)) ?? selected;
+  }
+
+  private isDrumKit(dev: BaseDevice): boolean {
+    return dev.type === 'redrum' || (dev instanceof SpecDevice && !!dev.spec.pads?.length);
+  }
+
+  private drumPadNotes(kit: BaseDevice): number[] {
+    if (kit instanceof SpecDevice) return kit.spec.pads?.map((p) => p.note) ?? [];
+    return (['kick', 'snare', 'hatC', 'hatO', 'clap', 'perc'] as const).map((role) => this.drumNoteFor(kit, role));
+  }
+
   private handleMidiMessage(data: Uint8Array): void {
     if (!data || data.length < 2) return;
     const cmd = data[0] & 0xf0;
@@ -1425,8 +1450,10 @@ export class AudioEngine {
       return;
     }
 
-    const dev = this.midiTarget();
-    if (!dev) return;
+    const selected = this.midiTarget();
+    if (!selected) return;
+    // The instrument that sounds this key: a drum kit passes its non-pad keys on to the melodic part.
+    const dev = cmd === 0x90 && vel > 0 ? this.keyboardOwner(selected, note) : selected;
     const canPlay = dev.isPowered && !dev.isBypassed;
     if (canPlay && this.ctx.state === 'suspended') void this.ctx.resume();
     const targets = this.liveFanout(dev);
@@ -1523,16 +1550,25 @@ export class AudioEngine {
   }
 
   // Factory device creator
-  public createDevice(type: DeviceType, customName?: string): BaseDevice {
+  /**
+   * Create a rack device. The optional sub-voice is meaningful only for the
+   * generic recorded-instrument wrappers; other device types safely ignore it.
+   */
+  public createDevice(type: DeviceType, customName?: string, subVoiceId?: string): BaseDevice {
     const undoable = this.beginStructural('Add device');
     try {
-      return this.createDeviceInner(type, customName);
+      return this.createDeviceInner(type, customName, undefined, subVoiceId);
     } finally {
       if (undoable) this.endStructural();
     }
   }
 
-  private createDeviceInner(type: DeviceType, customName?: string, id = `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`): BaseDevice {
+  private createDeviceInner(
+    type: DeviceType,
+    customName?: string,
+    id = `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+    subVoiceId?: string,
+  ): BaseDevice {
     // Spec-driven devices (Reason lineup + hardware emulations): src/audio/spec
     const spec = createSpecDevice(this.ctx, type, id, customName);
     if (spec) return this.registerDevice(spec);
@@ -1614,12 +1650,12 @@ export class AudioEngine {
       case 'world_instrument': {
         const name = customName || 'World Instrument';
         const isWind = name.toLowerCase().includes('flute') || name.toLowerCase().includes('horn') || name.toLowerCase().includes('pipe') || name.toLowerCase().includes('bagpipe') || name.toLowerCase().includes('clarinet') || name.toLowerCase().includes('oboe') || name.toLowerCase().includes('accordion') || name.toLowerCase().includes('saxophone') || name.toLowerCase().includes('whistle') || name.toLowerCase().includes('didgeridoo') || name.toLowerCase().includes('duduk') || name.toLowerCase().includes('recorder');
-        dev = new UniversalWorldInstrumentDevice(this.ctx, id, name, isWind ? 'wind' : 'string');
+        dev = new UniversalWorldInstrumentDevice(this.ctx, id, name, isWind ? 'wind' : 'string', subVoiceId);
         break;
       }
       case 'percussion_electronic': {
         const name = customName || 'Percussion/Electronic';
-        dev = new UniversalPercussionElectronicDevice(this.ctx, id, name);
+        dev = new UniversalPercussionElectronicDevice(this.ctx, id, name, undefined, subVoiceId);
         break;
       }
       case 'wyvern':
@@ -1668,6 +1704,10 @@ export class AudioEngine {
         if (!dev.isPowered || dev.isBypassed || !this.midi.outputId) return;
         this.midi.sendOutput([0xb0 | (channel - 1), cc, value], this.midiTimestamp(this.ctx.currentTime));
       };
+    }
+
+    if (subVoiceId && 'setSubVoice' in dev && typeof (dev as any).setSubVoice === 'function') {
+      (dev as any).setSubVoice(subVoiceId);
     }
 
     return this.registerDevice(dev);
@@ -2213,6 +2253,10 @@ export class AudioEngine {
     }
 
     if (this.workerTimer) this.workerTimer.stop();
+    if (this.realtimeTimer) {
+      this.realtimeTimer.stop();
+      this.realtimeTimer = null;
+    }
     this.workerTimer = createSchedulerTimer(() => {
       if (this.isPlaying) this.scheduler();
     }, this.lookaheadMs);
@@ -2445,6 +2489,7 @@ export class AudioEngine {
       this.workerTimer.stop();
       this.workerTimer = null;
     }
+    this.refreshRealtimeScheduler();
     this.songPosition = 0;
     this.currentSongBar = 0;
     this.currentStep = 0;
@@ -2643,6 +2688,7 @@ export class AudioEngine {
 
   private scheduler(): void {
     this.automation.pump(this.ctx.currentTime);
+    this.serviceRealtimeTasks();
     if (this.pendingStopTime !== null) {
       // Song end reached (loop off): stop once the last scheduled 16th has been heard.
       if (this.ctx.currentTime >= this.pendingStopTime) this.stopTransport();
@@ -2651,6 +2697,53 @@ export class AudioEngine {
     while (this.isPlaying && this.pendingStopTime === null && this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
       this.scheduleStep(this.songPosition, this.nextNoteTime);
       this.advanceStep();
+    }
+  }
+
+  /**
+   * Registers a device look-ahead callback. These are only serviced by their
+   * own worker timer while stopped; during playback the transport scheduler
+   * services the same set, so there is never a second timing authority.
+   */
+  private requestRealtime(callback: (now: number, until: number) => boolean): () => void {
+    this.realtimeTasks.add(callback);
+    this.serviceRealtimeTasks();
+    return () => {
+      this.realtimeTasks.delete(callback);
+      this.refreshRealtimeScheduler();
+    };
+  }
+
+  private serviceRealtimeTasks(): void {
+    if (!this.realtimeTasks.size) {
+      this.refreshRealtimeScheduler();
+      return;
+    }
+    const now = this.ctx.currentTime;
+    const until = now + Math.max(0.15, this.scheduleAheadTime);
+    for (const task of Array.from(this.realtimeTasks)) {
+      try {
+        if (!task(now, until)) this.realtimeTasks.delete(task);
+      } catch {
+        // A device being disposed must not be able to take down the shared scheduler.
+        this.realtimeTasks.delete(task);
+      }
+    }
+    this.refreshRealtimeScheduler();
+  }
+
+  private refreshRealtimeScheduler(): void {
+    if (this.isPlaying || this.realtimeTasks.size === 0) {
+      if (this.realtimeTimer) {
+        this.realtimeTimer.stop();
+        this.realtimeTimer = null;
+      }
+      return;
+    }
+    if (!this.realtimeTimer) {
+      this.realtimeTimer = createSchedulerTimer(() => {
+        if (!this.isPlaying) this.serviceRealtimeTasks();
+      }, this.lookaheadMs);
     }
   }
 
@@ -3260,7 +3353,11 @@ export class AudioEngine {
     const clonedDev =
       origDev instanceof VstPluginDevice
         ? this.createVstDevice(origDev.toProjectData().snapshot, { name: `${orig.name} (Copy)` })
-        : this.createDevice(origDev.type, `${orig.name} (Copy)`);
+        : this.createDevice(
+            origDev.type,
+            `${orig.name} (Copy)`,
+            typeof origDev.params.subVoice === 'string' && origDev.params.subVoice ? origDev.params.subVoice : undefined,
+          );
     Object.entries(origDev.params).forEach(([k, v]) => {
       if (typeof v === 'number') clonedDev.setParam(k, v);
     });
@@ -4003,7 +4100,8 @@ export class AudioEngine {
 
   /** A copy of a live device on another context (params, samples and library snapshot included). */
   public instantiateOffline(ctx: BaseAudioContext, live: BaseDevice): BaseDevice {
-    const dev = live.cloneForOfflineContext?.(ctx) ?? this.instantiateDeviceOnContext(ctx as AudioContext, live.type, live.id, live.name);
+    const subVoiceId = typeof live.params.subVoice === 'string' && live.params.subVoice ? live.params.subVoice : undefined;
+    const dev = live.cloneForOfflineContext?.(ctx) ?? this.instantiateDeviceOnContext(ctx as AudioContext, live.type, live.id, live.name, subVoiceId);
     if (!live.cloneForOfflineContext) {
       Object.entries(live.params).forEach(([k, v]) => typeof v === 'number' && dev.setParam(k, v));
       if (live instanceof MimicDevice && dev instanceof MimicDevice) live.pads.forEach((pad, i) => pad.buffer && dev.pads[i] && (dev.pads[i].buffer = pad.buffer));
@@ -4087,7 +4185,7 @@ export class AudioEngine {
     this.exportUncompressedWav(undefined, 'wav');
   }
 
-  private instantiateDeviceOnContext(ctx: AudioContext, type: DeviceType, id: string, name: string): BaseDevice {
+  private instantiateDeviceOnContext(ctx: AudioContext, type: DeviceType, id: string, name: string, subVoiceId?: string): BaseDevice {
     const spec = createSpecDevice(ctx, type, id, name);
     if (spec) return spec;
     switch (type) {
@@ -4120,9 +4218,9 @@ export class AudioEngine {
       case 'world_instrument': {
         const lowerName = name.toLowerCase();
         const isWind = ['flute', 'horn', 'pipe', 'bagpipe', 'clarinet', 'oboe', 'accordion', 'saxophone', 'whistle', 'didgeridoo', 'duduk', 'recorder'].some((word) => lowerName.includes(word));
-        return new UniversalWorldInstrumentDevice(ctx, id, name, isWind ? 'wind' : 'string');
+        return new UniversalWorldInstrumentDevice(ctx, id, name, isWind ? 'wind' : 'string', subVoiceId);
       }
-      case 'percussion_electronic': return new UniversalPercussionElectronicDevice(ctx, id, name);
+      case 'percussion_electronic': return new UniversalPercussionElectronicDevice(ctx, id, name, undefined, subVoiceId);
       case 'objekt': return new ObjektDevice(ctx, id, name);
       case 'reason_performance': return new ReasonPerformanceDevice(ctx, id, name);
       case 'rv9': return new RV9Device(ctx, id, name);

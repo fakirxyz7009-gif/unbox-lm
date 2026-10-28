@@ -1561,6 +1561,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                 track={activeTrack}
                 tracks={tracks}
                 tool={pianoTool}
+                onToolChange={setPianoTool}
                 snap={magneticGridSnap ? (gridSnapInterval === 3 ? 2 / 3 : gridSnapInterval) : 0}
                 defaultLength={defaultNoteLength}
                 chordOffsets={getChordOffsets(chordStamp)}

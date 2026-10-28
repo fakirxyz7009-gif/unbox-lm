@@ -73,9 +73,10 @@ export const WorkstationKeyboard: React.FC<Props> = ({ dev, track }) => {
   };
   const noteOn = (note: number, vel: number) => {
     if (!dev || held.current.has(note)) return;
-    const targets = audioEngine.liveFanout(dev);
+    const owner = audioEngine.keyboardOwner(dev, note);
+    const targets = audioEngine.liveFanout(owner);
     targets.forEach((d) => audioEngine.liveNoteOn(d, note, vel));
-    audioEngine.recordNoteToTrack(dev.id, note, vel);
+    audioEngine.recordNoteToTrack(owner.id, note, vel);
     held.current.set(note, targets);
     light(note, true);
   };

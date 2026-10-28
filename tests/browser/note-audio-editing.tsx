@@ -83,6 +83,19 @@ async function run(): Promise<void> {
   editor.querySelector<HTMLButtonElement>('button[title="Stop Audition"]')!.click();
   await until(() => !!editor.querySelector('button[title^="Audition"]'), 'Audition did not stop');
 
+  // Exercise the visible editor control rather than writing the assignment directly: repeated
+  // button edits coalesce, while the undo closure must target the live graph.
+  const offsetBefore = deviceSample(marimba.id)!.pads![53].offset ?? 0;
+  const trimLater = editor.querySelector<HTMLButtonElement>('button[title="Shift offset later (trim start)"]')!;
+  trimLater.click();
+  trimLater.click();
+  await until(() => (deviceSample(marimba.id)?.pads?.[53]?.offset ?? 0) > offsetBefore, 'LCD offset control did not edit the captured note');
+  const offsetAfter = deviceSample(marimba.id)!.pads![53].offset!;
+  expect(engine.undo(), 'LCD note-audio edit did not enter undo history');
+  expect(deviceSample(marimba.id)?.pads?.[53]?.offset === offsetBefore, 'LCD note-audio undo did not restore the trim');
+  expect(engine.redo(), 'LCD note-audio edit did not redo');
+  expect(deviceSample(marimba.id)?.pads?.[53]?.offset === offsetAfter, 'LCD note-audio redo did not restore the trim');
+
   const settings: PadSample = {
     ...captured, level: 0.72, offset: 0.12, duration: 0.38, pitch: 7, tune: -23,
     reverse: true, loop: true, attack: 0.018, decay: 0.13, sustain: 0.64, release: 0.11,

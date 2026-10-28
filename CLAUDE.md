@@ -10,7 +10,7 @@ external folder.
   `public/favicon.svg` (rendered to `build/icon.png` for electron-builder).
 - Server: Express 4 run with `tsx` (`server.ts`), hosts `/api/*` (Gemini AI + library) and serves
   the app (Vite middleware in dev, `dist/` in production) and the library bundle at `/library`.
-- Desktop: Electron 33 (`electron/main.cjs`) → portable `release/Unbox-Studio.exe`; it embeds the
+- Desktop: Electron 45 (`electron/main.cjs`) → portable `release/Unbox-Studio.exe`; it embeds the
   same API via the esbuild bundle `electron/api-server.cjs` (fixed loopback ports 47821–47825 so
   IndexedDB projects survive restarts).
 - AI provider: Google Gemini via `@google/genai` (server-side only, key in `.env`). Every AI
@@ -234,8 +234,8 @@ CC1, CC64 sustain are handled in `handleMidiMessage`.
 ### Hardware MIDI
 `audioEngine.midi` (`audio/midi/MidiInput.ts`) opens every input port explicitly (a port held by
 another program shows "in use", a refused permission shows "MIDI blocked" + Ask again) and re-binds
-on hot-plug. Notes on any channel go to `engine.midiTarget()` (the selected part, else the first
-instrument) through `handleMidiMessage`; other CCs go to `midi.onControl` listeners —
+on hot-plug. The desktop app connects at start-up (`App.tsx`). Notes on any channel go to `engine.midiTarget()` (the selected part, else the first
+instrument) through `handleMidiMessage` (a drum kit answers only on its pad notes; its other keys go to the first melodic instrument, `keyboardOwner`); other CCs go to `midi.onControl` listeners —
 `workstation/midiControls.ts` maps them (defaults: CC 21–26 big knobs 1–6, 27 part pan, 28 master,
 49 part level = a Novation Impulse in MIDI mode; transport buttons only via MIDI Learn, since the
 Impulse's buttons send nothing fixed) and keeps the map in localStorage (`unbox.midiControls`).
@@ -421,3 +421,5 @@ then the user-data folder.
   for ~1.2 s on the first note (MIDI and UI stalled). Keep new banks separate (`if (only === …)`).
 - `catalog.ts` is generated: after building / removing a pack, restart the dev server if the new
   device doesn't appear (it is imported by shared code that the server also loads).
+- Tailwind scans only `index.html`, `src/` and `shared/` (see the `@source` lines in `src/index.css`). Keep it that way: the automatic scan walks `release/` (5+ GB) and stalls `npm run dev` for tens of seconds on the first stylesheet.
+- If the project folder ever gets a Low integrity label again (the Codex sandbox set one on the dev machine), Electron builds (`release/*.exe`, `npm run electron`, `run-app.bat`) exit with 0x80000003 or silently when started from inside it. Check with `icacls <folder>` and reset with `icacls <folder> /setintegritylevel (OI)(CI)M /T`.

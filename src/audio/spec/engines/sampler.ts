@@ -232,8 +232,7 @@ export function granularEngine(host: SpecHost): SpecEngine {
   const user = new UserSamples();
   let src: SourceInfo | null = null;
   let loading: Promise<void> = Promise.resolve();
-  let timer: number | null = null;
-  const live = typeof window !== 'undefined' && ctx instanceof AudioContext;
+  let removeRealtime: (() => void) | null = null;
 
   const load = () => {
     loading = tonalSource(ctx.sampleRate, host.opt('sample') || 'Vox Chop').then((s) => {
@@ -279,14 +278,19 @@ export function granularEngine(host: SpecHost): SpecEngine {
     v.scheduledUntil = t;
   }
 
-  const tick = () => {
-    pool.gc(ctx.currentTime);
-    const ahead = ctx.currentTime + 0.15;
-    pool.list.forEach((v) => fill(v, ahead));
-    if (!pool.list.length && timer !== null) {
-      clearInterval(timer);
-      timer = null;
-    }
+  const service = (now: number, until: number): boolean => {
+    pool.gc(now);
+    pool.list.forEach((v) => fill(v, until));
+    return pool.list.length > 0;
+  };
+
+  const ensureRealtime = (): void => {
+    if (removeRealtime || !pool.list.length || !host.clock.requestRealtime) return;
+    removeRealtime = host.clock.requestRealtime((now, until) => {
+      const keep = service(now, until);
+      if (!keep) removeRealtime = null;
+      return keep;
+    });
   };
 
   return {
@@ -330,14 +334,20 @@ export function granularEngine(host: SpecHost): SpecEngine {
         },
       };
       pool.add(v);
-      if (live && timer === null) timer = window.setInterval(tick, 25);
-      if (live) fill(v, ctx.currentTime + 0.15);
+      // Seed enough audio at the note's scheduled time. The shared engine
+      // scheduler then maintains the look-ahead for a held live note.
+      fill(v, t + 0.15);
+      ensureRealtime();
     },
     noteOff(note, t) {
       pool.releaseNote(note, t);
     },
     allNotesOff(t) {
       pool.killAll(t);
+    },
+    onStepTick(_pos, time) {
+      // Transport and OfflineAudioContext both reach this deterministic path.
+      service(ctx.currentTime, time + 0.15);
     },
     onParam(key) {
       if (key === 'sample') load();
@@ -359,7 +369,8 @@ export function granularEngine(host: SpecHost): SpecEngine {
       return { voices: pool.held().length, position: host.p('position', 0.3) };
     },
     dispose() {
-      if (timer !== null) clearInterval(timer);
+      removeRealtime?.();
+      removeRealtime = null;
       pool.killAll(ctx.currentTime);
     },
     userBuffers: () => user.buffers,

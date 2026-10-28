@@ -91,6 +91,21 @@ export default function App() {
     audioEngine.midiTargetDeviceId = selectedPart;
   }, [selectedPart]);
 
+  // Connect a keyboard at start-up: always in the desktop app, and in a browser once the site already has MIDI
+  // permission (nothing new is asked on load).
+  useEffect(() => {
+    if (/Electron\//.test(navigator.userAgent)) {
+      void audioEngine.enableMidiInput();
+      return;
+    }
+    navigator.permissions
+      ?.query({ name: 'midi' as PermissionName })
+      .then((status) => {
+        if (status.state === 'granted') void audioEngine.enableMidiInput();
+      })
+      .catch(() => undefined);
+  }, []);
+
   const goTab = (t: WorkspaceTab) => {
     setPage(null);
     setTab(t);

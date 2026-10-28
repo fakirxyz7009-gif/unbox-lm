@@ -1,10 +1,12 @@
 import { BaseDevice } from '../BaseDevice.ts';
+import { realMultiSampler } from '../realSampler/RealMultiSampler.ts';
 import { soundFontEngine } from '../SoundFontEngine.ts';
 import { percussionVoiceFor, playPercussion } from './percussionVoices.ts';
 
 export class UniversalPercussionElectronicDevice extends BaseDevice {
   public instrumentName: string;
   public category: 'percussion' | 'electronic';
+  public activeSubVoice?: string;
   public brilliance: number = 0.75;
   public decay: number = 0.55;
   private masterOutput: GainNode;
@@ -16,10 +18,17 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     return /synth|piano|keyboard|theremin|mellotron|clavinet|keytar|sampler|stylophone|ewi|controller|ondes|otamatone|omniaccord|soundboard|organ/i.test(name) ? 'electronic' : 'percussion';
   }
 
-  constructor(ctx: AudioContext, id: string, name: string = 'Percussion/Electronic Instrument', category = UniversalPercussionElectronicDevice.categoryOf(name)) {
+  constructor(
+    ctx: AudioContext,
+    id: string,
+    name: string = 'Percussion/Electronic Instrument',
+    category = UniversalPercussionElectronicDevice.categoryOf(name),
+    subVoiceId?: string
+  ) {
     super(ctx, id, name, 'percussion_electronic', 2);
     this.instrumentName = name;
     this.category = category;
+    this.activeSubVoice = subVoiceId;
 
     this.masterOutput = ctx.createGain();
     this.masterOutput.gain.value = 0.92;
@@ -46,7 +55,11 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
       pan: 0,
       brilliance: 0.75,
       decay: 0.55,
+      subVoice: subVoiceId || '',
     };
+
+    // On-demand lazy load the selected sub-voice via RealMultiSampler
+    void realMultiSampler.loadDeviceSubVoice(this.id, this.instrumentName, this.activeSubVoice, this.ctx);
 
     this.ports = [
       { id: 'out_l', name: 'Audio Out L', type: 'audio_out', channel: 'left' },
@@ -67,10 +80,34 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     });
   }
 
+  public setSubVoice(voiceId: string): void {
+    this.activeSubVoice = voiceId;
+    this.params['subVoice'] = voiceId;
+    void realMultiSampler.loadDeviceSubVoice(this.id, this.instrumentName, voiceId, this.ctx);
+  }
+
   public noteOn(note: number, velocity: number = 0.88, time?: number): void {
     if (!this.isPowered || this.isBypassed) return;
     const now = time !== undefined ? Math.max(this.ctx.currentTime, time) : this.ctx.currentTime;
     this.noteOff(note, now);
+
+    const vel = Math.max(0.15, Math.min(1.2, velocity));
+
+    // 1. Prioritize playing 100% real multi-sampled recorded audio via RealMultiSampler!
+    const playedReal = realMultiSampler.playNote(
+      this.id,
+      this.instrumentName,
+      note,
+      vel,
+      now,
+      this.panner || this.masterOutput,
+      {
+        gain: (this.params.volume as number) ?? 0.92,
+        attack: 0.003,
+        release: 0.15 + this.decay * 0.8,
+      }
+    );
+    if (playedReal) return;
 
     // Named percussion: its own modal / drum voice (mallets, bells, shakers, congas, timpani …)
     const named = percussionVoiceFor(this.instrumentName);
@@ -79,7 +116,6 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
       return;
     }
     const freq = Math.max(40, Math.min(12000, 440.0 * Math.pow(2.0, (note - 69.0) / 12.0)));
-    const vel = Math.max(0.15, Math.min(1.2, velocity));
     const lowerName = this.instrumentName.toLowerCase();
 
     const isTablaOrHandDrum =
@@ -190,6 +226,7 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
   }
 
   public noteOff(note: number, time?: number): void {
+    realMultiSampler.stopNote(this.id, note, time);
     const voice = this.activeVoices.get(note);
     if (!voice) return;
     this.activeVoices.delete(note);
@@ -208,8 +245,17 @@ export class UniversalPercussionElectronicDevice extends BaseDevice {
     } catch (e) {}
   }
 
+  public override dispose(): void {
+    super.dispose();
+    realMultiSampler.releaseDevice(this.id);
+  }
+
   public setParam(param: string, val: any): void {
     const num = Number(val);
+    if (param === 'subVoice' && typeof val === 'string') {
+      this.setSubVoice(val);
+      return;
+    }
     this.params[param] = val;
     if (param === 'brilliance' && !isNaN(num)) this.brilliance = Math.max(0.1, Math.min(1.0, num));
     if (param === 'decay' && !isNaN(num)) this.decay = Math.max(0.1, Math.min(2.0, num));

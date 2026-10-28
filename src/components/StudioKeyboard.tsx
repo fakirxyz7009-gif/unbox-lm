@@ -68,7 +68,7 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
     }
     if (typeof currentSynth.noteOn === 'function') {
       // through the instrument's players (arps, chords …), plus linked parts
-      audioEngine.liveFanout(currentSynth).forEach((d) => audioEngine.liveNoteOn(d, midi, 0.88));
+      audioEngine.liveFanout(audioEngine.keyboardOwner(currentSynth, midi)).forEach((d) => audioEngine.liveNoteOn(d, midi, 0.88));
     } else if (typeof (currentSynth as any).triggerPad === 'function') {
       (currentSynth as any).triggerPad(((midi % 8) + 8) % 8, 0.9);
     }
@@ -79,7 +79,7 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
     if (!currentSynth) return;
     if (!sustain) {
       if (typeof currentSynth.noteOff === 'function') {
-        audioEngine.liveFanout(currentSynth).forEach((d) => audioEngine.liveNoteOff(d, midi));
+        audioEngine.liveFanout(audioEngine.keyboardOwner(currentSynth, midi)).forEach((d) => audioEngine.liveNoteOff(d, midi));
       }
       setActiveNotes((prev) => {
         const next = new Set(prev);
@@ -322,7 +322,7 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
               onClick={() => {
                 // releasing HOLD lets go of every note it was holding
                 if (sustain && currentSynth) {
-                  activeNotes.forEach((n) => audioEngine.liveNoteOff(currentSynth, n));
+                  activeNotes.forEach((n) => audioEngine.liveNoteOff(audioEngine.keyboardOwner(currentSynth, n), n));
                   setActiveNotes(new Set());
                 }
                 setSustain((v) => !v);

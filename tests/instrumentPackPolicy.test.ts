@@ -46,8 +46,21 @@ test('every recorded instrument pack keeps contributor, source, and license meta
 
   const devicesPagePath = fileURLToPath(new URL('../src/studio/pages/DevicesPage.tsx', import.meta.url));
   const devicesPage = readFileSync(devicesPagePath, 'utf8');
+  assert.match(devicesPage, /SHIPPED_PACKS/);
+  assert.doesNotMatch(devicesPage, /from ['"]\.\.\/\.\.\/\.\.\/shared\/instruments\/catalog\.ts['"]/);
   assert.match(devicesPage, /Attribution: \$\{pack\.author\}/);
   assert.doesNotMatch(devicesPage, /Recorded by \$\{pack\.author\}/);
+
+  const patchBrowserPath = fileURLToPath(new URL('../src/workstation/PatchBrowser.tsx', import.meta.url));
+  const patchBrowser = readFileSync(patchBrowserPath, 'utf8');
+  assert.match(patchBrowser, /SHIPPED_PACKS/);
+  assert.match(patchBrowser, /Attribution: \$\{pack\.author\}/);
+  assert.match(patchBrowser, /Source: \$\{pack\.source\}/);
+
+  const rackLibraryPath = fileURLToPath(new URL('../src/rack/LibraryBrowser.tsx', import.meta.url));
+  const rackLibrary = readFileSync(rackLibraryPath, 'utf8');
+  assert.doesNotMatch(rackLibrary, /getSubVoicesForDevice/);
+  assert.doesNotMatch(rackLibrary, /Real Recorded Audio/);
 });
 
 test('Ganjo ships pinned CC0 guitar-banjo recordings with complete key and round-robin maps', () => {

@@ -33,6 +33,19 @@ export function editPadSample(host: SampleEditHost, deviceId: string, note: numb
   editPadSamples(host, deviceId, new Map([[note, sample]]), 'Edit note audio', `sample:${deviceId}:${note}:${fields.join(',')}`);
 }
 
+/** Applies a metadata change only when the note already owns a real captured audio assignment. */
+export function editCapturedPadSample(
+  host: SampleEditHost,
+  deviceId: string,
+  note: number,
+  patch: Partial<Omit<PadSample, 'audioId'>>,
+): boolean {
+  const current = deviceSample(deviceId)?.pads?.[note];
+  if (!current) return false;
+  editPadSample(host, deviceId, note, { ...current, ...patch });
+  return true;
+}
+
 export interface PadSampleGesture {
   update(sample: PadSample): void;
   commit(): void;

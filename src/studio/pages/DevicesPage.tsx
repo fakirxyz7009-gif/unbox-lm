@@ -10,7 +10,7 @@ import { EFFECT_CATALOG } from '../../audio/effectCatalog.ts';
 import { INSTRUMENT_CATEGORIES } from '../../audio/instrumentCatalog.ts';
 import type { DeviceType } from '../../audio/types.ts';
 import { useEngineVersion } from '../../nexa/useEngine.ts';
-import { INSTRUMENT_PACKS } from '../../../shared/instruments/catalog.ts';
+import { SHIPPED_PACKS } from '../../../shared/instruments/packs.ts';
 import { isRedistributable, packDeviceType } from '../../../shared/instruments/catalogTypes.ts';
 import { isRecordedInstrument, isSamplerDevice } from './deviceCatalogFilters.ts';
 import { useVstLibrary, vstLibrary } from '../../vst/libraryClient.ts';
@@ -32,7 +32,9 @@ const DRUM_BADGES = new Set(['RHYTHM', 'PERCUSSION', 'CLASSIC DRUMS', 'RECORDED 
 const SYNTH_BADGES = new Set(['SYNTHS', 'CLASSIC SYNTHS', 'HW SYNTHS']);
 const PATCH_BADGES = new Set(['DI & PATCH', 'SUMMING']);
 const ROUTING_TYPES = new Set<DeviceType>(['spider_audio', 'spider_cv', 'line_mixer', 'mixer_14_2', 'matrix', 'pulsar', 'combinator']);
-const PACK_BY_DEVICE_TYPE = new Map<string, (typeof INSTRUMENT_PACKS)[number]>(INSTRUMENT_PACKS.map((pack) => [packDeviceType(pack.id), pack]));
+// This is a user-facing pack list. In a share build it must never retain private custom-pack
+// metadata, even if a component is rendered before an instrument is mounted.
+const PACK_BY_DEVICE_TYPE = new Map<string, (typeof SHIPPED_PACKS)[number]>(SHIPPED_PACKS.map((pack) => [packDeviceType(pack.id), pack]));
 const midiNoteName = (note: number): string => `${['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'][note % 12]}${Math.floor(note / 12) - 1}`;
 
 function entriesFor(cat: Cat): Entry[] {

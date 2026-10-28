@@ -1,3 +1,30 @@
+# v12.2 — MIDI keyboard plays with the drum part selected; LCD labels fit
+
+## Fixed
+- **The MIDI keyboard sounded almost nothing by default.** The first part is the Drums kit, whose six pads sit on
+  C3–F3, so most keys were silent. A key the kit doesn't use now plays the first melodic instrument
+  (`AudioEngine.keyboardOwner`). This applies to the MIDI keyboard, the Workstation keyboard and the studio keyboard,
+  and a note's release goes to the same instrument as its press.
+- **MIDI connected only after "Connect MIDI" was pressed.** The desktop app now connects at start-up. A browser does
+  so once the site already has MIDI permission, so nothing new is asked on load.
+- **A key reported on two MIDI inputs sounded twice.** Windows lists some keyboards on two inputs; a key already held
+  on one input is not triggered again by the other.
+- **LCD labels overlapped from 1500 px wide:** the knob labels "Cutoff" and "Resonance", and the note-audio header's
+  record button over its transport buttons. The knob columns are wider and the header wraps instead of overlapping.
+  Below 1500 px the clip editor's rows still overlap, as they did in v12.1.
+
+# v12.1 — Dev server starts faster; desktop builds start in place
+
+## Fixed
+- `npm run dev` showed a blank page for about 40 s: Tailwind scanned the whole project (the multi-GB
+  `release/` folder included) before it could serve the stylesheet. `src/index.css` now scans only
+  `index.html`, `src/` and `shared/`. The stylesheet lost about 60 KB of utilities that matched text in
+  unused folders; no class the app uses was lost. Cold start is about 16 s, a warm reload under 1 s.
+- `release\Unbox-Studio.exe` and `npm run electron` did not start from inside the project folder on the
+  dev machine: Electron exits with 0x80000003 or silently. The folder carried a Low integrity label, which
+  Electron cannot start under; an identical build ran from a folder without it. The label is now Medium (the
+  level Windows gives unlabelled files), so both start in place. See the pitfall in CLAUDE.md.
+
 # v12 — Quick fixes: variation, crossfades, duck trigger, strum, right-click automation
 
 ## New

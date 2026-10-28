@@ -21,6 +21,8 @@ import { loadKeySampleFile } from '../audio/deviceSamples.ts';
 import { setMultiSample, type MultiSampleZone } from '../audio/deviceSamples.ts';
 import { parseSf2, type ParsedSf2, type Sf2Preset, type Sf2Sample, type Sf2Zone } from '../audio/soundfont/sf2.ts';
 import { isAudioFile } from '../rack/DeviceSampleBar.tsx';
+import { SHIPPED_PACKS } from '../../shared/instruments/packs.ts';
+import { isRedistributable, packDeviceType } from '../../shared/instruments/catalogTypes.ts';
 
 type Source = 'built-in' | 'audio' | 'soundfont' | 'presets' | 'effects' | 'samples';
 const SOURCES: { id: Source; label: string }[] = [
@@ -32,6 +34,7 @@ const SOURCES: { id: Source; label: string }[] = [
   { id: 'samples', label: 'Samples' },
 ];
 const isEffectPlugin = (i: ManifestItem) => i.kind === 'plugin' && i.role === 'effect';
+const PACK_BY_DEVICE_TYPE = new Map<string, (typeof SHIPPED_PACKS)[number]>(SHIPPED_PACKS.map((pack) => [packDeviceType(pack.id), pack]));
 
 interface Props {
   /** The part to replace; null = only "add as new part". */
@@ -450,11 +453,27 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
                   type="button"
                   onClick={() => choose(i.type, i.name)}
                   className="text-left us-lcd-box px-2 py-1 hover:bg-[#0e2d33] hover:text-[#a8d6d9] group"
-                  title={i.desc}
+                  title={(() => {
+                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
+                    return pack ? `${i.desc}\nAttribution: ${pack.author}\nLicense: ${pack.spdx}\nSource: ${pack.source}` : i.desc;
+                  })()}
                   data-testid="patch-item"
                 >
+                  {(() => {
+                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
+                    if (!pack) return null;
+                    const privatePack = !isRedistributable(pack.spdx);
+                    return <div className={`font-label text-[11px] font-bold ${privatePack ? 'text-amber-300' : 'text-emerald-300'}`}>
+                      {privatePack ? `RECORDED · ${pack.spdx} · CHECK RIGHTS` : `RECORDED · ${pack.spdx}`}
+                    </div>;
+                  })()}
                   <div className="font-lcd text-[18px] leading-[20px] truncate">{i.name}</div>
-                  <div className="font-label text-[13px] leading-tight opacity-80 line-clamp-2">{i.desc}</div>
+                  {(() => {
+                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
+                    return <div className="font-label text-[13px] leading-tight opacity-80 line-clamp-2">
+                      {pack ? `${i.desc} Attribution: ${pack.author}.` : i.desc}
+                    </div>;
+                  })()}
                 </button>
               ))}
               {items.length === 0 && <div className="font-lcd text-[18px]">Nothing found.</div>}

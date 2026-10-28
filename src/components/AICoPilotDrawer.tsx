@@ -6,12 +6,13 @@
 import { useState } from 'react';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
 import type { AudioEngine } from '../audio/AudioEngine.ts';
-import { Sparkles, Bot, Disc, Wand2, CheckCircle2, X, AlertCircle, Undo2 } from 'lucide-react';
+import { Sparkles, Bot, Cpu, Disc, Wand2, CheckCircle2, X, AlertCircle, Undo2 } from 'lucide-react';
 import { applyRackPlan, requestRackPlan } from '../ai/rackCombinator.ts';
 import { vstLibrary } from '../vst/libraryClient.ts';
 import { deviceParams } from '../audio/deviceParams.ts';
 import { localPreset, validatePreset, type CraftedPreset, type PresetParam } from '../../shared/rack/presetCraft.ts';
 import { MASTER_TARGETS, analyzeMix, autoMaster, suggestMastering, type MixAnalysis } from '../audio/mastering/assistant.ts';
+import { LocalAiPanel } from './LocalAiPanel.tsx';
 
 interface AICoPilotDrawerProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ const isCrafted = (x: unknown): x is CraftedPreset =>
 const fmt = (v: number, d = 1) => (Number.isFinite(v) && v > -69.9 ? v.toFixed(d) : '—');
 
 export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackBuilt, onOpenMastering }: AICoPilotDrawerProps) {
-  const [activeTab, setActiveTab] = useState<'spawn' | 'preset' | 'mastering'>('spawn');
+  const [activeTab, setActiveTab] = useState<'spawn' | 'preset' | 'mastering' | 'local'>('spawn');
 
   // rack builder
   const [spawnPrompt, setSpawnPrompt] = useState('');
@@ -236,7 +237,7 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
           </div>
           <div>
             <h2 className="text-[18px] font-bold tracking-wide font-label text-white">AI Co-Pilot</h2>
-            <p className="text-[11px] text-neutral-400">Rack builder · preset crafter · mix &amp; master assistant</p>
+            <p className="text-[11px] text-neutral-400">Rack builder · preset crafter · mix &amp; master · local AI</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800" aria-label="Close">
@@ -248,9 +249,11 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
         {tabBtn('spawn', 'Rack builder', Bot, 'border-indigo-500')}
         {tabBtn('preset', 'Preset crafter', Wand2, 'border-amber-500')}
         {tabBtn('mastering', 'Mix & master', Disc, 'border-emerald-500')}
+        {tabBtn('local', 'Local AI', Cpu, 'border-sky-500')}
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {activeTab === 'local' && <LocalAiPanel audioEngine={audioEngine} />}
         {activeTab === 'spawn' && (
           <div className="space-y-4">
             <div className="p-3.5 rounded-lg bg-black/30 border border-chrome-line">

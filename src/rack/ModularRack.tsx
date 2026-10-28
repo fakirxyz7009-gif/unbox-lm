@@ -250,11 +250,11 @@ export const ModularRack: React.FC<ModularRackProps> = ({
     scrollToUnit(dev.id);
   };
 
-  const mountBuiltin = (type: DeviceType, name: string) => {
+  const mountBuiltin = (type: DeviceType, name: string, subVoiceId?: string) => {
     const selected = selectedId ? engine.devices.get(selectedId) : undefined;
     let inserted = false;
     const dev = engine.runStructuralEdit('Add device', () => {
-      const mounted = engine.createDevice(type, name);
+      const mounted = engine.createDevice(type, name, subVoiceId);
       if (mounted instanceof SpecDevice && mounted.spec.kind === 'player') {
         if (selected && engine.isPlayableInstrument(selected.type)) engine.setPlayerTarget(mounted.id, selected.id);
       } else if (!engine.isPlayableInstrument(type) && selected) {

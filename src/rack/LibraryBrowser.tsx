@@ -28,7 +28,7 @@ import type { Notify } from './PatchCableLayer.tsx';
 
 interface LibraryBrowserProps {
   onMountItem: (item: MountableItem, presetId?: string) => void;
-  onMountBuiltin: (type: DeviceType, name: string) => void;
+  onMountBuiltin: (type: DeviceType, name: string, subVoiceId?: string) => void;
   onMessage: Notify;
 }
 
@@ -309,17 +309,29 @@ export const LibraryBrowser: React.FC<LibraryBrowserProps> = ({ onMountItem, onM
             <li key={c.label}>
               <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 px-1 pb-1">{c.label}</div>
               <ul className="space-y-1">
-                {c.items.map((i) => (
-                  <li key={`${i.type}-${i.name}`} className="lib-row flex items-center gap-1.5">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-semibold text-slate-100 truncate">{i.name}</div>
-                      <div className="text-[11px] text-slate-500 truncate">{i.desc}</div>
-                    </div>
-                    <button type="button" className="lib-act lib-act--mount" onClick={() => onMountBuiltin(i.type, i.name)}>
-                      <Plus className="w-3 h-3" /> Add
-                    </button>
-                  </li>
-                ))}
+                {c.items.map((i) => {
+                  const itemKey = `${i.type}-${i.name}`;
+                  return (
+                    <li key={itemKey} className="lib-row flex p-1.5 rounded bg-slate-900/50 border border-slate-800/80 hover:border-slate-700/80 transition-colors">
+                      <div className="flex items-center gap-1.5 w-full">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-slate-100 truncate">{i.name}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 truncate">{i.desc}</div>
+                        </div>
+                        <button
+                          type="button"
+                          className="lib-act lib-act--mount shrink-0"
+                          onClick={() => onMountBuiltin(i.type, i.name)}
+                          title="Add instrument to rack"
+                        >
+                          <Plus className="w-3 h-3" /> Add
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </li>
           ))}

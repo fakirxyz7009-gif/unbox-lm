@@ -119,7 +119,8 @@ export function ExportPage() {
                 <Sel value={s.stemMode} onChange={(v) => set({ stemMode: v })} options={[{ value: 'wet', label: 'Wet (with its sends / returns)' }, { value: 'dry', label: 'Dry (channel only)' }]} />
               </label>
               <label className="flex items-center gap-1"><input type="checkbox" checked={s.stemMaster} onChange={(e) => set({ stemMaster: e.target.checked })} /> Through the master section</label>
-              <span className="text-slate-500">Each stem is rendered on its own; all stems come as one .zip.</span>
+              <label className="flex items-center gap-1"><input type="checkbox" checked={s.stemNotes} onChange={(e) => set({ stemNotes: e.target.checked })} /> MIDI notes with each stem (drum pattern included)</label>
+              <span className="text-slate-500">Each stem is rendered on its own; with notes on, each instrument also gets a .mid. All come as one .zip with a manifest.json.</span>
             </div>
           )}
           {s.what === 'midi' && <p className="text-slate-400">Standard MIDI File (type 1, 480 PPQ): tempo map, time signature, markers and one track per instrument (drums on channel 10).</p>}

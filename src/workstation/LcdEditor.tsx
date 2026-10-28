@@ -23,7 +23,8 @@ import { formatParam as fmt } from './paramFormat.ts';
 import { midiControlChanges } from './midiControls.ts';
 import { useClipFocus } from '../shell/clipFocus.ts';
 import { LcdAudioClipBox } from './LcdAudioClipBox.tsx';
-import { deviceSample, setPadSample, type PadSample } from '../audio/deviceSamples.ts';
+import { deviceSample, type PadSample } from '../audio/deviceSamples.ts';
+import { editCapturedPadSample } from '../audio/deviceSampleEdits.ts';
 import { drumLanesFor } from '../audio/drumLanes.ts';
 
 export type LcdPage = 'easy' | 'clip' | 'mix' | 'fx' | 'midi' | 'combi' | `sec:${string}`;
@@ -164,7 +165,8 @@ export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) 
     const adsr = (['attack', 'decay', 'sustain', 'release'] as const).map((k) => pick(params, new RegExp(`^${k}$`), new RegExp(`^amp${k}$`, 'i')));
     body = (
       <div className="flex gap-3 h-full">
-        <div className="grid grid-cols-3 gap-x-2 gap-y-1 content-start">
+        {/* Wider knob columns from 1500 px: "Resonance" needs ~70 px and must not run into "Cutoff". */}
+        <div className="grid grid-cols-3 min-[1500px]:grid-cols-[repeat(3,minmax(60px,1fr))] gap-x-2 gap-y-1 content-start">
           {knob(pick(params, /^cutoff$/i, /cutoff/i, /^tone$/i), 'Cutoff')}
           {knob(pick(params, /^resonance$/i, /^res/i, /reso/i), 'Resonance')}
           {knob(pick(params, /^envAmount$/i, /env.*(amt|amount|depth)/i, /^punch$/i), 'Env')}
@@ -223,20 +225,23 @@ export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) 
                     const s = pad?.sustain ?? 1.0;
                     const r = pad?.release ?? 0.05;
 
-                    const updateSampleAdsr = (patch: Partial<PadSample>) => {
-                      if (pad) {
-                        setPadSample(dev.id, note, { ...pad, ...patch });
-                      } else {
-                        setPadSample(dev.id, note, { audioId: '', level: 1, attack: a, decay: d, sustain: s, release: r, ...patch });
+                    const updateSampleAdsr = (patch: Partial<PadSample>): boolean => {
+                      // ADSR controls alter an already-captured note. Creating a fake empty
+                      // assignment here used to persist an audioId of "", which cannot play and
+                      // bypassed the common undo path.
+                      if (!editCapturedPadSample(audioEngine, dev.id, note, patch)) {
+                        setTouched({ label: 'Capture note audio', value: 'Capture a note first' });
+                        return false;
                       }
                       force();
+                      return true;
                     };
 
                     return [
-                      <AdsrSlider key="A" label="A" val={a} min={0.001} max={1.5} onChange={(v) => { updateSampleAdsr({ attack: v }); setTouched({ label: 'Attack', value: `${(v * 1000).toFixed(0)}ms` }); }} />,
-                      <AdsrSlider key="D" label="D" val={d} min={0.01} max={2.0} onChange={(v) => { updateSampleAdsr({ decay: v }); setTouched({ label: 'Decay', value: `${v.toFixed(2)}s` }); }} />,
-                      <AdsrSlider key="S" label="S" val={s} min={0} max={1.0} onChange={(v) => { updateSampleAdsr({ sustain: v }); setTouched({ label: 'Sustain', value: `${Math.round(v * 100)}%` }); }} />,
-                      <AdsrSlider key="R" label="R" val={r} min={0.01} max={3.0} onChange={(v) => { updateSampleAdsr({ release: v }); setTouched({ label: 'Release', value: `${v.toFixed(2)}s` }); }} />,
+                      <AdsrSlider key="A" label="A" val={a} min={0.001} max={1.5} onChange={(v) => { if (updateSampleAdsr({ attack: v })) setTouched({ label: 'Attack', value: `${(v * 1000).toFixed(0)}ms` }); }} />,
+                      <AdsrSlider key="D" label="D" val={d} min={0.01} max={2.0} onChange={(v) => { if (updateSampleAdsr({ decay: v })) setTouched({ label: 'Decay', value: `${v.toFixed(2)}s` }); }} />,
+                      <AdsrSlider key="S" label="S" val={s} min={0} max={1.0} onChange={(v) => { if (updateSampleAdsr({ sustain: v })) setTouched({ label: 'Sustain', value: `${Math.round(v * 100)}%` }); }} />,
+                      <AdsrSlider key="R" label="R" val={r} min={0.01} max={3.0} onChange={(v) => { if (updateSampleAdsr({ release: v })) setTouched({ label: 'Release', value: `${v.toFixed(2)}s` }); }} />,
                     ];
                   })()
                 )}

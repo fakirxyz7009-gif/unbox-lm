@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => {
       watch:
         process.env.DISABLE_HMR === 'true'
           ? null
-          : { ignored: ['**/public/library/**', '**/public/instruments/**', '**/data/**', '**/release/**', '**/dist/**'] },
+          : { ignored: ['**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release/**', '**/dist/**'] },
     },
   };
 });

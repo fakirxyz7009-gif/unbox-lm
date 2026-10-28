@@ -48,8 +48,11 @@ const text = (type: number, s: string) => {
   return [0xff, type, ...vlq(b.length), ...b];
 };
 
-/** The song as a type-1 MIDI file. `range` in 16ths (default: whole song / pattern pass). */
-export function exportMidi(engine: AudioEngine, range?: { start: number; end: number }): Blob {
+/**
+ * The song as a type-1 MIDI file. `range` in 16ths (default: whole song / pattern pass).
+ * `onlyTracks` (sequencer track ids) writes just those instruments: one stem's notes and drums.
+ */
+export function exportMidi(engine: AudioEngine, range?: { start: number; end: number }, onlyTracks?: ReadonlySet<string>): Blob {
   const spb = engine.stepsPerBar;
   const start = range?.start ?? 0;
   const end = range?.end ?? engine.renderLength16ths();
@@ -74,6 +77,7 @@ export function exportMidi(engine: AudioEngine, range?: { start: number; end: nu
   let channel = 0;
   for (const t of engine.tracks) {
     if (t.kind === 'audio') continue;
+    if (onlyTracks && !onlyTracks.has(t.id)) continue;
     const drum = t.group === 'Drums';
     const ch = drum ? 9 : channel;
     if (!drum) channel = channel === 8 ? 10 : (channel + 1) % 16;

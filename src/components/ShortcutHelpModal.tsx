@@ -120,6 +120,13 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
       { key: '8', label: 'Stretch' },
       { key: '9', label: 'Marquee select' },
       { key: 'Q', label: 'Snap the notes to the song scale' },
+      { key: 'Ctrl+A / Ctrl+I', label: 'Select all notes / invert the selection' },
+      { key: 'Shift+R / Shift+F', label: 'Reverse the selection in time / flip its pitches' },
+      { key: 'Ctrl+← / →', label: 'Rotate the selection one grid step, wrapping around the pattern' },
+      { key: '↑ / ↓  (Shift = octave)', label: 'Transpose the selection' },
+      { key: 'Shift+H / Ctrl+M', label: 'Humanize timing and velocity / mute or unmute the selection' },
+      { key: 'Del · Ctrl+D', label: 'Delete · duplicate the selected notes' },
+      { key: 'Left toolbar', label: 'Tools and note edits; each button names its shortcut in its tooltip' },
     ],
   },
   {

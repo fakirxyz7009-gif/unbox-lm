@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+/* Scan only the app's own sources. Automatic detection walks the whole project, including the
+   multi-GB release/ folder, and stalls the dev server for tens of seconds on the first stylesheet. */
+@source "../index.html";
+@source "../src";
+@source "../shared";
 
 /* THE UNBOX APP visual tokens (src/ui/skin). */
 @theme {

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "unbox-dev-3123",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set PORT=3123&& npx tsx server.ts"],
+      "port": 3123
     }
   ]
 }

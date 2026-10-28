@@ -1,9 +1,11 @@
 import { BaseDevice } from '../BaseDevice.ts';
+import { realMultiSampler } from '../realSampler/RealMultiSampler.ts';
 import { soundFontEngine } from '../SoundFontEngine.ts';
 
 export class UniversalWorldInstrumentDevice extends BaseDevice {
   public instrumentName: string;
   public family: 'string' | 'wind';
+  public activeSubVoice?: string;
   public resonance: number = 0.8;
   public toneColor: number = 0.55;
   private masterOutput: GainNode;
@@ -12,10 +14,17 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
   private activeVoices: Map<number, { stop: (rel?: number) => void }> = new Map();
   private lastMidiNote: number = 60;
 
-  constructor(ctx: AudioContext, id: string, name: string = 'Acoustic Instrument', family: 'string' | 'wind' = 'string') {
+  constructor(
+    ctx: AudioContext,
+    id: string,
+    name: string = 'Acoustic Instrument',
+    family: 'string' | 'wind' = 'string',
+    subVoiceId?: string
+  ) {
     super(ctx, id, name, 'world_instrument', 2);
     this.instrumentName = name;
     this.family = family;
+    this.activeSubVoice = subVoiceId;
 
     this.filterNode = ctx.createBiquadFilter();
     this.filterNode.type = 'lowpass';
@@ -41,6 +50,7 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
       pan: 0,
       resonance: 0.8,
       toneColor: 0.55,
+      subVoice: subVoiceId || '',
     };
 
     this.ports = [
@@ -50,6 +60,13 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
       { id: 'cv_gate', name: 'Gate CV In', type: 'cv_in' },
     ];
     soundFontEngine.warmUp(ctx, () => this.presetId());
+    void realMultiSampler.loadDeviceSubVoice(this.id, this.instrumentName, this.activeSubVoice, this.ctx);
+  }
+
+  public setSubVoice(voiceId: string): void {
+    this.activeSubVoice = voiceId;
+    this.params['subVoice'] = voiceId;
+    void realMultiSampler.loadDeviceSubVoice(this.id, this.instrumentName, voiceId, this.ctx);
   }
 
   private presetId(): string {
@@ -67,6 +84,23 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
     this.noteOff(note, now);
 
     const vel = Math.max(0.15, Math.min(1.2, velocity));
+
+    // 1. Prioritize playing 100% real recorded multi-samples via RealMultiSampler!
+    const playedReal = realMultiSampler.playNote(
+      this.id,
+      this.instrumentName,
+      note,
+      vel,
+      now,
+      this.filterNode,
+      {
+        gain: (this.params.volume as number) ?? 0.92,
+        attack: 0.003,
+        release: 0.4 + this.resonance * 0.8,
+      }
+    );
+    if (playedReal) return;
+
     const presetId = this.presetId();
 
     const cutHz = Math.min(18000, 2200 + this.toneColor * 14000);
@@ -94,14 +128,24 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
   }
 
   public noteOff(note: number, time?: number): void {
+    realMultiSampler.stopNote(this.id, note, time);
     const voice = this.activeVoices.get(note);
     if (!voice) return;
     this.activeVoices.delete(note);
     voice.stop(time);
   }
 
+  public override dispose(): void {
+    super.dispose();
+    realMultiSampler.releaseDevice(this.id);
+  }
+
   public setParam(param: string, val: any): void {
     const num = Number(val);
+    if (param === 'subVoice' && typeof val === 'string') {
+      this.setSubVoice(val);
+      return;
+    }
     this.params[param] = val;
     if (param === 'resonance' && !isNaN(num)) this.resonance = Math.max(0.1, Math.min(1.0, num));
     if (param === 'toneColor' && !isNaN(num)) this.toneColor = Math.max(0.1, Math.min(1.0, num));

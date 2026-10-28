@@ -16,6 +16,7 @@ interface Props {
   track: SequencerTrack;
   tracks: SequencerTrack[];
   tool: RollTool;
+  onToolChange?: (tool: RollTool) => void;
   /** Snap in pattern steps (0 = free). */
   snap: number;
   defaultLength: number;
@@ -38,6 +39,7 @@ export const PatternPianoRoll: React.FC<Props> = ({
   track,
   tracks,
   tool,
+  onToolChange,
   snap,
   defaultLength,
   chordOffsets,
@@ -109,6 +111,7 @@ export const PatternPianoRoll: React.FC<Props> = ({
       unitsPerBeat={unitsPerBeat}
       snap={snap}
       tool={tool}
+      onToolChange={onToolChange}
       defaultLength={defaultLength}
       chordOffsets={chordOffsets}
       newNoteMeta={newNoteMeta}

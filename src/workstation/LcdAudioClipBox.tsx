@@ -235,7 +235,9 @@ export const LcdAudioClipBox: React.FC<Props> = ({ track, onTouched, onForce }) 
     dragRef.current = null;
     stopPreview();
     setAudioError(null);
-  }, [selectedNote, dev?.id]);
+  // Include the device object, not only its id: structural undo restores a new graph that may
+  // intentionally retain the same id, and a stale drag must never edit that new device.
+  }, [selectedNote, dev]);
   useEffect(() => {
     const cancel = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || !sampleGestureRef.current) return;
@@ -343,10 +345,10 @@ export const LcdAudioClipBox: React.FC<Props> = ({ track, onTouched, onForce }) 
         tune: noteSample.tune ?? 0,
         reverse: noteSample.reverse ?? false,
         loop: false,
-        attack: 0.002,
-        decay: 0.25,
-        sustain: 1,
-        release: 0.05,
+        attack: noteSample.attack ?? 0.002,
+        decay: noteSample.decay ?? 0.25,
+        sustain: noteSample.sustain ?? 1,
+        release: noteSample.release ?? 0.05,
       });
     }
     editPadSamples(audioEngine, dev.id, changes, 'Spread note audio to keys');
@@ -642,8 +644,8 @@ export const LcdAudioClipBox: React.FC<Props> = ({ track, onTouched, onForce }) 
   return (
     <div className="flex-1 w-full min-h-0 flex flex-col justify-between text-lcd-ink select-none gap-0.5" data-testid="note-audio-editor">
       {/* 1. Header: Note / Pad Selector + Preview Audition Button */}
-      <div className="flex items-center justify-between gap-1 shrink-0">
-        <div className="flex items-center gap-0.5 flex-1 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 flex-1">
           <span className="font-label font-bold text-[11px] uppercase tracking-wider shrink-0">NOTE:</span>
           <button
             type="button"
@@ -660,7 +662,7 @@ export const LcdAudioClipBox: React.FC<Props> = ({ track, onTouched, onForce }) 
             value={selectedNote}
             onChange={(e) => setSelectedNote(Number(e.target.value))}
             aria-label="Note audio pitch"
-            className="us-lcd-box bg-transparent font-lcd text-[13px] leading-tight px-1 py-0 flex-1 truncate outline-none cursor-pointer"
+            className="us-lcd-box bg-transparent font-lcd text-[13px] leading-tight px-1 py-0 flex-1 min-w-0 truncate outline-none cursor-pointer"
           >
             {noteOptions.map((o) => (
               <option key={o.note} value={o.note}>

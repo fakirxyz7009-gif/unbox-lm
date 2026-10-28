@@ -11,6 +11,8 @@ import { audioEngine } from '../../audio/AudioEngine.ts';
 import { audioStore, type AudioAsset } from '../../audio/clips/audioStore.ts';
 import { musicSeparator, type SeparatedStem, type SeparationProgress } from '../../audio/ai/MusicSeparator.ts';
 import { Btn, Panel } from '../../studio/ui/controls.tsx';
+import { LinkImport } from './LinkImport.tsx';
+import { assetToWav, DEMUCS_STEMS, fetchDemucsStatus, separateWithDemucs, type DemucsStem } from '../../audio/ai/demucsSeparation.ts';
 
 interface Props {
   isOpen: boolean;
@@ -58,6 +60,16 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   const [busy, setBusy] = useState(false);
   const srcRef = useRef<AudioBufferSourceNode | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Demucs: null = the route is not on this server, undefined = still checking.
+  const [demucsReady, setDemucsReady] = useState<boolean | null | undefined>(undefined);
+  const [aiStems, setAiStems] = useState<Record<DemucsStem, AudioAsset> | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiStatus, setAiStatus] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    void fetchDemucsStatus().then((status) => setDemucsReady(status ? status.demucs : null));
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -161,6 +173,25 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     onMessage?.(`Saved "${asset.name}.wav" to the project samples`, 'success');
   };
 
+  const separateAi = async () => {
+    if (!source || aiBusy) return;
+    setAiBusy(true);
+    setAiStems(null);
+    try {
+      const blobs = await separateWithDemucs(assetToWav(source), setAiStatus);
+      const title = source.name.replace(/\.[^.]+$/, '');
+      const assets = {} as Record<DemucsStem, AudioAsset>;
+      for (const stem of DEMUCS_STEMS) assets[stem] = await audioStore.importFile(blobs[stem], `${title} · ${stem}`);
+      setAiStems(assets);
+      onMessage?.('Stems ready: drums, bass, other and vocals are in the project samples', 'success');
+    } catch (err) {
+      onMessage?.(err instanceof Error ? err.message : 'Separation failed.', 'error');
+    } finally {
+      setAiBusy(false);
+      setAiStatus('');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -196,6 +227,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
             <Btn onClick={() => fileRef.current?.click()} className="justify-center">
               <Upload className="w-3.5 h-3.5" /> Load audio file…
             </Btn>
+            <LinkImport onImported={(asset) => setSource(asset)} onMessage={onMessage} />
             <input
               ref={fileRef}
               type="file"
@@ -337,6 +369,52 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                   >
                     <ArrowRight className="w-3.5 h-3.5" /> All four to the rack
                   </Btn>
+                </div>
+              )}
+            </Panel>
+            <Panel title="Separate with a model" right={<span className="text-[11px] uppercase tracking-wider text-[#8fbf8f]">local</span>}>
+              <p className="text-[11px] leading-snug text-[#a7aeb5]">
+                Demucs (htdemucs) runs on this computer and returns drums, bass, other and vocals from a trained model. A song
+                takes several minutes on a CPU.
+              </p>
+              {demucsReady === false && (
+                <p className="mt-2 text-[11px] leading-snug text-[#e0b266]">
+                  demucs is not installed on this computer. Install it with pip (pip install demucs), then reopen this panel.
+                </p>
+              )}
+              {demucsReady === null && <p className="mt-2 text-[11px] text-[#8b9299]">Separation needs the full build running on this computer.</p>}
+              <div className="mt-3 flex items-center gap-2">
+                <Btn
+                  on={!!source && !aiBusy && demucsReady === true}
+                  disabled={!source || aiBusy || demucsReady !== true}
+                  onClick={() => void separateAi()}
+                >
+                  Separate with the local model
+                </Btn>
+                {aiBusy && <span className="text-[11px] text-[#a7aeb5]">{aiStatus}</span>}
+              </div>
+              {aiStems && (
+                <div className="mt-3 space-y-1.5">
+                  {DEMUCS_STEMS.map((stem) => {
+                    const asset = aiStems[stem];
+                    return (
+                      <div key={stem} className="flex items-center gap-2 rounded border border-chrome-line bg-black/25 p-2">
+                        <button
+                          type="button"
+                          onClick={() => preview(asset.buffer, `ai_${stem}`)}
+                          className="us-btn grid h-6 w-6 shrink-0 place-items-center rounded"
+                          aria-label={`Preview ${stem}`}
+                        >
+                          {playingId === `ai_${stem}` ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                        </button>
+                        <span className="flex-1 text-[11px] font-semibold capitalize">{stem}</span>
+                        <span className="font-mono text-[11px] text-[#8b9299]">{fmtDuration(asset.buffer.duration)}</span>
+                        <Btn onClick={() => addToSong(asset)} title="Place at the playhead on a new audio track">
+                          Timeline
+                        </Btn>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </Panel>

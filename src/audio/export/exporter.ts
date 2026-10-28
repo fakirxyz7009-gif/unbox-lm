@@ -34,6 +34,8 @@ export interface ExportSettings {
   stems: string[];
   stemMode: 'wet' | 'dry';
   stemMaster: boolean;
+  /** Stems: also write each instrument's notes (a .mid, drum pattern included) beside its audio. */
+  stemNotes: boolean;
   /** Mix: run the master section (off = raw mix bus). */
   masterProcessing: boolean;
   fileName: string;
@@ -42,7 +44,7 @@ export interface ExportSettings {
 
 export const DEFAULT_EXPORT: ExportSettings = {
   what: 'mix', format: 'wav', sampleRate: 48000, bitDepth: 24, dither: true, kbps: 320, normalize: 'off', peakDb: -1, lufs: -14, ceilingDb: -1,
-  range: 'song', startBar: 1, endBar: 9, tailSec: 2, stems: [], stemMode: 'wet', stemMaster: false, masterProcessing: true, fileName: '', meta: {},
+  range: 'song', startBar: 1, endBar: 9, tailSec: 2, stems: [], stemMode: 'wet', stemMaster: false, stemNotes: true, masterProcessing: true, fileName: '', meta: {},
 };
 
 export const FORMAT_INFO: Record<ExportFormat, { label: string; ext: string; lossy: boolean; rates: number[] }> = {
@@ -58,6 +60,27 @@ export interface ExportResult {
   files: { name: string; blob: Blob }[];
   loudness?: LoudnessResult;
   gainDb: number;
+}
+
+interface StemManifestEntry {
+  name: string;
+  kind: string;
+  audio: string;
+  notes: string | null;
+}
+
+/** manifest.json in a stems zip: the tempo and grid the notes were written with. */
+function stemManifest(engine: AudioEngine, sampleRate: number, range: { start: number; end: number }, stems: StemManifestEntry[]) {
+  return {
+    software: 'Unbox Studio',
+    bpm: engine.bpm,
+    timeSignature: engine.timeSignature,
+    sampleRate,
+    stepsPerBar: engine.stepsPerBar,
+    range16ths: range,
+    notes: 'Each .mid holds one instrument (drums on channel 10) at 480 PPQ; the audio is the same stem rendered on its own.',
+    stems,
+  };
 }
 
 export function exportRange(engine: AudioEngine, s: ExportSettings): { start: number; end: number } {
@@ -129,6 +152,7 @@ export async function runExport(engine: AudioEngine, s: ExportSettings, onProgre
 
   // stems
   const files: { name: string; blob: Blob }[] = [];
+  const manifest: StemManifestEntry[] = [];
   const chans = engine.mixer.channels().filter((c) => s.stems.includes(c.id));
   for (let i = 0; i < chans.length; i++) {
     const c = chans[i];
@@ -139,8 +163,17 @@ export async function runExport(engine: AudioEngine, s: ExportSettings, onProgre
       onProgress: (f, l) => onProgress((i + f * 0.8) / chans.length, `${label}: ${l}`),
     });
     const blob = await encode(buf, { ...s, normalize: 'off' }, () => undefined);
-    files.push({ name: `${base} - ${String(i + 1).padStart(2, '0')} ${safeFileName(c.settings.name)}.${ext}`, blob });
+    const stemBase = `${base} - ${String(i + 1).padStart(2, '0')} ${safeFileName(c.settings.name)}`;
+    files.push({ name: `${stemBase}.${ext}`, blob });
+    const trackId = c.kind === 'track' ? c.track?.id : undefined;
+    const notesFile = s.stemNotes && trackId ? `${stemBase}.mid` : null;
+    if (notesFile && trackId) files.push({ name: notesFile, blob: exportMidi(engine, range, new Set([trackId])) });
+    manifest.push({ name: c.settings.name, kind: c.kind, audio: `${stemBase}.${ext}`, notes: notesFile });
   }
+  files.push({
+    name: 'manifest.json',
+    blob: new Blob([JSON.stringify(stemManifest(engine, rate, range, manifest), null, 2)], { type: 'application/json' }),
+  });
   onProgress(0.98, 'Packing stems');
   const zip = await writeZip(await Promise.all(files.map(async (f) => ({ name: f.name, data: new Uint8Array(await f.blob.arrayBuffer()) }))));
   onProgress(1, 'Done');
