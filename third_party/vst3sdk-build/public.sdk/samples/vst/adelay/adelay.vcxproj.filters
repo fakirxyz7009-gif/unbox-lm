@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\adelaycontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\adelayprocessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\exampletest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\vst\utility\test\ringbuffertest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\vst\utility\test\versionparsertest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\main\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\adelaycontroller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\adelayids.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\adelayprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\source\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\adelay\resource\info.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{B2A82F04-6C29-31ED-9A6F-D25E02997D84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3FAB6F9C-E912-35DA-A4CB-B265BA5AFA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

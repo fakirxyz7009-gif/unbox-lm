@@ -1,0 +1,18 @@
+{
+  "id": "harmonium",
+  "name": "Harmonium",
+  "kind": "melodic",
+  "category": "keys",
+  "description": "Recorded hand harmonium, every key from C2 to D5 (chromatic), looped reeds so notes sustain as long as you hold them.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "donyaquick, cut by cabled_mess (Freesound)",
+    "source": "https://freesound.org/people/cabled_mess/packs/29512/",
+    "notes": "Freesound sounds 523851-523889 by cabled_mess (cut from donyaquick's 'Harmonium Samples - All Keys and Drones', sound 330410). CC0; built from Freesound's high-quality Ogg previews (lossy)."
+  },
+  "dir": "../../../data/instrument-cache/freesound",
+  "notes": "harmonium/Harmonium-*.ogg",
+  "loop": "auto",
+  "length": 4,
+  "release": 0.25
+}

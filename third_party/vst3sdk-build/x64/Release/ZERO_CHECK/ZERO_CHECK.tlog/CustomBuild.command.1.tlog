@@ -1,0 +1,10 @@
+^C:\USERS\OWNER\DESKTOP\UNBOX-LM-MAIN\THIRD_PARTY\VST3SDK-BUILD\CMAKEFILES\8476FC55AD13F921EF0DC7EC61F1614A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk -BC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/vstsdk.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

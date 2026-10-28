@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4954BB50-090C-37EA-96B8-FA8E3641287B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>channel-context</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\VST3\Debug\channel-context.vst3\Contents\x86_64-win\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">channel-context.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">channel-context</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.vst3</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\VST3\Release\channel-context.vst3\Contents\x86_64-win\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">channel-context.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">channel-context</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.vst3</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>6031;6308;6330;6385;6386;28125;28251;4221</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;SMTG_RENAME_ASSERT=1;DEVELOPMENT=1;_UNICODE;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";channel_context_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;SMTG_RENAME_ASSERT=1;DEVELOPMENT=1;_UNICODE;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";channel_context_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/Contents/Resources
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message>[SMTG] Copy PlugIn.ico and desktop.ini and change their attributes.		</Message>
+      <Command>setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/../templates/VST_Logo_Steinberg.ico C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/PlugIn.ico
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/../templates/desktop.ini.in C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/desktop.ini
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/desktop.ini
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/PlugIn.ico
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+cd C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin\Debug\moduleinfotool.exe -create -version 3.8.1.0 -path C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3 -output C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3/Contents/Resources/moduleinfo.json
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+cd C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo [SMTG] Validator started...
+if %errorlevel% neq 0 goto :cmEnd
+C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin\Debug\validator.exe C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Debug/channel-context.vst3 
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo [SMTG] Validator finished.
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\..\..\lib\Debug\sdk.lib;..\..\..\..\lib\Debug\sdk_common.lib;..\..\..\..\lib\Debug\base.lib;..\..\..\..\lib\Debug\pluginterfaces.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/lib/Debug/channel-context.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/public.sdk/samples/vst/channelcontext/WIN_PDB64/Debug/channel-context.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>6031;6308;6330;6385;6386;28125;28251;4221</DisableSpecificWarnings>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SMTG_RENAME_ASSERT=1;RELEASE=1;_UNICODE;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";channel_context_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SMTG_RENAME_ASSERT=1;RELEASE=1;_UNICODE;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";channel_context_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E make_directory C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/Contents/Resources
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message>[SMTG] Copy PlugIn.ico and desktop.ini and change their attributes.		</Message>
+      <Command>setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/../templates/VST_Logo_Steinberg.ico C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/PlugIn.ico
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/../templates/desktop.ini.in C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/desktop.ini
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/desktop.ini
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/PlugIn.ico
+if %errorlevel% neq 0 goto :cmEnd
+attrib +s C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+cd C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin\Release\moduleinfotool.exe -create -version 3.8.1.0 -path C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3 -output C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3/Contents/Resources/moduleinfo.json
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+cd C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo [SMTG] Validator started...
+if %errorlevel% neq 0 goto :cmEnd
+C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\bin\Release\validator.exe  C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/VST3/Release/channel-context.vst3
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo [SMTG] Validator finished.
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\..\..\lib\Release\sdk.lib;..\..\..\..\lib\Release\sdk_common.lib;..\..\..\..\lib\Release\base.lib;..\..\..\..\lib\Release\pluginterfaces.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/lib/Release/channel-context.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/public.sdk/samples/vst/channelcontext/WIN_PDB64/Release/channel-context.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst/channelcontext/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk -BC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build --check-stamp-file C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/public.sdk/samples/vst/channelcontext/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\templates\projectversion.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst/channelcontext/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk -BC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build --check-stamp-file C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/public.sdk/samples/vst/channelcontext/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\templates\projectversion.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plug.cpp" />
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plug.h" />
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plugcids.h" />
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plugcontroller.cpp" />
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plugcontroller.h" />
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plugentry.cpp" />
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\plugparamids.h" />
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\source\version.h" />
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\main\dllmain.cpp" />
+    <ResourceCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst\channelcontext\resource\info.rc" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\ZERO_CHECK.vcxproj">
+      <Project>{82485DED-3CBA-315A-9EA5-49720497E78B}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\base.vcxproj">
+      <Project>{960ABF0D-1428-3417-9E3F-88B52B248572}</Project>
+      <Name>base</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst-utilities\moduleinfotool\moduleinfotool.vcxproj">
+      <Project>{0EBF0FA3-D78D-350B-A889-83DD46AC14BF}</Project>
+      <Name>moduleinfotool</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\pluginterfaces.vcxproj">
+      <Project>{7DD78C31-EB51-3FD6-B91D-65404419C364}</Project>
+      <Name>pluginterfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\sdk.vcxproj">
+      <Project>{EAE4B0D0-25DC-3935-A79F-E3401B69DAA2}</Project>
+      <Name>sdk</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\sdk_common.vcxproj">
+      <Project>{E66855CF-0C2B-3570-B972-D6B3CC6B392A}</Project>
+      <Name>sdk_common</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst-hosting\validator\validator.vcxproj">
+      <Project>{B39F2499-0157-3C5A-A28D-35056D5E8FDF}</Project>
+      <Name>validator</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

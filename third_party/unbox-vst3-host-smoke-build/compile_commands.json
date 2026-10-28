@@ -1,0 +1,722 @@
+[
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -Dunbox_test_delay_EXPORTS -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /wd4221 /Zi -DRELEASE=1 /FoCMakeFiles\\unbox-test-delay.dir\\test_plugin\\test_delay_factory.cpp.obj /FdCMakeFiles\\unbox-test-delay.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\test_plugin\\test_delay_factory.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/test_plugin/test_delay_factory.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-test-delay.dir/test_plugin/test_delay_factory.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -Dunbox_test_delay_EXPORTS -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /wd4221 /Zi -DRELEASE=1 /FoCMakeFiles\\unbox-test-delay.dir\\test_plugin\\test_delay_processor.cpp.obj /FdCMakeFiles\\unbox-test-delay.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\test_plugin\\test_delay_processor.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/test_plugin/test_delay_processor.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-test-delay.dir/test_plugin/test_delay_processor.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -Dunbox_test_synth_EXPORTS -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /wd4221 /Zi -DRELEASE=1 /FoCMakeFiles\\unbox-test-synth.dir\\test_plugin\\test_synth_factory.cpp.obj /FdCMakeFiles\\unbox-test-synth.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\test_plugin\\test_synth_factory.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/test_plugin/test_synth_factory.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-test-synth.dir/test_plugin/test_synth_factory.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -Dunbox_test_synth_EXPORTS -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /wd4221 /Zi -DRELEASE=1 /FoCMakeFiles\\unbox-test-synth.dir\\test_plugin\\test_synth_processor.cpp.obj /FdCMakeFiles\\unbox-test-synth.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\test_plugin\\test_synth_processor.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/test_plugin/test_synth_processor.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-test-synth.dir/test_plugin/test_synth_processor.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-host-smoke.dir\\host_smoke.cpp.obj /FdCMakeFiles\\unbox-vst3-host-smoke.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\host_smoke.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/host_smoke.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-host-smoke.dir/host_smoke.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-host-smoke.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\memorystream.cpp.obj /FdCMakeFiles\\unbox-vst3-host-smoke.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\memorystream.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/memorystream.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-host-smoke.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/memorystream.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-host-smoke.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /FdCMakeFiles\\unbox-vst3-host-smoke.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-host-smoke.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-instrument-smoke.dir\\instrument_host_smoke.cpp.obj /FdCMakeFiles\\unbox-vst3-instrument-smoke.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\instrument_host_smoke.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/instrument_host_smoke.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-instrument-smoke.dir/instrument_host_smoke.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-instrument-smoke.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /FdCMakeFiles\\unbox-vst3-instrument-smoke.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-instrument-smoke.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-process-stream-host.dir\\process_stream_host.cpp.obj /FdCMakeFiles\\unbox-vst3-process-stream-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\process_stream_host.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/process_stream_host.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-process-stream-host.dir/process_stream_host.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-process-stream-host.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /FdCMakeFiles\\unbox-vst3-process-stream-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-process-stream-host.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-midi-process-stream-host.dir\\midi_process_stream_host.cpp.obj /FdCMakeFiles\\unbox-vst3-midi-process-stream-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\midi_process_stream_host.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/midi_process_stream_host.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-midi-process-stream-host.dir/midi_process_stream_host.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-midi-process-stream-host.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /FdCMakeFiles\\unbox-vst3-midi-process-stream-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-midi-process-stream-host.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-shared-memory-host.dir\\shared_memory_stream_host.cpp.obj /FdCMakeFiles\\unbox-vst3-shared-memory-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\scripts\\vst3\\shared_memory_stream_host.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/scripts/vst3/shared_memory_stream_host.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-shared-memory-host.dir/shared_memory_stream_host.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DRELEASE=1 /FoCMakeFiles\\unbox-vst3-shared-memory-host.dir\\C_\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /FdCMakeFiles\\unbox-vst3-shared-memory-host.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/CMakeFiles/unbox-vst3-shared-memory-host.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\baseiids.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\baseiids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/baseiids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/baseiids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fbuffer.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fbuffer.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fbuffer.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fbuffer.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fdebug.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fdebug.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fdebug.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fdebug.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fdynlib.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fdynlib.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fdynlib.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fdynlib.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fobject.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fobject.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fobject.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fobject.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fstreamer.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fstreamer.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fstreamer.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fstreamer.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\fstring.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\fstring.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/fstring.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/fstring.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\timer.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\timer.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/timer.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/timer.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\source\\updatehandler.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\source\\updatehandler.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/source/updatehandler.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/source/updatehandler.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\thread\\source\\fcondition.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\thread\\source\\fcondition.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/thread/source/fcondition.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/thread/source/fcondition.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\base.dir\\base\\thread\\source\\flock.cpp.obj /Fdvst3sdk\\CMakeFiles\\base.dir\\base.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\base\\thread\\source\\flock.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/base/thread/source/flock.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/base.dir/base/thread/source/flock.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD /Fovst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces\\base\\conststringtable.cpp.obj /Fdvst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\pluginterfaces\\base\\conststringtable.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/pluginterfaces/base/conststringtable.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/pluginterfaces.dir/pluginterfaces/base/conststringtable.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD /Fovst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces\\base\\coreiids.cpp.obj /Fdvst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\pluginterfaces\\base\\coreiids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/pluginterfaces/base/coreiids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/pluginterfaces.dir/pluginterfaces/base/coreiids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD /Fovst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces\\base\\funknown.cpp.obj /Fdvst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\pluginterfaces\\base\\funknown.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/pluginterfaces/base/funknown.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/pluginterfaces.dir/pluginterfaces/base/funknown.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD /Fovst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces\\base\\ustring.cpp.obj /Fdvst3sdk\\CMakeFiles\\pluginterfaces.dir\\pluginterfaces.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\pluginterfaces\\base\\ustring.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/pluginterfaces/base/ustring.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/pluginterfaces.dir/pluginterfaces/base/ustring.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\commoniids.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\commoniids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/commoniids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/commoniids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\commonstringconvert.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\commonstringconvert.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/commonstringconvert.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/commonstringconvert.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\openurl.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\openurl.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/openurl.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/openurl.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\systemclipboard_linux.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\systemclipboard_linux.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/systemclipboard_linux.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/systemclipboard_linux.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\systemclipboard_win32.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\systemclipboard_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/systemclipboard_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/systemclipboard_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\threadchecker_linux.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\threadchecker_linux.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/threadchecker_linux.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/threadchecker_linux.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\threadchecker_win32.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\threadchecker_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/threadchecker_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/threadchecker_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\common\\readfile.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\readfile.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/readfile.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/common/readfile.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_common.dir\\public.sdk\\source\\vst\\vstpresetfile.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_common.dir\\sdk_common.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstpresetfile.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstpresetfile.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_common.dir/public.sdk/source/vst/vstpresetfile.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\common\\pluginview.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\pluginview.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/pluginview.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/common/pluginview.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\main\\pluginfactory.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\main\\pluginfactory.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/main/pluginfactory.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/main/pluginfactory.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\main\\moduleinit.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\main\\moduleinit.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/main/moduleinit.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/main/moduleinit.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\utility\\dataexchange.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\dataexchange.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/dataexchange.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/dataexchange.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\utility\\stringconvert.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\stringconvert.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/stringconvert.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/stringconvert.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\utility\\systemtime.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\systemtime.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/systemtime.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/systemtime.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\utility\\testing.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\testing.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/testing.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/testing.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\utility\\vst2persistence.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\vst2persistence.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/vst2persistence.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/vst2persistence.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstaudioeffect.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstaudioeffect.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstaudioeffect.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstaudioeffect.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstbus.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstbus.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstbus.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstbus.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstcomponent.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstcomponent.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstcomponent.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstcomponent.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstcomponentbase.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstcomponentbase.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstcomponentbase.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstcomponentbase.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vsteditcontroller.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vsteditcontroller.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vsteditcontroller.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vsteditcontroller.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstinitiids.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstinitiids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstinitiids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstinitiids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstnoteexpressiontypes.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstnoteexpressiontypes.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstnoteexpressiontypes.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstnoteexpressiontypes.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstparameters.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstparameters.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstparameters.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstparameters.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk.dir\\public.sdk\\source\\vst\\vstrepresentation.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk.dir\\sdk.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstrepresentation.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstrepresentation.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstrepresentation.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\connectionproxy.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\connectionproxy.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/connectionproxy.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/connectionproxy.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\eventlist.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\eventlist.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/eventlist.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/eventlist.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\hostclasses.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\hostclasses.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/hostclasses.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/hostclasses.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\module.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/module.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\parameterchanges.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\parameterchanges.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/parameterchanges.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/parameterchanges.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\pluginterfacesupport.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\pluginterfacesupport.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/pluginterfacesupport.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/pluginterfacesupport.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\hosting\\processdata.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\processdata.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/processdata.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/hosting/processdata.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\utility\\stringconvert.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\stringconvert.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/stringconvert.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/utility/stringconvert.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\CMakeFiles\\sdk_hosting.dir\\public.sdk\\source\\vst\\vstinitiids.cpp.obj /Fdvst3sdk\\CMakeFiles\\sdk_hosting.dir\\sdk_hosting.pdb /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\vstinitiids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/vstinitiids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/CMakeFiles/sdk_hosting.dir/public.sdk/source/vst/vstinitiids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\common\\memorystream.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\common\\memorystream.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/memorystream.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/common/memorystream.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\e39fa765d45cf779ac63122755f9f530\\third_party\\vst3sdk\\public.sdk\\source\\main\\moduleinit.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\main\\moduleinit.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/main/moduleinit.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/e39fa765d45cf779ac63122755f9f530/third_party/vst3sdk/public.sdk/source/main/moduleinit.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\moduleinfo\\moduleinfoparser.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\moduleinfo\\moduleinfoparser.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\hosting\\test\\connectionproxytest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\connectionproxytest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/connectionproxytest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/hosting/test/connectionproxytest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\eventlisttest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\eventlisttest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/eventlisttest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/hosting/test/eventlisttest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\hosting\\test\\hostclassestest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\hostclassestest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/hostclassestest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/hosting/test/hostclassestest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\miditovsttest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\miditovsttest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/miditovsttest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/hosting/test/miditovsttest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\hosting\\test\\parameterchangestest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\parameterchangestest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/parameterchangestest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/hosting/test/parameterchangestest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\hosting\\test\\pluginterfacesupporttest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\pluginterfacesupporttest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/pluginterfacesupporttest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/hosting/test/pluginterfacesupporttest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\hosting\\test\\processdatatest.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\test\\processdatatest.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/test/processdatatest.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/hosting/test/processdatatest.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\hosting\\plugprovider.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\plugprovider.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/plugprovider.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/hosting/plugprovider.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\bus\\busactivation.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\busactivation.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/busactivation.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/bus/busactivation.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\bus\\busconsistency.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\busconsistency.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/busconsistency.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/bus/busconsistency.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\bus\\businvalidindex.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\businvalidindex.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/businvalidindex.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/bus/businvalidindex.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\bus\\checkaudiobusarrangement.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\checkaudiobusarrangement.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/checkaudiobusarrangement.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/bus/checkaudiobusarrangement.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\scanbusses.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\scanbusses.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/scanbusses.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/testsuite/bus/scanbusses.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\bus\\sidechainarrangement.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\bus\\sidechainarrangement.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/bus/sidechainarrangement.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/bus/sidechainarrangement.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\editorclasses.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\editorclasses.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/editorclasses.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/editorclasses.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\midilearn.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\midilearn.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/midilearn.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/midilearn.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\midimapping.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\midimapping.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/midimapping.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/midimapping.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\plugcompat.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\plugcompat.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/plugcompat.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/plugcompat.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\scanparameters.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\scanparameters.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/scanparameters.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/scanparameters.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\general\\suspendresume.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\suspendresume.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/suspendresume.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/general/suspendresume.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\terminit.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\general\\terminit.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/general/terminit.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/testsuite/general/terminit.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\noteexpression\\keyswitch.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\noteexpression\\keyswitch.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/noteexpression/keyswitch.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/noteexpression/keyswitch.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\noteexpression\\noteexpression.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\noteexpression\\noteexpression.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/noteexpression/noteexpression.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/noteexpression/noteexpression.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\processing\\automation.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\automation.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/automation.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/processing/automation.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\processing\\process.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\process.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/process.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/processing/process.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\42276cf7642ebb22062d8e446d8df44d\\vst\\testsuite\\processing\\processcontextrequirements.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\processcontextrequirements.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/processcontextrequirements.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/42276cf7642ebb22062d8e446d8df44d/vst/testsuite/processing/processcontextrequirements.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\processing\\processformat.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\processformat.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/processformat.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/processing/processformat.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\processing\\processinputoverwriting.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\processinputoverwriting.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/processinputoverwriting.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/processing/processinputoverwriting.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\processing\\processtail.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\processtail.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/processtail.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/processing/processtail.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\processing\\processthreaded.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\processthreaded.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/processthreaded.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/processing/processthreaded.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\processing\\silenceflags.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\silenceflags.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/silenceflags.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/processing/silenceflags.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\processing\\silenceprocessing.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\silenceprocessing.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/silenceprocessing.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/processing/silenceprocessing.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\processing\\speakerarrangement.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\speakerarrangement.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/speakerarrangement.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/processing/speakerarrangement.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\processing\\variableblocksize.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\processing\\variableblocksize.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/processing/variableblocksize.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/processing/variableblocksize.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\state\\bypasspersistence.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\state\\bypasspersistence.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/state/bypasspersistence.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/state/bypasspersistence.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\state\\invalidstatetransition.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\state\\invalidstatetransition.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/state/invalidstatetransition.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/state/invalidstatetransition.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\42276cf7642ebb22062d8e446d8df44d\\vst\\testsuite\\state\\repeatidenticalstatetransition.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\state\\repeatidenticalstatetransition.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/state/repeatidenticalstatetransition.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/42276cf7642ebb22062d8e446d8df44d/vst/testsuite/state/repeatidenticalstatetransition.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\testsuite\\state\\validstatetransition.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\state\\validstatetransition.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/state/validstatetransition.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/52cd167612f61d1ca192dcec88082065/source/vst/testsuite/state/validstatetransition.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\testbase.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\testbase.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/testbase.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/testsuite/testbase.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\unit\\checkunitstructure.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\unit\\checkunitstructure.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/unit/checkunitstructure.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/unit/checkunitstructure.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\testsuite\\unit\\scanprograms.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\unit\\scanprograms.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/unit/scanprograms.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/testsuite/unit/scanprograms.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\unit\\scanunits.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\unit\\scanunits.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/unit/scanunits.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/testsuite/unit/scanunits.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\vsttestsuite.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\testsuite\\vsttestsuite.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/testsuite/vsttestsuite.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/testsuite/vsttestsuite.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\utility\\testing.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\utility\\testing.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/utility/testing.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/utility/testing.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\source\\main.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\source\\main.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst-hosting/validator/source/main.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/source/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\source\\usediids.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\source\\usediids.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst-hosting/validator/source/usediids.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/source/usediids.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\source\\validator.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\source\\validator.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst-hosting/validator/source/validator.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/source/validator.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\f818bfd3ef0114c2a19f206b6b44f05f\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-hosting\\validator\\CMakeFiles\\validator.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-hosting/validator/CMakeFiles/validator.dir/f818bfd3ef0114c2a19f206b6b44f05f/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\source\\main.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\source\\main.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/source/main.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/source/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\moduleinfo\\moduleinfocreator.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\moduleinfo\\moduleinfocreator.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/moduleinfo/moduleinfocreator.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/52cd167612f61d1ca192dcec88082065/source/vst/moduleinfo/moduleinfocreator.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\52cd167612f61d1ca192dcec88082065\\source\\vst\\moduleinfo\\moduleinfoparser.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\moduleinfo\\moduleinfoparser.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/52cd167612f61d1ca192dcec88082065/source/vst/moduleinfo/moduleinfoparser.cpp.obj"
+},
+{
+  "directory": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build",
+  "command": "C:\\PROGRA~1\\MICROS~3\\18\\PROFES~1\\VC\\Tools\\MSVC\\1451~1.362\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -IC:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD -DSMTG_RENAME_ASSERT=1 /W3 /Zc:__cplusplus /fp:fast /Oi /Ot /GF /EHa /Oy /MP /wd6031 /wd6308 /wd6330 /wd6385 /wd6386 /wd28125 /wd28251 /MD -DRELEASE=1 /Fovst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\7866becb03b086b7b240b03c4c0be84d\\public.sdk\\source\\vst\\hosting\\module_win32.cpp.obj /Fdvst3sdk\\public.sdk\\samples\\vst-utilities\\moduleinfotool\\CMakeFiles\\moduleinfotool.dir\\ /FS -c C:\\Users\\Owner\\Desktop\\unbox-lm-main\\third_party\\vst3sdk\\public.sdk\\source\\vst\\hosting\\module_win32.cpp",
+  "file": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp",
+  "output": "C:/Users/Owner/Desktop/unbox-lm-main/third_party/unbox-vst3-host-smoke-build/vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/7866becb03b086b7b240b03c4c0be84d/public.sdk/source/vst/hosting/module_win32.cpp.obj"
+}
+]

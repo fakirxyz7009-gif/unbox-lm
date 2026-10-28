@@ -1,0 +1,11 @@
+// Auto-generated DAW Instrument Patch
+<group>
+ampeg_attack=0.005
+ampeg_release=0.25
+
+<region>
+sample=vocal_chop.wav
+pitch_keycenter=60
+lokey=0
+hikey=127
+loop_mode=one_shot

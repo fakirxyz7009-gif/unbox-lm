@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unbox MIDI permission bootstrap probe</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <pre id="result" data-status="running">Checking MIDI permission bootstrap…</pre>
+    <script>
+      const fakeMidiAccess = { inputs: new Map(), outputs: new Map(), onstatechange: null };
+      window.__midiRequestCount = 0;
+      Object.defineProperty(navigator, 'requestMIDIAccess', {
+        configurable: true,
+        value: () => {
+          window.__midiRequestCount += 1;
+          return Promise.resolve(fakeMidiAccess);
+        },
+      });
+    </script>
+    <script type="module">
+      const result = document.querySelector('#result');
+      const fail = (message) => {
+        result.dataset.status = 'failed';
+        result.textContent = `FAIL · ${message}`;
+      };
+
+      try {
+        await import('/src/main.tsx');
+        const until = async (predicate, label) => {
+          const deadline = performance.now() + 5000;
+          while (performance.now() < deadline) {
+            if (predicate()) return;
+            await new Promise((resolve) => setTimeout(resolve, 25));
+          }
+          throw new Error(`Timed out waiting for ${label}`);
+        };
+
+        await until(() => document.querySelector('[data-testid="transport-midi"]'), 'transport MIDI control');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (window.__midiRequestCount !== 0) throw new Error('The app requested MIDI permission during startup');
+        const connect = document.querySelector('[data-testid="transport-midi"]');
+        if (connect.textContent.trim() !== 'Connect MIDI') throw new Error(`Unexpected idle label: ${connect.textContent.trim()}`);
+
+        connect.click();
+        await until(() => window.__midiRequestCount === 1 && document.querySelector('[data-testid="transport-midi"]')?.textContent.trim() === 'No MIDI', 'explicit MIDI connection');
+        if (window.__midiRequestCount !== 1) throw new Error(`Expected one explicit request, got ${window.__midiRequestCount}`);
+        result.dataset.status = 'passed';
+        result.textContent = 'PASS — startup does not request MIDI; Connect MIDI requests it once.';
+      } catch (error) {
+        fail(error instanceof Error ? error.stack ?? error.message : String(error));
+      }
+    </script>
+  </body>
+</html>

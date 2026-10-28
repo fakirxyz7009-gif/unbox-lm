@@ -1,0 +1,1677 @@
+@import "tailwindcss";
+
+/* THE UNBOX APP visual tokens (src/ui/skin). */
+@theme {
+  /* One interface family: Inter (tabular numerals for readouts). Labels no longer use a condensed
+     display face: at 11 px it was harder to read and gave the product a third voice. */
+  --font-label: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-lcd: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* The only text sizes in the product: 11 label, 13 body, 18 title, 22 readout. */
+  --text-xs: 13px;
+  --text-xs--line-height: 1.35;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.35;
+  --text-base: 13px;
+  --text-base--line-height: 1.4;
+  --text-lg: 18px;
+  --text-lg--line-height: 1.25;
+  --text-xl: 18px;
+  --text-xl--line-height: 1.2;
+  --text-2xl: 22px;
+  --text-2xl--line-height: 1.15;
+  --text-3xl: 22px;
+  --text-3xl--line-height: 1.1;
+  --color-metal-1: #f0ece4;
+  --color-metal-2: #d5cdbf;
+  --color-metal-3: #aaa08f;
+  --color-metal-edge: #796d5b;
+  --color-ink: #211b14;
+  --color-lcd-1: #8bb3b8;
+  --color-lcd-2: #729ba0;
+  --color-lcd-ink: #112328;
+  --color-lcd-dim: #32555c;
+  --color-ring: #00e5ff;
+  --color-sel: #d69b50;
+  --color-sel-2: #efc887;
+  --color-chrome-0: #100e0b;
+  --color-chrome-1: #191511;
+  --color-chrome-2: #262019;
+  --color-chrome-line: #40352a;
+  --color-chrome-ink: #c1b7a8;
+  --color-seq-bg: #e4dfd5;
+  --color-seq-lane: #f1eee7;
+  --color-seq-lane-2: #e8e3da;
+  --color-seq-line: #c7c0b5;
+  --color-seq-head: #d8d1c5;
+  --color-seq-ink: #28231c;
+  --color-wood-1: #382217;
+  --color-wood-2: #795331;
+}
+
+@layer base {
+  :root {
+    --rack-width: 100%;
+    --rack-unit-height: 120px;
+    --unboxed-chassis-light: #e2e8f0;
+    --unboxed-chassis-metal: #94a3b8;
+    --unboxed-chassis-dark: #070a10;
+    --unboxed-white-panel: #f8fafc;
+    --unboxed-dark-green: #163238;
+    --unboxed-forest-green: #23545e;
+    --unboxed-emerald-active: #00e5ff;
+    --unboxed-mint-accent: #8cb3b8;
+    --unboxed-techno-obsidian: #100e0b;
+    --unboxed-techno-slate: #201a14;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(ellipse at 50% -30%, #312416 0%, #15110d 48%, #0a0908 100%);
+    color: #f8fafc;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Hi-Fi Techno Scrollbar */
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #110e0a;
+    border: 1px solid #3b2e20;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #b98b50, #72502d);
+    border-radius: 4px;
+    border: 1px solid #d4ad76;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #d8b477, #a87537);
+  }
+}
+
+/* Warm cabinet materials inspired by the Unbox broadcast receiver. */
+.studio-wood-cabinet, .wooden-box-chassis {
+  background: 
+    linear-gradient(180deg, rgba(213, 168, 102, 0.08) 0%, rgba(34, 25, 17, 0.95) 15%, rgba(12, 10, 8, 0.98) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #17110c 0px,
+      #24190f 4px,
+      #1b130d 8px,
+      #17110c 12px
+    );
+  box-shadow: 
+    inset 0 1px 0 rgba(227, 190, 133, 0.28),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.95),
+    0 20px 50px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(182, 136, 76, 0.36);
+  position: relative;
+}
+
+.studio-wood-top {
+  background: 
+    linear-gradient(90deg, #1a120c 0%, #382516 50%, #1a120c 100%);
+  box-shadow: inset 0 1px 0 rgba(227, 190, 133, 0.3), 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.wooden-cheek {
+  background: 
+    linear-gradient(180deg, #332315 0%, #17110c 50%, #2b1d12 100%);
+  box-shadow: 
+    inset 1px 0 2px rgba(213, 168, 102, 0.22),
+    inset -1px 0 3px rgba(0, 0, 0, 0.9),
+    0 4px 10px rgba(0, 0, 0, 0.8);
+  position: relative;
+}
+
+/* Precision Titanium Hex Screw on Rack Rails */
+.brass-screw {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f1d9a8 0%, #b58a50 45%, #50391f 85%, #17110b 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55), 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(199, 156, 97, 0.3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brass-screw::before {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 1.5px;
+  background: #49351f;
+  transform: rotate(45deg);
+}
+
+/* Knurled Metal Knob Ring Edge */
+.knurled-edge-ring {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #d4ae73 0deg 4deg,
+    #292017 4deg 8deg,
+    #8f693b 8deg 12deg,
+    #100d09 12deg 16deg
+  );
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.9), 0 1px 2px rgba(255,255,255,0.2);
+}
+
+/* Techno Hi-Fi Top Bezel Trim */
+.wooden-mold-trim {
+  background: linear-gradient(90deg, #100b07 0%, #382719 35%, #76502d 50%, #382719 65%, #100b07 100%);
+  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(199, 156, 97, 0.38);
+}
+
+/* Subtle Pulse Glow Effect */
+@keyframes electrical-spark {
+  0% { opacity: 0.85; }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(214,163,88,0.45)); }
+  100% { opacity: 0.85; }
+}
+
+.electrical-spark-effect {
+  animation: electrical-spark 3s ease-in-out infinite;
+}
+
+/* High-Contrast Obsidian & Carbon Techno Chassis Background */
+.super-textured-chassis {
+  background: 
+    radial-gradient(circle at 20% 0%, rgba(199, 156, 97, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(111, 70, 37, 0.12) 0%, transparent 50%),
+    linear-gradient(180deg, #17120d 0%, #100d09 50%, #080706 100%);
+}
+
+/* Colorful Click Sparkle Animation */
+@keyframes colorful-click-sparkle {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.96); filter: drop-shadow(0 0 10px rgba(214, 163, 88, 0.65)); }
+  100% { transform: scale(1); }
+}
+
+.colorful-click-btn:active {
+  animation: colorful-click-sparkle 0.2s ease-in-out;
+}
+
+/* Heavy Industrial Brushed Aluminum & Dark Charcoal Faceplates */
+.faceplate-brushed-aluminum {
+  background: 
+    linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 35%, rgba(0,0,0,0.3) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #514638 0px,
+      #453a2e 1px,
+      #5a4d3e 2px,
+      #3c3227 3px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.65);
+}
+
+.faceplate-dark-charcoal {
+  background: 
+    linear-gradient(180deg, rgba(199, 156, 97, 0.08) 0%, transparent 40%, rgba(0,0,0,0.4) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #21180f 0px,
+      #18120c 2px,
+      #2b2116 4px
+    );
+  box-shadow: inset 0 1px 0 rgba(214, 190, 151, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Realistic Physical Heavy-Duty Bat Toggle Switch */
+.toggle-switch-bezel {
+  width: 24px;
+  height: 38px;
+  border-radius: 4px;
+  background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 80%, #020617 100%);
+  border: 1px solid #8f693b;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch-nut {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f4dfb8 0%, #c79c61 58%, #77502b 100%);
+  border: 1px solid #ead3a8;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.toggle-switch-bat {
+  width: 7px;
+  height: 16px;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(90deg, #f8fafc 0%, #94a3b8 40%, #e2e8f0 70%, #475569 100%);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom center;
+}
+
+.toggle-switch-bat.bat-up {
+  transform: translateY(-4px) rotate(0deg);
+}
+
+.toggle-switch-bat.bat-down {
+  transform: translateY(4px) rotate(180deg);
+}
+
+/* Studio Vertical Anodized Titanium Rack Rails with unit markings */
+.studio-rack-rail {
+  background: linear-gradient(90deg, #100d09 0%, #382b1d 50%, #100d09 100%);
+  box-shadow: inset 1px 0 0 rgba(199, 156, 97, 0.2), inset -1px 0 0 rgba(0, 0, 0, 0.8);
+  position: relative;
+}
+
+.rack-hole {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #020617;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 0 1px #334155;
+}
+
+/* Authentic Real Studio Faceplate Colorways: Crisp White, Light Grey Metal, Rich Wood, Dark Green Accents */
+
+/* 1. Precision Anodized Light Grey Metal (Rupert Neve Designs / SSL Origin / Grace Design style) */
+.faceplate-light-grey-metal, .faceplate-brushed-grey {
+  background: 
+    linear-gradient(180deg, #f3eee2 0%, #e3d9c7 30%, #cec0a9 70%, #b7a78d 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.4) 0px,
+      rgba(255, 255, 255, 0.1) 1px,
+      rgba(0, 0, 0, 0.04) 2px,
+      transparent 3px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  color: #2b2117;
+}
+
+/* 2. Studio Crisp White / Porcelain Enamel (Vintage Teletronix / EMT / German Broadcast style) */
+.faceplate-crisp-white, .faceplate-studio-white {
+  background: linear-gradient(180deg, #fffdf7 0%, #f7f0e2 40%, #ece2d0 75%, #ddd0bb 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.35);
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #c6b69b;
+  color: #2b2117;
+}
+
+/* 3. Vintage Turquoise & Cyan Retro Studio Faceplate */
+.faceplate-forest-green {
+  background: linear-gradient(180deg, #8cb3b8 0%, #769fa5 45%, #689298 75%, #567e84 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid #335960;
+  color: #112328;
+}
+
+/* 4. Studio Blue (Elysia / Focusrite style) */
+.faceplate-studio-blue {
+  background: linear-gradient(180deg, #302519 0%, #1c1711 40%, #272015 70%, #100d09 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.9), 0 4px 14px rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(230, 198, 147, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+  color: #f8fafc;
+}
+
+/* 5. Vibrant Terracotta Copper Faceplate */
+.faceplate-slate-black {
+  background: linear-gradient(180deg, #7c3f1e 0%, #5c2f16 45%, #482310 75%, #351a0b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 180, 100, 0.4);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+  color: #fffbeb;
+}
+
+/* Ultra-Realistic Machined Brushed Titanium & Anodized Aluminum */
+.metallic-brushed-titanium {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.3) 100%),
+    repeating-linear-gradient(
+      0deg,
+      #94a3b8 0px,
+      #cbd5e1 1px,
+      #64748b 2px,
+      #475569 3px
+    );
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 6px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4);
+  border: 1px solid #cbd5e1;
+}
+
+/* Polished Studio Gold / Bronze Bezel */
+.metallic-studio-gold {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 60%),
+    repeating-linear-gradient(
+      90deg,
+      #fbbf24 0px,
+      #f59e0b 2px,
+      #d97706 5px,
+      #b45309 8px
+    );
+  box-shadow: inset 0 1px 3px rgba(255,255,255,0.9), inset 0 -2px 5px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
+  border: 1px solid #fde047;
+}
+
+/* Rich Copper Hardware Plate */
+.metallic-copper-plate {
+  background: 
+    linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 40%, rgba(0,0,0,0.4) 100%),
+    repeating-linear-gradient(
+      0deg,
+      #ea580c 0px,
+      #c2410c 2px,
+      #9a3412 5px,
+      #7c2d12 8px
+    );
+  box-shadow: inset 0 2px 4px rgba(255,200,150,0.4), inset 0 -2px 6px rgba(0,0,0,0.7);
+  border: 1px solid #fdba74;
+}
+
+/* Sterling Silver Machined Metal */
+.metallic-sterling-silver {
+  background: 
+    linear-gradient(135deg, rgba(255,255,255,0.7) 0%, transparent 50%, rgba(100,116,139,0.4) 100%),
+    repeating-linear-gradient(
+      90deg,
+      #e2e8f0 0px,
+      #cbd5e1 2px,
+      #f1f5f9 5px,
+      #94a3b8 8px
+    );
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.9), inset 0 -2px 6px rgba(71,85,105,0.8), 0 8px 20px rgba(0,0,0,0.4);
+  border: 1px solid #f8fafc;
+  color: #0f172a;
+}
+
+/* Techno Hi-Fi Laser Cyan & Titanium Badge */
+.metallic-pure-gold {
+  background: linear-gradient(135deg, #76502c 0%, #c89655 50%, #71451f 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 235, 197, 0.55), 0 0 12px rgba(199, 156, 97, 0.28);
+  border: 1px solid #ead3a8;
+  color: #21160c;
+}
+
+/* Techno Hi-Fi Emblem Badge */
+.unboxed-gold-crest {
+  background: radial-gradient(circle at 30% 30%, #342519 0%, #17110c 60%, #080706 100%);
+  box-shadow: inset 0 1px 3px rgba(234, 211, 168, 0.35), 0 0 14px rgba(199, 156, 97, 0.24);
+  border: 1px solid #b58a50;
+}
+
+/* Sci-Fi Holographic Glass & Neon Cyber Accents */
+.scifi-glass-panel {
+  background: linear-gradient(135deg, rgba(199, 156, 97, 0.14) 0%, rgba(111, 70, 37, 0.1) 50%, rgba(99, 72, 42, 0.14) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(199, 156, 97, 0.45);
+  box-shadow: 0 0 25px rgba(199, 156, 97, 0.18), inset 0 0 15px rgba(111, 70, 37, 0.15);
+}
+
+.scifi-cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(199, 156, 97, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(199, 156, 97, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.neon-cyan-glow {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.9), inset 0 0 10px rgba(6, 182, 212, 0.6);
+}
+
+.neon-magenta-glow {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.9), inset 0 0 10px rgba(236, 72, 153, 0.6);
+}
+
+.neon-emerald-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.9), inset 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+/* Studio Masking Tape label strips */
+.masking-tape {
+  background: #e2e8f0;
+  color: #090d16;
+  font-family: var(--font-label);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(0, 0, 0, 0.2);
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+}
+
+/* Back of rack anodized dark carbon chassis */
+.metal-chassis-back {
+  background: #080c14 repeating-linear-gradient(0deg, #080c14, #080c14 2px, #0d1320 2px, #0d1320 4px);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+/* Vacuum tube filament glow */
+.tube-glow {
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.85) 0%, rgba(255, 69, 0, 0.45) 40%, rgba(200, 30, 0, 0.1) 70%, transparent 100%);
+  filter: drop-shadow(0 0 14px rgba(255, 120, 0, 0.8));
+  animation: tube-flicker 4s ease-in-out infinite alternate;
+}
+
+@keyframes tube-flicker {
+  0% { opacity: 0.88; transform: scale(0.99); }
+  50% { opacity: 0.96; transform: scale(1.01); }
+  70% { opacity: 0.92; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Rack screw styling with chrome washer */
+.rack-screw {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e9d5af 0%, #a77e48 50%, #362515 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45), 0 2px 4px rgba(0, 0, 0, 0.9);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rack-screw::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #3d2b18;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: rotate(35deg);
+}
+.rack-screw::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background: #3d2b18;
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.15);
+  transform: rotate(35deg);
+}
+
+/* LED Indicator lights */
+.led-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #23262b;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.8);
+  transition: all 0.08s ease;
+}
+.led-indicator.active-blue {
+  background: #e0b266;
+  box-shadow: 0 0 8px #d6a358, inset 0 1px 2px rgba(255, 245, 221, 0.9);
+}
+.led-indicator.active-green {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-amber {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-red {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444, inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* LCD Screen style */
+.lcd-display {
+  background: linear-gradient(180deg, #8cb3b8 0%, #769fa5 60%, #689298 100%);
+  border: 2px solid #4a747b;
+  color: #112328;
+  font-family: var(--font-label);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* =====================================================================================
+   Modular rack (src/rack/*): units, rear patch bay, cables, Combinator, library panel
+   ===================================================================================== */
+
+.modular-rack { background: #100d0a; }
+
+.rack-toolbar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 5px 8px;
+  border-bottom: 1px solid var(--color-chrome-line); background: linear-gradient(180deg, #261d14, #17120e);
+}
+.rack-tool {
+  display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 4px;
+  font: 700 13px/1 var(--font-label); letter-spacing: 0.06em; text-transform: uppercase; color: #eee6d9;
+  background: linear-gradient(180deg, #534331, #282016); border: 1px solid #100d09;
+  box-shadow: inset 0 1px 0 rgba(241, 218, 183, 0.18);
+}
+.rack-tool:hover:not(:disabled) { color: var(--color-sel-2); }
+.rack-tool[aria-pressed='true'] { color: var(--color-sel-2); box-shadow: inset 0 -2px 0 var(--color-sel), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+.rack-tool:disabled { opacity: 0.45; }
+.rack-seg { display: flex; border-radius: 4px; overflow: hidden; border: 1px solid #0b0d10; }
+.rack-seg button {
+  height: 24px; padding: 0 10px; font: 700 13px/1 var(--font-label); letter-spacing: 0.08em; text-transform: uppercase;
+  color: #d9cbb5; background: linear-gradient(180deg, #534331, #282016);
+}
+.rack-seg button[aria-pressed='true'] { background: linear-gradient(180deg, #e7bb77, #c5883d); color: #21160c; }
+.rack-hint { display: inline-flex; align-items: center; gap: 3px; font: 600 11px/1 var(--font-label); color: #7c8590; }
+.rack-chip {
+  display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 4px 0 8px; border-radius: 999px;
+  font: 700 11px/1 var(--font-label); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-sel-2); background: rgba(243, 154, 43, 0.16); border: 1px solid var(--color-sel);
+}
+
+.combinator-prompt {
+  flex: 1 1 340px; display: flex; align-items: center; gap: 6px; min-width: 260px;
+  padding: 3px 4px 3px 8px; border-radius: 6px; border: 1px solid rgba(199, 156, 97, 0.42);
+  background: linear-gradient(90deg, rgba(72, 48, 25, 0.56), rgba(18, 14, 10, 0.92));
+}
+.combinator-prompt:focus-within { border-color: #e0bf83; box-shadow: 0 0 0 2px rgba(199, 156, 97, 0.2); }
+.combinator-go {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+  background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c;
+}
+.combinator-go:hover:not(:disabled) { background: linear-gradient(180deg, #f0d39d, #cb9654); }
+.combinator-go:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.rack-result { margin: 6px 10px 0; padding: 6px 10px; border-radius: 6px; font-size: 11px; border: 1px solid; }
+.rack-result--ok { background: rgba(6, 78, 59, 0.45); border-color: rgba(16, 185, 129, 0.5); color: #a7f3d0; }
+.rack-result--err { background: rgba(127, 29, 29, 0.45); border-color: rgba(239, 68, 68, 0.5); color: #fecaca; }
+
+.rack-scroller { background: linear-gradient(180deg, #100d09, #0a0806); }
+/* One container for all three columns: jacks and the cable SVG share its coordinates. */
+.rack-content { position: relative; min-width: 1476px; min-height: 100%; display: flex; flex-direction: column; perspective: 2200px; }
+.rack-grid {
+  flex: 1; display: grid; align-items: stretch;
+  /* Side columns hold a full legacy faceplate (~423 px); keeping them at 430+ removes per-unit
+     horizontal scrolling. Below ~1476 px the whole rack scrolls as one canvas instead. */
+  grid-template-columns: 14px minmax(460px, 1fr) 14px minmax(560px, 2fr) 14px minmax(460px, 1fr) 14px;
+}
+.rack-rail { box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.5), inset -2px 0 3px rgba(0, 0, 0, 0.5); }
+/* Rack interior: two punched mounting rails; units cover them, empty space shows them */
+.rack-col {
+  position: relative; display: flex; flex-direction: column; min-width: 0; padding: 6px 0 40px;
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 10px, #100b07 10px 17px, transparent 17px 26px),
+    repeating-linear-gradient(180deg, transparent 0 10px, #100b07 10px 17px, transparent 17px 26px),
+    linear-gradient(90deg, #23190f, #5b4227 10px, #302316 22px, transparent 22px, transparent calc(100% - 22px), #302316 calc(100% - 22px), #5b4227 calc(100% - 10px), #23190f);
+  background-size: 7px 100%, 7px 100%, 100% 100%;
+  background-position: 8px 0, calc(100% - 8px) 0, 0 0;
+  background-repeat: no-repeat;
+  background-color: #0d0a07;
+}
+.rack-col-list { position: relative; }
+.rack-col-fill { flex: 1; min-height: 40px; }
+.rack-drop-line {
+  position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; z-index: 40; pointer-events: none;
+  background: var(--color-sel); box-shadow: 0 0 10px var(--color-sel);
+}
+.rack-add {
+  margin: 4px 26px 0; height: 56px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font: 700 13px/1 var(--font-label); letter-spacing: 0.16em; text-transform: uppercase; color: #8b95a3;
+  border: 1px dashed #3b424c; border-radius: 4px; background: rgba(0, 0, 0, 0.35);
+}
+.rack-add:hover { color: var(--color-sel-2); border-color: var(--color-sel); }
+.rack-add--armed { color: var(--color-sel-2); border: 1px solid var(--color-sel); box-shadow: inset 0 0 0 1px var(--color-sel), 0 0 14px rgba(243, 154, 43, 0.35); }
+.rack-empty {
+  margin: 6px 26px 0; padding: 22px; border: 1px dashed #715434; border-radius: 6px;
+  text-align: center; font-size: 13px; color: #bba887; background: rgba(0, 0, 0, 0.4);
+}
+
+/* Unit chrome: drag grip, fold toggle, remove; folded units are a 30 px strip */
+.rack-grip { display: inline-flex; cursor: grab; opacity: 0.55; padding: 2px 0; }
+.rack-grip:hover { opacity: 1; }
+.rack-grip:active { cursor: grabbing; }
+.rack-fold, .rack-x { display: inline-flex; padding: 3px; border-radius: 3px; opacity: 0.75; }
+.rack-fold:hover { opacity: 1; background: rgba(0, 0, 0, 0.25); }
+.rack-x:hover { opacity: 1; background: #dc2626; color: #fff; }
+.rack-unit--folded .rack-ear { padding: 3px 0; }
+.rack-unit--folded .rack-ear span { display: none; }
+.rack-strip { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px; }
+.rack-strip-power { display: inline-flex; padding: 2px; }
+.rack-strip-name {
+  min-width: 0; padding: 3px 8px; border-radius: 3px; font: 700 11px/1 var(--font-label);
+  letter-spacing: 0.12em; text-transform: uppercase; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Right column: mixer channel list */
+.rack-chans {
+  margin-bottom: 6px; padding: 4px 6px 6px; border-radius: 4px;
+  background: linear-gradient(180deg, #2b2116, #17120d); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(232, 205, 162, 0.08);
+}
+.rack-chans-head {
+  display: flex; justify-content: space-between; padding: 3px 2px 2px;
+  font: 700 13px/1 var(--font-label); letter-spacing: 0.22em; color: #c1aa83;
+}
+.rack-chans-empty { padding: 10px 4px; font: 600 13px/1.3 var(--font-label); color: #8d96a1; }
+.rack-chan {
+  display: flex; align-items: center; gap: 4px; height: 30px; margin-top: 3px; padding: 0 4px 0 2px; border-radius: 3px;
+  background: linear-gradient(180deg, #e7ddc9, #b7a68a); box-shadow: inset 0 1px 0 rgba(255, 250, 235, 0.78), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.rack-chan--sel { box-shadow: 0 0 0 2px var(--color-sel), inset 0 1px 0 rgba(255, 255, 255, 0.75); }
+.rack-chan-jump { display: inline-flex; color: #2a2f36; padding: 2px 0; }
+.rack-chan-jump:hover { color: #000; }
+.rack-chan-name {
+  flex: 1 1 auto; min-width: 0; height: 22px; padding: 0 7px; border-radius: 2px; text-align: left;
+  font: 600 13px/22px var(--font-label); color: #0f1216; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chan) 45%, #ffffff), color-mix(in srgb, var(--chan) 75%, #c9ced4));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+.rack-chan-level { width: 80px; flex-shrink: 0; display: flex; }
+.rack-chan-level > div { min-width: 0; }
+.rack-chan-tag { width: 34px; flex-shrink: 0; text-align: center; font: 700 11px/1 var(--font-label); color: #3a4048; }
+.rack-chan--rear { height: 44px; gap: 8px; padding: 0 8px 0 6px; background: linear-gradient(180deg, #2b2116, #17120d); box-shadow: inset 0 1px 0 rgba(232, 205, 162, 0.08), 0 1px 2px rgba(0, 0, 0, 0.6); }
+.rack-chan--rear .rack-chan-tag { color: #7c8590; width: auto; }
+.rack-chan--rear .rack-jack-label { margin-top: 0; }
+.rack-jack--mini { width: 24px; height: 24px; }
+.rack-jack--mini::after { inset: 7px; }
+
+/* Navigator minimap at the right edge */
+.rack-nav { width: 96px; flex-shrink: 0; display: flex; padding: 6px; background: #100c08; border-left: 1px solid var(--color-chrome-line); }
+.rack-nav-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+
+/* Tab flip: the whole rack turns around its vertical axis, faces swap at the midpoint */
+.rack-flip { transform-origin: 50% 30%; transition: transform 160ms ease-in, opacity 160ms ease-in; }
+.rack-flip--out { transform: rotateY(88deg) scale(0.97); opacity: 0.25; }
+.rack-flip--in { animation: rack-flip-in 170ms ease-out; }
+@keyframes rack-flip-in {
+  from { transform: rotateY(-88deg) scale(0.97); opacity: 0.25; }
+  to { transform: rotateY(0) scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rack-flip, .rack-flip--in { transition: none; animation: none; transform: none; opacity: 1; }
+}
+
+.rack-unit {
+  position: relative; display: flex; align-items: stretch; margin-bottom: 6px;
+  border: 1px solid rgba(124, 91, 51, 0.72); border-radius: 5px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 232, 191, 0.08);
+}
+.rack-unit--selected { outline: 2px solid rgba(218, 171, 101, 0.92); outline-offset: 1px; }
+.rack-unit--off .rack-face { filter: grayscale(0.35) brightness(0.7); }
+.rack-ear {
+  width: 16px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 7px 0;
+  background: linear-gradient(90deg, #21170e, #533b22 45%, #21170e);
+}
+.rack-ear--left { border-radius: 4px 0 0 4px; border-right: 1px solid #000; }
+.rack-ear--right { border-radius: 0 4px 4px 0; border-left: 1px solid #000; }
+.rack-face { position: relative; }
+/* Columns are sized to fit a full faceplate; the rack canvas scrolls as one surface instead. */
+.rack-face-body { overflow-x: hidden; overflow-y: hidden; }
+.rack-unit--hw .hw-face {
+  background: linear-gradient(90deg, #17120d, #2b2116 50%, #17120d); color: #e7dac1; min-height: 64px;
+}
+
+/* Library unit faceplates */
+.faceplate-vst-effect { background: linear-gradient(100deg, #17120d 0%, #3b2a19 55%, #17110b 100%); }
+.faceplate-vst-instrument { background: linear-gradient(100deg, #18130e 0%, #233126 55%, #0d0b08 100%); }
+.vst-badge {
+  font: 700 11px/1 var(--font-label); text-transform: uppercase; padding: 3px 5px; border-radius: 3px;
+  background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.proxy-badge {
+  font: 700 11px/1.2 var(--font-label); letter-spacing: 0.04em; padding: 3px 6px; border-radius: 3px;
+  color: #fde68a; background: rgba(120, 53, 15, 0.55); border: 1px solid rgba(245, 158, 11, 0.55); cursor: help;
+}
+.proxy-chip {
+  font: 800 11px/1 var(--font-label); padding: 3px 5px; border-radius: 3px; letter-spacing: 0.08em;
+  color: #fcd34d; border: 1px solid rgba(252, 211, 77, 0.5);
+}
+.vst-fader {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font: 700 11px/1 var(--font-label); color: #cbd5e1;
+}
+.vst-fader input[type='range'] {
+  writing-mode: vertical-lr; direction: rtl; height: 78px; width: 20px; accent-color: #f97316; cursor: ns-resize;
+}
+
+/* Rear panel */
+.rack-back {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(0, 0, 0, 0.3) 22px 24px),
+    linear-gradient(180deg, #241b12, #120e0a);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.85);
+  color: #ded1ba;
+}
+.rack-rear-label {
+  padding: 6px 9px; border-radius: 3px; background: linear-gradient(180deg, #f1e4c9, #c5a36d); color: #281a0e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.rack-jack-group {
+  border: 1px solid rgba(199, 156, 97, 0.3); border-radius: 5px; padding: 3px 8px 6px;
+  background: rgba(8, 6, 4, 0.42);
+}
+.rack-jack-group legend {
+  padding: 0 4px; font: 700 11px/1 var(--font-label); letter-spacing: 0.14em;
+  text-transform: uppercase; color: #b89c70;
+}
+.rack-jack {
+  --ring: #ab8553; --plug: transparent;
+  width: 30px; height: 30px; border-radius: 50%; position: relative; cursor: grab; touch-action: none;
+  background: radial-gradient(circle at 32% 30%, #b9a27f 0%, #62503a 38%, #211a12 76%, #0d0b08 100%);
+  box-shadow: 0 0 0 2px var(--ring), 0 3px 6px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+.rack-jack::after {
+  content: ''; position: absolute; inset: 9px; border-radius: 50%; background: #000;
+  box-shadow: inset 0 2px 4px #000, 0 0 0 1px #493721;
+}
+.rack-jack--cv { --ring: #ca8a04; width: 24px; height: 24px; }
+.rack-jack--cv::after { inset: 7px; }
+.rack-jack--plugged::after { background: var(--plug); box-shadow: 0 0 8px var(--plug), inset 0 1px 2px rgba(255, 255, 255, 0.5); }
+.rack-jack:hover { transform: scale(1.08); --ring: var(--color-sel); }
+.rack-jack:focus-visible { outline: 2px solid var(--color-sel-2); outline-offset: 3px; }
+.rack-jack--ok { --ring: #10b981; animation: jack-ready 1.1s ease-in-out infinite; }
+.rack-jack--no { opacity: 0.28; filter: grayscale(0.8); cursor: not-allowed; }
+.rack-jack--anchor { --ring: #f59e0b; transform: scale(1.1); }
+.rack-jack--hover { --ring: #34d399; transform: scale(1.22); box-shadow: 0 0 0 3px #34d399, 0 0 18px rgba(52, 211, 153, 0.9); }
+@keyframes jack-ready {
+  0%, 100% { box-shadow: 0 0 0 2px #10b981, 0 0 6px rgba(16, 185, 129, 0.5); }
+  50% { box-shadow: 0 0 0 3px #34d399, 0 0 14px rgba(52, 211, 153, 0.85); }
+}
+.rack-jack-label {
+  margin-top: 3px; max-width: 54px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font: 700 11px/1.1 var(--font-label); text-transform: uppercase; color: #cbd5e1;
+}
+
+/* Patch cables (SVG drawn over the rear panel; geometry written by the rAF loop) */
+.patch-cables { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 30; }
+.cable { --cable: #ef4444; }
+.cable path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cable-hit { stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.cable-shadow { stroke: rgba(0, 0, 0, 0.45); stroke-width: 9; transform: translate(2px, 6px); }
+.cable-body { stroke: var(--cable); stroke-width: 6.5; }
+.cable-shine { stroke: rgba(255, 255, 255, 0.38); stroke-width: 1.6; transform: translate(-1px, -1.5px); }
+.cable-sleeve { stroke: #9ca3af; stroke-width: 9; }
+.cable-plug { fill: #1f2937; stroke: var(--cable); stroke-width: 2.5; pointer-events: none; }
+.cable--cv .cable-shadow { stroke-width: 7; }
+.cable--cv .cable-body { stroke-width: 4.5; }
+.cable--cv .cable-sleeve { stroke-width: 7; }
+.cable:hover .cable-body { stroke-width: 8.5; filter: brightness(1.25); }
+.cable--cv:hover .cable-body { stroke-width: 6; }
+.cable--drag { pointer-events: none; }
+.cable--drag .cable-hit { pointer-events: none; }
+.cable--drag .cable-body { filter: drop-shadow(0 0 6px var(--cable)); }
+.cable--faded { opacity: 0.12; }
+.cable--faded:hover { opacity: 1; }
+.patch-cables--hide .cable:not(.cable--drag) { display: none; }
+
+/* Combinator group frame */
+.combinator {
+  margin-bottom: 8px; border-radius: 6px; padding: 0 0 4px;
+  background: linear-gradient(180deg, rgba(119, 82, 40, 0.24), rgba(17, 13, 9, 0.42));
+  border: 1px solid rgba(199, 156, 97, 0.4); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+.combinator-head {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 7px 12px; color: #f2dfbd;
+  border-radius: 6px 6px 0 0; background: linear-gradient(90deg, #392714, #684820 50%, #342314);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+.combinator--rear .combinator-head { background: linear-gradient(90deg, #21170e, #3b2917 50%, #21170e); }
+.combinator-source {
+  display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; padding: 2px 6px; border-radius: 999px;
+  font: 700 11px/1 var(--font-label); background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(231, 196, 139, 0.3);
+}
+.combinator-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 4px;
+  font-size: 11px; font-weight: 700; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.combinator-btn:hover { background: rgba(0, 0, 0, 0.55); }
+.combinator-btn--danger { background: #9c3425; border-color: #d47c56; }
+.combinator-body { padding: 6px 6px 0 14px; border-left: 3px solid rgba(199, 156, 97, 0.55); margin-left: 6px; }
+
+/* Library panel */
+.library-panel {
+  width: 300px; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0;
+  background: linear-gradient(180deg, #17120c, #0b0907); border-right: 1px solid #60462a; color: #ded1ba; font-size: 13px;
+}
+.lib-chip {
+  padding: 2px 7px; border-radius: 999px; font-size: 11px; background: rgba(70, 53, 31, 0.66); color: #e3d3b8; border: 1px solid rgba(199, 156, 97, 0.18);
+}
+.lib-chip--on { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; font-weight: 700; border-color: #e8c98f; }
+.lib-row { padding: 5px 6px; border-radius: 5px; background: rgba(30, 23, 15, 0.82); border: 1px solid rgba(199, 156, 97, 0.12); }
+.lib-row:hover { border-color: rgba(199, 156, 97, 0.48); background: rgba(55, 40, 23, 0.82); }
+.lib-act {
+  display: inline-flex; align-items: center; gap: 2px; padding: 2px 5px; border-radius: 3px;
+  font-size: 11px; font-weight: 700; background: rgba(73, 59, 42, 0.8); color: #f0e2c8;
+}
+.lib-act:hover { background: #765b36; }
+.lib-act--mount { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; }
+.lib-act--mount:hover { background: linear-gradient(180deg, #f0d39d, #cb9654); }
+.lib-flag {
+  font: 700 11px/1 var(--font-label); padding: 2px 4px; border-radius: 3px;
+  color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+/* ===================================================================== THE UNBOX APP skin
+   (components layer: Tailwind utilities on the same element still win) */
+@layer components {
+  .us-chrome {
+    background:
+      repeating-linear-gradient(90deg, rgba(212, 171, 112, 0.025) 0 1px, transparent 1px 5px),
+      linear-gradient(180deg, #261d14 0%, #17120e 100%);
+  }
+  /* brushed aluminium: fine horizontal grain over a soft vertical light falloff */
+  .us-metal {
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px, transparent 2px 3px),
+      linear-gradient(180deg, #f0ece3 0%, #d9d1c3 38%, #c5baa7 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 6px 18px rgba(0, 0, 0, 0.55);
+    color: var(--color-ink);
+  }
+  .us-metal-frame {
+    border-radius: 6px;
+    border: 1px solid #796d5b;
+  }
+  .us-bezel {
+    background: linear-gradient(180deg, #35291d, #17130f);
+    border-radius: 5px;
+    padding: 2.5px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .us-lcd,
+  .us-lcd-field,
+  .font-lcd,
+  .font-mono { font-variant-numeric: tabular-nums; }
+
+  .us-lcd {
+    background:
+      radial-gradient(ellipse at 35% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #8cb3b8 0%, #769fa5 60%, #689298 100%);
+    color: #112328;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(18, 38, 44, 0.35);
+    border: 1px solid #4a747b;
+  }
+  .us-lcd-box {
+    border: 1px solid rgba(17, 35, 40, 0.45);
+    border-radius: 2.5px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #112328;
+  }
+  .us-lcd-inverse {
+    background: #163238;
+    color: #c8f5f8;
+    font-weight: 700;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  .us-lcd-btn {
+    background: linear-gradient(180deg, #94bac0, #7a9ea4);
+    border: 1px solid #32585f;
+    color: #112328;
+    border-radius: 2.5px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+  }
+  .us-lcd-btn:hover, .us-lcd-btn:active {
+    background: #163238;
+    color: #c8f5f8;
+    border-color: #0d1e22;
+  }
+  .us-btn {
+    background: linear-gradient(180deg, #534331, #282016);
+    border: 1px solid #100d09;
+    box-shadow: inset 0 1px 0 rgba(241, 218, 183, 0.18), 0 1px 1px rgba(0, 0, 0, 0.5);
+    color: #eee6d9;
+  }
+  .us-btn:active {
+    background: linear-gradient(180deg, #282016, #463722);
+  }
+  .us-btn-light {
+    background: linear-gradient(180deg, #f8f3e9, #cfc4b1);
+    border: 1px solid #7d6b52;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 1px rgba(0, 0, 0, 0.25);
+    color: #2b2117;
+  }
+  .us-sel-row {
+    background: linear-gradient(180deg, #e7bb77, #c5883d);
+    color: #21160c;
+  }
+  .us-tab {
+    color: #8d96a1;
+  }
+  .us-tab[aria-selected='true'] {
+    color: #fff;
+    background: linear-gradient(180deg, #342a1e, #1c1712);
+    box-shadow: inset 0 -2px 0 var(--color-sel);
+  }
+  .us-wood {
+    background:
+      repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px 7px),
+      linear-gradient(90deg, var(--color-wood-1), var(--color-wood-2) 45%, var(--color-wood-1));
+  }
+  .us-screw {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f2dfb9, #b48b54 60%, #614526);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+    position: relative;
+  }
+  .us-screw::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 5px;
+    height: 2px;
+    background: #51402b;
+    transform: rotate(-35deg);
+  }
+  .us-key-white {
+    background: linear-gradient(180deg, #f7f7f5 0%, #ffffff 70%, #e9e9e6 100%);
+    box-shadow: inset 0 -6px 0 #dcdcd8, inset -1px 0 0 #b9bbbe;
+  }
+  .us-key-white[data-on='true'] {
+    background: linear-gradient(180deg, #ffd59b, #ffbd66);
+    box-shadow: inset 0 -3px 0 #d98d2b;
+  }
+  .us-key-black {
+    background: linear-gradient(180deg, #2b2e33 0%, #121417 70%, #050607 100%);
+    box-shadow: inset 0 -5px 0 #34383e, 0 2px 3px rgba(0, 0, 0, 0.6);
+  }
+  .us-key-black[data-on='true'] {
+    background: linear-gradient(180deg, #a35f12, #6d3d07);
+  }
+  .us-wheel {
+    background: linear-gradient(90deg, #1a1c20, #4a4f57 40%, #2a2d33 60%, #101114);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px #000, 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  /* Studio pages + shared controls (src/studio/ui/controls.tsx) */
+  .us-panel {
+    background: linear-gradient(180deg, #241c14, #17120e);
+    border: 1px solid #080706;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .us-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #050607;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+    min-height: 36px;
+  }
+  .us-panel-head .us-screw {
+    width: 10px;
+    height: 10px;
+  }
+  .us-plate {
+    padding: 3px 9px 2px;
+    border-radius: 3px;
+    font: 700 13px/1.1 var(--font-label);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px), linear-gradient(180deg, #f0ece3, #c5baa7);
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  .us-field {
+    background: #100d0a;
+    border: 1px solid #050403;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: #eee6d9;
+    outline: none;
+  }
+  .us-field:focus {
+    border-color: var(--color-sel);
+  }
+  .us-lcd-field,
+  .us-lcd-chip {
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--color-lcd-1), var(--color-lcd-2));
+    color: var(--color-lcd-ink);
+    font: 400 18px/1 var(--font-lcd);
+    box-shadow: inset 0 0 6px rgba(43, 38, 28, 0.35), inset 0 0 0 1px rgba(43, 38, 28, 0.55);
+    outline: none;
+  }
+  .us-lcd-field:focus {
+    box-shadow: inset 0 0 6px rgba(43, 38, 28, 0.35), 0 0 0 2px var(--color-sel);
+  }
+  .us-lcd-chip {
+    padding: 3px 6px 2px;
+    white-space: nowrap;
+  }
+  .us-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .us-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #c89655 0 var(--fill, 0%), #17120d var(--fill, 0%));
+    box-shadow: inset 0 1px 3px #000, 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .us-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 18px;
+    margin-top: -6px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #f1d49d, #d49b50 55%, #8f5d26);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  .us-range::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #0d1013;
+  }
+  .us-range::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: #c89655;
+  }
+  .us-range::-moz-range-thumb {
+    width: 12px;
+    height: 18px;
+    border: 0;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #f1d49d, #d49b50 55%, #8f5d26);
+  }
+  .us-range:focus-visible {
+    outline: none;
+  }
+  .us-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px #e1bc7e;
+  }
+
+  /* "Load audio" strip on instrument panels (src/rack/DeviceSampleBar.tsx) */
+  .ds-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #261d14, #17120e);
+    border: 1px solid #000;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: var(--color-chrome-ink);
+    font: 600 13px/1.2 var(--font-label);
+  }
+  .ds-bar--over {
+    box-shadow: 0 0 0 2px var(--color-sel);
+  }
+  .ds-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    font: 700 13px/1 var(--font-label);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #e6e9ec;
+    background: linear-gradient(180deg, #3a3f46, #1c1f24);
+    border: 1px solid #0b0d10;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .ds-btn:hover:not(:disabled) {
+    color: var(--color-sel-2);
+  }
+  .ds-btn:disabled {
+    opacity: 0.5;
+  }
+  .ds-hint {
+    color: #8d96a1;
+    font-weight: 500;
+  }
+  .ds-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 190px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--color-lcd-1), var(--color-lcd-2));
+    color: var(--color-lcd-ink);
+    font: 400 13px/1 var(--font-lcd);
+  }
+  .ds-root,
+  .ds-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: 700 11px/1 var(--font-label);
+    letter-spacing: 0.12em;
+    color: #d5dae0;
+  }
+  .ds-pad {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    border-radius: 3px;
+    background: #0b0d10;
+    border: 1px solid #000;
+    color: #a3abb5;
+  }
+  .ds-pad > button:first-child {
+    padding: 0 6px;
+    font: 600 11px/20px var(--font-label);
+  }
+  .ds-pad--on {
+    background: linear-gradient(180deg, #ffd08a, #f08c1c);
+    color: #1d1306;
+  }
+  .ds-pad--over {
+    box-shadow: 0 0 0 2px var(--color-sel);
+  }
+  .ds-x {
+    padding: 0 4px;
+    opacity: 0.7;
+  }
+  .ds-x:hover {
+    opacity: 1;
+  }
+  .ds-error {
+    flex-basis: 100%;
+    color: #fca5a5;
+  }
+
+  /* Mixer console strips (src/components/mixer) */
+  .cs-console {
+    background: repeating-linear-gradient(90deg, #0b0d10 0 2px, #0e1114 2px 4px);
+  }
+  .cs-strip {
+    width: 100px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #2c2219, #17120d);
+    border: 1px solid #483726;
+    box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.15), 0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+  .cs-strip--sel {
+    box-shadow: 0 0 0 2px #00e5ff, 0 0 12px rgba(0, 229, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  .cs-strip--vca {
+    width: 80px;
+  }
+  .cs-strip--master {
+    width: 132px;
+  }
+  .cs-name {
+    margin: 4px 4px 3px;
+    padding: 3px 5px 4px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px), linear-gradient(180deg, #8cb3b8, #729ba0);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: #112328;
+    border: 1px solid #487279;
+  }
+  .cs-badge {
+    font: 700 11px/1 var(--font-label);
+    padding: 2px 4px;
+    border-radius: 2px;
+    background: #163238;
+    color: #c8f5f8;
+  }
+  .cs-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+  }
+  .cs-sec {
+    padding: 4px 0 3px;
+    border-top: 1px solid rgba(0, 0, 0, 0.65);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .cs-label {
+    display: flex;
+    align-items: center;
+    font: 700 11px/1 var(--font-label);
+    letter-spacing: 0.16em;
+    color: var(--color-chrome-ink);
+  }
+  .cs-lamp {
+    font: 700 11px/1 var(--font-label);
+    padding: 2px 4px;
+    border-radius: 2px;
+    background: #0b0d10;
+    color: #93a0ad;
+    border: 1px solid #000;
+  }
+  .cs-lamp--on {
+    background: linear-gradient(180deg, #ffd08a, #f08c1c);
+    color: #1d1306;
+    box-shadow: 0 0 6px rgba(240, 140, 28, 0.6);
+  }
+  .cs-lamp--gate {
+    background: linear-gradient(180deg, #bae6fd, #38bdf8);
+    color: #06202c;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+  }
+  .cs-bottom {
+    padding: 4px 4px 0;
+    margin: 0 3px 3px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+  .cs-readout {
+    text-align: center;
+    font: 400 18px/1 var(--font-lcd);
+    color: var(--color-lcd-1);
+    padding: 2px 0 3px;
+  }
+}
+
+/* Pages (Projects, Devices, Meters, Mastering, Export, Settings): raw text fields and checkboxes take
+   the skin. Unlayered on purpose: it must beat the utility classes those fields still carry. */
+.us-page input[type='text'],
+.us-page input[type='search'],
+.us-page input:not([type]),
+.us-page textarea {
+  background: #0b0d10;
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #e6e9ec;
+}
+.us-page input[type='text']:focus,
+.us-page input[type='search']:focus,
+.us-page input:not([type]):focus,
+.us-page textarea:focus {
+  border-color: var(--color-sel);
+  outline: none;
+}
+.us-page input[type='checkbox'] {
+  accent-color: var(--color-sel);
+}
+
+/* Unbox Studio: one shared cabinet/screen/control architecture across every workspace. */
+:root {
+  --unbox-brass: #c79c61;
+  --unbox-brass-light: #e5c58e;
+  --unbox-cabinet: #17120d;
+  --unbox-cabinet-edge: #4c3925;
+  --unbox-screen: #0b0d0e;
+  --unbox-phosphor: #ded9c7;
+  --unbox-meter-grille: rgba(204, 169, 112, 0.12);
+}
+
+/*
+ * Typography floor: no label in the studio renders below 11 px. Markup carried a long tail of
+ * 6–10 px utility classes; raising them here keeps that history from shrinking new UI, and the
+ * `!important` is deliberate — it must win over a Tailwind arbitrary size on the same element.
+ */
+.unbox-cabinet [class*='text-[6px]'],
+.unbox-cabinet [class*='text-[7px]'],
+.unbox-cabinet [class*='text-[7.5px]'],
+.unbox-cabinet [class*='text-[8px]'],
+.unbox-cabinet [class*='text-[8.5px]'],
+.unbox-cabinet [class*='text-[9px]'],
+.unbox-cabinet [class*='text-[9.5px]'],
+.unbox-cabinet [class*='text-[10px]'],
+.unbox-cabinet [class*='text-[10.5px]'] {
+  font-size: 11px !important;
+}
+
+.unbox-cabinet {
+  background: #17120d;
+  box-shadow: 
+    inset 0 0 0 2px #382719,
+    inset 0 0 0 3px rgba(214, 163, 88, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+
+.unbox-titlebar {
+  position: relative;
+  z-index: 30;
+  border-bottom: 1px solid #5c432a;
+  background: linear-gradient(180deg, #2b2016 0%, #1a130d 100%);
+  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.2), 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.unbox-brand-button {
+  min-width: 202px;
+  border-right: 1px solid rgba(199, 156, 97, 0.24);
+  color: #f0e5d1;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.unbox-brand-button:hover,
+.unbox-brand-button:focus-visible {
+  background: rgba(226, 185, 120, 0.08);
+  color: #fff8ed;
+}
+
+.unbox-brand-button:focus-visible,
+.unbox-workspace-tab:focus-visible,
+.unbox-utility-button:focus-visible {
+  outline: 2px solid var(--unbox-brass-light);
+  outline-offset: -3px;
+}
+
+.unbox-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.unbox-brand-mark {
+  width: 38px;
+  height: 30px;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+}
+
+.unbox-brand-type {
+  display: grid;
+  justify-items: start;
+  line-height: 0.9;
+}
+
+.unbox-brand-kicker {
+  color: #c6a271;
+  font: 800 11px/1 var(--font-label);
+  letter-spacing: 0.2em;
+}
+
+.unbox-brand-word {
+  color: #f1e5cf;
+  font: 800 18px/0.95 var(--font-label);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.unbox-brand-word span {
+  margin-left: 4px;
+  color: #c79c61;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+
+.unbox-workspace-tab {
+  position: relative;
+  min-width: 96px;
+  padding-inline: 15px;
+  color: #b9ac99;
+  font: 700 13px/1 var(--font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.unbox-workspace-tab:hover { color: #f6ead6; background: rgba(238, 205, 156, 0.06); }
+
+.unbox-workspace-tab[aria-selected='true'] {
+  color: #ffffff;
+  background: linear-gradient(180deg, #38291b 0%, #1f160e 100%);
+  box-shadow: inset 0 -3px 0 #d69b50, inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.unbox-workspace-tab kbd {
+  margin-left: 6px;
+  color: #88765d;
+  font: 600 11px/1 var(--font-label);
+  letter-spacing: 0;
+}
+
+.unbox-utility-button {
+  color: #bbae9d;
+  border-radius: 4px;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.unbox-utility-button:hover { color: #f5e6cd; background: rgba(226, 185, 120, 0.09); }
+
+.unbox-screen-well {
+  position: relative;
+  isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(231, 198, 145, 0.09);
+}
+
+.unbox-page-bar {
+  background: linear-gradient(180deg, #261d14, #19130e);
+  border-bottom: 1px solid var(--unbox-cabinet-edge);
+}
+
+.unbox-transport {
+  position: relative;
+  z-index: 20;
+  border-top: 1px solid #755535;
+  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.1), 0 -2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.unbox-meter-bank {
+  border: 1px solid rgba(199, 156, 97, 0.32);
+  border-radius: 4px;
+  padding: 4px 5px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 3px, var(--unbox-meter-grille) 3px 4px),
+    linear-gradient(180deg, #15110d, #0d0b09);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 235, 197, 0.07);
+}
+
+@media (max-width: 1220px) {
+  .unbox-brand-button { min-width: 176px; padding-inline: 10px; }
+  .unbox-workspace-tab { min-width: 78px; padding-inline: 10px; }
+  .unbox-workspace-tab kbd { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unbox-brand-button,
+  .unbox-workspace-tab,
+  .unbox-utility-button { transition: none; }
+}
+
+/* Work surfaces: turn the rack and sequencer into different panels on one receiver. */
+.modular-rack {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(199, 156, 97, 0.08), transparent 45%),
+    linear-gradient(180deg, #100d09, #080706);
+}
+.rack-ear--left { border-right-color: #100b07; }
+.rack-ear--right { border-left-color: #100b07; }
+.rack-chan--sel { outline: 1px solid #d6a358; outline-offset: 1px; }
+
+.unbox-sequencer {
+  color: #e0d3bc;
+  background:
+    repeating-linear-gradient(0deg, rgba(219, 182, 120, 0.018) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 50% 0%, rgba(166, 112, 52, 0.16), transparent 60%),
+    linear-gradient(180deg, #15110d, #080706);
+}
+.unbox-sequencer-console {
+  color: #ded1ba;
+  background: linear-gradient(180deg, #15110d, #0c0a08);
+  border-color: #684d30;
+  box-shadow: inset 0 1px 0 rgba(239, 212, 167, 0.08), 0 14px 36px rgba(0, 0, 0, 0.7);
+}
+.unbox-seq-toprail {
+  background: linear-gradient(90deg, #2b2014, #19130d 48%, #2b2014);
+  border-color: #5b4329;
+}
+.unbox-seq-patternrail {
+  background: linear-gradient(180deg, #16110b, #100c08);
+  border-color: #40301e;
+}
+.unbox-seq-instrumentrail {
+  background: linear-gradient(180deg, #21180f, #15100b);
+  border-color: #4c3822;
+}
+.unbox-seq-songrail {
+  background: linear-gradient(90deg, #18120c, #21180f 48%, #18120c);
+  border-color: #5b4329;
+}
+.unbox-sequencer-console [class*="text-cyan-"] { color: #e0bf83 !important; }
+.unbox-sequencer-console [class*="border-cyan-"] { border-color: rgba(199, 156, 97, 0.55) !important; }
+.unbox-sequencer-console [class~="bg-cyan-500"],
+.unbox-sequencer-console [class~="bg-cyan-600"],
+.unbox-sequencer-console [class~="bg-cyan-700"],
+.unbox-sequencer-console [class~="bg-cyan-800"] {
+  background: linear-gradient(180deg, #e3bc79, #bb8544) !important;
+  color: #21160c !important;
+  border-color: #e8c98f !important;
+}
+.unbox-sequencer-console [class~="bg-cyan-500/10"],
+.unbox-sequencer-console [class~="bg-cyan-500/15"],
+.unbox-sequencer-console [class~="bg-cyan-500/20"],
+.unbox-sequencer-console [class~="bg-cyan-900/60"],
+.unbox-sequencer-console [class~="bg-cyan-950/60"],
+.unbox-sequencer-console [class~="bg-cyan-950/70"] {
+  background-color: rgba(199, 156, 97, 0.13) !important;
+}
+.unbox-sequencer-console [class~="hover:bg-cyan-400"]:hover,
+.unbox-sequencer-console [class~="hover:bg-cyan-500"]:hover,
+.unbox-sequencer-console [class~="hover:bg-cyan-600"]:hover,
+.unbox-sequencer-console [class~="hover:bg-cyan-700"]:hover {
+  background: linear-gradient(180deg, #e3bc79, #bb8544) !important;
+  color: #21160c !important;
+}
+.unbox-sequencer-console [class~="bg-cyan-950"],
+.unbox-sequencer-console [class~="bg-cyan-900"] { color: #e0bf83; }
+.unbox-piano-roll { background: #100d09; }
+
+.unbox-live-keyboard {
+  background: linear-gradient(180deg, #100d09, #070605);
+  border-color: #674b2d;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(237, 206, 156, 0.08);
+}
+.unbox-live-keyboard [class*="text-cyan-"] { color: #e0bf83 !important; }
+.unbox-live-keyboard [class*="border-cyan-"] { border-color: rgba(199, 156, 97, 0.52) !important; }
+.unbox-live-keyboard [class~="from-cyan-300"] { --tw-gradient-from: #e5c58e var(--tw-gradient-from-position) !important; }
+.unbox-live-keyboard [class~="to-cyan-600"] { --tw-gradient-to: #a66e32 var(--tw-gradient-to-position) !important; }
+.unbox-live-keyboard [class~="bg-emerald-300"],
+.unbox-live-keyboard [class~="bg-emerald-500"] { background-color: #d6a358 !important; }
+.unbox-live-keyboard [class~="border-neutral-800"] { border-color: #5a4229 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .unbox-sequencer *,
+  .unbox-live-keyboard * { scroll-behavior: auto; }
+}
+
+/* =========================================================================
+   OPENING INTRO ANIMATION (TEEN TITANS GO! STYLE POP-COMIC ASSETS)
+   ========================================================================= */
+
+@keyframes spin-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-ultra-slow {
+  animation: spin-clockwise 35s linear infinite;
+}
+.animate-spin-slow {
+  animation: spin-clockwise 16s linear infinite;
+}
+.animate-spin-medium {
+  animation: spin-clockwise 8s linear infinite;
+}
+.animate-spin-fast {
+  animation: spin-clockwise 4s linear infinite;
+}
+.animate-spin-hyper {
+  animation: spin-clockwise 2s linear infinite;
+}
+
+.comic-sunburst-amber {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #f59e0b 0deg 10deg,
+    #b45309 10deg 20deg
+  );
+}
+
+.comic-sunburst-cyan {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #06b6d4 0deg 10deg,
+    #0e7490 10deg 20deg
+  );
+}
+
+.comic-sunburst-crimson {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #e11d48 0deg 10deg,
+    #881337 10deg 20deg
+  );
+}
+
+.comic-sunburst-gold {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #eab308 0deg 10deg,
+    #713f12 10deg 20deg
+  );
+}
+
+.comic-sunburst-emerald {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #10b981 0deg 10deg,
+    #064e3b 10deg 20deg
+  );
+}
+
+.comic-sunburst-violet {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #8b5cf6 0deg 10deg,
+    #4c1d95 10deg 20deg
+  );
+}
+
+.comic-sunburst-rainbow {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #f59e0b 0deg 8deg,
+    #06b6d4 8deg 16deg,
+    #f43f5e 16deg 24deg,
+    #10b981 24deg 32deg
+  );
+}
+
+.comic-halftone-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.4) 15%, transparent 16%),
+                    radial-gradient(rgba(255, 255, 255, 0.4) 15%, transparent 16%);
+  background-size: 14px 14px;
+  background-position: 0 0, 7px 7px;
+}
+
+.comic-speedlines {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.12) 0deg 1.5deg,
+    transparent 1.5deg 5deg
+  );
+}
+

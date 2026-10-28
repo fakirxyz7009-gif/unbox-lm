@@ -1,0 +1,173 @@
+{
+  "id": "tabla-dholak",
+  "name": "Tabla & Dholak",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded tabla bols (bayan Ge / Ke / Dhe, dayan Na / Tun / Te / Re / Tas) with round robins, plus dholak bass and treble skins. Closed strokes damp the ringing head.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "mmiron, curesforbrokenhearts (Freesound)",
+    "source": "https://freesound.org/people/mmiron/packs/8162/",
+    "notes": "Tabla: Freesound sounds 130404-130430 by mmiron. Dholak: Freesound sounds 536871-536872 by curesforbrokenhearts. All CC0; built from Freesound's high-quality Ogg previews (lossy)."
+  },
+  "dir": "../../../data/instrument-cache/freesound",
+  "lanes": [
+    {
+      "name": "Ge",
+      "note": 48,
+      "role": "kick",
+      "choke": 1,
+      "samples": [
+        "tabla/ghe_2.ogg",
+        "tabla/ghe_3.ogg",
+        "tabla/ghe_7.ogg"
+      ]
+    },
+    {
+      "name": "Ge Short",
+      "note": 47,
+      "role": "perc",
+      "choke": 1,
+      "samples": [
+        "tabla/ghe.ogg",
+        "tabla/ghe_4.ogg",
+        "tabla/ghe_8.ogg"
+      ]
+    },
+    {
+      "name": "Ge Meend",
+      "note": 49,
+      "role": "perc",
+      "choke": 1,
+      "samples": [
+        "tabla/ghe_5.ogg",
+        "tabla/ghe_6.ogg"
+      ]
+    },
+    {
+      "name": "Ke",
+      "note": 50,
+      "role": "perc",
+      "choke": 1,
+      "samples": [
+        {
+          "file": "tabla/ke.ogg",
+          "gain": -4
+        },
+        {
+          "file": "tabla/ke_2.ogg",
+          "gain": -4
+        },
+        {
+          "file": "tabla/ke_3.ogg",
+          "gain": -4
+        }
+      ]
+    },
+    {
+      "name": "Dhe",
+      "note": 52,
+      "role": "perc",
+      "choke": 1,
+      "samples": [
+        {
+          "file": "tabla/dhec.ogg",
+          "gain": -3
+        }
+      ]
+    },
+    {
+      "name": "Na",
+      "note": 60,
+      "role": "snare",
+      "choke": 2,
+      "samples": [
+        "tabla/na.ogg",
+        "tabla/na_sharp.ogg"
+      ]
+    },
+    {
+      "name": "Na Open",
+      "note": 61,
+      "role": "perc",
+      "choke": 2,
+      "samples": [
+        "tabla/na-open.ogg"
+      ]
+    },
+    {
+      "name": "Tun",
+      "note": 62,
+      "role": "perc",
+      "choke": 2,
+      "samples": [
+        "tabla/tun.ogg",
+        "tabla/tun_2.ogg",
+        "tabla/tun_3.ogg"
+      ]
+    },
+    {
+      "name": "Te",
+      "note": 64,
+      "role": "hatC",
+      "choke": 2,
+      "samples": [
+        {
+          "file": "tabla/te.ogg",
+          "gain": -3
+        },
+        {
+          "file": "tabla/te_2.ogg",
+          "gain": -3
+        },
+        {
+          "file": "tabla/te__ne.ogg",
+          "gain": -3
+        },
+        {
+          "file": "tabla/te_middlefinger.ogg",
+          "gain": -3
+        }
+      ]
+    },
+    {
+      "name": "Re",
+      "note": 65,
+      "role": "perc",
+      "choke": 2,
+      "samples": [
+        {
+          "file": "tabla/re.ogg",
+          "gain": -3
+        }
+      ]
+    },
+    {
+      "name": "Tas",
+      "note": 67,
+      "role": "perc",
+      "choke": 2,
+      "samples": [
+        "tabla/tas.ogg",
+        "tabla/tas_2.ogg",
+        "tabla/tas_3.ogg"
+      ]
+    },
+    {
+      "name": "Dholak Bass",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "dholak/DHOLAK_BASS_SKIN.ogg"
+      ]
+    },
+    {
+      "name": "Dholak Treble",
+      "note": 43,
+      "role": "perc",
+      "samples": [
+        "dholak/DHOLAK_TREBLE_SKIN.ogg"
+      ]
+    }
+  ]
+}

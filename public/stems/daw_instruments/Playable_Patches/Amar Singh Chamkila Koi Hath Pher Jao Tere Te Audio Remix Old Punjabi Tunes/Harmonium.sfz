@@ -1,0 +1,13 @@
+// Auto-generated DAW Instrument Patch
+<group>
+ampeg_attack=0.005
+ampeg_release=0.25
+
+<region>
+sample=harmonium_note.wav
+pitch_keycenter=60
+lokey=0
+hikey=127
+loop_mode=loop_continuous
+loop_start=4410
+loop_end=44100

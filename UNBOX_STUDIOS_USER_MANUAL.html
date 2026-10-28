@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UNBOX STUDIOS — Operation Manual & Complete Functionality Reference</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 15mm 20mm 15mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 8pt;
+        color: #64748b;
+      }
+      @bottom-left {
+        content: "UNBOX STUDIOS DAW · OPERATION MANUAL";
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #94a3b8;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      page-break-after: always;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #09131f 0%, #0f2744 60%, #081422 100%);
+      color: #ffffff;
+      border-radius: 8px;
+    }
+
+    .cover-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cover-logo-badge {
+      background: #f59e0b;
+      color: #000000;
+      font-weight: 900;
+      font-size: 16pt;
+      padding: 6px 14px;
+      border-radius: 6px;
+      letter-spacing: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cover-version {
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9pt;
+      letter-spacing: 1px;
+    }
+
+    .cover-main {
+      margin-top: 60px;
+      margin-bottom: 60px;
+    }
+
+    .cover-title {
+      font-size: 34pt;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin: 0 0 16px 0;
+      background: linear-gradient(to right, #ffffff, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-subtitle {
+      font-size: 14pt;
+      color: #94a3b8;
+      font-weight: 400;
+      margin: 0 0 24px 0;
+      line-height: 1.4;
+    }
+
+    .cover-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cover-pill {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .cover-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      color: #64748b;
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 18pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 6px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      page-break-after: avoid;
+    }
+
+    .chapter-heading {
+      page-break-before: always;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #0369a1;
+      margin-top: 24px;
+      margin-bottom: 10px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    ul, ol {
+      margin-top: 0;
+      margin-bottom: 12px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      margin-bottom: 18px;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      background: #f1f5f9;
+      color: #0369a1;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-left: 4px solid #0284c7;
+      background: #f0f9ff;
+      padding: 10px 14px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+      page-break-inside: avoid;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #0369a1;
+      margin-bottom: 4px;
+      font-size: 9pt;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout-warning {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .callout-warning .callout-title {
+      color: #b45309;
+    }
+
+    .callout-success {
+      border-left-color: #10b981;
+      background: #ecfdf5;
+    }
+    .callout-success .callout-title {
+      color: #047857;
+    }
+
+    /* Diagram Blocks */
+    .diagram-box {
+      background: #09131f;
+      color: #38bdf8;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.5pt;
+      line-height: 1.4;
+      white-space: pre;
+      margin: 14px 0;
+      overflow-x: auto;
+      page-break-inside: avoid;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 7pt;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+    .badge-synth { background: #dbeafe; color: #1e40af; }
+    .badge-drums { background: #fee2e2; color: #991b1b; }
+    .badge-effect { background: #fef3c7; color: #92400e; }
+    .badge-utility { background: #f3e8ff; color: #6b21a8; }
+    .badge-hardware { background: #dcfce7; color: #166534; }
+
+    /* TOC */
+    .toc-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dotted #cbd5e1;
+      padding: 5px 0;
+      font-size: 9pt;
+    }
+    .toc-title { font-weight: 600; color: #1e293b; }
+    .toc-page { font-family: 'JetBrains Mono', monospace; color: #64748b; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= COVER PAGE ================= -->
+  <div class="cover-page">
+    <div class="cover-brand">
+      <div class="cover-logo-badge">UNBOX STUDIOS</div>
+      <div class="cover-version">MODULAR WORKSTATION · v1.0.0 NATIVE</div>
+    </div>
+
+    <div class="cover-main">
+      <h1 class="cover-title">OPERATION MANUAL &amp;<br>SYSTEM ARCHITECTURE</h1>
+      <p class="cover-subtitle">Complete Reference Manual for Musicians, Producers, Sound Designers &amp; Audio Engineers.</p>
+      
+      <div class="cover-pills">
+        <span class="cover-pill">ZERO-ELECTRON STANDALONE</span>
+        <span class="cover-pill">HARDWARE GPU &amp; AUDIO PROBE</span>
+        <span class="cover-pill">3-COLUMN MODULAR RACK</span>
+        <span class="cover-pill">3rd WAVE 24-VOICE SYNTH</span>
+        <span class="cover-pill">STUDIO CONSOLE MIXER</span>
+        <span class="cover-pill">CV PHYSICS ROUTING</span>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div>DOCUMENT: UM-UNBOX-101</div>
+      <div>PUBLISHED: UNBOX STUDIOS DSP TEAM</div>
+      <div>CLASSIFICATION: OFFICIAL SYSTEM MANUAL</div>
+    </div>
+  </div>
+
+  <!-- ================= TABLE OF CONTENTS ================= -->
+  <div style="page-break-after: always; padding-top: 10px;">
+    <h1>Table of Contents</h1>
+    <div style="margin-top: 20px;">
+      <div class="toc-item"><span class="toc-title">1. System Architecture &amp; Standalone Runtime</span><span class="toc-page">Chapter 1</span></div>
+      <div class="toc-item"><span class="toc-title">2. Workspace Views: Workstation (F7), Rack (F6) &amp; Mixer (F5)</span><span class="toc-page">Chapter 2</span></div>
+      <div class="toc-item"><span class="toc-title">3. The Workstation LCD Editor, Part List &amp; Per-Note Audio Clips</span><span class="toc-page">Chapter 3</span></div>
+      <div class="toc-item"><span class="toc-title">4. The 3-Column Modular Rack System &amp; Patch Cable Physics</span><span class="toc-page">Chapter 4</span></div>
+      <div class="toc-item"><span class="toc-title">5. 3rd Wave Advanced 24-Voice Wavetable Synthesizer</span><span class="toc-page">Chapter 5</span></div>
+      <div class="toc-item"><span class="toc-title">6. Native Synthesizer Suite (Thor, Subtractor, Europa, Monotone...)</span><span class="toc-page">Chapter 6</span></div>
+      <div class="toc-item"><span class="toc-title">7. Traditional Indian Classical Suite &amp; World Acoustic Engines</span><span class="toc-page">Chapter 7</span></div>
+      <div class="toc-item"><span class="toc-title">8. Drums &amp; Creative Samplers (Redrum, Mimic, Big Rusty Drums)</span><span class="toc-page">Chapter 8</span></div>
+      <div class="toc-item"><span class="toc-title">9. Studio Outboard Effects, Dynamics &amp; Hardware Emulations</span><span class="toc-page">Chapter 9</span></div>
+      <div class="toc-item"><span class="toc-title">10. Modulation, CV Utilities &amp; The AI Combinator</span><span class="toc-page">Chapter 10</span></div>
+      <div class="toc-item"><span class="toc-title">11. Studio Console Mixer, Bus Routing &amp; Mastering Chain</span><span class="toc-page">Chapter 11</span></div>
+      <div class="toc-item"><span class="toc-title">12. Arrangement Timeline, Automation Lanes &amp; Stem Export</span><span class="toc-page">Chapter 12</span></div>
+      <div class="toc-item"><span class="toc-title">13. Hardware Integration: CPU, GPU, Web MIDI &amp; High-Power Mode</span><span class="toc-page">Chapter 13</span></div>
+      <div class="toc-item"><span class="toc-title">14. Complete Keyboard Shortcuts &amp; Reason Keybindings Reference</span><span class="toc-page">Chapter 14</span></div>
+    </div>
+
+    <div class="callout" style="margin-top: 30px;">
+      <div class="callout-title">About This Manual</div>
+      <p>This manual provides an exhaustive operational reference for Unbox Studios. Every device parameter, CV modulation routing, audio signal path, keyboard shortcut, and hardware interaction is documented with exact values and behavior.</p>
+    </div>
+  </div>
+
+  <!-- ================= CHAPTER 1: SYSTEM ARCHITECTURE ================= -->
+  <div class="chapter-heading">
+    <h1>1. System Architecture &amp; Standalone Runtime</h1>
+    <p>Unbox Studios is a full-featured modular Digital Audio Workstation (DAW) engineered from the ground up for high fidelity, instant tactile feedback, and modular routing freedom. Combining the sonic depth of vintage rack-mounted synthesizers, outboard analog hardware emulations, and modern multi-track arrangement workflows, the application delivers studio-grade sound design capabilities directly on consumer PC hardware.</p>
+
+    <h2>1.1 Standalone Desktop Architecture (Zero-Electron Engine)</h2>
+    <p>Unbox Studios operates as a native standalone desktop application that completely bypasses the resource bloat and memory footprint of Electron. The standalone engine couples an ultra-low latency Node.js backend with your PC's native high-performance Chromium hardware renderer.</p>
+
+    <div class="diagram-box">
++----------------------------------------------------------------------------------+
+|                            HOST PC PHYSICAL HARDWARE                             |
+|  [Multi-Core CPU]    [Dedicated GPU Engine]    [Audio DAC / Interface]  [Web MIDI] |
++---------+-----------------------+-------------------------+------------------+---+
+          |                       |                         |                  |
++---------v-----------------------v-------------------------v------------------v---+
+|                     STANDALONE APPLICATION HOST (Zero Electron)                  |
+|  - Standalone Application Container (Window Frame, Isolated Local Profile)       |
+|  - Direct3D 11 / OpenGL GPU Rasterization & Zero-Copy Compositing                |
+|  - WASAPI / DirectAudio Low-Latency Audio Streaming                              |
+|  - Hardware Screen WakeLock (Power Throttling Prevention)                        |
++----------------------------------------------------------------------------------+
+|                            UNBOX AUDIO & GRAPH CORE                              |
+|  [AudioContext Graph] <---> [Multi-Voice Manager] <---> [CV Modulation Matrix]   |
+|  [64-Channel Strip]   <---> [Mastering Suite]     <---> [Real Audio Sampler]     |
++----------------------------------------------------------------------------------+
+    </div>
+
+    <h2>1.2 Launch Methods</h2>
+    <ul>
+      <li><strong>Double-Click Launcher:</strong> Execute <code>Start-Unbox-Standalone.bat</code> in the root directory. This launches the application with direct GPU acceleration flags and isolated user data storage in <code>%LOCALAPPDATA%\UnboxStudiosStandalone</code>.</li>
+      <li><strong>Command Line:</strong> Run <code>npm run standalone</code> from PowerShell or Command Prompt.</li>
+      <li><strong>Development Mode:</strong> Run <code>npm run dev</code> for live hot-reloading development with full Vite middleware.</li>
+    </ul>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Hardware Boost &amp; Power Policy</div>
+      <p>When running in standalone mode, the application automatically requests an OS WakeLock to prevent Windows from clocking down CPU cores, sleeping background audio threads, or dimming displays during critical recording and mixing sessions.</p>
+    </div>
+  </div>
+
+  <!-- ================= CHAPTER 2: WORKSPACE VIEWS ================= -->
+  <div class="chapter-heading">
+    <h1>2. Workspace Navigation: The Three Core Views</h1>
+    <p>Unbox Studios organizes music production into three dedicated full-screen workspaces designed for instant switching with zero latency. You can toggle between views at any time using the top navigation bar or the industry-standard function keys.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Workspace View</th>
+          <th>Primary Operational Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>F7</code></td>
+          <td><strong>Workstation &amp; Sequencer</strong></td>
+          <td>Sound auditioning, multi-track Part selection, per-note audio clip editing, sample slicing, and arrangement timeline.</td>
+        </tr>
+        <tr>
+          <td><code>F6</code></td>
+          <td><strong>3-Column Modular Rack</strong></td>
+          <td>Full modular synth view with physical faceplates, vacuum tubes, interactive knobs, patch cables, and rear panel CV routing.</td>
+        </tr>
+        <tr>
+          <td><code>F5</code></td>
+          <td><strong>Mixer &amp; Clip Editor</strong></td>
+          <td>SSL-style console channel strips, EQ frequency curves, dynamics, aux send routing, master meters, and clip launcher.</td>
+        </tr>
+        <tr>
+          <td><code>Tab</code></td>
+          <td><strong>Flip Rack (Front / Rear)</strong></td>
+          <td>Instantly flips the 3-column modular rack around to expose audio jacks, CV ins/outs, and physical patch cables.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2.1 Top Cabinet Title Bar</h2>
+    <p>The top cabinet title bar persists across all views and provides:</p>
+    <ul>
+      <li><strong>Brand Menu:</strong> Access project operations (New, Open, Save, Save As, Export WAV, Project Settings).</li>
+      <li><strong>Workspace Selector Tabs:</strong> One-click switching between Workstation, Rack, and Mixer.</li>
+      <li><strong>Hardware Telemetry HUD:</strong> Real-time display of active GPU renderer, CPU cores, audio interface sample rate, buffer latency, DSP load, and display FPS.</li>
+      <li><strong>Global Tool Access:</strong> Real Audio Stems browser (<code>Alt+S</code>), AI Co-Pilot (<code>Alt+C</code>), Command Search (<code>Ctrl+K</code>), and Keyboard Shortcuts (<code>?</code>).</li>
+    </ul>
+  </div>
+
+  <!-- ================= CHAPTER 3: WORKSTATION LCD & CLIPS ================= -->
+  <div class="chapter-heading">
+    <h1>3. The Integrated Workstation &amp; LCD Editor</h1>
+    <p>The <strong>Workstation</strong> view (<code>F7</code>) combines a classic Roland/Yamaha multi-timbral workstation layout with modern digital sample manipulation.</p>
+
+    <h2>3.1 The Multi-Timbral Part List</h2>
+    <p>Every instrument loaded into the project automatically occupies a numbered Part slot in the left-hand Part List:</p>
+    <ul>
+      <li><strong>MUTE Button:</strong> Silences the part instantly without interrupting sequencer sync.</li>
+      <li><strong>LINK Button:</strong> Links secondary parts to the primary selected part so playing notes on your MIDI keyboard or clicking keys triggers lush layered sounds across multiple synthesizers simultaneously.</li>
+      <li><strong>PATCH Display:</strong> Displays the active device name (e.g., <code>3rd Wave Wavetable Synth</code>, <code>Big Rusty Drums</code>). Double-clicking opens the Patch Browser to swap instruments while preserving track patterns.</li>
+      <li><strong>LEVEL Meter:</strong> Tactile horizontal slider controlling channel gain with a real-time stereo VU meter.</li>
+    </ul>
+
+    <h2>3.2 The Hardware LCD Editor &amp; Audio Clip Chopper</h2>
+    <p>The central LCD screen provides deep editing of the selected instrument. It features two primary operating modes: <strong>CLIP Mode</strong> and <strong>ADSR Mode</strong>.</p>
+
+    <h3>Automatic Live Note Tracking</h3>
+    <p>When you strike any note on your MIDI keyboard or piano roll (for example note 36 / Kick on <em>Big Rusty Drums</em>), the LCD editor instantly updates its waveform display to show the exact audio sample assigned to that note. You can immediately slice, trim, and adjust its parameters without hunting through file menus.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Control</th>
+          <th>Range</th>
+          <th>Operational Function</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>AUDITION</code></td>
+          <td>Trigger</td>
+          <td>Plays back the currently selected note sample with current offset and loop settings.</td>
+        </tr>
+        <tr>
+          <td><code>OFFSET</code></td>
+          <td>0.00s – 10.00s</td>
+          <td>Trims the sample start point to skip silence or jump straight into the attack transient.</td>
+        </tr>
+        <tr>
+          <td><code>DUR</code></td>
+          <td>0.1b – 16.0b</td>
+          <td>Sets the maximum playback duration in musical beats or seconds.</td>
+        </tr>
+        <tr>
+          <td><code>PITCH</code></td>
+          <td>-24 to +24 st</td>
+          <td>Pitches the individual note up or down in semitones with high-quality resampling.</td>
+        </tr>
+        <tr>
+          <td><code>SPLIT / CHOP</code></td>
+          <td>16th, 8th, 1/4, 1 Bar</td>
+          <td>Automatically chops the sample across musical grid intervals for stutter and glitch beats.</td>
+        </tr>
+        <tr>
+          <td><code>REV</code></td>
+          <td>Toggle</td>
+          <td>Reverses the note audio playback buffer instantly.</td>
+        </tr>
+        <tr>
+          <td><code>LOOP</code></td>
+          <td>Toggle</td>
+          <td>Loops the audio sample continuously while the key is held down.</td>
+        </tr>
+        <tr>
+          <td><code>F-IN / F-OUT</code></td>
+          <td>0.00s – 2.00s</td>
+          <td>Applies smooth linear fade-in and exponential fade-out ramps to prevent clicks.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= CHAPTER 4: 3-COLUMN RACK ================= -->
+  <div class="chapter-heading">
+    <h1>4. The 3-Column Modular Rack System &amp; Patch Physics</h1>
+    <p>Pressing <code>F6</code> reveals the <strong>3-Column Modular Rack</strong>, a full emulation of Reason-style hardware chassis with photorealistic front panels, vacuum tube thermionic glows, and interactive knobs.</p>
+
+    <h2>4.1 Front Panel Operation</h2>
+    <p>Each unit occupies standard rack height units (1U = 44px, 2U = 88px, 3U = 132px, 4U = 176px). Controls include rotary knobs, vertical faders, toggle switches, LCD displays, and visualizers. Double-clicking any knob resets it to its factory default value.</p>
+
+    <h2>4.2 Rear Panel &amp; Physical Patch Cables</h2>
+    <p>Pressing <code>Tab</code> flips the entire rack around to the rear panel. All audio connections, sidechain inputs, gate triggers, and CV modulation lines are exposed as physical 1/4-inch jacks.</p>
+
+    <div class="callout">
+      <div class="callout-title">Dynamic Cable Physics Engine</div>
+      <p>Patch cables behave according to real-world physics formulas. As devices are dragged or resized, cables simulate gravity, tension, droop curves, and sway with full momentum. Cables are automatically color-coded (Red, Yellow, Green, Cyan, Purple) for effortless signal tracing.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Signal Type</th>
+          <th>Jack Color</th>
+          <th>Standard Voltage / Value Range</th>
+          <th>Behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Audio Signals</strong></td>
+          <td>Silver Chrome Jacks</td>
+          <td>-1.0 to +1.0 (Full Scale Float)</td>
+          <td>Carries stereo or mono audio signals directly between synth outputs, effect processors, and mixer channel inputs.</td>
+        </tr>
+        <tr>
+          <td><strong>CV Pitch</strong></td>
+          <td>Yellow / Brass Jacks</td>
+          <td>1 Volt per Octave (0.0 to 1.0)</td>
+          <td>Drives oscillator pitch tracking from sequencers, arpeggiators, and matrix units.</td>
+        </tr>
+        <tr>
+          <td><strong>CV Gate</strong></td>
+          <td>Yellow / Brass Jacks</td>
+          <td>Binary Pulse (0.0 or 1.0)</td>
+          <td>Triggers note-on envelopes, pad strikes, and step sequencer triggers.</td>
+        </tr>
+        <tr>
+          <td><strong>CV Modulation</strong></td>
+          <td>Yellow / Brass Jacks</td>
+          <td>Bipolar (-1.0 to +1.0)</td>
+          <td>Continuous modulation from LFOs and envelopes to filter cutoffs, wavetable surfers, and VCA levels.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= CHAPTER 5: 3rd WAVE SYNTH ================= -->
+  <div class="chapter-heading">
+    <h1>5. 3rd Wave Advanced 24-Voice Wavetable Synthesizer</h1>
+    <p>The <strong>3rd Wave</strong> is Unbox Studios' flagship wavetable instrument, recreating the historic sound of the vintage PPG Wave 2.2/2.3 combined with modern 24-voice polyphony, analog circuit drift, dual series filters, and the iconic master <strong>Wave Surfer</strong>.</p>
+
+    <span class="badge badge-synth">Native Synth</span>
+    <span class="badge badge-hardware">4U Rack Unit</span>
+
+    <h2>5.1 Oscillator Architecture (3 Oscillators Per Voice)</h2>
+    <p>Each of the 24 voices contains three independent wavetable oscillators capable of running legacy PPG, modern high-resolution, analog-modeled, or sampled transient waves.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Bank</th>
+          <th>Identifier</th>
+          <th>Wave Range</th>
+          <th>Harmonic Character</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PPG Legacy</strong></td>
+          <td><code>P00 – P35</code></td>
+          <td>64 waveforms per table</td>
+          <td>Vintage 8-bit stepped quantization, metallic bell sweeps, robotic vocal formants, Upper Wavetable P30, and Prophet VS digital spectra (P32–P35).</td>
+        </tr>
+        <tr>
+          <td><strong>Modern User</strong></td>
+          <td><code>U00 – U55</code></td>
+          <td>64 waveforms per table</td>
+          <td>Anti-aliased, 96 kHz high-resolution tables with lush morphing, glassy harmonics, and cinematic textures.</td>
+        </tr>
+        <tr>
+          <td><strong>Analog Core</strong></td>
+          <td><code>A00 – A06</code></td>
+          <td>Static / Variable PWM</td>
+          <td>A00 Saw, A01 Square with variable PWM, A02 Triangle, A03 Pure Sine, A04 7-voice Supersaw stack, A05 White Noise, A06 Pink Noise.</td>
+        </tr>
+        <tr>
+          <td><strong>Sample Slots</strong></td>
+          <td><code>S00 – S08</code></td>
+          <td>Single-cycle &amp; Transients</td>
+          <td>Acoustic kalimba, hammer strikes, gamelan transients, and choral breath.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5.2 The Master Wave Surfer &amp; Wave Flow</h2>
+    <p>The large blue <strong>WAVE SURFER</strong> knob sweeps the wavetable positions of all three oscillators simultaneously across a range of <strong>-63 to +63</strong>. The <strong>WAVE FLOW</strong> knob adjusts wavetable smoothing: values below 50% replicate authentic vintage 8-bit stepped transitions, while values above 50% smoothly interpolate harmonic coefficients.</p>
+
+    <h2>5.3 6-Stage Wave Envelope</h2>
+    <p>Each voice includes a dedicated 6-stage trajectory envelope with independent Time ($T_1 dots T_6$) and Position ($P_1 dots P_6$) controls. Setting <strong>Loop Start</strong> and <strong>Loop End</strong> stages creates continuous cyclical wavetable sweeping while notes are sustained.</p>
+
+    <h2>5.4 Dual Filters in Series</h2>
+    <ul>
+      <li><strong>Filter 1 (12dB State-Variable Filter - SVF):</strong> Zero-delay digital SVF smoothly morphing between Low-Pass, Notch, High-Pass, and dedicated Band-Pass modes with Cutoff, Resonance, and Envelope amount.</li>
+      <li><strong>Filter 2 (24dB 4-Pole Low-Pass Filter):</strong> Warm resonant lowpass ladder filter equipped with a non-linear <code>Drive</code> saturation waveshaper and <code>Bass Comp</code> (Resonance Bass Compensation) to preserve thunderous low end even at self-oscillation resonance settings.</li>
+    </ul>
+
+    <h2>5.5 Performance, Voice Spread &amp; Dual FX</h2>
+    <ul>
+      <li><strong>Voice Pan Spread:</strong> Distributes voices across a wide binaural stereo image (0% mono center up to 100% wide alternating spread).</li>
+      <li><strong>Circuit Drift:</strong> Introduces subtle analog-modeled pitch detuning (±2.5 cents) and cutoff deviations per voice.</li>
+      <li><strong>FX 1 Processor:</strong> Lush Multi-Tap Chorus, BBD Analog Delay, Stereo Ping-Pong Delay, Echoplex Tape Echo, Flanger, and 6-stage Phaser.</li>
+      <li><strong>FX 2 Processor:</strong> Spacious Hall Reverb, Warm Room Reverb, Superplate Reverb, and Analog Transistor Distortion.</li>
+    </ul>
+  </div>
+
+  <!-- ================= CHAPTER 6: NATIVE SYNTHS ================= -->
+  <div class="chapter-heading">
+    <h1>6. Native Synthesizer Suite</h1>
+    <p>In addition to the 3rd Wave, Unbox Studios includes a versatile suite of native synthesizers covering subtractive, FM, wavetable, and hybrid analog modeling.</p>
+
+    <h2>6.1 Thunderhead (Thor) Polysonic Synth <span class="badge badge-synth">3U</span></h2>
+    <p>A triple-oscillator synthesizer pairing multi-oscillator detuned saws with a warm overdrive saturation stage, chorus, and dual filters. Ideal for soaring synthwave leads, rich pad chords, and energetic plucks.</p>
+
+    <h2>6.2 Twin-Osc (Subtractor) Analog Synth <span class="badge badge-synth">2U</span></h2>
+    <p>The workhorse subtractive synth inspired by classic dual-oscillator analog polyphonic instruments. Features variable octave scaling, hard sync, noise generator, 24dB resonant lowpass filter, dedicated filter ADSR, and amplifier ADSR.</p>
+
+    <h2>6.3 Aurora (Europa) Wavetable Synth <span class="badge badge-synth">3U</span></h2>
+    <p>A modern shapeshifting spectral wavetable synth featuring real-time wavetable morphing, harmonic multipliers, sub-oscillator reinforcement, formant peaking filter, and vacuum tube saturation.</p>
+
+    <h2>6.4 Monobass (Monotone) Bass Synth <span class="badge badge-synth">1U</span></h2>
+    <p>A dedicated 1U bass powerhouse utilizing a classic 24dB transistor ladder filter with variable drive overdrive, dedicated sub-bass reinforcement, and glide portamento. Excels at 808 sub-basses, acid squelches, and driving synth basslines.</p>
+
+    <h2>6.5 Tri-Osc Detuned Power Synth <span class="badge badge-synth">2U</span></h2>
+    <p>Three stacked oscillators with micro-detuning, designed for massive supersaw trance leads, stadium chord stabs, and heavy unison textures.</p>
+
+    <h2>6.6 Fusion (Sytrus) FM / Additive Synth <span class="badge badge-synth">2U</span></h2>
+    <p>Multi-operator frequency modulation synthesizer capable of pure DX7 bell chimes, crystalline electric pianos, metallic percussive hits, and complex harmonic FM sweeps.</p>
+  </div>
+
+  <!-- ================= CHAPTER 7: WORLD INSTRUMENTS ================= -->
+  <div class="chapter-heading">
+    <h1>7. Traditional Indian Classical &amp; Folk Suite</h1>
+    <p>Unbox Studios features an acoustic modeling engine dedicated to regional and classical instruments with authentic microtonal pitch bending and transient response.</p>
+
+    <h2>7.1 Bansuri Bamboo Flute <span class="badge badge-synth">2U</span></h2>
+    <p>Models the acoustic breath pressure, embouchure, air turbulence, and authentic <em>meend</em> (fluid microtonal sliding between notes) characteristic of North Indian classical flute music.</p>
+
+    <h2>7.2 Classical Harmonium <span class="badge badge-synth">2U</span></h2>
+    <p>Recreates the multi-reed brass voicing, hand-pumped air reservoir pressure, bellows expansion, and continuous acoustic drone coupling of devotional harmoniums.</p>
+
+    <h2>7.3 Tabla (Dayan &amp; Bayan) <span class="badge badge-synth">2U</span></h2>
+    <p>Synthesizes the physical skin tension, center syahi paste loading, and resonant acoustic cavity of the wooden high-pitched Dayan (right hand) and copper/clay low-pitched Bayan (left hand). Responds dynamically to Ga, Na, Tin, Ge, and Dha strikes.</p>
+
+    <h2>7.4 Dhol Folk Drum &amp; Tumbi Resonator <span class="badge badge-synth">1U</span></h2>
+    <p>High-energy regional folk engines: the dual-headed Punjabi Dhol drum provides massive transient punch and bass slap, while the single-string Tumbi delivers high-resonance plucks with fast decay.</p>
+  </div>
+
+  <!-- ================= CHAPTER 8: DRUMS & SAMPLERS ================= -->
+  <div class="chapter-heading">
+    <h1>8. Drums &amp; Creative Samplers</h1>
+
+    <h2>8.1 Beatbox 8 (Redrum) Drum Computer <span class="badge badge-drums">3U</span></h2>
+    <p>An 8-channel programmable drum computer. Features independent pitch, decay, tone, level, and pan per voice, complete with an integrated 16-step sequencer, shuffle swing timing, and accent control.</p>
+
+    <h2>8.2 Copycat (Mimic) Creative Sampler <span class="badge badge-drums">3U</span></h2>
+    <p>An 8-pad granular sampler and audio slicer. Allows dropping any audio file to automatically map slices across MIDI keys, with reverse playback, start/end trimming, pitch shifting, and sample rate reduction.</p>
+
+    <h2>8.3 Big Rusty Drums &amp; Recorded Instrument Packs</h2>
+    <p>High-resolution real acoustic sample packs recorded with close and overhead microphones, 5 velocity layers, round-robin variations, and automatic hi-hat choking (open hat cut off by closed pedal strike).</p>
+  </div>
+
+  <!-- ================= CHAPTER 9: EFFECTS ================= -->
+  <div class="chapter-heading">
+    <h1>9. Studio Outboard Effects, Dynamics &amp; Hardware Emulations</h1>
+    <p>Unbox Studios integrates an arsenal of studio-grade effects, from dirty distortion units to pristine algorithmic reverbs and analog mastering processors.</p>
+
+    <h2>9.1 Howler (Scream 4) Sound Destruction Unit <span class="badge badge-effect">2U</span></h2>
+    <p>Analog overdrive and saturation unit offering 10 distinct distortion algorithms (Overdrive, Distortion, Fuzz, Tube, Tape, Screamer, Warp), alongside variable Warmth even-harmonic saturation and a dual Body resonator filter.</p>
+
+    <h2>9.2 Cathedral (RV7000) Flagship Stereo Reverb <span class="badge badge-effect">2U</span></h2>
+    <p>High-density algorithmic and convolution reverb with early reflection modeling, high-frequency damping, pre-delay (0–200ms), and decay times up to 12 seconds.</p>
+
+    <h2>9.3 Repeater (Echo) Stereo Delay <span class="badge badge-effect">2U</span></h2>
+    <p>Stereo tape and digital delay with millisecond or tempo-synced subdivisions (1/16, 1/8, dotted, triplets), ping-pong stereo bouncing, analog tape wow &amp; flutter, and high/low cut filters in the feedback path.</p>
+
+    <h2>9.4 Outboard Hardware Suite</h2>
+    <p>Authentic hardware faceplates and circuit modeling for industry standards:</p>
+    <ul>
+      <li><strong>SSL G-Master Bus Compressor:</strong> Legendary VCA glue compressor with Auto-release and High-Pass sidechain filter.</li>
+      <li><strong>UA 1176 Peak Limiter:</strong> Ultra-fast FET peak limiter with all-buttons-in ("British mode") aggressive compression.</li>
+      <li><strong>Teletronix LA-2A:</strong> Optical leveling amplifier with smooth frequency-dependent tube attack and two-stage release.</li>
+      <li><strong>Pultec EQP-1A:</strong> Classic passive tube equalizer capable of simultaneous low-frequency boost and cut ("Pultec low-end trick").</li>
+    </ul>
+  </div>
+
+  <!-- ================= CHAPTER 10: MODULATION & COMBINATOR ================= -->
+  <div class="chapter-heading">
+    <h1>10. Modulation, CV Utilities &amp; The AI Combinator</h1>
+
+    <h2>10.1 Matrix Pattern / CV Sequencer <span class="badge badge-utility">2U</span></h2>
+    <p>A 32-step analog-style pattern sequencer that outputs Note CV (pitch), Gate CV (timing), and a continuous Curve CV lane for modulating filter cutoffs, panning, and effect depths in sync with tempo.</p>
+
+    <h2>10.2 Pulsar Dual LFO &amp; Modulation Shaper <span class="badge badge-utility">1U</span></h2>
+    <p>Dual low-frequency oscillators with Sine, Triangle, Saw, Square, and Random S&amp;H waveforms, capable of tempo sync or free-running rates from 0.05 Hz to 50 Hz.</p>
+
+    <h2>10.3 The AI Combinator &amp; Patch Plan Engine</h2>
+    <p>The Combinator wraps multiple instruments, effect inserts, and modulation units into a unified master frame with 4 assignable Macro Knobs. The integrated AI and local planning engine analyzes text prompts (e.g., <em>"80s synthwave lead with tape echo and sidechained reverb"</em>) and automatically constructs, patches, and voices the entire rack.</p>
+  </div>
+
+  <!-- ================= CHAPTER 11: MIXER & MASTERING ================= -->
+  <div class="chapter-heading">
+    <h1>11. Studio Console Mixer &amp; Mastering Chain</h1>
+    <p>Pressing <code>F5</code> opens the <strong>Studio Console Mixer</strong>, modeling an analog large-format mixing console.</p>
+
+    <h2>11.1 Channel Strip Signal Path</h2>
+    <ul>
+      <li><strong>Input Section:</strong> Gain trim (±18 dB), Phase Invert, and steep 18dB/oct Low-Cut filter (20–400 Hz).</li>
+      <li><strong>Dynamics Section:</strong> Soft-knee compressor with threshold, ratio, attack, release, and make-up gain.</li>
+      <li><strong>4-Band Parametric EQ:</strong> Low Shelf, Low-Mid Bell, High-Mid Bell, and High Shelf with interactive SVG response curves.</li>
+      <li><strong>Auxiliary Sends:</strong> 8 independent Aux Send knobs with Pre/Post fader switching feeding Reverb and Delay return buses.</li>
+      <li><strong>Fader &amp; Pan:</strong> High-resolution 100mm faders with peak-hold LED metering and stereo panning.</li>
+    </ul>
+
+    <h2>11.2 Master Section &amp; Telemetry HUD</h2>
+    <p>The master console monitors the complete acoustic output with real-time RMS, True Peak dBSPL, Phase Correlation meter (-1 to +1), and stereo Lissajous Vectorscope.</p>
+  </div>
+
+  <!-- ================= CHAPTER 12: SEQUENCER ================= -->
+  <div class="chapter-heading">
+    <h1>12. Arrangement Timeline, Automation &amp; Export</h1>
+
+    <h2>12.1 Song Blocks &amp; Timeline Editing</h2>
+    <p>The arrangement timeline allows building complete compositions using reusable <strong>Song Blocks</strong> (Intro, Verse, Chorus, Bridge, Outro) or freeform pattern clips. Tool modes include Pointer (<code>Q</code>), Pencil (<code>W</code>), Eraser (<code>E</code>), Razor/Split (<code>R</code>), and Mute (<code>T</code>).</p>
+
+    <h2>12.2 Multi-Lane Automation</h2>
+    <p>Every knob and slider in the rack can be automated. Enabling automation recording captures manual knob twists in real time, drawing smooth Bezier curves directly beneath the sequencer track.</p>
+
+    <h2>12.3 High-Resolution Uncompressed Stem Exporter</h2>
+    <p>Export your final production in <strong>24-bit / 32-bit Float WAV, AIFF, or FLAC</strong>. The export engine runs on a high-speed non-realtime <code>OfflineAudioContext</code>, rendering master mixes or isolated multi-track stems with sample-accurate precision in seconds.</p>
+  </div>
+
+  <!-- ================= CHAPTER 13: HARDWARE ================= -->
+  <div class="chapter-heading">
+    <h1>13. Hardware Integration &amp; Performance Tuning</h1>
+    <p>Unbox Studios directly interfaces with your computer's hardware for maximum processing power and low latency.</p>
+
+    <h2>13.1 Hardware Probing &amp; Multithreading</h2>
+    <ul>
+      <li><strong>CPU Multi-Core Distribution:</strong> Automatically detects logical CPU cores (<code>navigator.hardwareConcurrency</code>) and offloads audio scheduling to dedicated Web Worker timers unaffected by UI rendering.</li>
+      <li><strong>Direct GPU Acceleration:</strong> Utilizes Direct3D / WebGL 2.0 zero-copy hardware rasterization for high-refresh visualizers (60–144 Hz).</li>
+      <li><strong>Audio Buffer Latency:</strong> Probes the host audio driver (ASIO / WASAPI) and optimizes buffer sizes down to 128 samples (2.7ms latency).</li>
+    </ul>
+
+    <h2>13.2 Web MIDI Controller Setup</h2>
+    <p>Plug in any USB or Bluetooth MIDI keyboard (Arturia, Novation, Akai, Native Instruments). Unbox Studios automatically detects the device, maps pitch bend and modulation wheels, and routes incoming note triggers to the active track with zero configuration.</p>
+  </div>
+
+  <!-- ================= CHAPTER 14: SHORTCUTS ================= -->
+  <div class="chapter-heading">
+    <h1>14. Complete Keyboard Shortcuts Reference</h1>
+    <p>Master these industry-standard keybindings to accelerate your production workflow.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Keybinding</th>
+          <th>Action / Operation</th>
+          <th>Scope</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Space</code></td><td>Start / Stop Sequencer Transport Playback</td><td>Global</td></tr>
+        <tr><td><code>F7</code></td><td>Switch to Workstation &amp; Sequencer View</td><td>Global</td></tr>
+        <tr><td><code>F6</code></td><td>Switch to 3-Column Modular Rack View</td><td>Global</td></tr>
+        <tr><td><code>F5</code></td><td>Switch to Studio Console Mixer View</td><td>Global</td></tr>
+        <tr><td><code>Tab</code></td><td>Flip Modular Rack (Toggle Front / Rear Panels)</td><td>Rack View</td></tr>
+        <tr><td><code>Ctrl + Z</code> / <code>Cmd + Z</code></td><td>Undo Last Operation</td><td>Global</td></tr>
+        <tr><td><code>Ctrl + Y</code> / <code>Cmd + Shift + Z</code></td><td>Redo Operation</td><td>Global</td></tr>
+        <tr><td><code>Ctrl + S</code></td><td>Quick Save Project to Local Storage</td><td>Global</td></tr>
+        <tr><td><code>Ctrl + K</code></td><td>Open Global Command Search Palette</td><td>Global</td></tr>
+        <tr><td><code>Alt + S</code></td><td>Open Real Audio Stems Browser Modal</td><td>Global</td></tr>
+        <tr><td><code>Alt + C</code></td><td>Toggle AI Co-Pilot &amp; Combinator Drawer</td><td>Global</td></tr>
+        <tr><td><code>Alt + M</code></td><td>Open Full CV Modulation Matrix</td><td>Global</td></tr>
+        <tr><td><code>F8</code></td><td>Toggle MIDI Tools &amp; Transpose Window</td><td>Global</td></tr>
+        <tr><td><code>Q</code></td><td>Select Pointer Tool</td><td>Sequencer</td></tr>
+        <tr><td><code>W</code></td><td>Select Pencil / Note Draw Tool</td><td>Sequencer</td></tr>
+        <tr><td><code>E</code></td><td>Select Eraser Tool</td><td>Sequencer</td></tr>
+        <tr><td><code>R</code></td><td>Select Razor / Split Clip Tool</td><td>Sequencer</td></tr>
+        <tr><td><code>T</code></td><td>Select Mute Tool</td><td>Sequencer</td></tr>
+        <tr><td><code>Delete</code> / <code>Backspace</code></td><td>Delete Selected Note, Clip or Device</td><td>Global</td></tr>
+        <tr><td><code>Alt + Drag</code></td><td>Duplicate Note or Audio Clip</td><td>Sequencer</td></tr>
+        <tr><td><code>Double Click Knob</code></td><td>Reset Parameter to Default Value</td><td>Rack Faceplates</td></tr>
+        <tr><td><code>Shift + Drag Knob</code></td><td>Fine-Resolution Parameter Adjustment</td><td>Rack Faceplates</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 40px; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 6px; text-align: center;">
+      <div style="font-weight: 800; font-size: 11pt; letter-spacing: 1px; color: #38bdf8;">UNBOX STUDIOS · END OF OFFICIAL MANUAL</div>
+      <div style="font-size: 8pt; color: #94a3b8; margin-top: 6px;">Designed for high-performance audio synthesis, sample sequencing, and modular sound design.</div>
+    </div>
+  </div>
+
+</body>
+</html>

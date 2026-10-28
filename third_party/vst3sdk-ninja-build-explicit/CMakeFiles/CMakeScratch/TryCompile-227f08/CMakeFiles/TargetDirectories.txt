@@ -1,0 +1,3 @@
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-ninja-build-explicit/CMakeFiles/CMakeScratch/TryCompile-227f08/CMakeFiles/cmTC_cf49a.dir
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-ninja-build-explicit/CMakeFiles/CMakeScratch/TryCompile-227f08/CMakeFiles/edit_cache.dir
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-ninja-build-explicit/CMakeFiles/CMakeScratch/TryCompile-227f08/CMakeFiles/rebuild_cache.dir
