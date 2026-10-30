@@ -6,6 +6,7 @@ import type { ArrangementClip, SequencerTrack } from '../../../audio/types.ts';
 import { audioStore, detectTempoBpm, detectTransientTimes, removeDcOffset, calculateClipRms } from '../../../audio/clips/audioStore.ts';
 import { monoSamples } from '../../../audio/ai/stemNotes.ts';
 import { transcribeInBackground } from '../../../audio/ai/transcribeInBackground.ts';
+import { denoiseBuffer } from '../../../audio/ai/denoise.ts';
 import type { KeyEstimate } from '../../../../shared/analysis/keyDetection.ts';
 import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { Btn, NumField } from '../../../studio/ui/controls.tsx';
@@ -54,6 +55,8 @@ export function AudioClipPanel({
   const [keyMessage, setKeyMessage] = useState('');
   const [keyFound, setKeyFound] = useState<KeyEstimate | null>(null);
   const [sliceMessage, setSliceMessage] = useState('');
+  const [cleaning, setCleaning] = useState(false);
+  const [cleanMessage, setCleanMessage] = useState('');
   const [selectedTakeId, setSelectedTakeId] = useState(clip.audioId ?? clip.takes?.[0]?.audioId ?? '');
   const [compStart, setCompStart] = useState(0);
   const [compEnd, setCompEnd] = useState(clip.lengthBars);
@@ -86,6 +89,21 @@ export function AudioClipPanel({
     if (!asset) return;
     // A new asset, so other clips that play the original keep their audio; the clip change is one undo step.
     set({ audioId: audioStore.add(`${asset.name} (DC removed)`, removeDcOffset(asset.buffer)).id });
+  };
+  const cleanNoise = async () => {
+    if (!asset || cleaning) return;
+    setCleaning(true);
+    setCleanMessage('Removing noise...');
+    try {
+      const cleaned = await denoiseBuffer(asset.buffer);
+      // A new asset, like Remove DC: the original stays for other clips, and the clip change is one undo step.
+      set({ audioId: audioStore.add(`${asset.name} (clean)`, cleaned).id });
+      setCleanMessage('Noise removed with RNNoise. Check it against the original by ear: it can thin out music.');
+    } catch (error) {
+      setCleanMessage(`Noise removal failed: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setCleaning(false);
+    }
   };
   const detectTempo = () => {
     if (!asset) return;
@@ -159,6 +177,9 @@ export function AudioClipPanel({
         <Btn onClick={normalize} title="Set the clip gain so its loudest peak sits at -0.3 dBFS">Normalize</Btn>
         <Btn onClick={normalizeRms} title="Normalize RMS energy to -18 dBFS target">Norm RMS</Btn>
         <Btn onClick={cleanDcOffset} title="Remove digital DC offset from source audio">Remove DC</Btn>
+        <Btn onClick={() => void cleanNoise()} disabled={cleaning} title="Remove background noise with RNNoise (open source). Makes a new source; the original stays.">
+          {cleaning ? 'Cleaning...' : 'Remove noise'}
+        </Btn>
         <Btn
           on={!!clip.invertPhase}
           tone="yellow"
@@ -210,6 +231,7 @@ export function AudioClipPanel({
       {tempoMessage && <div className="text-violet-300" role="status">{tempoMessage}</div>}
       {keyMessage && <div className="text-violet-300" role="status">{keyMessage}</div>}
       {sliceMessage && <div className="text-emerald-300" role="status">{sliceMessage}</div>}
+      {cleanMessage && <div className="text-sky-300" role="status">{cleanMessage}</div>}
       {clip.takes && clip.takes.length > 1 && (
         <div className="flex flex-col gap-2 border-t border-slate-800 pt-2" data-testid="audio-take-comp">
           <div className="flex flex-wrap items-center gap-2">

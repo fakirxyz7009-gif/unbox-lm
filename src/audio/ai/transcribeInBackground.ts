@@ -1,12 +1,13 @@
 /**
- * Runs a transcription job without freezing the page. The signal analysis runs in a Web Worker. Pitched notes
- * come from Basic Pitch on this thread, because TensorFlow.js needs WebGL for speed and WebGL is not available
- * in a worker; the model is loaded only when a job needs it. Where there is no window (the Node tests) or
- * Basic Pitch cannot run, the signal analysis answers, with the same code.
+ * Runs a transcription job without freezing the page. The signal analysis runs in a Web Worker. Pitched notes come
+ * from Basic Pitch in its own worker (basicPitchWorker.ts, on TensorFlow.js's WASM backend). This thread runs the
+ * model only when no worker is available or a worker job fails. Where there is no window (the Node tests) or Basic
+ * Pitch cannot run, the signal analysis answers, with the same code.
  */
 import { runTranscribeJob, type TranscribeKind, type TranscribeResults } from '../../../shared/transcription/transcribeJob.ts';
 import { describePitched } from '../../../shared/transcription/autoTranscribe.ts';
 import type { TimedNote } from '../../../shared/transcription/transcribe.ts';
+import { basicPitchInWorker } from './basicPitchClient.ts';
 
 interface Reply {
   id: number;
@@ -65,12 +66,20 @@ function analyse<K extends TranscribeKind>(kind: K, samples: Float32Array, sampl
   });
 }
 
-/** Basic Pitch's notes for a clip, or null when this page cannot run the model (no window, or the model fails). */
+async function mainThreadNotes(samples: Float32Array, sampleRate: number): Promise<TimedNote[]> {
+  const ai = await import('./basicPitch.ts');
+  return ai.transcribeWithBasicPitch(samples, sampleRate);
+}
+
+/**
+ * Basic Pitch's notes for a clip, or null when this page cannot run the model (no window, or the model fails).
+ * The worker runs it first; if the worker fails, this thread runs it.
+ */
 async function aiNotes(samples: Float32Array, sampleRate: number): Promise<TimedNote[] | null> {
   if (typeof window === 'undefined') return null;
   try {
-    const ai = await import('./basicPitch.ts');
-    const notes = await ai.transcribeWithBasicPitch(samples, sampleRate);
+    const inWorker = basicPitchInWorker(samples, sampleRate);
+    const notes = inWorker ? await inWorker.catch(() => mainThreadNotes(samples, sampleRate)) : await mainThreadNotes(samples, sampleRate);
     return notes.length > 0 ? notes : null;
   } catch {
     return null;
