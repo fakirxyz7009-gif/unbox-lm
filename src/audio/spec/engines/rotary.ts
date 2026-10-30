@@ -3,7 +3,8 @@
  *  - rotary: a horn rotor (above the 800 Hz crossover) and a drum rotor (below it). Each rotor
  *    sweeps its level and its pitch (a Doppler delay) on its own LFO. Two microphones sit 90° apart,
  *    so each side hears the sweep a quarter turn apart. Speed: Stop / Slow / Fast; Accel is the time
- *    constant of a speed change.
+ *    constant of a speed change. Stop is a neutral rest: the sweeps switch off at once, and the two
+ *    microphones hear the same level.
  *  - tremolo: level tremolo with separate left and right LFOs. Stereo sets their phase: Mono (the
  *    same), Quad (90°) or Opposite (180°).
  */
@@ -17,6 +18,22 @@ const HORN_DELAY = 0.0032;
 const HORN_SWEEP = 0.0019;
 const DRUM_DELAY = 0.002;
 const DRUM_SWEEP = 0.0003;
+
+/**
+ * One rotor path at a speed (0 Stop, 1 Slow, 2 Fast) and a depth. At Stop the level and pitch sweeps
+ * are off, so both microphones match. The LFO rate eases to zero with the change of speed.
+ */
+export function rotorSettings(speed: number, depth: number, horn: boolean) {
+  const d = clamp(depth, 0, 1);
+  const moving = speed > 0;
+  return {
+    lfoHz: moving ? ROTOR_HZ[horn ? 'horn' : 'drum'][speed - 1] : 0,
+    ampBase: 1 - 0.5 * d,
+    ampDepth: moving ? 0.5 * d : 0,
+    dopplerBase: horn ? HORN_DELAY : DRUM_DELAY,
+    sweep: moving ? d * (horn ? HORN_SWEEP : DRUM_SWEEP) : 0,
+  };
+}
 
 /** LFO shapes: sine, cosine (90°) and inverted sine (180°). */
 function lfoWaves(ctx: BaseAudioContext) {
@@ -56,6 +73,8 @@ function rotorPath(
   const amp = ctx.createGain();
   const dopp = ctx.createDelay(0.02);
   const lfo = ctx.createOscillator();
+  // The oscillator defaults to 440 Hz. Start at rest, and let the first sync spin the rotor up.
+  lfo.frequency.value = 0;
   lfo.setPeriodicWave(wave);
   const ampDepth = ctx.createGain();
   const sweep = ctx.createGain();
@@ -85,12 +104,12 @@ export function rotaryCabinet(host: SpecHost): SpecEngine {
     const depth = clamp(host.p('depth', 0.6), 0, 1);
     const accel = clamp(host.p('accel', 1.2), 0.05, 4);
     for (const p of paths) {
-      const rates = p.horn ? ROTOR_HZ.horn : ROTOR_HZ.drum;
-      setSmooth(p.lfo.frequency, speed === 0 ? 0 : rates[speed - 1], ctx, p.horn ? accel * 0.5 : accel);
-      setSmooth(p.amp.gain, 1 - 0.5 * depth, ctx, 0.05);
-      setSmooth(p.ampDepth.gain, 0.5 * depth, ctx, 0.05);
-      setSmooth(p.dopp.delayTime, p.horn ? HORN_DELAY : DRUM_DELAY, ctx, 0.05);
-      setSmooth(p.sweep.gain, depth * (p.horn ? HORN_SWEEP : DRUM_SWEEP), ctx, 0.05);
+      const s = rotorSettings(speed, depth, p.horn);
+      setSmooth(p.lfo.frequency, s.lfoHz, ctx, p.horn ? accel * 0.5 : accel);
+      setSmooth(p.amp.gain, s.ampBase, ctx, 0.05);
+      setSmooth(p.ampDepth.gain, s.ampDepth, ctx, 0.05);
+      setSmooth(p.dopp.delayTime, s.dopplerBase, ctx, 0.05);
+      setSmooth(p.sweep.gain, s.sweep, ctx, 0.05);
     }
   };
   sync();
@@ -116,6 +135,10 @@ export function stereoTremolo(host: SpecHost): SpecEngine {
   const lfoLeft = ctx.createOscillator();
   const lfoRight = ctx.createOscillator();
   lfoLeft.setPeriodicWave(waves.sine);
+  // Start at the set rate. The oscillator default of 440 Hz would buzz until the first sync.
+  const rate = clamp(host.p('rate', 4.5), 0.1, 20);
+  lfoLeft.frequency.value = rate;
+  lfoRight.frequency.value = rate;
   const lfos = [lfoLeft, lfoRight];
   const gains = [ctx.createGain(), ctx.createGain()];
   const depths = [ctx.createGain(), ctx.createGain()];
@@ -128,9 +151,9 @@ export function stereoTremolo(host: SpecHost): SpecEngine {
   const sync = () => {
     const phase = Math.round(clamp(host.p('phase', 1), 0, 2)); // 0 Mono, 1 Quad, 2 Opposite
     lfoRight.setPeriodicWave(phase === 0 ? waves.sine : phase === 1 ? waves.cosine : waves.inverted);
-    const rate = clamp(host.p('rate', 4.5), 0.1, 20);
+    const rateNow = clamp(host.p('rate', 4.5), 0.1, 20);
     const depth = clamp(host.p('depth', 0.6), 0, 1);
-    lfos.forEach((lfo) => setSmooth(lfo.frequency, rate, ctx, 0.03));
+    lfos.forEach((lfo) => setSmooth(lfo.frequency, rateNow, ctx, 0.03));
     gains.forEach((g) => setSmooth(g.gain, 1 - 0.5 * depth, ctx, 0.02));
     depths.forEach((d) => setSmooth(d.gain, 0.5 * depth, ctx, 0.02));
   };

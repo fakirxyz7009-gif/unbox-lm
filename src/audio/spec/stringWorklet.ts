@@ -24,7 +24,7 @@ export function stringProcessorSource(): void {
     private prev = 0;
     private burst = 0;
     private gateWas = false;
-    private seed = 1;
+    private seed: number;
 
     static get parameterDescriptors() {
       return [
@@ -37,9 +37,11 @@ export function stringProcessorSource(): void {
       ];
     }
 
-    constructor() {
+    constructor(options?: { processorOptions?: { seed?: number } }) {
       super();
       this.line = new Float32Array(SIZE);
+      // Each pluck's noise comes from its own seed, so two plucks of one note do not sound identical.
+      this.seed = ((options?.processorOptions?.seed ?? 1) >>> 0) || 1;
     }
 
     process(_inputs: Float32Array[][], outputs: Float32Array[][], params: Record<string, Float32Array>): boolean {

@@ -5,7 +5,8 @@
  *  - Mid Push: a 720 Hz hump in front of the soft clip, so the mids push through it.
  *  - Hard Clip: linear to a knee at half scale, then a firm tail (diode-style).
  *  - Fuzz: asymmetric and high gain, so it adds even harmonics.
- * These are voicings, not models of any particular pedal.
+ * These are voicings, not models of any particular pedal. A final output stage keeps every peak under
+ * full scale: a low-pass after a hard-ish clip overshoots, and that overshoot must not reach the mix.
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import { clamp, disconnectAll, setSmooth } from '../dsp.ts';
@@ -13,6 +14,8 @@ import { clamp, disconnectAll, setSmooth } from '../dsp.ts';
 const CURVE_POINTS = 1024;
 /** Output trim per voicing: Fuzz and Hard Clip run hotter, Screamer sits lower. */
 const MAKEUP = [1, 0.85, 0.9, 0.6];
+/** Output stage knee, as a fraction of full scale: linear below it, then a soft curve into full scale. */
+const KNEE = 0.9;
 
 /** Shaper curve for a voicing (0..3) at Drive 0..1. Bounded to ±1 and non-decreasing across the input. */
 export function driveCurve(voicing: number, drive: number): Float32Array<ArrayBuffer> {
@@ -41,6 +44,17 @@ function shape(voicing: number, drive: number, x: number): number {
   return Math.tanh(k * x) / Math.tanh(k);
 }
 
+/** Output stage curve: linear below the knee, then a soft curve that tops out just under full scale. */
+export function ceilingCurve(): Float32Array<ArrayBuffer> {
+  const out = new Float32Array(CURVE_POINTS);
+  for (let i = 0; i < CURVE_POINTS; i++) {
+    const x = (2 * i) / (CURVE_POINTS - 1) - 1;
+    const a = Math.abs(x);
+    out[i] = a <= KNEE ? x : Math.sign(x) * (KNEE + (1 - KNEE) * Math.tanh((a - KNEE) / (1 - KNEE)));
+  }
+  return out;
+}
+
 export function drivePedal(host: SpecHost): SpecEngine {
   const ctx = host.ctx;
   const hp = ctx.createBiquadFilter();
@@ -57,7 +71,11 @@ export function drivePedal(host: SpecHost): SpecEngine {
   tone.type = 'lowpass';
   tone.Q.value = 0.6;
   const makeup = ctx.createGain();
-  host.ins[0].connect(hp).connect(hump).connect(pre).connect(shaper).connect(tone).connect(makeup).connect(host.outs[0]);
+  const ceiling = ctx.createWaveShaper();
+  // No oversampling here: a 4x shaper rings past the top of its curve, which would undo the ceiling.
+  ceiling.oversample = 'none';
+  ceiling.curve = ceilingCurve();
+  host.ins[0].connect(hp).connect(hump).connect(pre).connect(shaper).connect(tone).connect(makeup).connect(ceiling).connect(host.outs[0]);
 
   const sync = () => {
     const voicing = Math.round(clamp(host.p('voicing', 0), 0, 3));
@@ -75,7 +93,7 @@ export function drivePedal(host: SpecHost): SpecEngine {
       if (k !== 'mix' && k !== 'output') sync();
     },
     dispose() {
-      disconnectAll(hp, hump, pre, shaper, tone, makeup);
+      disconnectAll(hp, hump, pre, shaper, tone, makeup, ceiling);
     },
   };
 }

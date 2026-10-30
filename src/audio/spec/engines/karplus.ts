@@ -5,7 +5,7 @@
  * released note stops, Tune detunes in cents.
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
-import { clamp, midiHz } from '../dsp.ts';
+import { clamp, midiHz, seededRandom } from '../dsp.ts';
 import { ensureStringWorklet } from '../stringWorklet.ts';
 import { VoicePool, type VoiceBase } from './voices.ts';
 
@@ -33,6 +33,8 @@ export function karplusEngine(host: SpecHost): SpecEngine {
   const out = host.outs[0];
   const pool = new VoicePool<StringVoice>(MAX_VOICES);
   const fading: StringVoice[] = [];
+  // Each pluck takes the next seed from this device's sequence: repeated notes differ, and an export repeats.
+  const rnd = seededRandom(host.id);
   let ready = false;
   const loading = ensureStringWorklet(ctx).then((ok) => {
     ready = ok;
@@ -56,7 +58,9 @@ export function karplusEngine(host: SpecHost): SpecEngine {
     ready: () => loading,
     noteOn(note, vel, time) {
       if (!ready) return;
-      sweep(time);
+      // Free voices by the audio clock, not by this note's time: a note can be scheduled ahead of the audio,
+      // and disconnecting a voice that is still sounding would cut its tail.
+      sweep(ctx.currentTime);
       // Steal the oldest released voice first (fast fade), then the oldest held one.
       while (pool.list.length >= MAX_VOICES) {
         const idx = Math.max(0, pool.list.findIndex((v) => v.releaseTime !== null));
@@ -66,7 +70,13 @@ export function karplusEngine(host: SpecHost): SpecEngine {
       }
       const hz = midiHz(note) * Math.pow(2, host.p('tune', 0) / 1200);
       const gain = loopGainFor(host.p('decay', 0.6));
-      const node = new AudioWorkletNode(ctx, 'unbox-string', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] });
+      const seed = 1 + Math.floor(rnd() * 0xfffffffe);
+      const node = new AudioWorkletNode(ctx, 'unbox-string', {
+        numberOfInputs: 0,
+        numberOfOutputs: 1,
+        outputChannelCount: [1],
+        processorOptions: { seed },
+      });
       const set = (name: string, value: number) => node.parameters.get(name)?.setValueAtTime(value, time);
       set('frequency', hz);
       set('loop', gain);

@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { ladderProcessorSource } from '../src/audio/spec/ladderWorklet.ts';
-import { driveCurve } from '../src/audio/spec/engines/drive.ts';
+import { ceilingCurve, driveCurve } from '../src/audio/spec/engines/drive.ts';
 import { loopGainFor, ringSeconds } from '../src/audio/spec/engines/karplus.ts';
 import { tapeSettings } from '../src/audio/spec/engines/tapeEcho.ts';
 import { phaseFrame } from '../src/audio/spec/engines/wavetable.ts';
+import { rotorSettings } from '../src/audio/spec/engines/rotary.ts';
 import { stringProcessorSource } from '../src/audio/spec/stringWorklet.ts';
 
 const SAMPLE_RATE = 48_000;
@@ -91,6 +92,29 @@ test('phase-distortion frames rebuild the warped cycle: frame 0 is a sine, later
   }
 });
 
+test('the drive output stage keeps every peak under full scale and is linear below its knee', () => {
+  const curve = ceilingCurve();
+  let prev = -Infinity;
+  for (const y of curve) {
+    assert.ok(Math.abs(y) <= 0.98 + 1e-6, 'peaks stay under full scale');
+    assert.ok(y >= prev - 1e-6, 'the curve never folds back');
+    prev = y;
+  }
+  const at = (x: number) => curve[Math.round(((x + 1) / 2) * 1023)];
+  assert.ok(Math.abs(at(0.5) - 0.5) < 2e-3, 'linear below the knee');
+});
+
+test('rotor settings: a stopped rotor adds no sweep, and a moving one follows its speed', () => {
+  for (const horn of [true, false]) {
+    const stopped = rotorSettings(0, 0.8, horn);
+    assert.equal(stopped.lfoHz, 0);
+    assert.equal(stopped.ampDepth, 0);
+    assert.equal(stopped.sweep, 0);
+  }
+  assert.equal(rotorSettings(2, 0.8, true).lfoHz, 6.8);
+  assert.equal(rotorSettings(1, 0.8, false).lfoHz, 0.66);
+});
+
 // ---------------------------------------------------------------- ladder worklet
 
 type LadderProcessor = { process(inputs: Float32Array[][], outputs: Float32Array[][], params: Record<string, Float32Array>): boolean };
@@ -112,7 +136,7 @@ function loadLadder(): LadderCtor {
 }
 
 /** Pushes samples through the processor in 128-frame blocks at a fixed cutoff and resonance. */
-function runLadder(samples: Float32Array, cutoff: number, resonance: number): Float32Array {
+function runLadder(samples: Float32Array, cutoff: number, resonance: number, drive = 0): Float32Array {
   const proc = new (loadLadder())();
   const out = new Float32Array(samples.length);
   for (let start = 0; start < samples.length; start += 128) {
@@ -121,7 +145,7 @@ function runLadder(samples: Float32Array, cutoff: number, resonance: number): Fl
     proc.process([[block]], [[y]], {
       cutoff: Float32Array.from([cutoff]),
       resonance: Float32Array.from([resonance]),
-      drive: Float32Array.from([0]),
+      drive: Float32Array.from([drive]),
     });
     out.set(y, start);
   }
@@ -146,10 +170,48 @@ test('ladder self-oscillates at full resonance and dies out without it', () => {
   assert.ok(rms(runLadder(impulse, 1000, 0).subarray(6144)) < 1e-6, 'with no resonance the tail is gone');
 });
 
+/** Steady-state amplitude of one frequency (Goertzel), counting from sample `from`. */
+function amplitudeAt(x: Float32Array, hz: number, from: number): number {
+  const c = 2 * Math.cos((2 * Math.PI * hz) / SAMPLE_RATE);
+  let s1 = 0;
+  let s2 = 0;
+  for (let i = from; i < x.length; i++) {
+    const s = x[i] + c * s1 - s2;
+    s2 = s1;
+    s1 = s;
+  }
+  return (2 / (x.length - from)) * Math.sqrt(Math.max(0, s1 * s1 + s2 * s2 - c * s1 * s2));
+}
+
+/** The frequency the ladder answers most, from a tiny sine sweep (linear regime), 0.6 to 1.6 times the cutoff. */
+function resonancePeak(cutoff: number, resonance: number): number {
+  const steps = 40;
+  const freqs = Array.from({ length: steps }, (_, i) => cutoff * 0.6 * Math.pow(1.6 / 0.6, i / (steps - 1)));
+  const amps = freqs.map((f) => amplitudeAt(runLadder(sine(f, 9000, 1e-4), cutoff, resonance), f, 4500));
+  let best = 0;
+  for (let i = 1; i < steps; i++) if (amps[i] > amps[best]) best = i;
+  return freqs[best];
+}
+
+test('ladder resonance lands on its cutoff at high cutoffs', () => {
+  for (const cutoff of [6000, 8000]) {
+    const ratio = resonancePeak(cutoff, 0.95) / cutoff;
+    assert.ok(Math.abs(ratio - 1) < 0.05, `cutoff ${cutoff} Hz: resonance at ${ratio.toFixed(3)} x cutoff`);
+  }
+});
+
+test('ladder keeps the 3 kHz alias of a 15 kHz tone far below the tone', () => {
+  const out = runLadder(sine(15000, 9600), 19200, 0, 1);
+  const tone = amplitudeAt(out, 15000, 4800);
+  const alias = amplitudeAt(out, 3000, 4800);
+  assert.ok(tone > 0.1, 'the tone passes');
+  assert.ok(alias < 1e-3, `3 kHz alias at ${alias.toExponential(2)} against a ${tone.toFixed(3)} tone`);
+});
+
 // ---------------------------------------------------------------- plucked string worklet
 
 type StringProcessor = { process(inputs: Float32Array[][], outputs: Float32Array[][], params: Record<string, Float32Array>): boolean };
-type StringCtor = new () => StringProcessor;
+type StringCtor = new (options?: { processorOptions?: { seed?: number } }) => StringProcessor;
 
 function loadString(): StringCtor {
   const registered = new Map<string, StringCtor>();
@@ -166,8 +228,8 @@ function loadString(): StringCtor {
 }
 
 /** One plucked note held open: the gate is high from the first block, the parameters are fixed. */
-function playString(hz: number, loop: number, average: number, samples: number): Float32Array {
-  const proc = new (loadString())();
+function playString(hz: number, loop: number, average: number, samples: number, seed = 1): Float32Array {
+  const proc = new (loadString())({ processorOptions: { seed } });
   const out = new Float32Array(samples);
   for (let start = 0; start < samples; start += 128) {
     const y = new Float32Array(Math.min(128, samples - start));
@@ -227,4 +289,13 @@ test('plucked string rings longer at a higher loop gain and stays bounded', () =
   assert.ok(peak(short, short.length - 4800) < 1e-3, 'a loop gain of 0.9 is silent after 2 s');
   assert.ok(peak(long, long.length - 4800) > 0.01, 'a loop gain of 0.999 is still audible after 2 s');
   assert.ok(peak(long) < 2, 'the loop stays bounded');
+});
+
+test('each pluck draws its own noise burst; the same seed repeats exactly', () => {
+  const first = playString(220, 0.99, 1, 1024, 7);
+  const again = playString(220, 0.99, 1, 1024, 7);
+  const other = playString(220, 0.99, 1, 1024, 8);
+  assert.deepEqual(Array.from(again), Array.from(first));
+  const largest = first.reduce((m, v, i) => Math.max(m, Math.abs(v - other[i])), 0);
+  assert.ok(largest > 0.01, 'a different seed gives a different burst');
 });
