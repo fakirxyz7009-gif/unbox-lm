@@ -50,7 +50,10 @@ export const LibraryQuickList: React.FC<LibraryQuickListProps> = ({ kinds, query
         return (
           <div key={item.id} className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded bg-slate-900/70 hover:bg-slate-800">
             <div className="flex-1 min-w-0">
-              <div className="truncate">{item.name}</div>
+              <div className="truncate">
+                {item.name}
+                {item.kind === 'plugin' && <span className="proxy-chip ml-1" title="Runs as Web Audio proxy DSP, not the plugin binary">PROXY DSP</span>}
+              </div>
               <div className="truncate text-[11px] text-slate-500">{subtitle(item)}</div>
             </div>
             {previewId && (

@@ -2,7 +2,9 @@
  * Small read-only metadata readers for library files: audio headers, zip directory counts,
  * Native Instruments .nicnt product XML, changelogs and VST3 moduleinfo.json.
  */
-import { open, readFile, type FileHandle } from 'node:fs/promises';
+import { open, readFile, stat, type FileHandle } from 'node:fs/promises';
+
+const MAX_MODULE_INFO_BYTES = 1024 * 1024;
 
 async function readRange(fh: FileHandle, offset: number, length: number): Promise<Buffer> {
   const buf = Buffer.alloc(Math.max(0, length));
@@ -141,6 +143,8 @@ export interface ModuleInfo {
 /** VST3 bundle Contents/Resources/moduleinfo.json (SDK 3.7.5+). */
 export async function readModuleInfo(path: string): Promise<ModuleInfo | undefined> {
   try {
+    // The file comes from a plugin folder the user does not control, so a huge one is not read whole.
+    if ((await stat(path)).size > MAX_MODULE_INFO_BYTES) return undefined;
     const raw: unknown = JSON.parse(await readFile(path, 'utf8'));
     if (!raw || typeof raw !== 'object') return undefined;
     const obj = raw as Record<string, unknown>;

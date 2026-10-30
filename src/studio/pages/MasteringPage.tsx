@@ -361,7 +361,7 @@ export function MasteringPage() {
               <OnOff label="Limiter" on={s.limiter.on} onChange={(v) => upd((m) => (m.limiter.on = v))} />
             </div>
             <Slide label="Gain" value={s.limiter.gainDb} min={0} max={24} step={0.1} unit=" dB" onChange={(v) => upd((m) => (m.limiter.gainDb = v))} />
-            <Slide label="Ceiling" value={s.limiter.ceiling} min={-6} max={0} step={0.1} unit=" dBTP" onChange={(v) => upd((m) => (m.limiter.ceiling = v))} />
+            <Slide label="Ceiling" value={s.limiter.ceiling} min={-6} max={0} step={0.1} unit=" dBFS" onChange={(v) => upd((m) => (m.limiter.ceiling = v))} />
             <Slide label="Release" value={Math.round(s.limiter.release * 1000)} min={10} max={1000} step={5} unit=" ms" onChange={(v) => upd((m) => (m.limiter.release = v / 1000))} />
             <Slide label="Look-ahead" value={s.limiter.lookaheadMs} min={0} max={10} step={0.5} unit=" ms" onChange={(v) => upd((m) => (m.limiter.lookaheadMs = v))} />
             <GrMeter label="Limiter" read={() => chain.limiterGr} />

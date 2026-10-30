@@ -98,8 +98,38 @@ function frameAmps(table: string, f: number): Float32Array {
   return a;
 }
 
+/**
+ * Phase-distortion frame f: one cycle of cos(2π·φ^p), with p from 1 (a pure sine) to 6 (sharp).
+ * Returned as harmonic amplitudes and phases, the form harmonicWave takes.
+ */
+export function phaseFrame(f: number): { amps: Float32Array; phases: Float32Array } {
+  const p = 1 + (clamp(f, 0, FRAMES - 1) / (FRAMES - 1)) * 5;
+  const N = 256;
+  const y = new Float64Array(N);
+  for (let n = 0; n < N; n++) y[n] = Math.cos(2 * Math.PI * Math.pow(n / N, p));
+  const amps = new Float32Array(H);
+  const phases = new Float32Array(H);
+  for (let k = 1; k < H; k++) {
+    let re = 0;
+    let im = 0;
+    for (let n = 0; n < N; n++) {
+      const th = (2 * Math.PI * k * n) / N;
+      re += y[n] * Math.cos(th);
+      im -= y[n] * Math.sin(th);
+    }
+    // y = Σ (2|c_k|/N)·cos(kx + arg c_k); harmonicWave takes sin(kx + phase), so add 90°.
+    amps[k] = (2 * Math.hypot(re, im)) / N;
+    phases[k] = Math.atan2(im, re) + Math.PI / 2;
+  }
+  return { amps, phases };
+}
+
 function tableWave(ctx: BaseAudioContext, table: string, frame: number): PeriodicWave {
   const f = clamp(Math.round(frame), 0, FRAMES - 1);
+  if (table === 'Phase') {
+    const { amps, phases } = phaseFrame(f);
+    return harmonicWave(ctx, `wt:Phase:${f}`, amps, phases);
+  }
   return harmonicWave(ctx, `wt:${table}:${f}`, frameAmps(table, f));
 }
 
@@ -200,7 +230,8 @@ export function wavetableEngine(host: SpecHost): SpecEngine {
   posLfo.connect(posLfoAmt);
   posLfo.start();
   let motionPhase = 0;
-  let motionTimer: number | null = null;
+  let removeMotionRealtime: (() => void) | null = null;
+  let motionAt = 0;
 
   const mode = () => voiceModeOf(host.opt('voiceMode') || 'Poly');
   pool.max = mode().mono ? 1 : Number(cfg.maxVoices ?? 8);
@@ -333,20 +364,24 @@ export function wavetableEngine(host: SpecHost): SpecEngine {
 
   function ensureMotion(): void {
     const hasMotion = host.spec.params.some((p) => p.key === 'motion') && host.p('motionDepth', 0) > 0.01;
-    if (!hasMotion || motionTimer !== null || typeof window === 'undefined' || !(ctx instanceof AudioContext)) return;
-    let last = performance.now();
-    motionTimer = window.setInterval(() => {
-      const now = performance.now();
-      motionPhase += ((now - last) / 1000) * host.p('motion', 0.6) * Math.PI * 2;
-      last = now;
-      pool.gc(ctx.currentTime);
-      if (!pool.list.length) {
-        if (motionTimer !== null) clearInterval(motionTimer);
-        motionTimer = null;
-        return;
+    if (!hasMotion || removeMotionRealtime || !host.clock.requestRealtime) return;
+    motionAt = ctx.currentTime;
+    removeMotionRealtime = host.clock.requestRealtime((now) => {
+      if (host.p('motionDepth', 0) <= 0.01) {
+        removeMotionRealtime = null;
+        return false;
       }
-      pool.list.forEach((v) => applyIndex(v, ctx.currentTime));
-    }, 33);
+      pool.gc(now);
+      if (!pool.list.length) {
+        removeMotionRealtime = null;
+        return false;
+      }
+      const elapsed = Math.max(0, now - motionAt);
+      motionAt = now;
+      motionPhase += elapsed * host.p('motion', 0.6) * Math.PI * 2;
+      pool.list.forEach((v) => applyIndex(v, now));
+      return true;
+    });
   }
 
   const syncPosLfo = () => {
@@ -418,10 +453,11 @@ export function wavetableEngine(host: SpecHost): SpecEngine {
       }
     },
     meter() {
-      return { voices: pool.held().length, index: host.p('posA', 0) };
+      return { voices: pool.held().length, index: host.p('posA', 0), motion: motionPhase };
     },
     dispose() {
-      if (motionTimer !== null) clearInterval(motionTimer);
+      removeMotionRealtime?.();
+      removeMotionRealtime = null;
       pool.killAll(ctx.currentTime);
       try {
         posLfo.stop();

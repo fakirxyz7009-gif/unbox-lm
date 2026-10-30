@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useSyncExternalStore } from 'react';
 import { BaseDevice } from '../audio/BaseDevice.ts';
+import { useEscapeKey } from '../shell/useEscapeKey.ts';
 import { CVEngine } from '../audio/CVEngine.ts';
+import { useFrame } from '../nexa/useEngine.ts';
+import { setWidth } from '../ui/skin/dom.ts';
 import {
   X,
   Plus,
@@ -16,22 +19,55 @@ interface CVMatrixModalProps {
   cvEngine: CVEngine;
 }
 
+/** A live CV readout must never cause the full matrix to re-render. */
+function CVMeter({ cvEngine, entryId }: { cvEngine: CVEngine; entryId: string }) {
+  const meterRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const shown = useRef('');
+  useFrame(() => {
+    const value = cvEngine.liveMeterValues.get(entryId) ?? 0;
+    setWidth(fillRef.current, (value + 1) * 50);
+    const text = value.toFixed(2);
+    if (shown.current === text) return;
+    shown.current = text;
+    const meter = meterRef.current;
+    if (!meter) return;
+    meter.title = `Live CV: ${text}V`;
+    meter.setAttribute('aria-valuenow', text);
+    meter.setAttribute('aria-valuetext', `${text} volts`);
+  });
+  return (
+    <div
+      ref={meterRef}
+      data-testid={`cv-meter-${entryId}`}
+      role="meter"
+      aria-label="Live CV"
+      aria-valuemin={-1}
+      aria-valuemax={1}
+      aria-valuenow={0}
+      className="w-14 h-5 rounded bg-neutral-900 border border-neutral-800 overflow-hidden relative shadow-inner flex items-center"
+      title="Live CV: 0.00V"
+    >
+      <div ref={fillRef} data-testid={`cv-meter-fill-${entryId}`} className="absolute h-full bg-gradient-to-r from-cyan-600 via-amber-500 to-red-500 transition-[width] duration-75" style={{ width: 0 }} />
+      <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/40" />
+    </div>
+  );
+}
+
 export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
   isOpen,
   onClose,
   devices,
   cvEngine,
 }) => {
-  const [, setTick] = useState(0);
-
-  // Poll for animated live meter values
-  useEffect(() => {
-    if (!isOpen) return;
-    const interval = setInterval(() => {
-      setTick((t) => (t + 1) % 1000);
-    }, 40);
-    return () => clearInterval(interval);
-  }, [isOpen]);
+  useEscapeKey(onClose, isOpen);
+  // Re-render only when mappings or available devices structurally change. Live meters update in
+  // CVMeter through the shared animation-frame service, not through React state.
+  useSyncExternalStore(
+    (callback) => cvEngine.subscribeMatrix(callback),
+    () => cvEngine.matrixVersion(),
+    () => 0,
+  );
 
   if (!isOpen) return null;
 
@@ -137,10 +173,6 @@ export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
           ) : (
             <div className="space-y-3">
               {cvEngine.matrixEntries.map((entry) => {
-                const liveVal = cvEngine.liveMeterValues.get(entry.id) || 0;
-                // Normalize for visual meter bar (-1 to 1) -> (0% to 100%)
-                const meterPercent = Math.min(100, Math.max(0, (liveVal + 1) * 50));
-
                 return (
                   <div
                     key={entry.id}
@@ -231,17 +263,7 @@ export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
                         {entry.inverted ? 'INV (-)' : 'NORM (+)'}
                       </button>
 
-                      {/* Animated Bipolar CV meter */}
-                      <div
-                        className="w-14 h-5 rounded bg-neutral-900 border border-neutral-800 overflow-hidden relative shadow-inner flex items-center"
-                        title={`Live CV: ${liveVal.toFixed(2)}V`}
-                      >
-                        <div
-                          className="absolute h-full bg-gradient-to-r from-cyan-600 via-amber-500 to-red-500 transition-all duration-75"
-                          style={{ width: `${meterPercent}%` }}
-                        />
-                        <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/40" />
-                      </div>
+                      <CVMeter cvEngine={cvEngine} entryId={entry.id} />
 
                       <button
                         onClick={() => cvEngine.removeMatrixEntry(entry.id)}

@@ -44,7 +44,12 @@ export interface ThirdWaveVoice {
   amp: GainNode;
   panNode?: StereoPannerNode;
   voiceIndex: number;
-  waveEnvTimer?: number;
+  /**
+   * Wave-envelope changes use browser timers because OscillatorNode cannot
+   * schedule setPeriodicWave changes on the audio clock. Keep every pending
+   * handle so a released, stolen, or disposed voice cannot mutate later.
+   */
+  waveEnvTimers?: number[];
 }
 
 export class ThirdWaveDevice extends BaseDevice {
@@ -646,6 +651,11 @@ export class ThirdWaveDevice extends BaseDevice {
     });
   }
 
+  private clearWaveEnvTimers(voice: ThirdWaveVoice): void {
+    for (const timer of voice.waveEnvTimers ?? []) clearTimeout(timer);
+    voice.waveEnvTimers = undefined;
+  }
+
   private applyWavetablesToVoice(voice: ThirdWaveVoice, waveEnvOffset: number = 0): void {
     const masterSurfer = Number(this.params.waveSurfer) || 0;
     const kw1 = (voice.midiNote - 60) * ((this.params.osc1_kw || 0) / 32);
@@ -682,7 +692,7 @@ export class ThirdWaveDevice extends BaseDevice {
         const stolen = this.activeVoices.get(oldestKey);
         if (stolen) {
           try {
-            if (stolen.waveEnvTimer) clearTimeout(stolen.waveEnvTimer);
+            this.clearWaveEnvTimers(stolen);
             stolen.amp.gain.cancelScheduledValues(startTime);
             stolen.amp.gain.setValueAtTime(Math.max(0.001, stolen.amp.gain.value || 0.3), startTime);
             stolen.amp.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.005);
@@ -913,19 +923,19 @@ export class ThirdWaveDevice extends BaseDevice {
       const t2 = Math.max(0.05, this.params.waveEnv_t2 || 0.35);
 
       // Sweep through the wave positions over time
-      const timer = window.setTimeout(() => {
-        if (this.activeVoices.has(midiNote)) {
+      const firstTimer = window.setTimeout(() => {
+        if (this.activeVoices.get(midiNote) === voice) {
           this.applyWavetablesToVoice(voice, (p2 - p1) * (waveAmt / 63));
         }
       }, t1 * 1000);
 
-      window.setTimeout(() => {
-        if (this.activeVoices.has(midiNote)) {
+      const secondTimer = window.setTimeout(() => {
+        if (this.activeVoices.get(midiNote) === voice) {
           this.applyWavetablesToVoice(voice, (p3 - p1) * (waveAmt / 63));
         }
       }, (t1 + t2) * 1000);
 
-      voice.waveEnvTimer = timer;
+      voice.waveEnvTimers = [firstTimer, secondTimer];
     }
 
     voice.osc1.onended = () => {
@@ -961,9 +971,7 @@ export class ThirdWaveDevice extends BaseDevice {
     if (!voice) return;
     this.activeVoices.delete(midiNote);
 
-    if (voice.waveEnvTimer) {
-      clearTimeout(voice.waveEnvTimer);
-    }
+    this.clearWaveEnvTimers(voice);
 
     const relTime = Math.max(this.ctx.currentTime, time);
     const release = Math.max(0.02, Math.min(6.0, this.params.aenv_release || 0.95));
@@ -1000,9 +1008,7 @@ export class ThirdWaveDevice extends BaseDevice {
 
   public override dispose(): void {
     for (const [, voice] of this.activeVoices.entries()) {
-      if (voice.waveEnvTimer) {
-        clearTimeout(voice.waveEnvTimer);
-      }
+      this.clearWaveEnvTimers(voice);
       try {
         voice.osc1.stop();
         voice.osc2.stop();

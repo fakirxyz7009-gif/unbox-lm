@@ -10,7 +10,12 @@ export abstract class BaseDevice {
   public audioInputs: Map<string, GainNode> = new Map();
   public audioOutputs: Map<string, GainNode> = new Map();
   public cvInputs: Map<string, { param?: AudioParam; setter?: (val: number) => void; node?: GainNode }> = new Map();
-  public cvOutputs: Map<string, { node?: AudioNode; getter?: () => number }> = new Map();
+  /**
+   * A software CV source may evaluate at the scheduled AudioContext time.
+   * The argument is optional so static CV sources can continue to use a
+   * zero-argument getter.
+   */
+  public cvOutputs: Map<string, { node?: AudioNode; getter?: (audioTime?: number) => number }> = new Map();
 
   public ports: PortDefinition[] = [];
   public params: Record<string, any> = {};

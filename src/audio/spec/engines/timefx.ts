@@ -2,6 +2,7 @@
  * Time-based effects.
  *  - 'delay': ddl1 (steps synced to the tempo or ms, feedback, pan) and ripley (multi-tap space
  *    delay → diffuse reverb, modulation, bit crush, noise, ducking, tone).
+ *  - tape: tape / bucket-brigade echo with wow and flutter, see tapeEcho.ts.
  *  - 'reverb': rv7 (10 algorithms; impulse rebuilt at most every 400 ms when size / decay / damp
  *    move; Stereo Echoes = ping-pong taps, Pan Room = room + auto-pan).
  *  - 'timed': Synchronous — three tempo-synced curves modulate distortion, filter, delay /
@@ -10,11 +11,15 @@
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import { bitCurve, buildFollower, clamp, impulseResponse, noiseSource, satCurve, setSmooth, stopAll } from '../dsp.ts';
 import { StepClock } from './clock.ts';
+import { tapeEcho } from './tapeEcho.ts';
 
 const step16 = (host: SpecHost) => 60 / Math.max(20, host.clock.bpm()) / 4;
 
 export function delayEngine(host: SpecHost): SpecEngine {
-  return String(host.cfg.model) === 'ripley' ? ripley(host) : ddl1(host);
+  const model = String(host.cfg.model);
+  if (model === 'ripley') return ripley(host);
+  if (model === 'tape') return tapeEcho(host);
+  return ddl1(host);
 }
 
 function ddl1(host: SpecHost): SpecEngine {

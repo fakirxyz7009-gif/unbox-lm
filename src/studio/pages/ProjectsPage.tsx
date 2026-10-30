@@ -143,7 +143,7 @@ export function ProjectsPage() {
             {shown.map((p) => (
               <li key={p.id} className={`flex items-center gap-2 rounded px-2 py-1.5 ${p.id === pm.currentId ? 'bg-orange-500/15 border border-orange-500/40' : 'bg-slate-900/70 hover:bg-slate-800'}`}>
                 <span className="w-1.5 self-stretch rounded" style={{ background: p.color }} />
-                <button type="button" className="flex-1 min-w-0 text-left" onDoubleClick={() => void run('Open', () => pm.open(p.id))} title="Double-click to open">
+                <button type="button" className="flex-1 min-w-0 text-left" onDoubleClick={() => { if (p.id !== pm.currentId) void run('Open', () => pm.open(p.id)); }} title="Double-click to open">
                   <div className="font-bold text-slate-100 truncate">{p.name}</div>
                   <div className="text-[11px] text-slate-500">{p.bpm} BPM · {p.key} · {p.tracks} tracks · {p.bars} bars · {ago(p.updatedAt)}{p.audioIds.length ? ` · ${p.audioIds.length} audio` : ''}</div>
                 </button>

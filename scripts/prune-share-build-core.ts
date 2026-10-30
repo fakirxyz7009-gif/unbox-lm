@@ -55,6 +55,7 @@ export function pruneShareBuild(distRoot: string): SharePruneResult {
   const removals = [
     safeChild(dist, path.join(dist, 'library')),
     safeChild(dist, path.join(dist, 'stems')),
+    safeChild(dist, path.join(dist, 'samples')),
     ...dropped.map((pack) => safeChild(instruments, path.join(instruments, pack.id))),
   ];
   const creditsPath = safeChild(instruments, path.join(instruments, 'CREDITS.md'));

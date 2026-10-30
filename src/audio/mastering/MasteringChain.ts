@@ -9,6 +9,7 @@
  */
 import { ensureDynamicsWorklet } from '../spec/worklets.ts';
 import { undoJournal } from '../undoJournal.ts';
+import { clipCurve } from './clipCurve.ts';
 
 export type BandType = 'lowshelf' | 'peaking' | 'highshelf';
 export type BandTarget = 'stereo' | 'mid' | 'side';
@@ -143,16 +144,6 @@ function satCurve(mode: MasteringState['saturation']['mode'], drive: number): Fl
     else if (mode === 'console') y = (x - (drive * x * x * x) / 3) / (1 - drive / 3);
     else y = Math.tanh(k * x) / Math.tanh(k);
     c[i] = y;
-  }
-  return c;
-}
-
-function clipCurve(): Float32Array<ArrayBuffer> {
-  const n = 2049;
-  const c = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const x = (i / (n - 1)) * 4 - 2;
-    c[i] = Math.abs(x) < 0.8 ? x : Math.sign(x) * (0.8 + 0.2 * Math.tanh((Math.abs(x) - 0.8) / 0.2));
   }
   return c;
 }

@@ -13,21 +13,28 @@ import {
   ChevronsUp,
   Copy,
   Crosshair,
+  Dices,
   Eraser,
   FlipHorizontal2,
   FlipVertical2,
+  Layers,
   Link2,
   ListChecks,
+  Minimize2,
   MoveHorizontal,
   MousePointer2,
   Pencil,
+  Rows3,
   RotateCcw,
   RotateCw,
   Scissors,
   Shuffle,
   Timer,
   Trash2,
+  Volume1,
+  Volume2,
   VolumeX,
+  Waypoints,
   ZoomIn,
 } from 'lucide-react';
 import type { RollTool } from './PianoRoll.tsx';
@@ -48,8 +55,16 @@ export type RollAction =
   | 'legato'
   | 'humanize'
   | 'crescendo'
+  | 'randomizeVelocity'
+  | 'velocityUp'
+  | 'velocityDown'
+  | 'arpeggiate'
+  | 'discardLengths'
+  | 'selectSamePitch'
+  | 'selectStacked'
   | 'splitAtPlayhead'
   | 'toggleMute'
+  | 'cut'
   | 'duplicate'
   | 'delete';
 
@@ -80,6 +95,8 @@ const ACTION_GROUPS: ActionDef[][] = [
   [
     { id: 'selectAll', label: 'Select all', hint: 'Select all notes (Ctrl+A)', Icon: ListChecks },
     { id: 'invertSelection', label: 'Invert selection', hint: 'Select the notes that are not selected (Ctrl+I)', glyph: 'INV' },
+    { id: 'selectSamePitch', label: 'Select same pitch', hint: 'Select every note at the pitch of a selected note (Shift+P)', Icon: Rows3 },
+    { id: 'selectStacked', label: 'Select stacked', hint: 'Select the notes that start together with a selected note (Shift+S)', Icon: Layers },
   ],
   [
     { id: 'reverse', label: 'Reverse', hint: 'Reverse the time order of the selection, the last note first (Shift+R)', Icon: FlipHorizontal2 },
@@ -96,17 +113,25 @@ const ACTION_GROUPS: ActionDef[][] = [
   [
     { id: 'double', label: 'Double length', hint: 'Double the length of the selected notes', glyph: '2x' },
     { id: 'halve', label: 'Halve length', hint: 'Halve the length of the selected notes (not below the grid)', glyph: '1/2' },
+    { id: 'discardLengths', label: 'Discard lengths', hint: 'Give the selection the default note length (Shift+D)', Icon: Minimize2 },
     { id: 'legato', label: 'Legato', hint: 'Extend each note up to the next note of its pitch (Shift+L)', Icon: Timer },
+    { id: 'arpeggiate', label: 'Arpeggiate', hint: 'Spread each chord of the selection into a run of notes, lowest first (Shift+A)', Icon: Waypoints },
   ],
   [
     { id: 'humanize', label: 'Humanize', hint: 'Random timing and velocity for the selection (Shift+H)', Icon: Shuffle },
     { id: 'crescendo', label: 'Crescendo', hint: 'Velocity ramp from soft to loud across the selection in time order', Icon: Activity },
   ],
   [
+    { id: 'randomizeVelocity', label: 'Randomize velocity', hint: 'Random velocity of up to 15 % for the selection (Shift+N)', Icon: Dices },
+    { id: 'velocityUp', label: 'Velocity up', hint: 'Velocity up 10 % for the selection (Ctrl+Up)', Icon: Volume2 },
+    { id: 'velocityDown', label: 'Velocity down', hint: 'Velocity down 10 % for the selection (Ctrl+Down)', Icon: Volume1 },
+  ],
+  [
     { id: 'splitAtPlayhead', label: 'Split at playhead', hint: 'Cut the notes that cross the playhead (or the cursor when stopped)', Icon: Crosshair },
     { id: 'toggleMute', label: 'Mute or unmute', hint: 'Mute or unmute the selection (Ctrl+M)', Icon: Ban },
   ],
   [
+    { id: 'cut', label: 'Cut', hint: 'Cut the selection to the clipboard (Ctrl+X)', Icon: Scissors },
     { id: 'duplicate', label: 'Duplicate', hint: 'Copy the selection to its right (Ctrl+D)', Icon: Copy },
     { id: 'delete', label: 'Delete', hint: 'Delete the selection (Delete)', Icon: Trash2 },
   ],

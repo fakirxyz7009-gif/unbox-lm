@@ -2,6 +2,7 @@ import { audioEngine } from '../../src/audio/AudioEngine.ts';
 import { renderSong } from '../../src/audio/render/renderSong.ts';
 import { projectManager } from '../../src/project/ProjectManager.ts';
 import type { SequencerTrack } from '../../src/audio/types.ts';
+import type { MatrixDevice } from '../../src/audio/devices/MatrixDevice.ts';
 
 const result = document.querySelector<HTMLPreElement>('#result');
 if (!result) throw new Error('Missing result node');
@@ -27,11 +28,17 @@ async function run(): Promise<void> {
   }];
 
   const echo = engine.createDevice('echo', 'Round Trip Delay');
+  const sequencer = engine.createDevice('matrix', 'Round Trip Matrix') as MatrixDevice;
+  sequencer.setStepNote(3, 7);
+  sequencer.toggleStepGate(5);
+  engine.cvEngine.addMatrixEntry({
+    sourceDeviceId: sequencer.id, sourcePortId: 'note_cv', targetDeviceId: echo.id, targetParam: 'time', amount: 0.6, offset: 0.2, inverted: true,
+  });
   for (const connection of engine.audioConnections.filter((c) => c.sourceDeviceId === guitar.id && c.targetDeviceId === 'master')) {
     engine.disconnectAudio(connection.id);
   }
   const cables = [
-    engine.connectAudio(guitar.id, 'out_l', echo.id, 'in_l'),
+    engine.connectAudio(guitar.id, 'out_l', echo.id, 'in_l', '#123456'),
     engine.connectAudio(guitar.id, 'out_r', echo.id, 'in_r'),
     engine.connectAudio(echo.id, 'out_l', 'master', 'master_l'),
     engine.connectAudio(echo.id, 'out_r', 'master', 'master_r'),
@@ -72,6 +79,18 @@ async function run(): Promise<void> {
     throw new Error(`Piano-roll note data did not survive reopen: ${JSON.stringify(note ?? null)}`);
   }
 
+  const loadedSequencer = [...engine.devices.values()].find((device) => device.type === 'matrix' && device.name === 'Round Trip Matrix') as MatrixDevice | undefined;
+  if (!loadedSequencer || loadedSequencer.patterns[0].notes[3] !== 7 || loadedSequencer.patterns[0].gates[5] !== true) {
+    throw new Error('Matrix step patterns did not survive reopen');
+  }
+  const loadedRoutes = engine.cvEngine.matrixEntries.filter((m) => m.sourceDeviceId === loadedSequencer.id && m.targetDeviceId === loadedEcho.id);
+  if (loadedRoutes.length !== 1 || loadedRoutes[0].amount !== 0.6 || loadedRoutes[0].offset !== 0.2 || loadedRoutes[0].inverted !== true) {
+    throw new Error(`CV matrix route did not survive reopen: ${JSON.stringify(loadedRoutes)}`);
+  }
+  if (engine.audioConnections.find((c) => c.sourceDeviceId === loadedGuitar.id && c.targetDeviceId === loadedEcho.id && c.sourcePortId === 'out_l')?.color !== '#123456') {
+    throw new Error('Cable colour did not survive reopen');
+  }
+
   await loadedGuitar.ready?.();
   await engine.resumeContext();
   await engine.startTransport();
@@ -98,7 +117,7 @@ async function run(): Promise<void> {
   if (offlinePeak <= 1e-4) throw new Error(`Offline render of the reopened song was silent (peak ${offlinePeak.toExponential(2)})`);
 
   result!.dataset.status = 'passed';
-  result!.textContent = `PASS · IndexedDB save/reopen preserved ${engine.devices.size} devices, parameter state, stereo cables, metadata and a piano-roll chord; live peak ${peak.toExponential(2)}, offline peak ${offlinePeak.toExponential(2)}.`;
+  result!.textContent = `PASS · IndexedDB save/reopen preserved ${engine.devices.size} devices, parameter state, coloured stereo cables, metadata, a piano-roll chord, matrix steps and a CV-matrix route; live peak ${peak.toExponential(2)}, offline peak ${offlinePeak.toExponential(2)}.`;
 }
 
 void run().catch((error: unknown) => {

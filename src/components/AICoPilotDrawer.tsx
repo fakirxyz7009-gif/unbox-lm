@@ -3,16 +3,18 @@
  * device's real parameters), and a mix & master assistant built on measurements of the song.
  * Every tab works without an API key (local planner / keyword rules / measurements only).
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
 import type { AudioEngine } from '../audio/AudioEngine.ts';
 import { Sparkles, Bot, Cpu, Disc, Wand2, CheckCircle2, X, AlertCircle, Undo2 } from 'lucide-react';
-import { applyRackPlan, requestRackPlan } from '../ai/rackCombinator.ts';
+import { applyRackPlan, requestRackPlan, type PlanSource } from '../ai/rackCombinator.ts';
 import { vstLibrary } from '../vst/libraryClient.ts';
 import { deviceParams } from '../audio/deviceParams.ts';
 import { localPreset, validatePreset, type CraftedPreset, type PresetParam } from '../../shared/rack/presetCraft.ts';
 import { MASTER_TARGETS, analyzeMix, autoMaster, suggestMastering, type MixAnalysis } from '../audio/mastering/assistant.ts';
 import { LocalAiPanel } from './LocalAiPanel.tsx';
+import { localHardwareAi, type HardwareAiBackend } from '../ai/hardware/localHardwareAiEngine.ts';
+import { useEscapeKey } from '../shell/useEscapeKey.ts';
 
 interface AICoPilotDrawerProps {
   isOpen: boolean;
@@ -45,7 +47,16 @@ const isCrafted = (x: unknown): x is CraftedPreset =>
 const fmt = (v: number, d = 1) => (Number.isFinite(v) && v > -69.9 ? v.toFixed(d) : '—');
 
 export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackBuilt, onOpenMastering }: AICoPilotDrawerProps) {
+  useEscapeKey(onClose, isOpen);
   const [activeTab, setActiveTab] = useState<'spawn' | 'preset' | 'mastering' | 'local'>('spawn');
+  const [aiEngineMode, setAiEngineMode] = useState<'hardware' | 'gemini'>('hardware');
+  const [hwState, setHwState] = useState(() => localHardwareAi.state);
+
+  useEffect(() => {
+    return localHardwareAi.subscribe(() => {
+      setHwState({ ...localHardwareAi.state });
+    });
+  }, []);
 
   // rack builder
   const [spawnPrompt, setSpawnPrompt] = useState('');
@@ -77,15 +88,22 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
     setSpawnResult(null);
     try {
       if (!vstLibrary.manifest) await vstLibrary.load();
-      const res = await requestRackPlan(prompt);
-      const applied = applyRackPlan(audioEngine, res.plan, { prompt, source: res.source });
+      let res;
+      if (aiEngineMode === 'hardware') {
+        const hw = await localHardwareAi.planRackOnHardware(prompt);
+        res = { plan: hw.plan, source: hw.source, warnings: hw.warnings, model: undefined };
+      } else {
+        // CLOUD: the Gemini route first; the local planner only when the server cannot be reached.
+        res = await requestRackPlan(prompt, true);
+      }
+      const applied = applyRackPlan(audioEngine, res.plan, { prompt, source: (res.source.startsWith('Local') ? 'local' : res.source) as PlanSource });
       setSpawnResult({
         rackName: res.plan.name,
         description: res.plan.description,
         units: applied.deviceIds.length,
         cables: applied.audioCables + applied.cvCables,
         bpm: applied.bpmSet ?? audioEngine.bpm,
-        source: res.source === 'gemini' ? `Gemini${res.model ? ` (${res.model})` : ''}` : res.source === 'local' ? 'Local planner' : 'In-app planner (offline)',
+        source: res.source === 'gemini' ? `Gemini${res.model ? ` (${res.model})` : ''}` : res.source,
         warnings: [...res.warnings, ...applied.warnings],
       });
       if (applied.deviceIds.length) onRackBuilt?.();
@@ -106,30 +124,41 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
     setPresetError('');
     setPresetResult(null);
     let preset: (CraftedPreset & { warning?: string }) | null = null;
-    try {
-      const res = await fetch('/api/gemini/generate-preset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceType: dev.type, deviceName: dev.name, prompt, params }),
-      });
-      const data: unknown = await res.json().catch(() => null);
-      if (!res.ok) {
-        const msg = data && typeof data === 'object' && typeof (data as { error?: unknown }).error === 'string' ? (data as { error: string }).error : `Server error ${res.status}`;
-        if (res.status === 400 || res.status === 429) {
-          setPresetError(msg);
-          return;
-        }
-        throw new Error(msg);
+    if (aiEngineMode === 'hardware') {
+      try {
+        const hwPreset = await localHardwareAi.craftPresetOnHardware(dev, prompt);
+        preset = hwPreset.preset;
+      } catch {
+        preset = localPreset(prompt, params, 'local-offline');
+      } finally {
+        setIsGeneratingPreset(false);
       }
-      if (!isCrafted(data)) throw new Error('Unexpected answer');
-      // validate again here: the server is trusted for transport, not for values
-      const v = validatePreset(Object.entries(data.parameters).map(([key, value]) => ({ key, value })), params);
-      preset = { ...data, parameters: v.parameters, skipped: [...(data.skipped ?? []), ...v.skipped] };
-    } catch {
-      // server unreachable (static desktop build, offline): same rules in the browser
-      preset = localPreset(prompt, params, 'local-offline');
-    } finally {
-      setIsGeneratingPreset(false);
+    } else {
+      try {
+        const res = await fetch('/api/gemini/generate-preset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deviceType: dev.type, deviceName: dev.name, prompt, params }),
+        });
+        const data: unknown = await res.json().catch(() => null);
+        if (!res.ok) {
+          const msg = data && typeof data === 'object' && typeof (data as { error?: unknown }).error === 'string' ? (data as { error: string }).error : `Server error ${res.status}`;
+          if (res.status === 400 || res.status === 429) {
+            setPresetError(msg);
+            return;
+          }
+          throw new Error(msg);
+        }
+        if (!isCrafted(data)) throw new Error('Unexpected answer');
+        // validate again here: the server is trusted for transport, not for values
+        const v = validatePreset(Object.entries(data.parameters).map(([key, value]) => ({ key, value })), params);
+        preset = { ...data, parameters: v.parameters, skipped: [...(data.skipped ?? []), ...v.skipped] };
+      } catch {
+        // server unreachable (static desktop build, offline): same rules in the browser
+        preset = localPreset(prompt, params, 'local-offline');
+      } finally {
+        setIsGeneratingPreset(false);
+      }
     }
     if (!preset) return;
     const previous: Record<string, number> = {};
@@ -171,40 +200,50 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
       setAnalysis({ m, notes });
       setMastered(null);
       setAiNotes(null);
-      setBusy('Asking the AI for mixing notes');
-      try {
-        const res = await fetch('/api/gemini/mix-master-assistant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            goal: t.label,
-            notes,
-            measurements: {
-              integratedLufs: m.loudness.integrated,
-              truePeakDb: m.loudness.truePeakDb,
-              loudnessRangeLu: m.loudness.lra,
-              plrDb: m.loudness.plr,
-              tiltDbPerOctave: m.tilt,
-              correlation: m.correlation,
-              lowCorrelation: m.lowCorrelation,
-              sideToMidDb: m.sideDb,
-              seconds: m.seconds,
-              ...Object.fromEntries(m.octaves.map((v, i) => [`octave${i}`, v])),
-            },
-          }),
+      setBusy(aiEngineMode === 'hardware' ? 'Analyzing mix on local hardware…' : 'Asking AI for mixing notes…');
+      if (aiEngineMode === 'hardware') {
+        const hwReport = localHardwareAi.analyzeAndMasterOnHardware(m, t);
+        setAiNotes({
+          summary: hwReport.summary,
+          tips: hwReport.tips,
+          source: hwReport.source,
+          model: 'On-device AI',
         });
-        const data: unknown = await res.json();
-        if (res.ok && data && typeof data === 'object') {
-          const d = data as { summary?: unknown; tips?: unknown; source?: unknown; model?: unknown };
-          setAiNotes({
-            summary: typeof d.summary === 'string' ? d.summary : null,
-            tips: Array.isArray(d.tips) ? d.tips.filter((x): x is string => typeof x === 'string') : [],
-            source: typeof d.source === 'string' ? d.source : 'none',
-            model: typeof d.model === 'string' ? d.model : undefined,
+      } else {
+        try {
+          const res = await fetch('/api/gemini/mix-master-assistant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              goal: t.label,
+              notes,
+              measurements: {
+                integratedLufs: m.loudness.integrated,
+                truePeakDb: m.loudness.truePeakDb,
+                loudnessRangeLu: m.loudness.lra,
+                plrDb: m.loudness.plr,
+                tiltDbPerOctave: m.tilt,
+                correlation: m.correlation,
+                lowCorrelation: m.lowCorrelation,
+                sideToMidDb: m.sideDb,
+                seconds: m.seconds,
+                ...Object.fromEntries(m.octaves.map((v, i) => [`octave${i}`, v])),
+              },
+            }),
           });
+          const data: unknown = await res.json();
+          if (res.ok && data && typeof data === 'object') {
+            const d = data as { summary?: unknown; tips?: unknown; source?: unknown; model?: unknown };
+            setAiNotes({
+              summary: typeof d.summary === 'string' ? d.summary : null,
+              tips: Array.isArray(d.tips) ? d.tips.filter((x): x is string => typeof x === 'string') : [],
+              source: typeof d.source === 'string' ? d.source : 'none',
+              model: typeof d.model === 'string' ? d.model : undefined,
+            });
+          }
+        } catch {
+          setAiNotes({ summary: null, tips: [], source: 'offline' });
         }
-      } catch {
-        setAiNotes({ summary: null, tips: [], source: 'offline' });
       }
     });
   const master = () =>
@@ -250,6 +289,53 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
         {tabBtn('preset', 'Preset crafter', Wand2, 'border-amber-500')}
         {tabBtn('mastering', 'Mix & master', Disc, 'border-emerald-500')}
         {tabBtn('local', 'Local AI', Cpu, 'border-sky-500')}
+      </div>
+
+      {/* Local Hardware AI Engine Bar */}
+      <div className="mx-5 mt-3 p-2.5 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-between text-[11px]">
+        <div className="flex items-center gap-2">
+          <Cpu className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div>
+            <div className="font-bold text-neutral-200 flex items-center gap-1.5">
+              <span>Engine:</span>
+              <span className="text-cyan-300 font-mono">
+                {aiEngineMode === 'hardware'
+                  ? `On-device AI (${hwState.gpu.vendor})`
+                  : 'Cloud Gemini AI'}
+              </span>
+            </div>
+            <div className="text-[10px] text-neutral-400">
+              {aiEngineMode === 'hardware'
+                ? 'Rules and planners on this computer · WebGPU probed · no cloud request'
+                : 'Remote Google Gemini AI model (requires API key & cloud connectivity)'}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 bg-black/60 p-0.5 rounded border border-neutral-700 shrink-0">
+          <button
+            type="button"
+            onClick={() => setAiEngineMode('hardware')}
+            className={`px-2 py-1 rounded text-[10px] font-mono font-bold transition-colors ${
+              aiEngineMode === 'hardware'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            ⚡ ON-DEVICE
+          </button>
+          <button
+            type="button"
+            onClick={() => setAiEngineMode('gemini')}
+            className={`px-2 py-1 rounded text-[10px] font-mono font-bold transition-colors ${
+              aiEngineMode === 'gemini'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            ☁️ CLOUD
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
@@ -457,9 +543,14 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
             )}
             {aiNotes && (
               <div className="p-3.5 rounded-lg bg-black/30 border border-chrome-line text-[11px] space-y-1">
-                {aiNotes.source === 'gemini' ? (
+                {/* Notes from any engine are shown; the key message is only for a Gemini request that gave none. */}
+                {aiNotes.source === 'gemini' || aiNotes.tips.length > 0 || aiNotes.summary ? (
                   <>
-                    <div className="text-[11px] font-mono text-emerald-400 uppercase">Mixing notes · Gemini{aiNotes.model ? ` (${aiNotes.model})` : ''} · from the measurements above</div>
+                    <div className="text-[11px] font-mono text-emerald-400 uppercase">
+                      {aiNotes.source === 'gemini'
+                        ? `Mixing notes · Gemini${aiNotes.model ? ` (${aiNotes.model})` : ''} · from the measurements above`
+                        : `Mixing notes · ${aiNotes.model ?? 'computed in the app'} · from the measurements above`}
+                    </div>
                     {aiNotes.summary && <p className="text-neutral-300">{aiNotes.summary}</p>}
                     <ul className="list-disc ml-4 text-neutral-300 space-y-0.5">
                       {aiNotes.tips.map((x) => (
@@ -467,9 +558,9 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
                       ))}
                     </ul>
                   </>
-                ) : (
+                ) : aiEngineMode === 'gemini' ? (
                   <p className="text-neutral-500">Written mixing notes need a GEMINI_API_KEY{aiNotes.source === 'offline' ? ' and the app server' : ''}. The measurements and suggestions above are computed in the app.</p>
-                )}
+                ) : null}
               </div>
             )}
           </div>

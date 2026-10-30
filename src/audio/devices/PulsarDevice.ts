@@ -1,16 +1,12 @@
 import { BaseDevice } from '../BaseDevice.ts';
 
 export class PulsarDevice extends BaseDevice {
-  public lfo1Val: number = 0;
-  public lfo2Val: number = 0;
-  private animId: number = 0;
-  private lastSampleHold1: number = 0;
-  private lastSampleHold2: number = 0;
-  private sampleHoldTimer1: number = 0;
-  private sampleHoldTimer2: number = 0;
+  /** AudioContext origin keeps live and OfflineAudioContext CV phase coherent. */
+  private readonly lfoOriginTime: number;
 
   constructor(ctx: AudioContext, id: string = 'pulsar_1', name: string = 'Twin LFO Modulator') {
     super(ctx, id, name, 'pulsar', 1);
+    this.lfoOriginTime = ctx.currentTime;
 
     this.params = {
       rate1: 1.5,
@@ -26,36 +22,27 @@ export class PulsarDevice extends BaseDevice {
       { id: 'lfo2_out', name: 'LFO 2 CV Out', type: 'cv_out', description: 'Outputs LFO 2 modulation voltage' },
     ];
 
-    this.cvOutputs.set('lfo1_out', { getter: () => this.lfo1Val });
-    this.cvOutputs.set('lfo2_out', { getter: () => this.lfo2Val });
-
-    this.startModulationLoop();
+    this.cvOutputs.set('lfo1_out', { getter: (time) => this.valueAt(1, time) });
+    this.cvOutputs.set('lfo2_out', { getter: (time) => this.valueAt(2, time) });
   }
 
-  private startModulationLoop(): void {
-    let lastTime = performance.now();
-
-    const tick = () => {
-      const now = performance.now();
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-
-      if (this.isPowered && !this.isBypassed) {
-        this.lfo1Val = this.calcLfo(now / 1000, this.params.rate1, this.params.shape1, this.params.depth1, 1, dt);
-        this.lfo2Val = this.calcLfo(now / 1000, this.params.rate2, this.params.shape2, this.params.depth2, 2, dt);
-      } else {
-        this.lfo1Val = 0;
-        this.lfo2Val = 0;
-      }
-
-      this.animId = requestAnimationFrame(tick);
-    };
-
-    this.animId = requestAnimationFrame(tick);
+  /** Current values remain public for the faceplate/visualizer. */
+  public get lfo1Val(): number {
+    return this.valueAt(1);
   }
 
-  private calcLfo(t: number, rate: number, shape: string, depth: number, lfoNum: number, dt: number): number {
-    const phase = (t * rate) % 1;
+  public get lfo2Val(): number {
+    return this.valueAt(2);
+  }
+
+  private valueAt(lfoNum: 1 | 2, audioTime = this.ctx.currentTime): number {
+    if (!this.isPowered || this.isBypassed) return 0;
+    const rate = Math.max(0.01, Number(this.params[`rate${lfoNum}`]) || 0.01);
+    const depth = Math.max(0, Math.min(1, Number(this.params[`depth${lfoNum}`]) || 0));
+    const shape = String(this.params[`shape${lfoNum}`] ?? 'sine');
+    const elapsed = Math.max(0, audioTime - this.lfoOriginTime);
+    const cycles = elapsed * rate;
+    const phase = cycles - Math.floor(cycles);
     let raw = 0;
 
     switch (shape) {
@@ -71,23 +58,14 @@ export class PulsarDevice extends BaseDevice {
       case 'square':
         raw = phase < 0.5 ? 1 : -1;
         break;
-      case 'random':
-        if (lfoNum === 1) {
-          this.sampleHoldTimer1 += dt;
-          if (this.sampleHoldTimer1 >= 1 / rate) {
-            this.sampleHoldTimer1 = 0;
-            this.lastSampleHold1 = (Math.random() * 2 - 1);
-          }
-          raw = this.lastSampleHold1;
-        } else {
-          this.sampleHoldTimer2 += dt;
-          if (this.sampleHoldTimer2 >= 1 / rate) {
-            this.sampleHoldTimer2 = 0;
-            this.lastSampleHold2 = (Math.random() * 2 - 1);
-          }
-          raw = this.lastSampleHold2;
-        }
+      case 'random': {
+        // Deterministic sample-and-hold: a given AudioContext time always has
+        // the same value, including in OfflineAudioContext renders.
+        const step = Math.floor(cycles);
+        const seed = Math.sin((step + lfoNum * 101) * 12.9898) * 43758.5453;
+        raw = (seed - Math.floor(seed)) * 2 - 1;
         break;
+      }
       default:
         raw = Math.sin(phase * 2 * Math.PI);
     }
@@ -97,10 +75,5 @@ export class PulsarDevice extends BaseDevice {
 
   public setParam(key: string, value: any): void {
     this.params[key] = value;
-  }
-
-  public dispose(): void {
-    super.dispose();
-    cancelAnimationFrame(this.animId);
   }
 }

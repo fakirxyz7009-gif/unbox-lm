@@ -21,6 +21,7 @@ Attribution names can identify a library creator, mapper, curator, or uploader. 
 - Attribution: Karoryfer Samples
 - License: CC0-1.0
 - Source: https://github.com/sfzinstruments/karoryfer.growlybass
+- Notes: The source's key centers sit one octave above the recorded pitch (measured); --key-shift -12 maps each sample to its sounding pitch.
 
 ## Emilyguitar
 

@@ -656,20 +656,22 @@ export class SequencerEditor {
   }
 
   /** Slips the internal content of a clip while keeping its timeline boundaries fixed. */
-  slipClip(trackId: string, clipId: string, deltaOffset: number, commit = true): void {
+  /** `deltaSeconds` is the drag in seconds: audio slips in seconds, patterns in 16ths and notes in ticks at the song tempo. */
+  slipClip(trackId: string, clipId: string, deltaSeconds: number, commit = true): void {
     const f = this.clip(trackId, clipId);
     if (!f) return;
     const c = f.c;
+    const sixteenthsPerSecond = this.host.bpm / 15;
     if (c.kind === 'audio') {
       const cur = c.audioOffset ?? 0;
-      c.audioOffset = Math.max(0, cur + deltaOffset);
+      c.audioOffset = Math.max(0, cur + deltaSeconds);
       this.done(commit);
     } else if (c.kind === 'pattern') {
       const cur = c.offsetSteps ?? 0;
-      c.offsetSteps = Math.max(0, cur + Math.round(deltaOffset));
+      c.offsetSteps = Math.max(0, cur + Math.round(deltaSeconds * sixteenthsPerSecond));
       this.done(commit);
     } else if (c.kind === 'notes' && c.notes) {
-      const shiftTicks = Math.round(deltaOffset * 192);
+      const shiftTicks = Math.round(deltaSeconds * sixteenthsPerSecond * TICKS_PER_16TH);
       c.notes.forEach((n) => {
         n.offsetTicks = Math.max(0, (n.offsetTicks ?? 0) + shiftTicks);
       });

@@ -269,8 +269,12 @@ async function run(): Promise<void> {
     }, () => undefined);
     assert(stems.files.length === 1 && stems.files[0]?.name === 'Phase 0 recorded organ stems - stems.zip', 'Stem export returned the wrong archive');
     const entries = await readZip(stems.files[0]!.blob);
-    assert(entries.size === 1, `Stem archive contains ${entries.size} entries; expected one channel`);
-    const [stemName, stemBytes] = [...entries.entries()][0]!;
+    // The archive holds the one audio stem, its manifest and, when enabled, its notes; the manifest always comes with it.
+    const audioNames = [...entries.keys()].filter((name) => name.endsWith('.wav'));
+    assert(audioNames.length === 1, `Stem archive contains ${audioNames.length} audio stems; expected one channel`);
+    assert(entries.has('manifest.json'), 'Stem archive has no manifest');
+    const stemName = audioNames[0]!;
+    const stemBytes = entries.get(stemName)!;
     assert(stemName === 'Phase 0 recorded organ stems - 01 Export Test Organ.wav', `Unexpected stem name: ${stemName}`);
     await submitForFfmpeg('stem-wav-24-44100', new Blob([toArrayBuffer(stemBytes)], { type: 'audio/wav' }));
     const stem = inspectPcmWav(stemBytes);
@@ -349,10 +353,10 @@ async function run(): Promise<void> {
       stemMaster: false,
     }, () => undefined);
     const wetEntries = await readZip(wetStems.files[0]!.blob);
-    assert(wetEntries.size === 2, `Wet stem archive contains ${wetEntries.size} entries; expected two instrument stems`);
+    const wetAudio = [...wetEntries].filter(([name]) => name.endsWith('.wav'));
+    assert(wetAudio.length === 2, `Wet stem archive contains ${wetAudio.length} audio stems; expected two instrument stems`);
     const wetBuffers: AudioBuffer[] = [];
-    for (const [name, bytes] of wetEntries) {
-      assert(name.endsWith('.wav'), `Wet stem is not a WAV: ${name}`);
+    for (const [, bytes] of wetAudio) {
       wetBuffers.push(await engine.ctx.decodeAudioData(toArrayBuffer(bytes)));
     }
     assert(wetBuffers.every((buffer) => buffer.length === multiMixAudio.length), 'Wet stems and mix have different durations');
@@ -397,7 +401,8 @@ async function run(): Promise<void> {
       stemMode: 'wet',
       stemMaster: true,
     }, () => undefined);
-    assert((await readZip(masteredStems.files[0]!.blob)).size === 2, 'Master-processed stem export did not render both instruments');
+    const masteredEntries = await readZip(masteredStems.files[0]!.blob);
+    assert([...masteredEntries.keys()].filter((name) => name.endsWith('.wav')).length === 2, 'Master-processed stem export did not render both instruments');
     engine.setMasterSpectrumParam('low', 0.5);
 
     resultNode.dataset.status = 'passed';

@@ -7,24 +7,32 @@
  *
  * Gestures (draw tool): click empty = add note (+ chord stamp), drag while adding = length,
  * drag note = move (Alt = copy), drag right edge = resize, right-click / double-click = delete.
- * Select tool: click/Shift-click select, drag empty = marquee. Keys: Del, Ctrl+A/C/V/D,
- * arrows (Shift = octave), Q = quantize, Esc. Ctrl+wheel = zoom time, Alt+wheel = zoom rows.
+ * Select tool: click/Shift-click select, drag empty = marquee. Keys: Del, Ctrl+A/C/X/V/D,
+ * arrows (Shift = octave; Ctrl+arrows = rotate, or velocity up/down), Q = quantize, Shift+A/D/N/P/S
+ * arpeggiate, lengths, randomize velocity, select same pitch / stacked, Esc. Ctrl+wheel = zoom time,
+ * Alt+wheel = zoom rows.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { SequencerNote } from '../../../audio/types.ts';
 import { rollKey, type RollNote } from './rollAdapters.ts';
 import { RollToolbar, type RollAction } from './RollToolbar.tsx';
 import {
+  arpeggiate,
   flipPitch,
   humanizeNotes,
   invertKeys,
   isEditError,
   legatoNotes,
   rampVelocity,
+  randomizeVelocity,
   reverseNotes,
   rotateNotes,
   scaleLengths,
+  scaleVelocity,
   selectAllKeys,
+  selectSamePitchKeys,
+  selectStackedKeys,
+  setLengths,
   setMuted,
   splitNotesAt,
   transposeNotes,
@@ -147,6 +155,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const rulerRef = useRef<HTMLCanvasElement | null>(null);
   const velRef = useRef<HTMLCanvasElement | null>(null);
   const playheadRef = useRef<HTMLDivElement | null>(null);
+  const readoutRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState<Size>({ w: 600, h: 300 });
   const [velHeight] = useState<number>(38);
   const [velCollapsed, setVelCollapsed] = useState<boolean>(false);
@@ -293,6 +302,32 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
         g.fillStyle = isSel ? '#1a1309' : '#140e06';
         const label = noteLabel ? noteLabel(n.note) : midiName(n.note);
         g.fillText(label || midiName(n.note), x + 5, y + zy / 2);
+      }
+    }
+    // Bounds of the selection: a dashed box so a multi-note selection reads as one object
+    if (sel.size) {
+      let x0 = Infinity;
+      let x1 = -Infinity;
+      let topRow = Infinity;
+      let bottomRow = -Infinity;
+      for (const n of all) {
+        if (!sel.has(rollKey(n))) continue;
+        x0 = Math.min(x0, n.step);
+        x1 = Math.max(x1, n.step + n.length);
+        topRow = Math.min(topRow, 127 - n.note);
+        bottomRow = Math.max(bottomRow, 127 - n.note);
+      }
+      if (x0 < x1) {
+        const bx0 = Math.round(x0 * zx - sx);
+        const bx1 = Math.round(x1 * zx - sx);
+        const by0 = Math.round(topRow * zy - sy);
+        const by1 = Math.round((bottomRow + 1) * zy - sy);
+        g.save();
+        g.setLineDash([4, 3]);
+        g.strokeStyle = 'rgba(255, 214, 150, 0.7)';
+        g.lineWidth = 1;
+        g.strokeRect(bx0 + 0.5, by0 + 0.5, bx1 - bx0, by1 - by0);
+        g.restore();
       }
     }
     // marquee
@@ -548,6 +583,17 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     else if (clientX < rect.left + 28) sc.scrollLeft -= 14;
   };
 
+  // The readout follows the pointer; it is written to the DOM, not React state, so moving the mouse never re-renders the roll.
+  const showReadout = (text: string | null) => {
+    const el = readoutRef.current;
+    if (el) el.textContent = text ?? '';
+  };
+  const positionLabel = (step: number) => {
+    const bar = Math.floor(step / unitsPerBar) + 1;
+    const beat = (step - (bar - 1) * unitsPerBar) / unitsPerBeat + 1;
+    return `bar ${bar}, beat ${beat.toFixed(2)}`;
+  };
+
   // ------------------------------------------------------------------ toolbar and key edits
 
   const syncSel = () => setSelCount(selRef.current.size);
@@ -629,6 +675,30 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
         const allMuted = targets.length > 0 && targets.every((n) => n.muted);
         return applyEdit(setMuted(notes, sel, !allMuted));
       }
+      case 'randomizeVelocity':
+        return applyEdit(randomizeVelocity(notes, sel, 0.15));
+      case 'velocityUp':
+        return applyEdit(scaleVelocity(notes, sel, 1.1));
+      case 'velocityDown':
+        return applyEdit(scaleVelocity(notes, sel, 0.9));
+      case 'arpeggiate':
+        return applyEdit(arpeggiate(notes, sel, gridStep));
+      case 'discardLengths':
+        return applyEdit(setLengths(notes, sel, defaultLength));
+      case 'selectSamePitch':
+        selRef.current = selectSamePitchKeys(notes, sel);
+        requestDraw();
+        syncSel();
+        return;
+      case 'selectStacked':
+        selRef.current = selectStackedKeys(notes, sel);
+        requestDraw();
+        syncSel();
+        return;
+      case 'cut':
+        if (!sel.size) return flash('Select notes to cut');
+        clipboardRef.current = notes.filter((n) => sel.has(rollKey(n))).map((n) => ({ ...n }));
+        return deleteSelection();
       case 'duplicate':
         return duplicateSelection();
       case 'delete':
@@ -743,6 +813,11 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
       const hit = hitNote(u, row, notes);
       canvas.style.cursor =
         tool === 'erase' ? 'not-allowed' : hit?.edge || (hit && tool === 'stretch') ? 'ew-resize' : hit ? 'grab' : tool === 'zoom' ? 'zoom-in' : 'crosshair';
+      showReadout(
+        hit
+          ? `${midiName(hit.n.note)} · ${positionLabel(hit.n.step)} · ${hit.n.length} steps · velocity ${Math.round(hit.n.velocity * 127)}`
+          : `${midiName(127 - row)} · ${positionLabel(snapFloor(u))}`
+      );
       return;
     }
     autoScroll(e.clientX);
@@ -758,6 +833,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
       const kept = drag.copy ? base : removeKeys(base, drag.keys);
       workRef.current = withoutCollisions(kept, growable ? moved : moved.filter((n) => n.step < length));
       selRef.current = new Set(moved.map(rollKey));
+      if (moved[0]) showReadout(`${midiName(moved[0].note)} · ${positionLabel(moved[0].step)} · ${moved[0].length} steps`);
       if (dn !== drag.lastDn && moved[0]) {
         drag.lastDn = dn;
         onAudition?.(moved[0].note, moved[0].velocity);
@@ -854,6 +930,10 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
       duplicateSelection();
     } else if (mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
       runAction(e.key === 'ArrowLeft' ? 'rotateLeft' : 'rotateRight');
+    } else if (mod && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      runAction(e.key === 'ArrowUp' ? 'velocityUp' : 'velocityDown');
+    } else if (mod && e.key.toLowerCase() === 'x') {
+      runAction('cut');
     } else if (mod && e.key.toLowerCase() === 'i') {
       runAction('invertSelection');
     } else if (mod && e.key.toLowerCase() === 'm') {
@@ -866,6 +946,16 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
       runAction('humanize');
     } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'l') {
       runAction('legato');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'a') {
+      runAction('arpeggiate');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'd') {
+      runAction('discardLengths');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'n') {
+      runAction('randomizeVelocity');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 'p') {
+      runAction('selectSamePitch');
+    } else if (e.shiftKey && !mod && e.key.toLowerCase() === 's') {
+      runAction('selectStacked');
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       if (selected.length) {
         const d = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 12 : 1);
@@ -992,6 +1082,13 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
         selectedCount={selCount}
         snapLabel={snapLabel}
       />
+      <div
+        ref={readoutRef}
+        aria-hidden="true"
+        data-testid="piano-roll-readout"
+        className="pointer-events-none absolute right-2 z-10 rounded bg-[#0d0a07]/85 px-1.5 py-0.5 font-mono text-[11px] text-[#ffe1a8] empty:hidden"
+        style={{ top: RULER_H + 6 }}
+      />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       {/* ruler */}
       <div className="flex flex-shrink-0 border-b border-[#59452e]" style={{ height: RULER_H }}>
@@ -1038,6 +1135,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
               onPointerMove={onGridMove}
               onPointerUp={onGridUp}
               onPointerCancel={onGridUp}
+              onPointerLeave={() => showReadout(null)}
               onDoubleClick={onGridDouble}
               data-testid="piano-roll-grid"
             />

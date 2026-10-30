@@ -6,8 +6,9 @@
  * not expose a trustworthy one, and a made-up number is worse than no number.
  */
 import React, { useEffect, useState } from 'react';
-import { Activity, Radio } from 'lucide-react';
+import { Activity, Radio, Cpu } from 'lucide-react';
 import { audioEngine } from '../audio/AudioEngine.ts';
+import { localHardwareAi } from '../ai/hardware/localHardwareAiEngine.ts';
 
 function ms(v: number): string {
   return v >= 10 ? `${v.toFixed(0)} ms` : `${v.toFixed(1)} ms`;
@@ -16,7 +17,15 @@ function ms(v: number): string {
 export const HardwareStatusBar: React.FC = () => {
   const [, force] = useState(0);
   const [ctxState, setCtxState] = useState(audioEngine.ctx.state);
+  const [hwState, setHwState] = useState(() => localHardwareAi.state);
   const midi = audioEngine.midi;
+
+  useEffect(() => {
+    const unsubHw = localHardwareAi.subscribe(() => {
+      setHwState({ ...localHardwareAi.state });
+    });
+    return unsubHw;
+  }, []);
 
   useEffect(() => {
     const ctx = audioEngine.ctx;
@@ -70,6 +79,31 @@ export const HardwareStatusBar: React.FC = () => {
       >
         <span className={`w-1.5 h-1.5 rounded-full ${ctxState === 'running' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
         <span className="uppercase">{ctxState === 'running' ? 'Engine running' : 'Engine suspended — click to start'}</span>
+      </button>
+
+      <span className="text-[#8a9096]">|</span>
+
+      <button
+        type="button"
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('unbox:open-ai'));
+        }}
+        className="flex items-center gap-1.5 hover:text-[#d7dadd] cursor-pointer"
+        title={`On-device AI: ${hwState.backend.toUpperCase()} (${hwState.gpu.vendor}) · runs on this computer · no cloud request on this path`}
+        data-testid="status-local-ai"
+      >
+        <Cpu className="w-3 h-3 text-cyan-400" />
+        <span className="uppercase text-cyan-300">Local AI</span>
+        <span className="font-mono text-[#c2c6ca]">
+          {hwState.backend === 'webgpu'
+            ? `GPU (${hwState.gpu.vendor.slice(0, 16)})`
+            : hwState.backend === 'ollama'
+            ? `Ollama (${hwState.selectedModel})`
+            : 'Neural CPU'}
+        </span>
+        <span className="text-emerald-400 font-mono text-[9px] px-1 bg-emerald-950/60 border border-emerald-500/30 rounded">
+          ON-DEVICE
+        </span>
       </button>
 
       <div className="flex-1" />

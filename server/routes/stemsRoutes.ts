@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
+import { requireLoopback } from './routeGuards.ts';
 
 const STEMS_ROOT = 'D:\\audio stems\\daw_instruments';
 const FALLBACK_ROOT = path.resolve(process.cwd(), 'public', 'stems', 'daw_instruments');
@@ -37,6 +38,7 @@ export interface StemPatch {
 
 export function createStemsRouter(): Router {
   const router = Router();
+  router.use(requireLoopback('The stem library is only available on this computer.'));
 
   router.get('/list', (_req, res) => {
     const root = getRootDir();

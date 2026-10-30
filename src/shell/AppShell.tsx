@@ -10,6 +10,7 @@ import { projectManager } from '../project/ProjectManager.ts';
 import { SECTIONS, type PageId } from '../studio/sections.ts';
 import { TransportBar } from './TransportBar.tsx';
 import { setUi, getUi, useUi } from './uiStore.ts';
+import { toast } from './toast.ts';
 import { UnboxLogo } from '../ui/skin/UnboxLogo.tsx';
 import { HardwareStatusBar } from '../components/HardwareStatusBar.tsx';
 
@@ -66,10 +67,14 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
     a.download = `${projectManager.currentName || 'THE_UNBOX_APP_Project'}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast('The .json file holds the project without its audio. Use Export .unbox to keep the audio too.', 'info');
   };
   const importFile = async (f: File) => {
-    const ok = await projectManager.importArchive(f, f.name.replace(/\.[^.]+$/, '')).catch(() => false);
-    if (!ok) window.alert('That file is not a valid Unbox Studio project.');
+    try {
+      await projectManager.importArchive(f, f.name.replace(/\.[^.]+$/, ''));
+    } catch (e) {
+      window.alert(`That file could not be imported: ${(e as Error).message}`);
+    }
   };
 
   const go = (t: WorkspaceTab) => () => {

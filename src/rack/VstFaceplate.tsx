@@ -35,6 +35,16 @@ function OutputMeter({ device }: { device: VstPluginDevice }) {
 export const VstFaceplate: React.FC<VstFaceplateProps> = ({ device, onUpdate, onMessage }) => {
   const s = device.snapshot;
   const [previewing, setPreviewing] = useState(device.isPreviewing);
+  const previewingRef = useRef(previewing);
+  previewingRef.current = previewing;
+  // Preview completion is an audio-node lifecycle event, not a reason to own a polling interval.
+  // This shared frame subscriber only changes React state once when that lifecycle state flips.
+  useFrame(() => {
+    const next = device.isPreviewing;
+    if (next === previewingRef.current) return;
+    previewingRef.current = next;
+    setPreviewing(next);
+  });
   const groups = new Map<string, typeof s.presets>();
   s.presets.forEach((p) => groups.set(p.group ?? 'Presets', [...(groups.get(p.group ?? 'Presets') ?? []), p]));
 
@@ -46,17 +56,11 @@ export const VstFaceplate: React.FC<VstFaceplateProps> = ({ device, onUpdate, on
   const togglePreview = async () => {
     try {
       const playing = await device.togglePreview();
+      previewingRef.current = playing;
       setPreviewing(playing);
-      if (playing) {
-        const timer = window.setInterval(() => {
-          if (!device.isPreviewing) {
-            setPreviewing(false);
-            window.clearInterval(timer);
-          }
-        }, 250);
-      }
     } catch (e) {
       onMessage(`Preview failed: ${(e as Error).message}`, 'error');
+      previewingRef.current = false;
       setPreviewing(false);
     }
   };

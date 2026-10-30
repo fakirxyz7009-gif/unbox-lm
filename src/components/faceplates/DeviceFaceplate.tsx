@@ -2,12 +2,9 @@ import React from 'react';
 import { useStepTick } from '../../nexa/useEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
 import { audioEngine } from '../../audio/AudioEngine.ts';
-import { SubtractorDevice } from '../../audio/devices/SubtractorDevice.ts';
-import { ThorDevice } from '../../audio/devices/ThorDevice.ts';
+import { scheduleAudition } from '../../audio/audition.ts';
 import { ThirdWaveDevice } from '../../audio/devices/ThirdWaveDevice.ts';
 import { ThirdWaveFaceplate } from './ThirdWaveFaceplate.tsx';
-import { EuropaDevice } from '../../audio/devices/EuropaDevice.ts';
-import { MonotoneDevice } from '../../audio/devices/MonotoneDevice.ts';
 import { RedrumDevice } from '../../audio/devices/RedrumDevice.ts';
 import { MimicDevice } from '../../audio/devices/MimicDevice.ts';
 import { MatrixDevice } from '../../audio/devices/MatrixDevice.ts';
@@ -354,8 +351,7 @@ export const TaalRagaPhraseSelector: React.FC<{
       });
     }
     const firstMidi = phrase.notes.find((n) => n !== null) ?? 60;
-    device.noteOn(firstMidi, 0.95);
-    setTimeout(() => device.noteOff(firstMidi), 280);
+    scheduleAudition(device, [{ note: firstMidi, velocity: 0.95 }], 280);
     onUpdate();
   };
 
@@ -567,10 +563,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         {/* Master Output & Test trigger */}
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => {
-              (device as SubtractorDevice).noteOn(60, 0.9);
-              setTimeout(() => (device as SubtractorDevice).noteOff(60), 250);
-            }}
+            onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.9 }], 250)}
             className="px-3 py-2 rounded bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs flex items-center space-x-1 shadow-md transition-colors"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
@@ -638,10 +631,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={105} height={46} />
 
         <button
-          onClick={() => {
-            (device as ThorDevice).noteOn(60, 0.9);
-            setTimeout(() => (device as ThorDevice).noteOff(60), 300);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.9 }], 300)}
           className="px-3 py-2 rounded bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs flex items-center space-x-1 shadow-md transition-colors"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
@@ -720,10 +710,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={105} height={46} />
 
         <button
-          onClick={() => {
-            (device as EuropaDevice).noteOn(57, 0.9);
-            setTimeout(() => (device as EuropaDevice).noteOff(57), 400);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 57, velocity: 0.9 }], 400)}
           className="px-3 py-2 rounded bg-sky-500 hover:bg-sky-400 text-black font-mono font-bold text-xs flex items-center space-x-1 shadow-md transition-colors"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
@@ -779,10 +766,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={105} height={46} />
 
         <button
-          onClick={() => {
-            (device as MonotoneDevice).noteOn(36, 1.0);
-            setTimeout(() => (device as MonotoneDevice).noteOff(36), 250);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 36, velocity: 1 }], 250)}
           className="px-3.5 py-2 rounded bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs flex items-center space-x-1.5 shadow-md transition-colors"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
@@ -1777,10 +1761,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={140} height={54} />
 
         <button
-          onClick={() => {
-            device.noteOn?.(64, 0.92);
-            setTimeout(() => device.noteOff?.(64), 380);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 64, velocity: 0.92 }], 380)}
           className="px-3 py-2 rounded bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
         >
           <Play className="w-3 h-3 fill-current" />
@@ -1836,14 +1817,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={140} height={54} />
 
         <button
-          onClick={() => {
-            device.noteOn?.(60, 0.9);
-            device.noteOn?.(67, 0.85);
-            setTimeout(() => {
-              device.noteOff?.(60);
-              device.noteOff?.(67);
-            }, 420);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.9 }, { note: 67, velocity: 0.85 }], 420)}
           className="px-3 py-2 rounded bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
         >
           <Play className="w-3 h-3 fill-current" />
@@ -1916,10 +1890,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           ].map((bol) => (
             <button
               key={bol.label}
-              onClick={() => {
-                device.noteOn?.(bol.midi, 0.95);
-                setTimeout(() => device.noteOff?.(bol.midi), 250);
-              }}
+              onClick={() => scheduleAudition(device, [{ note: bol.midi, velocity: 0.95 }], 250)}
               className="px-2 py-1.5 rounded bg-amber-500/20 hover:bg-amber-400 text-amber-200 hover:text-slate-950 border border-amber-500/50 font-mono font-black text-[11px] transition-all"
               title={`Strike Tabla Bol ${bol.label} (MIDI ${bol.midi})`}
             >
@@ -1997,10 +1968,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             <span>{(device as any).isRunning || p.droneActive ? 'STOP DRONE' : 'START DRONE'}</span>
           </button>
           <button
-            onClick={() => {
-              device.noteOn?.(48, 0.9);
-              setTimeout(() => device.noteOff?.(48), 500);
-            }}
+            onClick={() => scheduleAudition(device, [{ note: 48, velocity: 0.9 }], 500)}
             className="px-2.5 py-2 rounded bg-gradient-to-b from-amber-400 to-amber-600 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1"
           >
             <Play className="w-3 h-3 fill-current" />
@@ -2044,28 +2012,19 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
 
         <div className="flex items-center space-x-1.5 bg-black/55 p-2 rounded border border-amber-500/40">
           <button
-            onClick={() => {
-              device.noteOn?.(48, 0.95);
-              setTimeout(() => device.noteOff?.(48), 250);
-            }}
+            onClick={() => scheduleAudition(device, [{ note: 48, velocity: 0.95 }], 250)}
             className="px-2 py-1.5 rounded bg-amber-500/20 hover:bg-amber-400 text-amber-200 hover:text-slate-950 border border-amber-500/50 font-mono font-black text-[11px]"
           >
             DUGGA BASS
           </button>
           <button
-            onClick={() => {
-              device.noteOn?.(64, 0.95);
-              setTimeout(() => device.noteOff?.(64), 250);
-            }}
+            onClick={() => scheduleAudition(device, [{ note: 64, velocity: 0.95 }], 250)}
             className="px-2 py-1.5 rounded bg-amber-500/20 hover:bg-amber-400 text-amber-200 hover:text-slate-950 border border-amber-500/50 font-mono font-black text-[11px]"
           >
             TILLI STICK
           </button>
           <button
-            onClick={() => {
-              device.noteOn?.(60, 0.98);
-              setTimeout(() => device.noteOff?.(60), 250);
-            }}
+            onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.98 }], 250)}
             className="px-2 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono font-black text-[11px]"
           >
             CHAAL HIT
@@ -2130,10 +2089,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={135} height={52} />
 
         <button
-          onClick={() => {
-            device.noteOn?.(67, 0.92);
-            setTimeout(() => device.noteOff?.(67), 320);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 67, velocity: 0.92 }], 320)}
           className="px-3 py-2 rounded bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
         >
           <Play className="w-3 h-3 fill-current" />
@@ -2186,10 +2142,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={140} height={54} />
 
         <button
-          onClick={() => {
-            (device as any).noteOn?.(60, 0.92);
-            setTimeout(() => (device as any).noteOff?.(60), 280);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.92 }], 280)}
           className="px-3 py-2 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
         >
           <Play className="w-3 h-3 fill-current" />
@@ -2242,10 +2195,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
         <DeviceVisualizer device={device} width={140} height={54} />
 
         <button
-          onClick={() => {
-            (device as any).noteOn?.(60, 0.92);
-            setTimeout(() => (device as any).noteOff?.(60), 280);
-          }}
+          onClick={() => scheduleAudition(device, [{ note: 60, velocity: 0.92 }], 280)}
           className="px-3 py-2 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-mono font-black text-[11px] flex items-center space-x-1 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
         >
           <Play className="w-3 h-3 fill-current" />

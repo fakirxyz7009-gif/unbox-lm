@@ -198,6 +198,68 @@ export function setMuted(notes: RollNote[], keys: Set<string>, muted: boolean): 
   return done(others, targets.map((n) => ({ ...n, muted: muted || undefined })));
 }
 
+/** Random velocity (± `amount`) for the selection: the velocity half of humanize. */
+export function randomizeVelocity(notes: RollNote[], keys: Set<string>, amount: number, rand: () => number = Math.random): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('randomize');
+  return done(others, targets.map((n) => ({ ...n, velocity: clamp(n.velocity + (rand() * 2 - 1) * amount, MIN_VELOCITY, 1) })));
+}
+
+/** Multiplies the selection's velocities by `factor` (1.1 = up 10 %, 0.9 = down 10 %). */
+export function scaleVelocity(notes: RollNote[], keys: Set<string>, factor: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('change velocity');
+  return done(others, targets.map((n) => ({ ...n, velocity: clamp(n.velocity * factor, MIN_VELOCITY, 1) })));
+}
+
+/** Sets every selected note to `length` steps (FL "Discard lengths"). */
+export function setLengths(notes: RollNote[], keys: Set<string>, length: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('set lengths');
+  return done(others, targets.map((n) => ({ ...n, length: round3(Math.max(EPS, length)) })));
+}
+
+/**
+ * Spreads every chord of the selection into a run of single notes, lowest first, one `stepUnits`
+ * apart (FL "Arpeggiate"). Notes that are not part of a chord stay where they are.
+ */
+export function arpeggiate(notes: RollNote[], keys: Set<string>, stepUnits: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  const byStep = new Map<number, RollNote[]>();
+  for (const n of targets) {
+    const list = byStep.get(n.step) ?? [];
+    list.push(n);
+    byStep.set(n.step, list);
+  }
+  const touched: RollNote[] = [];
+  let chords = 0;
+  for (const [step, list] of byStep) {
+    if (list.length < 2) {
+      touched.push(...list);
+      continue;
+    }
+    chords++;
+    list
+      .slice()
+      .sort((a, b) => a.note - b.note)
+      .forEach((n, i) => touched.push({ ...n, step: round3(step + i * stepUnits), length: round3(Math.min(n.length, stepUnits)) }));
+  }
+  if (!chords) return { error: 'No chords in the selection' };
+  return done(others, touched);
+}
+
+/** Every note at the pitch of a selected note (FL "Select" by row). */
+export function selectSamePitchKeys(notes: RollNote[], keys: Set<string>): Set<string> {
+  const pitches = new Set(notes.filter((n) => keys.has(rollKey(n))).map((n) => n.note));
+  return new Set(notes.filter((n) => pitches.has(n.note)).map(rollKey));
+}
+
+/** Every note that starts on the same step as a selected note: the chords of the selection. */
+export function selectStackedKeys(notes: RollNote[], keys: Set<string>): Set<string> {
+  const steps = new Set(notes.filter((n) => keys.has(rollKey(n))).map((n) => n.step));
+  return new Set(notes.filter((n) => steps.has(n.step)).map(rollKey));
+}
+
 export function selectAllKeys(notes: RollNote[]): Set<string> {
   return new Set(notes.map(rollKey));
 }

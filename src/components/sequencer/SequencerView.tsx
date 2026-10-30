@@ -559,17 +559,15 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
   };
 
   // Channel Controls
+  // The track's volume and pan are its mixer channel's settings: the mixer applies them to the audio and
+  // records them for undo and automation.
   const handleVolumeChange = (track: SequencerTrack, val: number) => {
-    track.volume = val;
-    const dev = devices.find((d) => d.id === track.deviceId);
-    if (dev) dev.setParam('volume', val);
+    audioEngine.mixer.setVolume(track.deviceId, val);
     audioEngine['notify']?.();
   };
 
   const handlePanChange = (track: SequencerTrack, val: number) => {
-    track.pan = val;
-    const dev = devices.find((d) => d.id === track.deviceId);
-    if (dev) dev.setParam('pan', val);
+    audioEngine.mixer.setPan(track.deviceId, val);
     audioEngine['notify']?.();
   };
 

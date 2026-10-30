@@ -2,7 +2,7 @@
 
 **Status:** Project-owned Windows x64 effect and MIDI-instrument offline host smokes pass, including a versioned effect-component state round-trip and malformed-state rejection. Real-time transport and DAW integration remain open. Native hosting is not implemented in Unbox.
 **Date:** 2026-10-26
-**Last updated:** 2026-10-28
+**Last updated:** 2026-10-29
 
 ## Context
 
@@ -88,3 +88,16 @@ Steinberg's current VST3 SDK provides the hosting API and hosting examples under
 - The MIDI synth test delivers 300 note-ons and 300 matching note-offs at sample offsets that vary by phrase across 2,400 blocks; every stereo output sample is checked against the expected oscillator phase, velocity and note release. The latest paced run sustained 374.819 blocks/s against 375 nominal, with 0/2,400 one-block deadline misses, 0 producer starts over 1 ms late, 0.7826 ms maximum schedule lateness, and worker-completion latency p99 0.0236 ms / max 0.0398 ms. Its offline burst filled the ring and applied backpressure.
 - These are native-process fixture measurements with no audio device, Electron `utilityProcess`, browser AudioWorklet, live callback, or DAW graph integration. The results support continuing the shared-memory candidate evaluation; they are not evidence to enable third-party plugins or claim Phase 5 complete.
 - Verification: `npm run test:vst3-shared-memory` passed the effect and instrument host smokes, both 47-check Steinberg validations, sample-exact offline bursts for both fixture types, and the paced realtime-mode audio/MIDI deadline checks.
+
+## Follow-up — 2026-10-29 current fixture revalidation
+
+- Rebuilt/revalidated only the project-owned fixtures. The standalone effect and MIDI-instrument host smokes passed, and Steinberg's validator again reported 47 passed / 0 failed checks for each bundle. The delay state-recall check still rendered the restored 0.5/0.25 stereo gain at frame 48,000.
+- The isolated native stdio host processed the project-owned delay in an offline 2,400-block, 48 kHz / 128-frame stream with a bounded four-block queue and sample-exact output. It measured process round-trip p50/p95/p99/max of 0.165/0.439/0.875/3.527 ms and exercised backpressure 2,396 times. This is throughput evidence, not a live-callback result.
+- The shared-memory candidate then completed two 2,400-block paced runs at the same format with zero one-block response deadline misses: effect worker completion p99 0.0521 ms (max 0.5322 ms), MIDI-synth p99 0.0410 ms (max 1.1024 ms). The synth run delivered 300 timestamped note-ons plus 300 note-offs with phrase-varying offsets and checked every stereo output sample.
+- These measurements leave the transport decision **open**. They do not exercise Electron's utility process, an AudioWorklet/audio-device callback, DAW project state, editor hosting, PDC, sidechains, plugin crash recovery, or any third-party binary. Native VST3 hosting remains unimplemented in Unbox.
+
+## Follow-up — 2026-10-29 Electron utility-process capability boundary
+
+- The repaired Electron fixture launch now reaches `app.whenReady()` and starts a real `utilityProcess`. The worker reports a present `process.parentPort`, but on this host it exits cleanly before receiving even a versioned control message, including when held open with an explicit timer. Thus the control-plane handshake is **unverified**, not successful.
+- Before that early exit, Electron rejects a small `SharedArrayBuffer` payload with `An object could not be cloned.` `npm run test:vst3-boundary` records this as an explicit `SKIP` capability result when both limitations occur. Any different failure remains a test failure; a future Electron capability change requires a new bounded real-time measurement rather than auto-enabling a transport.
+- Therefore Electron `utilityProcess` is not a selectable lifecycle/control or shared-memory audio bridge on this host. It is not an audio transport result and does not advance native VST3 hosting beyond its open implementation gates.

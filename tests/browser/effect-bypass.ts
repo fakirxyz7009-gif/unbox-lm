@@ -206,8 +206,16 @@ async function probeEffect(type: string, measureResponse: boolean): Promise<Effe
     // Let the bypass ramp and a full analyser window settle before measuring dry fidelity.
     await pause(250);
 
-    const inputRms = references.map(rmsOf);
-    const inputLevel = Math.max(...inputRms);
+    let inputRms = references.map(rmsOf);
+    let inputLevel = Math.max(...inputRms);
+    // Analyser data is an audio-rate window, while source starts are scheduled.  On a busy
+    // shared context, allow a bounded number of complete windows before treating the input as
+    // genuinely silent instead of failing a downstream effect for a startup race.
+    for (let attempt = 0; inputLevel < 0.03 && attempt < 4; attempt++) {
+      await pause(125);
+      inputRms = references.map(rmsOf);
+      inputLevel = Math.max(...inputRms);
+    }
     if (inputLevel < 0.03) throw new Error(`input stimulus was unexpectedly quiet (RMS ${inputLevel.toExponential(2)})`);
     const outputRms = outputTaps.map(rmsOf);
     const largestError = Math.max(...outputRms.map((value, index) => Math.abs(value - inputRms[index]!) / inputRms[index]!));
@@ -402,7 +410,9 @@ async function probeUtilityBehavior(type: string): Promise<string> {
     sources.push(source);
     sourceGains.push(leftGain, rightGain);
   };
-  const waitForSignal = async () => pause(180);
+  // Utility routing changes are smoothed in the graph and the analyser contains an 85 ms
+  // history. Leave enough audio time for both the new route and a clean observation window.
+  const waitForSignal = async () => pause(300);
   const fail = (message: string): never => { throw new Error(`${type}: ${message}`); };
 
   try {
@@ -441,7 +451,9 @@ async function probeUtilityBehavior(type: string): Promise<string> {
       const invertedPhase = signedCorrelation(samplesOf(refs[0]!), samplesOf(outputs[0]![0]), 128);
       device.setParam('polarity', 0);
       device.setParam('pad', 1);
-      await pause(120);
+      // The DI pad uses a 15 ms AudioParam smoothing time.  Wait for that ramp plus a complete
+      // 4096-frame analyser window so the previous 0 dB level cannot skew a −15 dB measurement.
+      await pause(240);
       const paddedLevel = rmsOf(outputs[0]![0]);
       const padRatio = paddedLevel / Math.max(1e-9, dryLevel);
       if (dryPhase < 0.5 || invertedPhase > -0.5) fail(`polarity control did not flip phase (normal ${dryPhase.toFixed(3)}, inverted ${invertedPhase.toFixed(3)})`);
@@ -455,7 +467,7 @@ async function probeUtilityBehavior(type: string): Promise<string> {
       await waitForSignal();
       const ratio = rmsOf(outputs[0]![0]) / Math.max(1e-9, rmsOf(refs[0]!));
       device.setParam('invertL', 1);
-      await pause(120);
+      await pause(240);
       const phase = signedCorrelation(samplesOf(refs[0]!), samplesOf(outputs[0]![0]), 128);
       if (ratio < 1.85 || ratio > 2.15) fail(`+6 dB gain measured ${ratio.toFixed(3)}×; expected about 2×`);
       if (phase > -0.95) fail(`left polarity switch did not invert the signal (correlation ${phase.toFixed(3)})`);

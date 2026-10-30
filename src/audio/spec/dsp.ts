@@ -112,6 +112,25 @@ export function impulseResponse(
 }
 
 const cabStore = perCtx<AudioBuffer>();
+
+/**
+ * Stable tiny PRNG for generated impulse responses.  A cabinet has to render identically in
+ * the live AudioContext and an OfflineAudioContext; using Math.random() here made exports a
+ * slightly different amp every time their graph was cloned.
+ */
+export function seededRandom(key: string): () => number {
+  let state = 2_166_136_261;
+  for (let i = 0; i < key.length; i++) {
+    state = Math.imul(state ^ key.charCodeAt(i), 16_777_619);
+  }
+  state >>>= 0;
+  if (state === 0) state = 1;
+  return () => {
+    state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
+    return state / 4_294_967_296;
+  };
+}
+
 /** Short speaker-cabinet impulse (band-limited, resonant) for amp models. */
 export function cabinetImpulse(ctx: Ctx, kind: string): AudioBuffer {
   return cached(cabStore, ctx, kind, () => {
@@ -122,11 +141,12 @@ export function cabinetImpulse(ctx: Ctx, kind: string): AudioBuffer {
     const hi = kind.includes('1×12') ? 4200 : kind.includes('8×10') ? 4800 : 5200;
     for (let ch = 0; ch < 2; ch++) {
       const d = buf.getChannelData(ch);
+      const random = seededRandom(`cabinet:${kind}:channel:${ch}`);
       for (let i = 0; i < len; i++) {
         const t = i / sr;
         const body = Math.sin(2 * Math.PI * res * t) * Math.exp(-t * 60);
         const cone = Math.sin(2 * Math.PI * hi * t) * Math.exp(-t * 900) * 0.6;
-        const n = (Math.random() * 2 - 1) * Math.exp(-t * 400) * 0.35;
+        const n = (random() * 2 - 1) * Math.exp(-t * 400) * 0.35;
         d[i] = (body + cone + n) * Math.exp(-t * 30);
       }
       d[0] += 1;

@@ -1826,10 +1826,8 @@ const ClipMenu: React.FC<{
           })}
           {item('Clean DC Offset', () => {
             const a = audioStore.get(c.audioId);
-            if (a) {
-              audioStore.replaceBuffer(a.id, removeDcOffset(a.buffer));
-              audioEngine.changed();
-            }
+            // A new asset for this clip only: other clips that play the original keep their audio.
+            if (a) seq.updateAudioClip(t.id, c.id, { audioId: audioStore.add(`${a.name} (DC removed)`, removeDcOffset(a.buffer)).id });
           })}
           {item('Transpose +1 semitone', () => seq.updateAudioClip(t.id, c.id, { pitch: (c.pitch ?? 0) + 1 }))}
           {item('Transpose -1 semitone', () => seq.updateAudioClip(t.id, c.id, { pitch: (c.pitch ?? 0) - 1 }))}

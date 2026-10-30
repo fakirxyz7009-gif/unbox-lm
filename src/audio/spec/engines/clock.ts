@@ -6,14 +6,12 @@
 import type { SpecHost } from '../SpecDevice.ts';
 
 export class StepClock {
-  private timer: number | null = null;
+  private removeRealtime: (() => void) | null = null;
   private nextTime = 0;
   private pos = 0;
 
   constructor(private readonly host: SpecHost, private readonly onTick: (pos: number, time: number) => void) {
-    const ctx = host.ctx;
-    if (typeof window === 'undefined' || !(ctx instanceof AudioContext)) return;
-    this.timer = window.setInterval(() => this.run(), 25);
+    this.removeRealtime = host.clock.requestRealtime?.((now, until) => this.run(now, until)) ?? null;
   }
 
   /** Called from the device's onStepTick while the transport plays. */
@@ -23,20 +21,20 @@ export class StepClock {
     this.onTick(pos, time);
   }
 
-  private run(): void {
-    if (this.host.clock.isPlaying()) return;
-    const ctx = this.host.ctx;
+  private run(now: number, until: number): boolean {
+    if (this.host.clock.isPlaying()) return true;
     const step = 60 / Math.max(20, this.host.clock.bpm()) / 4;
-    if (this.nextTime < ctx.currentTime) this.nextTime = ctx.currentTime + 0.02;
-    while (this.nextTime < ctx.currentTime + 0.12) {
+    if (this.nextTime < now) this.nextTime = now + 0.02;
+    while (this.nextTime < until) {
       this.onTick(this.pos, this.nextTime);
       this.pos++;
       this.nextTime += step;
     }
+    return true;
   }
 
   stop(): void {
-    if (this.timer !== null) clearInterval(this.timer);
-    this.timer = null;
+    this.removeRealtime?.();
+    this.removeRealtime = null;
   }
 }

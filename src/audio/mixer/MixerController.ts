@@ -38,6 +38,8 @@ export interface MixerHost {
   masterGain: GainNode;
   createDevice(type: 'mix_bus', name: string): BaseDevice;
   removeDevice(id: string): void;
+  /** Runs an edit as one undo step (its nested device and cable changes included). */
+  runStructuralEdit<T>(label: string, edit: () => T): T;
   connectAudio(s: string, sp: string, t: string, tp: string): string | null;
   insertEffectOnTrack(fxId: string, ownerId: string): boolean;
   /** Structural change (re-render + autosave). */
@@ -297,9 +299,9 @@ export class MixerController {
     const used = new Set(this.host.audioConnections.filter((c) => c.targetDeviceId === 'master').map((c) => c.stripId ?? c.sourceDeviceId));
     for (const [id, strip] of this.strips) {
       if (!used.has(id) && !this.isOwner(id)) {
+        // Only the audio nodes go: the channel's settings (level, pan, mute, sends) stay for the next master cable.
         disposeStrip(strip);
         this.strips.delete(id);
-        this.rackChannels.delete(id);
       }
     }
     this.apply();
@@ -579,8 +581,11 @@ export class MixerController {
   /** Removes a bus (its inserts stay in the rack, unpatched). */
   deleteBus(id: string): void {
     if (!this.isBus(id)) return;
-    this.forget(id);
-    this.host.removeDevice(id);
+    // One undo step taken before the routing is cleared, so undo brings the bus and its sends back.
+    this.host.runStructuralEdit('Delete bus', () => {
+      this.forget(id);
+      this.host.removeDevice(id);
+    });
     this.apply();
     this.host.changed();
   }

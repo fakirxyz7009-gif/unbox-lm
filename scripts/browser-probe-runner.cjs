@@ -6,7 +6,7 @@ const { spawnSync } = require('node:child_process');
 const { createServer } = require('vite');
 const { chromium } = require('playwright-core');
 
-const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'note-audio-editing', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow']);
+const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow']);
 const probe = process.argv[2] ?? 'multisample-engine';
 if (!probes.has(probe)) throw new Error(`Unknown browser probe: ${probe}`);
 
@@ -173,7 +173,10 @@ async function main() {
     page.on('response', (response) => {
       if (response.status() < 400) return;
       const url = new URL(response.url());
-      if (probe === 'rack-ui-workflow' && response.status() === 404 && url.pathname === '/api/vst/status') return;
+      // The UI probes serve no API: the app's VST and local-assistant status requests fall back when it is absent.
+      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'export-page-ui') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/local-ai/status')) return;
+      // The app-level selection probe runs without the local API server; the app falls back when it is absent.
+      if (probe === 'instrument-selection-app' && response.status() === 404 && url.pathname.startsWith('/api/')) return;
       if (url.pathname !== '/favicon.ico') errors.push(`HTTP ${response.status()} ${url.pathname}`);
     });
     page.on('requestfailed', (request) => {
@@ -207,7 +210,10 @@ async function main() {
       await page.context().grantPermissions(['midi'], { origin });
     }
     const pageProbe = probe === 'physical-midi-ui-recording' ? 'midi-ui-recording' : probe;
-    await page.goto(probe === 'export-page-ui' || probe === 'rack-ui-workflow' ? origin : `${origin}/tests/browser/${pageProbe}.html${query}`, { waitUntil: 'load', timeout: probe === 'note-audio-editing' ? 60_000 : 30_000 });
+    // A clean Vite dependency cache can legitimately need more than 30 seconds
+    // before the first probe page reaches `load` on Windows. This is bootstrap
+    // time, not an audio-test timeout; retain the stricter result timeouts below.
+    await page.goto(probe === 'export-page-ui' || probe === 'rack-ui-workflow' ? origin : `${origin}/tests/browser/${pageProbe}.html${query}`, { waitUntil: 'load', timeout: 60_000 });
     if (probe === 'physical-midi-ui-recording' && headed) {
       await page.evaluate((title) => { document.title = title; }, `Unbox Impulse MIDI Probe ${port}`);
     }

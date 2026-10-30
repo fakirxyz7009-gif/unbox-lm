@@ -5,7 +5,7 @@ import '@fontsource/inter/700.css';
 import { createRoot } from 'react-dom/client';
 import { audioEngine as engine } from '../../src/audio/AudioEngine.ts';
 import { audioStore } from '../../src/audio/clips/audioStore.ts';
-import { deviceSample, installSampleVoice, setPadSample, type PadSample } from '../../src/audio/deviceSamples.ts';
+import { deviceSample, installSampleVoice, setMultiSample, setPadSample, type PadSample } from '../../src/audio/deviceSamples.ts';
 import { renderDeviceNote, audioPeak } from '../../src/audio/render/renderDeviceNote.ts';
 import { applyTrackAudioAction } from '../../src/audio/render/trackAudioActions.ts';
 import { projectManager } from '../../src/project/ProjectManager.ts';
@@ -121,6 +121,26 @@ async function run(): Promise<void> {
   setPadSample(restored.id, 53, { ...assignment, loop: true, sustain: 1 });
   const looped = await renderDeviceNote(engine, restored, 53);
   expect(rms(looped, 0.5, 0.8) > 0.01 && rms(looped, 2.2, 2.4) < 1e-6, 'Trimmed loop stopped after one pass or ignored key-up');
+
+  // A captured note must take priority over an imported bank only at that note.  This is the
+  // practical "replace one AI/synthetic sound with a real recording" route: the rest of the
+  // SoundFont/multisample instrument must remain intact.
+  const bankFixture = engine.ctx.createBuffer(1, engine.ctx.sampleRate, engine.ctx.sampleRate);
+  bankFixture.getChannelData(0).fill(0.08);
+  const padFixture = engine.ctx.createBuffer(1, engine.ctx.sampleRate, engine.ctx.sampleRate);
+  padFixture.getChannelData(0).fill(0.24);
+  const bankAsset = audioStore.add('Bank fallback fixture only', bankFixture);
+  const padAsset = audioStore.add('Per-note override fixture only', padFixture);
+  setMultiSample(restored.id, [{
+    audioId: bankAsset.id, keyLow: 0, keyHigh: 127, velLow: 1, velHigh: 127, root: 53, tune: 0,
+    level: 1, attack: 0.002, decay: 0.01, sustain: 1, release: 0.01, loop: false,
+  }]);
+  setPadSample(restored.id, 53, { audioId: padAsset.id, level: 1, offset: 0, duration: 0.5, attack: 0.002, release: 0.01 });
+  const overridden = await renderDeviceNote(engine, restored, 53);
+  const fallback = await renderDeviceNote(engine, restored, 54);
+  const overrideRms = rms(overridden, 0.08, 0.2);
+  const fallbackRms = rms(fallback, 0.08, 0.2);
+  expect(overrideRms > fallbackRms * 2.2 && fallbackRms > 0.01, 'A per-note captured recording did not override its imported bank while neighbouring notes kept the bank');
 
   await projectManager.create('empty', 'Track Audio Regression');
   const instrument = engine.createDevice('rec_vcsl_marimba', 'Source Marimba');

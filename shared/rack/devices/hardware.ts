@@ -117,7 +117,6 @@ const DI_COMMON = (o: { merge?: boolean; filter?: boolean; fat?: boolean; pads?:
   const p: ParamDef[] = [
     sel('pad', 'Pad', o.pads ?? ['0 dB', '-15 dB', '-30 dB'], 0, { section: 'Input' }),
     toggle('polarity', '180° Polarity', 0, { section: 'Input' }),
-    toggle('lift', 'Ground Lift', 0, { section: 'Output' }),
   ];
   if (o.merge) p.push(toggle('merge', 'Merge (mono)', 0, { section: 'Input' }));
   if (o.filter) p.push(toggle('lowCut', 'Low Cut 80 Hz', 0, { section: 'Input' }));
@@ -610,19 +609,19 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
 
   // ================= DI boxes
   { type: 'radial_j48', name: 'ActivBox DI', short: 'ACTIVBOX', kind: 'utility', family: H, group: 'DI Boxes & Patchbays', category: 'utility', engine: 'di',
-    engineConfig: { active: true, transformer: 0.25 }, description: 'Active phantom-powered DI: -15 dB pad, merge, 80 Hz low cut, polarity, ground lift; clean with a touch of transformer.',
+    engineConfig: { active: true, transformer: 0.25 }, description: 'Active phantom-powered DI: -15 dB pad, merge, 80 Hz low cut, polarity; clean with a touch of transformer.',
     tags: ['di', 'active', 'bass', 'keys'], params: DI_COMMON({ merge: true, filter: true, pads: ['0 dB', '-15 dB'] }), ports: { audioIns: 1 },
     panel: { finish: 'blue', color: '#1b3a6b', accent: '#ffffff', text: '#f2f2f2', knob: 'cap', logo: 'ActivBox', tagline: 'active DI', units: 1 } },
   { type: 'radial_jdi', name: 'PassivBox DI', short: 'PASSIVBOX', kind: 'utility', family: H, group: 'DI Boxes & Patchbays', category: 'utility', engine: 'di',
-    engineConfig: { active: false, transformer: 0.5 }, description: 'Passive DI with a quality transformer: smooth low-end saturation, -15 dB pad, merge, polarity, ground lift.',
+    engineConfig: { active: false, transformer: 0.5 }, description: 'Passive DI with a quality transformer: smooth low-end saturation, -15 dB pad, merge, polarity.',
     tags: ['di', 'passive', 'transformer'], params: DI_COMMON({ merge: true, pads: ['0 dB', '-15 dB'] }), ports: { audioIns: 1 },
     panel: { finish: 'blue', color: '#163055', accent: '#ffffff', text: '#f2f2f2', knob: 'cap', logo: 'PassivBox', tagline: 'passive transformer DI', units: 1 } },
   { type: 'countryman85', name: 'FET Direct Box', short: 'FET DIRECT', kind: 'utility', family: H, group: 'DI Boxes & Patchbays', category: 'utility', engine: 'di',
-    engineConfig: { active: true, transformer: 0.1 }, description: 'FET active DI known for clarity and headroom on bass and keys; pad, polarity, ground lift.',
+    engineConfig: { active: true, transformer: 0.1 }, description: 'FET active DI known for clarity and headroom on bass and keys; pad, polarity.',
     tags: ['di', 'active', 'clean', 'bass'], params: DI_COMMON({ pads: ['0 dB', '-15 dB', '-30 dB'] }), ports: { audioIns: 1 },
     panel: { finish: 'grey', color: '#4a4d52', accent: '#ffcc00', text: '#f2f2f2', knob: 'cap', logo: 'FET DIRECT', tagline: 'FET direct box', units: 1 } },
   { type: 'rndi', name: 'Transformer DI', short: 'TRANSFORMER DI', kind: 'utility', family: H, group: 'DI Boxes & Patchbays', category: 'utility', engine: 'di',
-    engineConfig: { active: true, transformer: 0.45, neve: true }, description: 'Class-A active transformer DI: rich transformer low end, Fat / Thru switch, ground lift, polarity.',
+    engineConfig: { active: true, transformer: 0.45, neve: true }, description: 'Class-A active transformer DI: rich transformer low end, Fat / Thru switch, polarity.',
     tags: ['di', 'transformer', 'bass', 'warm'], params: DI_COMMON({ fat: true, pads: ['0 dB', '-15 dB'] }), ports: { audioIns: 1 },
     panel: { finish: 'blue', color: '#203d66', accent: '#e8e8e8', text: '#f2f2f2', knob: 'cap', logo: 'TRANSFORMER DI', tagline: 'active transformer DI', units: 1 } },
 

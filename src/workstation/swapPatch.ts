@@ -26,6 +26,8 @@ export function swapPartInstrument(track: SequencerTrack, type: DeviceType, name
   const keepName = track.name === old.name;
   track.deviceId = dev.id;
   if (keepName) track.name = dev.name;
+  // Automation the part had follows the new instrument, so removing the old unit does not delete it.
+  audioEngine.automation.retargetDevice(old.id, dev.id, (param) => param in dev.params);
   audioEngine.removeDevice(old.id, true);
   outs.forEach((o) => audioEngine.connectAudio(dev.id, o.sp, o.t, o.tp, o.color));
   players.forEach((p) => audioEngine.setPlayerTarget(p.id, dev.id));

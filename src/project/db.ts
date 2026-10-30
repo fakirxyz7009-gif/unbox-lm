@@ -51,14 +51,24 @@ export async function dbGet<T>(store: StoreName, key: string): Promise<T | undef
   return done(db.transaction(store).objectStore(store).get(key)) as Promise<T | undefined>;
 }
 
+/** Resolves once the transaction has committed, so a write that reports success is on disk. */
+const committed = (tx: IDBTransaction, req: IDBRequest) =>
+  new Promise<void>((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(req.error ?? tx.error ?? new Error('Database write failed'));
+    tx.onabort = () => reject(tx.error ?? req.error ?? new Error('Database write was aborted'));
+  });
+
 export async function dbPut<T>(store: StoreName, value: T): Promise<void> {
   const db = await openDb();
-  await done(db.transaction(store, 'readwrite').objectStore(store).put(value));
+  const tx = db.transaction(store, 'readwrite');
+  await committed(tx, tx.objectStore(store).put(value));
 }
 
 export async function dbDelete(store: StoreName, key: string): Promise<void> {
   const db = await openDb();
-  await done(db.transaction(store, 'readwrite').objectStore(store).delete(key));
+  const tx = db.transaction(store, 'readwrite');
+  await committed(tx, tx.objectStore(store).delete(key));
 }
 
 export async function dbAll<T>(store: StoreName): Promise<T[]> {

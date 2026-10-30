@@ -23,7 +23,20 @@ export interface PlanResponse {
   model?: string;
 }
 
-export async function requestRackPlan(prompt: string): Promise<PlanResponse> {
+export async function requestRackPlan(prompt: string, preferCloud = false): Promise<PlanResponse> {
+  if (!preferCloud) {
+    try {
+      const { localHardwareAi } = await import('./hardware/localHardwareAiEngine.ts');
+      const hw = await localHardwareAi.planRackOnHardware(prompt);
+      return {
+        plan: hw.plan,
+        source: 'local-offline',
+        warnings: hw.warnings,
+      };
+    } catch {
+      // Continue to cloud/local fallback
+    }
+  }
   let res: Response | null = null;
   try {
     res = await fetch('/api/ai/combinator', {
@@ -95,7 +108,16 @@ function patchStereo(engine: AudioEngine, from: string, to: string, warnings: st
   return made;
 }
 
+/** Applies an AI rack plan as one undo step: undo takes the whole build back. */
 export function applyRackPlan(
+  engine: AudioEngine,
+  plan: RackPatchPlan,
+  opts: { prompt: string; source: PlanSource; feedFrom?: string | null }
+): ApplyResult {
+  return engine.runStructuralEdit('Build rack plan', () => buildRackPlan(engine, plan, opts));
+}
+
+function buildRackPlan(
   engine: AudioEngine,
   plan: RackPatchPlan,
   opts: { prompt: string; source: PlanSource; feedFrom?: string | null }

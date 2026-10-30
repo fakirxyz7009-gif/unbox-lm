@@ -4,13 +4,18 @@
  *    with Auto Trigger, an input envelope follower (auto-wah) — both shift the cutoff.
  *  - alligator: three pattern-gated filters (HP / BP / LP) on 16-step patterns at 1/8, 1/16
  *    or 1/32, then drive, phaser and delay; Dry adds the unprocessed signal.
+ *  - ladder: four-pole ladder low-pass in an AudioWorklet, self-oscillating at full resonance (ladder.ts).
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import { adsrRelease, adsrStart, buildFollower, clamp, satCurve, setSmooth } from '../dsp.ts';
 import { StepClock } from './clock.ts';
+import { ladderFilter } from './ladder.ts';
 
 export function filterEngine(host: SpecHost): SpecEngine {
-  return String(host.cfg.model) === 'alligator' ? alligator(host) : ecf42(host);
+  const model = String(host.cfg.model);
+  if (model === 'alligator') return alligator(host);
+  if (model === 'ladder') return ladderFilter(host);
+  return ecf42(host);
 }
 
 function ecf42(host: SpecHost): SpecEngine {

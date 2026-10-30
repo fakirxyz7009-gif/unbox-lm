@@ -245,6 +245,10 @@ test('FreePats Wooden Recorder ships performer-credited CC0 recordings and loope
   assert.ok(pack);
   assert.equal(pack.zones.length, 34);
   assert.ok(pack.zones.every((zone) => zone.loop));
+  // Each root is the pitch its sample was recorded at (the source's C5-A6). The key map moves the keys down an
+  // octave, not the roots, so every key sounds at its own pitch.
+  const recordedRoots = [...new Set(pack.zones.map((zone) => zone.root))].sort((a, b) => (a ?? 0) - (b ?? 0));
+  assert.deepEqual(recordedRoots, [72, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 88, 89, 91, 93]);
   for (let note = 57; note <= 88; note++) {
     assert.ok(pack.zones.some((zone) => zone.trigger !== 'release' && zone.lokey <= note && zone.hikey >= note), `MIDI ${note} is missing`);
   }

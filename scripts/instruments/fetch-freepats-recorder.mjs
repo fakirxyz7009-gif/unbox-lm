@@ -88,11 +88,16 @@ function validateAndExtract() {
     throw new Error('FreePats Recorder SFZ mapping changed; review its regions before rebuilding the pack.');
   }
   let shiftedDirectives = 0;
-  const shiftedSfz = sfz.replace(/\b(lokey|hikey|key)=(\d+)\b/gim, (_match, opcode, value) => {
+  const shiftedSfz = sfz.replace(/\b(lokey|hikey|key)=(\d+)\b/gim, (match, opcode, value, offset, text) => {
     const original = Number(value);
     if (original < 69 || original > 100) throw new Error(`Unexpected source key ${value}; refusing to shift the SFZ mapping.`);
     shiftedDirectives++;
-    return `${opcode}=${original - 12}`;
+    if (opcode.toLowerCase() !== 'key') return `${opcode}=${original - 12}`;
+    // A single-key group has no pitch_keycenter, so the converter would take the sample's root from the key and
+    // the shift would move the root too. Keep the sample's own pitch as its root and move only the key.
+    const line = text.slice(text.lastIndexOf('\n', offset) + 1, text.indexOf('\n', offset + match.length));
+    if (/pitch_keycenter=/i.test(line)) throw new Error(`Recorder key group already names its pitch_keycenter: ${line.trim()}`);
+    return `key=${original - 12} pitch_keycenter=${original}`;
   });
   if (shiftedDirectives !== 23) {
     throw new Error(`Expected 23 recorder key-map values before building the octave-shifted playable range; found ${shiftedDirectives}.`);

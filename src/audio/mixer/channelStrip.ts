@@ -53,6 +53,8 @@ export interface StripNodes {
   wRR: GainNode;
   wLR: GainNode;
   preTap: GainNode;
+  /** Gates the pre-fader sends with mute and solo (the fader is not in their path). */
+  preGate: GainNode;
   fader: GainNode;
   pan: StereoPannerNode;
   mute: GainNode;
@@ -245,6 +247,8 @@ export function buildStrip(ctx: BaseAudioContext): StripNodes {
   const postTap = stereo(ctx);
   const out = stereo(ctx);
   wMerge.connect(preTap).connect(fader).connect(pan).connect(mute).connect(postTap).connect(out);
+  const preGate = stereo(ctx);
+  preTap.connect(preGate);
 
   const mSplit = ctx.createChannelSplitter(2);
   const analyserL = ctx.createAnalyser();
@@ -256,7 +260,7 @@ export function buildStrip(ctx: BaseAudioContext): StripNodes {
   mSplit.connect(analyserR, 1);
 
   return {
-    inL, inR, duckL, duckR, pdcDelay, trim, phase, eq, dyn, wLL, wRL, wRR, wLR, preTap, fader, pan, mute, postTap, out,
+    inL, inR, duckL, duckR, pdcDelay, trim, phase, eq, dyn, wLL, wRL, wRR, wLR, preTap, preGate, fader, pan, mute, postTap, out,
     analyserL, analyserR, sends: new Map(), dest: null, last: null,
     bufL: new Float32Array(analyserL.fftSize), bufR: new Float32Array(analyserR.fftSize),
   };
@@ -316,6 +320,7 @@ export function applyStrip(strip: StripNodes, v: StripValues, ctx: BaseAudioCont
   if (!skip?.('volume')) set(strip.fader.gain, v.fader);
   if (!skip?.('pan')) set(strip.pan.pan, v.pan);
   set(strip.mute.gain, v.audible ? 1 : 0);
+  set(strip.preGate.gain, v.audible ? 1 : 0);
 }
 
 function applyEq(strip: StripNodes, e: ChannelEq, ctx: BaseAudioContext, smooth: boolean): void {
@@ -434,7 +439,7 @@ export function syncSends(
     }
     if (!cur) {
       const gain = stereo(ctx, 0);
-      (s.pre ? strip.preTap : strip.postTap).connect(gain);
+      (s.pre ? strip.preGate : strip.postTap).connect(gain);
       gain.connect(s.dest);
       cur = { gain, pre: s.pre, dest: s.dest };
       strip.sends.set(s.busId, cur);
@@ -453,7 +458,7 @@ export function disposeStrip(strip: StripNodes): void {
     e.input, e.dry, e.wet, e.out, e.hp, e.low, e.lm, e.hm, e.high, e.lp,
     d.input, d.dry, d.wet, d.out,
     strip.wLL, strip.wRL, strip.wRR, strip.wLR,
-    strip.preTap, strip.fader, strip.pan, strip.mute, strip.postTap, strip.out,
+    strip.preTap, strip.preGate, strip.fader, strip.pan, strip.mute, strip.postTap, strip.out,
     strip.analyserL, strip.analyserR,
   ];
   if (d.node) nodes.push(d.node);

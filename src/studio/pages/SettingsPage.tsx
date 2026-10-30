@@ -10,6 +10,7 @@ import type { MonitorState } from '../../audio/mixer/MonitorController.ts';
 import { Btn, Panel, Sel, Slide } from '../ui/controls.tsx';
 import { useFrame } from '../../nexa/useEngine.ts';
 import { clearMidi, learnMidi, MIDI_TARGETS, midiLearning, midiMap, resetMidiMap, subscribeMidiMap } from '../../workstation/midiControls.ts';
+import { localHardwareAi, type HardwareAiBackend } from '../../ai/hardware/localHardwareAiEngine.ts';
 
 const NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function describeMidi(d: Uint8Array): string {
@@ -222,7 +223,87 @@ export function SettingsPage() {
         </Panel>
 
         <MidiPanel />
+        <HardwareAiPanel />
       </div>
     </div>
+  );
+}
+
+function HardwareAiPanel() {
+  const [hwState, setHwState] = useState(() => localHardwareAi.state);
+  const [benchmarkLatency, setBenchmarkLatency] = useState<number | null>(null);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
+
+  useEffect(() => {
+    return localHardwareAi.subscribe(() => {
+      setHwState({ ...localHardwareAi.state });
+    });
+  }, []);
+
+  const runBenchmark = async () => {
+    setIsBenchmarking(true);
+    const start = performance.now();
+    try {
+      await localHardwareAi.planRackOnHardware('80s synthwave lead with tape delay and chorus');
+      setBenchmarkLatency(Math.round(performance.now() - start));
+    } finally {
+      // Cleared even when planning fails, so the button cannot stay on "Running…".
+      setIsBenchmarking(false);
+    }
+  };
+
+  return (
+    <Panel
+      title="On-device AI & GPU probe"
+      right={
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+            ON THIS COMPUTER
+          </span>
+          <Btn onClick={() => void localHardwareAi.probeHardware()}>Re-scan GPU</Btn>
+        </div>
+      }
+    >
+      <div className="space-y-3 text-[11px]" data-testid="hardware-ai-settings-panel">
+        <div className="text-slate-400">
+          The rack planner, preset crafter and mix analysis run in this app on this computer. WebGPU is probed for the adapter details below. A local Ollama server, when it is running, answers chat questions. None of this path sends prompts, song state or audio to a cloud service; the CLOUD switch in the Co-Pilot does, when you choose it.
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono pt-1 border-t border-slate-800">
+          <span className="text-slate-400">Physical GPU Vendor</span>
+          <span className="text-cyan-300 font-bold">{hwState.gpu.vendor}</span>
+
+          <span className="text-slate-400">WebGPU Acceleration</span>
+          <span className={hwState.gpu.supported ? 'text-emerald-400' : 'text-amber-400'}>
+            {hwState.gpu.supported ? 'Adapter found (probed)' : 'No WebGPU adapter'}
+          </span>
+
+          <span className="text-slate-400">GPU Device / Driver</span>
+          <span className="text-slate-200">{hwState.gpu.device}</span>
+
+          <span className="text-slate-400">Max GPU Buffer</span>
+          <span className="text-slate-200">{hwState.gpu.maxBufferSizeMb ? `${hwState.gpu.maxBufferSizeMb} MB` : 'Dynamic System RAM'}</span>
+
+          <span className="text-slate-400">Local Neural Daemon</span>
+          <span className={hwState.daemonOnline ? 'text-emerald-400' : 'text-slate-400'}>
+            {hwState.daemonOnline ? `Online (${hwState.daemonModels.length} models installed)` : 'Not running (the built-in rule engine answers)'}
+          </span>
+
+          <span className="text-slate-400">Cloud Latency</span>
+          <span className="text-emerald-400 font-bold">None on this path (localhost only)</span>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+          <Btn on tone="cyan" disabled={isBenchmarking} onClick={() => void runBenchmark()}>
+            {isBenchmarking ? 'Running GPU Shader Benchmark…' : 'Benchmark on-device AI'}
+          </Btn>
+          {benchmarkLatency !== null && (
+            <span className="font-mono text-emerald-400">
+              Benchmark: {benchmarkLatency} ms to plan a sample rack on this computer
+            </span>
+          )}
+        </div>
+      </div>
+    </Panel>
   );
 }

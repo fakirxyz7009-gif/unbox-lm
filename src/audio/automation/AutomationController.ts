@@ -403,6 +403,19 @@ export class AutomationController {
   }
 
   /** Transport stopped: finish latch / write passes. */
+  /**
+   * A part's instrument was swapped (LOAD): its lanes follow the new unit. Channel lanes follow the part's
+   * channel; device lanes follow when the new unit has the same parameter, and are dropped otherwise.
+   */
+  retargetDevice(oldId: string, newId: string, hasParam: (param: string) => boolean): void {
+    for (const lane of this.lanes) {
+      const t = lane.target;
+      if (t.kind === 'channel' && t.channelId === oldId) lane.target = { ...t, channelId: newId };
+      else if (t.kind === 'device' && t.deviceId === oldId && hasParam(t.param)) lane.target = { ...t, deviceId: newId };
+    }
+    this.host.changed();
+  }
+
   stopped(): void {
     for (const id of this.touch.keys()) {
       const lane = this.lanes.find((l) => l.id === id);

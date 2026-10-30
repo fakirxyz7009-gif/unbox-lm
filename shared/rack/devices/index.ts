@@ -2,13 +2,14 @@
  * All spec-driven devices + helpers (ports, lookup, catalog groups). Pure data.
  */
 import { HARDWARE_SPECS } from './hardware.ts';
+import { ORIGINAL_SPECS } from './original.ts';
 import { REASON_SPECS } from './reason.ts';
 import { RECORDED_INSTRUMENTS, RECORDED_KITS, SAMPLED_SPECS } from './sampled.ts';
 import type { DeviceSpec, ParamDef } from './types.ts';
 
 export type { DeviceSpec, ParamDef, PadDef, SpecKind, EngineId, PanelDef, KnobStyle } from './types.ts';
 
-export const DEVICE_SPECS: readonly DeviceSpec[] = [...SAMPLED_SPECS, ...REASON_SPECS, ...HARDWARE_SPECS];
+export const DEVICE_SPECS: readonly DeviceSpec[] = [...SAMPLED_SPECS, ...REASON_SPECS, ...HARDWARE_SPECS, ...ORIGINAL_SPECS];
 
 export const SPEC_BY_TYPE: ReadonlyMap<string, DeviceSpec> = new Map(DEVICE_SPECS.map((s) => [s.type, s]));
 
@@ -93,7 +94,7 @@ const CV_NAMES: Record<string, string> = {
   cv_gate: 'Gate CV',
   cv_pitch: 'Note CV',
   cv_mod: 'Mod Wheel CV',
-  env_out: 'Envelope Out',
+  env_out: 'Envelope Out (level CV)',
   gr_out: 'Gain Reduction',
   note_cv: 'Note CV Out',
   gate_cv: 'Gate CV Out',

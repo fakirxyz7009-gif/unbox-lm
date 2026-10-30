@@ -79,6 +79,71 @@ export function AutomateMenu() {
       >
         {exists ? 'Automation lane exists (song sequencer)' : 'Create automation lane'}
       </button>
+
+      <div className="border-t border-neutral-700/60 my-1 pt-1 px-3 text-[10px] text-cyan-400 font-mono font-bold flex items-center justify-between">
+        <span>⚡ LOCAL AI AUTO-CURVES</span>
+        <span className="text-[9px] text-emerald-400">ON-DEVICE</span>
+      </div>
+
+      <button
+        type="button"
+        role="menuitem"
+        className="w-full text-left px-3 py-0.5 hover:bg-cyan-500 hover:text-black text-[11px]"
+        onClick={async () => {
+          const { localHardwareAi } = await import('../ai/hardware/localHardwareAiEngine.ts');
+          let lane = audioEngine.automation.lane(open.target);
+          if (!lane) {
+            lane = audioEngine.automation.addLane(open.target, 'read');
+          }
+          const { points } = localHardwareAi.generateAutomationOnHardware('sidechain_pump', 4);
+          audioEngine.automation.setPoints(lane.id, points);
+          toast(`Sidechain ducking pump applied to ${open.name}`, 'success');
+          current = null;
+          emit();
+        }}
+      >
+        Sidechain ducking pump (4 bars, fixed shape)
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        className="w-full text-left px-3 py-0.5 hover:bg-cyan-500 hover:text-black text-[11px]"
+        onClick={async () => {
+          const { localHardwareAi } = await import('../ai/hardware/localHardwareAiEngine.ts');
+          let lane = audioEngine.automation.lane(open.target);
+          if (!lane) {
+            lane = audioEngine.automation.addLane(open.target, 'read');
+          }
+          const { points } = localHardwareAi.generateAutomationOnHardware('riser_sweep', 4);
+          audioEngine.automation.setPoints(lane.id, points);
+          toast(`Filter riser sweep applied to ${open.name}`, 'success');
+          current = null;
+          emit();
+        }}
+      >
+        Filter riser sweep (4 bars, fixed shape)
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        className="w-full text-left px-3 py-0.5 hover:bg-cyan-500 hover:text-black text-[11px]"
+        onClick={async () => {
+          const { localHardwareAi } = await import('../ai/hardware/localHardwareAiEngine.ts');
+          let lane = audioEngine.automation.lane(open.target);
+          if (!lane) {
+            lane = audioEngine.automation.addLane(open.target, 'read');
+          }
+          const { points } = localHardwareAi.generateAutomationOnHardware('lfo_wobble', 4);
+          audioEngine.automation.setPoints(lane.id, points);
+          toast(`LFO wobble applied to ${open.name}`, 'success');
+          current = null;
+          emit();
+        }}
+      >
+        LFO wobble (4 bars, fixed shape)
+      </button>
     </div>
   );
 }

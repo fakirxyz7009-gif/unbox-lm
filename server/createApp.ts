@@ -33,12 +33,21 @@ export function createApp({ baseDir, bundleDir, bundleFallbackDir }: AppOptions)
   app.use('/library', express.static(config.bundleDir, { maxAge: '1h' }));
   if (bundleFallbackDir) app.use('/library', express.static(bundleFallbackDir, { maxAge: '1h' }));
 
-  // Multi-sampled real recordings (local public folder or external SAMPLE_LIBRARY_PATH)
-  const samplesDir = process.env.SAMPLE_LIBRARY_PATH
+  // Multi-sampled real recordings (D:\samples high-capacity storage, SAMPLE_LIBRARY_PATH, or local public folder)
+  const primarySamplesDir = process.env.SAMPLE_LIBRARY_PATH
     ? path.resolve(process.env.SAMPLE_LIBRARY_PATH)
-    : path.resolve(baseDir, 'public', 'samples');
-  if (fs.existsSync(samplesDir)) {
-    app.use('/samples', express.static(samplesDir, { maxAge: '1h' }));
+    : fs.existsSync('D:\\samples')
+      ? 'D:\\samples'
+      : path.resolve(baseDir, 'public', 'samples');
+
+  if (fs.existsSync(primarySamplesDir)) {
+    app.use('/samples', express.static(primarySamplesDir, { maxAge: '1h' }));
+  }
+
+  // Fallback to public/samples if primary is external and a requested asset exists locally
+  const pubSamples = path.resolve(baseDir, 'public', 'samples');
+  if (primarySamplesDir !== pubSamples && fs.existsSync(pubSamples)) {
+    app.use('/samples', express.static(pubSamples, { maxAge: '1h' }));
   }
 
   if (!SHARE_BUILD) {
@@ -63,6 +72,18 @@ export function createApp({ baseDir, bundleDir, bundleFallbackDir }: AppOptions)
   app.use('/api/local-ai', createLocalAiRouter());
   app.use('/api', createAiRouter({ library }));
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Unknown API route' }));
+  // Express would answer a failed request (a malformed JSON body, an oversized upload, a thrown error) with an
+  // HTML page that includes a stack trace. The API answers with JSON and keeps the detail in the server log.
+  app.use('/api', (err: unknown, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (res.headersSent) return next(err);
+    const e = err as { status?: unknown; statusCode?: unknown };
+    const status = [e.status, e.statusCode].find((s): s is number => typeof s === 'number' && s >= 400 && s < 600) ?? 500;
+    if (status >= 500) console.error('[api]', err);
+    const message = status === 413
+      ? 'That upload is larger than the server accepts.'
+      : status >= 500 ? 'The server could not finish that request.' : 'The request could not be read.';
+    res.status(status).json({ error: message });
+  });
 
   return { app, library };
 }

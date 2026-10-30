@@ -1,4 +1,5 @@
 import { BaseDevice } from '../BaseDevice.ts';
+import { seededRandom } from '../spec/dsp.ts';
 
 export class RV7000Device extends BaseDevice {
   private inputL: GainNode;
@@ -11,6 +12,8 @@ export class RV7000Device extends BaseDevice {
   private dampingFilter: BiquadFilterNode;
   private dryGain: GainNode;
   private wetGain: GainNode;
+  private powered = true;
+  private bypassed = false;
 
   constructor(ctx: AudioContext, id: string = 'rv7000_1', name: string = 'Cathedral Flagship Reverb') {
     super(ctx, id, name, 'rv7000', 2);
@@ -69,6 +72,7 @@ export class RV7000Device extends BaseDevice {
     split.connect(this.outputL, 0);
     split.connect(this.outputR, 1);
 
+    this.installPowerSwitches();
     this.updateImpulse();
     this.applyParams();
 
@@ -100,16 +104,42 @@ export class RV7000Device extends BaseDevice {
     const preset = this.params.preset;
 
     const density = preset === 'Plate' ? 1.4 : preset === 'Spring' ? 0.6 : 1.0;
+    const leftRandom = seededRandom(`rv7000:${preset}:${decayTime}:${rate}:left`);
+    const rightRandom = seededRandom(`rv7000:${preset}:${decayTime}:${rate}:right`);
 
     for (let i = 0; i < length; i++) {
       const t = i / rate;
       const env = Math.pow(1 - i / length, density) * Math.exp(-t * (3.5 / decayTime));
       // Subtle stereo decorrelation
-      left[i] = (Math.random() * 2 - 1) * env;
-      right[i] = (Math.random() * 2 - 1) * env * 0.95;
+      left[i] = (leftRandom() * 2 - 1) * env;
+      right[i] = (rightRandom() * 2 - 1) * env * 0.95;
     }
 
     this.convolver.buffer = impulse;
+  }
+
+  /**
+   * RV7000 owns its dry/wet graph, so its power and bypass states belong here rather than in the
+   * legacy output wrapper.  Muting both branches at the device prevents a convolution tail from
+   * leaking through a generic shim after the unit is powered down.
+   */
+  private installPowerSwitches(): void {
+    Object.defineProperty(this, 'isPowered', {
+      configurable: true,
+      get: () => this.powered,
+      set: (value: boolean) => {
+        this.powered = !!value;
+        this.applyParams();
+      },
+    });
+    Object.defineProperty(this, 'isBypassed', {
+      configurable: true,
+      get: () => this.bypassed,
+      set: (value: boolean) => {
+        this.bypassed = !!value;
+        this.applyParams();
+      },
+    });
   }
 
   /** Keep offline mix and stem renders on the same impulse response as the live device. */
@@ -117,6 +147,8 @@ export class RV7000Device extends BaseDevice {
     const copy = new RV7000Device(ctx as AudioContext, this.id, this.name);
     copy.params = { ...this.params };
     copy.convolver.buffer = this.convolver.buffer;
+    copy.isPowered = this.isPowered;
+    copy.isBypassed = this.isBypassed;
     copy.applyParams();
     return copy;
   }
@@ -126,8 +158,10 @@ export class RV7000Device extends BaseDevice {
     this.dampingFilter.frequency.setValueAtTime(Math.max(300, Math.min(18000, this.params.damping)), this.ctx.currentTime);
 
     const mix = Math.max(0, Math.min(1, this.params.mix));
-    this.wetGain.gain.setValueAtTime(mix, this.ctx.currentTime);
-    this.dryGain.gain.setValueAtTime(1 - mix, this.ctx.currentTime);
+    const wet = this.powered && !this.bypassed ? mix : 0;
+    const dry = this.powered ? (this.bypassed ? 1 : 1 - mix) : 0;
+    this.wetGain.gain.setValueAtTime(wet, this.ctx.currentTime);
+    this.dryGain.gain.setValueAtTime(dry, this.ctx.currentTime);
   }
 
   public setParam(key: string, value: any): void {

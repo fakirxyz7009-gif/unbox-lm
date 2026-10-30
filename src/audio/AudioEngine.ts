@@ -31,9 +31,12 @@ import { ObjektDevice, ReasonPerformanceDevice } from './devices/ReasonSynthesiz
 import { RV9Device, OsmiumDevice, RotorDevice, CombinatorDevice, MidiOutDevice } from './devices/ReasonEffectsAndUtilitiesSuite.ts';
 import { createSpecDevice } from './spec/registry.ts';
 import { SpecDevice } from './spec/SpecDevice.ts';
+import { seededRandom } from './spec/dsp.ts';
 import { SPEC_BY_TYPE } from '../../shared/rack/devices/index.ts';
 import type { NoteSink, PlayerContext } from './spec/engines/players.ts';
 import { CVEngine } from './CVEngine.ts';
+import { cvMatrixSection } from './cvMatrixSection.ts';
+import { toast } from '../shell/toast.ts';
 import { sharedAudioContext } from './AudioEngineGraph.ts';
 import {
   AudioConnection,
@@ -90,6 +93,7 @@ import { audioStore } from './clips/audioStore.ts';
 import { audioClipRate, barsForSeconds, secPerBar } from './clips/clipMath.ts';
 import { RecordController } from './recording/RecordController.ts';
 import { ensureRecorderWorklet, WorkletCapture } from './recording/recorderWorklet.ts';
+import { waitForAudioTime } from './audioClockAlarm.ts';
 import { encodeWav, downloadBlob } from './export/wav.ts';
 import { renderSong } from './render/renderSong.ts';
 import { runExport, DEFAULT_EXPORT } from './export/exporter.ts';
@@ -268,7 +272,6 @@ export class AudioEngine {
   public scaleType: 'chromatic' | 'minor' | 'major' | 'phrygian' | 'dorian' | 'harmonic_minor' | 'pentatonic' | 'bhairav' = 'minor';
 
   // Core Audio Hardware & Clocking State
-  public driverModel: 'ASIO' | 'CoreAudio' | 'WebAudio' = 'WebAudio';
   public bufferSize: 64 | 128 | 256 | 512 | 1024 | 2048 = 128;
   public sampleRateTarget: 44100 | 48000 | 88200 | 96000 | 192000 = 48000;
   public loopbackEnabled: boolean = false;
@@ -417,6 +420,7 @@ export class AudioEngine {
    */
   private realtimeTasks = new Set<(now: number, until: number) => boolean>();
   private realtimeTimer: { stop: () => void } | null = null;
+  private realtimeServiceQueued = false;
   private nextNoteTime: number = 0;
   private scheduleAheadTime: number = 0.12;
   private lookaheadMs: number = 25;
@@ -463,7 +467,7 @@ export class AudioEngine {
       requestRealtime: (callback) => this.requestRealtime(callback),
     };
 
-    this.cvEngine = new CVEngine();
+    this.cvEngine = new CVEngine((callback) => this.requestRealtime(callback));
 
     // Master Bus Nodes
     this.masterBusL = this.ctx.createGain();
@@ -508,6 +512,7 @@ export class AudioEngine {
     this.registerProjectSection('mastering', { save: () => this.mastering.save(), load: (d) => this.mastering.load(d) });
     this.registerProjectSection('mixer', this.mixer);
     this.registerProjectSection('deviceSamples', deviceSamplesSection((id) => this.devices.has(id)));
+    this.registerProjectSection('cvMatrix', cvMatrixSection(this.cvEngine));
     this.registerProjectSection('projectTime', {
       save: () => ({
         timeMap: this.timeMap.serialize(),
@@ -671,9 +676,10 @@ export class AudioEngine {
     const buf = context.createBuffer(2, len, rate);
     for (let ch = 0; ch < 2; ch++) {
       const data = buf.getChannelData(ch);
+      const random = seededRandom(`outboard-ir:${durationSec}:${decay}:${rate}:channel:${ch}`);
       for (let i = 0; i < len; i++) {
         const t = i / len;
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay) * 0.5;
+        data[i] = (random() * 2 - 1) * Math.pow(1 - t, decay) * 0.5;
       }
     }
     return buf;
@@ -903,6 +909,8 @@ export class AudioEngine {
         timeMap: this.timeMap.serialize(),
         loop: this.getLoopRange(),
         loopEnabled: this.loopEnabled,
+        // Block / Song switches are edits too: they are undo steps like the rest of the sequencer state.
+        playbackMode: this.playbackMode,
       });
     } catch {
       return '';
@@ -930,7 +938,9 @@ export class AudioEngine {
   }
 
   private captureUndoSoon(): void {
-    if (this.suppressUndoCapture || this.restoring || this.undoTimer !== null) return;
+    // Playback notifies once per bar; capturing then recorded the transport's own changes as undo steps.
+    // Edits made while playing are recorded when playback stops (see stopTransport).
+    if (this.suppressUndoCapture || this.restoring || this.undoTimer !== null || this.isPlaying) return;
     this.undoTimer = window.setTimeout(() => {
       this.undoTimer = null;
       this.flushUndoCapture();
@@ -967,6 +977,7 @@ export class AudioEngine {
       if (snap.timeMap) this.timeMap.deserialize(snap.timeMap);
       if (snap.loop) this.setLoopLocators(snap.loop.start, snap.loop.end);
       if (typeof snap.loopEnabled === 'boolean') this.loopEnabled = snap.loopEnabled;
+      if (snap.playbackMode === 'song_arrangement' || snap.playbackMode === 'pattern_loop') this.playbackMode = snap.playbackMode;
       this.lastTracksJson = json;
       this.updateTrackChannelStrip();
       this.notify();
@@ -982,10 +993,13 @@ export class AudioEngine {
 
   /** Records a pending sequencer capture now (a knob move or an undo must not land beneath it). */
   private flushPendingUndo(): void {
-    if (this.undoTimer === null) return;
-    clearTimeout(this.undoTimer);
-    this.undoTimer = null;
-    this.flushUndoCapture();
+    const pending = this.undoTimer !== null;
+    if (this.undoTimer !== null) {
+      clearTimeout(this.undoTimer);
+      this.undoTimer = null;
+    }
+    // Nothing is captured on a timer while playing, so an undo or redo records the edits made so far first.
+    if (pending || this.isPlaying) this.flushUndoCapture();
   }
 
   public redo(): boolean {
@@ -1077,16 +1091,17 @@ export class AudioEngine {
         .map((d) => ({
           id: d.id, type: d.type, name: d.name, isPowered: d.isPowered, isBypassed: d.isBypassed, params: { ...d.params },
           vst: d instanceof VstPluginDevice ? d.toProjectData().snapshot : undefined,
+          matrix: d instanceof MatrixDevice ? { patterns: d.patterns } : undefined,
         })),
       tracks: this.tracks,
       trackFolders: this.trackFolders,
       songBlocks: this.songBlocks,
       blockPlacements: this.blockPlacements,
       audioConnections: this.audioConnections.map((c) => ({
-        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId,
+        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, col: c.color,
       })),
       cvConnections: this.cvConnections.map((c) => ({
-        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, a: c.amount,
+        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, a: c.amount, col: c.color,
       })),
       rackGroups: this.rackGroups,
       // Module blocks: mixer, automation, audio clips, … (registerProjectSection)
@@ -1123,11 +1138,13 @@ export class AudioEngine {
           const nd = isVst ? this.createVstDevice(d.vst as VstUnitSnapshot, { name, restoreId: this.restoring ? d.id : undefined })
             : this.createDeviceInner(d.type, name, this.restoring ? d.id : undefined);
           idMap.set(d.id, nd.id);
-          Object.entries(d.params || {}).forEach(([k, v]) => {
-            if (typeof v === 'number' || (k === 'subVoice' && typeof v === 'string') || (isVst && k === 'presetId')) nd.setParam(k, v);
+          if (nd instanceof VstPluginDevice) nd.restoreParams(d.params || {});
+          else Object.entries(d.params || {}).forEach(([k, v]) => {
+            if (typeof v === 'number' || (k === 'subVoice' && typeof v === 'string')) nd.setParam(k, v);
             else if (k === 'target' && typeof v === 'string' && v) playerTargets.push([nd.id, v]);
           });
-          nd.isPowered = d.isPowered !== false;
+          if (nd instanceof MatrixDevice && d.matrix) nd.loadPatterns(d.matrix);
+          nd.isPowered = d.isPowered !== false && d.type !== 'automation_clip';
           nd.isBypassed = !!d.isBypassed;
         } catch {}
       }
@@ -1238,13 +1255,13 @@ export class AudioEngine {
           (x) => x.sourceDeviceId === src && x.sourcePortId === c.sp && x.targetDeviceId === tgt && x.targetPortId === c.tp
         );
         if (!exists) {
-          try { this.connectAudio(src, c.sp, tgt, c.tp); } catch {}
+          try { this.connectAudio(src, c.sp, tgt, c.tp, typeof c.col === 'string' ? c.col : undefined); } catch {}
         }
       });
       (p.cvConnections || []).forEach((c: any) => {
         const src = idMap.get(c.s);
         const tgt = idMap.get(c.t);
-        if (src && tgt) this.connectCV(src, c.sp, tgt, c.tp, typeof c.a === 'number' ? c.a : 1);
+        if (src && tgt) this.connectCV(src, c.sp, tgt, c.tp, typeof c.a === 'number' ? c.a : 1, typeof c.col === 'string' ? c.col : undefined);
       });
       (Array.isArray(p.rackGroups) ? p.rackGroups : []).forEach((g: RackGroup) => {
         const deviceIds = (g.deviceIds || []).map((id) => idMap.get(id)).filter((id): id is string => !!id);
@@ -1293,23 +1310,41 @@ export class AudioEngine {
   // ---- Real-time bounce: records exactly what you hear (before the monitor section) ----
   public async bounceRealtimeWav(): Promise<boolean> {
     await this.resumeContext();
-    if (!(await ensureRecorderWorklet(this.ctx))) return false;
+    if (!(await ensureRecorderWorklet(this.ctx))) {
+      toast('The real-time bounce could not start: the recorder is not available in this browser.', 'error');
+      return false;
+    }
     // Whole arrangement in Song mode, one pass of the longest active pattern in Pattern mode (max 10 min).
-    const bodyMs = Math.min(600, this.renderLength16ths() * (60 / this.bpm / 4)) * 1000;
+    // This must agree with the scheduler, which follows the project tempo map
+    // rather than assuming a constant root BPM.
+    const songSec = this.timeMap.sixteenthToSeconds(this.renderLength16ths());
+    if (songSec > 600) toast('The real-time bounce stops after 10 minutes. Export the song for the whole length.', 'info');
+    const bodySec = Math.min(600, songSec);
+    const tailSec = 2;
     const savedLoop = this.loopEnabled;
     this.stopTransport();
     this.loopEnabled = false; // play straight through to the song end
     this.seekToSongPosition(0);
     const capture = new WorkletCapture(this.ctx, this.masterTap, 2);
-    capture.start();
+    await capture.start();
     await this.startTransport();
-    await new Promise((r) => setTimeout(r, bodyMs));
-    this.stopTransport();
+    // `nextNoteTime` is the exact AudioContext time of bar 1, not the time at
+    // which this async method happened to return. The worklet receives the
+    // capture cut before playback starts, so it owns the final sample boundary.
+    const bodyEnd = this.nextNoteTime + bodySec;
+    const captureStopped = capture.stopAt(bodyEnd + tailSec);
+    await waitForAudioTime(this.ctx, bodyEnd);
+    // An arrangement stops itself at its scheduled final step. Pattern mode and
+    // the 10-minute safety cap need this audio-clock-aligned state transition.
+    if (this.isPlaying) this.stopTransport();
     this.loopEnabled = savedLoop;
     this.notify();
-    await new Promise((r) => setTimeout(r, 2000)); // let reverb / delay tails ring out
+    await captureStopped; // tail is still captured even while the UI is busy
     const data = await capture.stop();
-    if (!data.channels[0]?.length) return false;
+    if (!data.channels[0]?.length) {
+      toast('The real-time bounce captured no audio.', 'error');
+      return false;
+    }
     const sr = this.ctx.sampleRate;
     downloadBlob(encodeWav(data.channels, sr, { bitDepth: 24, dither: true }), `THE_UNBOX_APP_Bounce_${sr}Hz_24bit.wav`);
     return true;
@@ -1417,12 +1452,30 @@ export class AudioEngine {
     return (['kick', 'snare', 'hatC', 'hatO', 'clap', 'perc'] as const).map((role) => this.drumNoteFor(kit, role));
   }
 
+  /** All Notes Off (CC 123) or System Reset: the held and sustained keys end; a reset also clears every channel's pedal. */
+  private allMidiNotesOff(channel: number | undefined): void {
+    this.midiNoteLifecycle.allOff(
+      channel,
+      (target, releasedNote, releasedChannel) => {
+        if (target instanceof SpecDevice) target.keyRelease(releasedNote, this.ctx.currentTime);
+        this.recorder.noteOff(target.id, releasedNote, releasedChannel);
+      },
+      (target, releasedNote) => this.releaseLiveSound(target, releasedNote)
+    );
+    if (channel === undefined) this.midiSustainChannels.clear();
+    else this.midiSustainChannels.delete(channel);
+  }
+
   private handleMidiMessage(data: Uint8Array): void {
     if (!data || data.length < 2) return;
     const cmd = data[0] & 0xf0;
     const channel = data[0] & 0x0f;
     const note = data[1];
     const vel = data.length > 2 ? data[2] : 0;
+    if (cmd === 0xb0 && note === 123) {
+      this.allMidiNotesOff(channel);
+      return;
+    }
 
     if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) {
       const dev = this.midiTarget();
@@ -1686,8 +1739,10 @@ export class AudioEngine {
         dev = new MidiOutDevice(this.ctx, id, customName || 'MIDI Out External Control');
         break;
       case 'automation_clip':
-        // Legacy saved type only. New automation is represented by automation lanes, not a rack device.
+        // Legacy saved type only. New automation is represented by automation lanes, not a rack device. The old
+        // unit loads switched off: it must not sound as an unrelated synth.
         dev = new SubtractorDevice(this.ctx, id, customName || 'Automation Clip Modulator');
+        dev.isPowered = false;
         break;
       case 'mix_bus':
         dev = new MixBusDevice(this.ctx, id, customName || 'Bus');
@@ -1741,7 +1796,7 @@ export class AudioEngine {
     this.devices.set(id, dev);
     dev.isPowered = true;
     // Built-in effects without their own bypass / power switching get a generic one.
-    if (!(dev instanceof SpecDevice) && !(dev instanceof VstPluginDevice) && !(dev instanceof MixBusDevice)) installBypassShim(dev);
+    if (!(dev instanceof SpecDevice) && !(dev instanceof VstPluginDevice) && !(dev instanceof MixBusDevice) && !(dev instanceof RV7000Device)) installBypassShim(dev);
     // Calibrated instrument output level (some built-ins were far too hot / quiet).
     if (this.isPlayableInstrument(dev.type)) {
       installLevelTrim(dev);
@@ -1812,13 +1867,21 @@ export class AudioEngine {
   public setRackMacro(groupId: string, macroId: string, value: number): void {
     const macro = this.rackGroups.find((g) => g.id === groupId)?.macros.find((m) => m.id === macroId);
     if (!macro) return;
-    macro.value = Math.max(0, Math.min(1, value));
-    macro.targets.forEach((t) => this.devices.get(t.deviceId)?.setParam(t.param, t.min + (t.max - t.min) * macro.value));
+    const prev = macro.value;
+    const next = Math.max(0, Math.min(1, value));
+    const apply = (v: number) => {
+      macro.value = v;
+      macro.targets.forEach((t) => this.devices.get(t.deviceId)?.setParam(t.param, t.min + (t.max - t.min) * v));
+      this.changed();
+    };
+    apply(next);
+    // A macro move is a user edit: undo puts the knob and the parameters it drives back (a build records nothing here).
+    if (!this.undoSuspended() && prev !== next) undoJournal.push(`macro:${groupId}:${macroId}`, 'Turn Combiner macro', () => apply(prev), () => apply(next));
   }
 
   /** Remove a group frame; with `deleteDevices` its units are unmounted too (re-bridging the chain). */
   public removeRackGroup(groupId: string, deleteDevices = false): void {
-    const undoable = this.beginStructural('Delete Combiner');
+    const undoable = this.beginStructural(deleteDevices ? 'Delete Combiner' : 'Ungroup Combiner');
     try {
       this.removeRackGroupInner(groupId, deleteDevices);
     } finally {
@@ -1850,13 +1913,22 @@ export class AudioEngine {
     }
     const toMaster = this.audioConnections.filter((c) => c.sourceDeviceId === tail && c.targetDeviceId === 'master');
     if (toMaster.length === 0) return false;
-    try {
-      toMaster.forEach((c) => this.disconnectAudio(c.id));
-      this.connectAudio(tail, 'out_l', effectId, 'in_l');
-      this.connectAudio(tail, 'out_r', effectId, 'in_r');
-      this.connectAudio(effectId, 'out_l', 'master', 'master_l');
-      this.connectAudio(effectId, 'out_r', 'master', 'master_r');
-    } catch {
+    // One cable per input: an effect whose inputs are taken would refuse the new cables and cut the track off.
+    if (this.audioConnections.some((c) => c.targetDeviceId === effectId && (c.targetPortId === 'in_l' || c.targetPortId === 'in_r'))) return false;
+    const restore = toMaster.map((c) => ({ sourcePortId: c.sourcePortId, targetPortId: c.targetPortId, color: c.color }));
+    const made: string[] = [];
+    const link = (sourceId: string, sourcePort: string, targetId: string, targetPort: string): boolean => {
+      const id = this.connectAudio(sourceId, sourcePort, targetId, targetPort);
+      if (id) made.push(id);
+      return !!id;
+    };
+    toMaster.forEach((c) => this.disconnectAudio(c.id));
+    const linked = link(tail, 'out_l', effectId, 'in_l') && link(tail, 'out_r', effectId, 'in_r')
+      && link(effectId, 'out_l', 'master', 'master_l') && link(effectId, 'out_r', 'master', 'master_r');
+    if (!linked) {
+      // A refused cable must not leave the track half-patched: undo what was made and put the master cables back.
+      made.forEach((id) => this.disconnectAudio(id));
+      restore.forEach((r) => this.connectAudio(tail, r.sourcePortId, 'master', r.targetPortId, r.color));
       return false;
     }
     this.notify();
@@ -2322,6 +2394,11 @@ export class AudioEngine {
   public async freezeTrack(trackId: string): Promise<string | null> {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track || track.kind === 'audio' || track.disabled || this.isRecording) return null;
+    // The freeze renders the arrangement; Block mode does not play it, so the frozen track would lose its song placements.
+    if (this.playbackMode === 'pattern_loop') {
+      toast('Switch to Song mode to freeze a track: Block mode does not play the arrangement.', 'info');
+      return null;
+    }
     const len = this.renderLength16ths();
     if (len <= 0) return null;
     const before = this.exportProjectJSON();
@@ -2434,6 +2511,9 @@ export class AudioEngine {
       this.workerTimer.stop();
       this.workerTimer = null;
     }
+    // A held live note or stopped-transport clock may still need look-ahead
+    // service after pause. Hand the shared tasks back to their stopped clock.
+    this.refreshRealtimeScheduler();
     this.notify();
   }
 
@@ -2468,8 +2548,23 @@ export class AudioEngine {
     this.pendingStopTime = null;
     this.launchOrigin.clear();
     this.clipVoices.stopAll();
+    // Control-rate automation queued for the old position must not land after the seek.
+    this.automation.stopped();
     if (this.isPlaying) this.chaseNextStep = this.noteChaseEnabled;
     this.notify();
+  }
+
+  /** Stop releases every instrument now, not when the note-offs already scheduled for the song come round. */
+  private silenceInstruments(): void {
+    const now = this.ctx.currentTime;
+    for (const dev of this.devices.values()) {
+      if (dev instanceof SpecDevice) {
+        dev.allNotesOff();
+        continue;
+      }
+      // Legacy instruments have no all-off: a note-off for a note that is not sounding does nothing.
+      for (let note = 0; note < 128; note++) dev.noteOff?.(note, now);
+    }
   }
 
   public stopTransport(): void {
@@ -2480,8 +2575,14 @@ export class AudioEngine {
     this.launchQueue.clear();
     this.launchOrigin.clear();
     this.clipVoices.stopAll();
+    this.silenceInstruments();
     this.automation.stopped();
     this.isPlaying = false;
+    // Edits made during playback are recorded once, here (no capture runs while the transport plays).
+    if (!this.suppressUndoCapture && !this.restoring) {
+      this.flushPendingUndo();
+      this.flushUndoCapture();
+    }
     this.transportState.setStatus('stopped');
     this.transportState.setPlayhead(0);
     this.pendingStopTime = null;
@@ -2694,6 +2795,10 @@ export class AudioEngine {
       if (this.ctx.currentTime >= this.pendingStopTime) this.stopTransport();
       return;
     }
+    // A cold/blocked main thread can receive its first worker tick after the original look-ahead
+    // time. Never schedule an entire step in the past: Web Audio will immediately finish its
+    // already-expired note, which makes a just-started arrangement silently miss its first hit.
+    if (this.nextNoteTime < this.ctx.currentTime) this.nextNoteTime = this.ctx.currentTime + 0.005;
     while (this.isPlaying && this.pendingStopTime === null && this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
       this.scheduleStep(this.songPosition, this.nextNoteTime);
       this.advanceStep();
@@ -2707,11 +2812,26 @@ export class AudioEngine {
    */
   private requestRealtime(callback: (now: number, until: number) => boolean): () => void {
     this.realtimeTasks.add(callback);
-    this.serviceRealtimeTasks();
+    // Do not invoke a newly registered callback synchronously: a few voice
+    // factories register before their just-created voice is added to its pool.
+    // A microtask runs after that construction stack completes, which also
+    // covers the worker's initial startup gap without adding another timer.
+    this.refreshRealtimeScheduler();
+    this.queueRealtimeService();
     return () => {
       this.realtimeTasks.delete(callback);
       this.refreshRealtimeScheduler();
     };
+  }
+
+  private queueRealtimeService(): void {
+    if (this.realtimeServiceQueued || this.realtimeTasks.size === 0) return;
+    this.realtimeServiceQueued = true;
+    queueMicrotask(() => {
+      this.realtimeServiceQueued = false;
+      if (this.isPlaying) this.scheduler();
+      else this.serviceRealtimeTasks();
+    });
   }
 
   private serviceRealtimeTasks(): void {
@@ -3391,6 +3511,12 @@ export class AudioEngine {
     this.notify();
   }
 
+  /** MIDI Out tracks have no mixer strip to mute them, so their notes follow the same mute and solo rule the console applies. */
+  private midiOutAudible(track: SequencerTrack): boolean {
+    if (track.mute) return false;
+    return !!track.solo || !this.tracks.some((t) => t.solo);
+  }
+
   public toggleTrackMute(trackId: string): void {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
@@ -3750,6 +3876,7 @@ export class AudioEngine {
       if (track.disabled) continue;
       const dev = this.devices.get(track.deviceId);
       if (!dev || !dev.isPowered || dev.isBypassed) continue;
+      if (dev instanceof MidiOutDevice && !this.midiOutAudible(track)) continue;
       // Delay compensation slot: a positive offset plays later, negative earlier (hardware latency).
       const offsetSec = (track.offsetMs ?? 0) / 1000;
       const shifted = (t: number) => (offsetSec ? Math.max(this.ctx.currentTime, t + offsetSec) : t);
@@ -3911,7 +4038,8 @@ export class AudioEngine {
   }
 
   // ---- Player devices: note processors that sit on an instrument (their target) ----
-  private playerTimer: number | null = null;
+  /** Generator players share the engine's AudioContext-time realtime service. */
+  private playerRealtimeStop: (() => void) | null = null;
   private playerUntil = new Map<string, number>();
 
   /** Powered players targeting `deviceId`, in rack order. */
@@ -4007,19 +4135,24 @@ export class AudioEngine {
     // release whatever the player was holding on its old instrument
     if (old) p.engine.player.allOff(this.ctx.currentTime, { on: () => undefined, off: (n, t) => old.noteOff?.(n, t) });
     p.setParam('target', targetId ?? '');
-    this.ensurePlayerClock();
+    // A stopped generator has no work until a live key is held. Starting its
+    // service here can let it retire between target assignment and note-on;
+    // liveNoteOn registers the held note before it asks for the service.
+    if (this.isPlaying) this.ensurePlayerClock();
     this.notify();
   }
 
   /** Runs generator players (arps, Beat Map, Quad Note Generator) with a 120 ms look-ahead. */
   private ensurePlayerClock(): void {
-    if (this.playerTimer !== null || typeof window === 'undefined') return;
-    this.playerTimer = window.setInterval(() => this.tickPlayers(), 25);
+    if (this.playerRealtimeStop) return;
+    this.playerRealtimeStop = this.requestRealtime((now, until) => {
+      const running = this.tickPlayers(now, until);
+      if (!running) this.playerRealtimeStop = null;
+      return running;
+    });
   }
 
-  private tickPlayers(): void {
-    const now = this.ctx.currentTime;
-    const to = now + this.scheduleAheadTime;
+  private tickPlayers(now = this.ctx.currentTime, to = now + this.scheduleAheadTime): boolean {
     let running = false;
     this.devices.forEach((p) => {
       const proc = p instanceof SpecDevice ? p.engine.player : undefined;
@@ -4037,10 +4170,7 @@ export class AudioEngine {
       if (from < to) proc.tick(from, to, this.sinkFor(target, chain, chain.indexOf(p) + 1), pctx);
       this.playerUntil.set(p.id, to);
     });
-    if (!running && this.playerTimer !== null) {
-      clearInterval(this.playerTimer);
-      this.playerTimer = null;
-    }
+    return running;
   }
 
   private advanceStep(): void {

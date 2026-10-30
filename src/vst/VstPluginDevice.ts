@@ -314,9 +314,20 @@ export class VstPluginDevice extends BaseDevice {
     this.preview = null;
   }
 
+  /**
+   * Replays saved params. Choosing a preset voices the macros, so the preset goes first: replayed
+   * in key order it would come after the macros and overwrite the values saved with them.
+   */
+  public restoreParams(params: Record<string, unknown>): void {
+    if (typeof params.presetId === 'string') this.setParam('presetId', params.presetId);
+    Object.entries(params).forEach(([k, v]) => {
+      if (k !== 'presetId' && typeof v === 'number') this.setParam(k, v);
+    });
+  }
+
   public cloneForOfflineContext(ctx: BaseAudioContext): VstPluginDevice {
     const clone = new VstPluginDevice(ctx as AudioContext, this.id, this.name, this.snapshot);
-    Object.entries(this.params).forEach(([k, v]) => clone.setParam(k, v));
+    clone.restoreParams(this.params);
     return clone;
   }
 

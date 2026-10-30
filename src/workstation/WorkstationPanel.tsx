@@ -71,7 +71,7 @@ export const WorkstationPanel: React.FC<Props> = ({ selectedId, onSelect, onOpen
         </div>
         <div className="w-[70px] shrink-0 flex flex-col justify-between items-center py-0.5 min-h-0 overflow-y-auto" role="toolbar" aria-label="Workstation functions">
           <PanelButton label="LOAD" title="Load an instrument for this part (or add a part)" onClick={() => setLoad({ track })} testId="ws-load" />
-          <PanelButton label="EDIT" title="Open this part's full instrument panel" active={editing} onClick={() => setEditing((v) => !v)} testId="ws-edit" />
+          <PanelButton label="EDIT" title="Open this part's full instrument panel" active={editing && !!dev} onClick={() => setEditing((v) => !v)} testId="ws-edit" />
           <PanelButton label="CLIP" title="Audio clip editor: trim duration, split and slice audio" active={page === 'clip'} onClick={() => toggle('clip')} testId="ws-clip" />
           <PanelButton label="MIDI" title="Keyboard, MIDI input and recording for this part" active={page === 'midi'} onClick={() => toggle('midi')} testId="ws-midi" />
           <PanelButton label="MIX" title="Level, pan, width, trim and sends" active={page === 'mix'} onClick={() => toggle('mix')} testId="ws-mix" />

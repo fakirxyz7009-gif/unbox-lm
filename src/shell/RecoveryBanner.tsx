@@ -39,7 +39,9 @@ export function RecoveryBanner() {
       <button
         type="button"
         disabled={busy}
-        onClick={() => void projectManager.discardRecovery()}
+        onClick={() => {
+          if (window.confirm(`Discard the unsaved changes from ${label}? They cannot be recovered afterwards.`)) void projectManager.discardRecovery();
+        }}
         className="rounded border border-[#5a4a35] px-2 py-1 text-[11px] text-[#c2c9cf] hover:bg-white/5 disabled:opacity-50"
       >
         Discard

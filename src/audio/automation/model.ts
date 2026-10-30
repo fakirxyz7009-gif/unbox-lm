@@ -108,22 +108,40 @@ export function clearRange(points: AutoPoint[], from: number, to: number): AutoP
   return points.filter((p) => p.pos <= from || p.pos > to);
 }
 
-/** Drops points that a straight line between their neighbours already describes (recording cleanup). */
+/**
+ * Drops points that a straight line already describes (recording cleanup). Every dropped point lies
+ * within `tolerance` of the kept segment that replaces it, so a slow drift cannot build up over many
+ * small steps. Shaped and held points are always kept.
+ */
 export function thinPoints(points: AutoPoint[], tolerance = 0.004): AutoPoint[] {
   if (points.length < 3) return points;
   const out: AutoPoint[] = [points[0]];
-  for (let i = 1; i < points.length - 1; i++) {
-    const a = out[out.length - 1];
-    const p = points[i];
-    const b = points[i + 1];
-    if (a.hold || p.hold || a.curve || p.curve) {
-      out.push(p);
+  let anchor = 0;
+  let next = 2;
+  while (next < points.length) {
+    if (fitsLine(points, anchor, next, tolerance)) {
+      next += 1;
       continue;
     }
-    const t = (p.pos - a.pos) / (b.pos - a.pos || 1);
-    const lin = a.value + (b.value - a.value) * t;
-    if (Math.abs(lin - p.value) > tolerance) out.push(p);
+    // The point before `next` is the last one the straight line from the anchor still describes.
+    anchor = next - 1;
+    out.push(points[anchor]);
+    next = anchor + 2;
   }
-  out.push(points[points.length - 1]);
+  if (out[out.length - 1] !== points[points.length - 1]) out.push(points[points.length - 1]);
   return out;
+}
+
+/** True when every point strictly between `a` and `b` lies within `tolerance` of the straight line from a to b. */
+function fitsLine(points: AutoPoint[], a: number, b: number, tolerance: number): boolean {
+  const start = points[a];
+  const end = points[b];
+  if (start.hold || start.curve) return false;
+  for (let k = a + 1; k < b; k++) {
+    const p = points[k];
+    if (p.hold || p.curve) return false;
+    const t = (p.pos - start.pos) / (end.pos - start.pos || 1);
+    if (Math.abs(start.value + (end.value - start.value) * t - p.value) > tolerance) return false;
+  }
+  return true;
 }

@@ -128,7 +128,8 @@ export class MonitorController {
     set(this.calMid.Q, Math.max(0.1, s.calMidQ));
     set(this.calHigh.gain, on ? s.calHighDb : 0);
     set(this.calHigh.frequency, s.calHighHz);
-    set(this.trim.gain, dbToGain(Math.max(-24, Math.min(12, s.trimDb))));
+    // The monitor trim only cuts: a boost after the mix could clip the speakers at full scale.
+    set(this.trim.gain, dbToGain(Math.max(-24, Math.min(0, s.trimDb))));
   }
 
   /** True when the browser can switch the output device of an AudioContext. */

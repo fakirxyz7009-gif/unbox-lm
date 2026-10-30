@@ -97,34 +97,8 @@ async function probeEffect(type: string): Promise<number> {
   let taps: AnalyserNode[] = [];
   let source: OscillatorNode | null = null;
   let inputGain: GainNode | null = null;
-  let bypassGains: GainNode[] = [];
   try {
-    const gainDescriptor = type === 'rv7000'
-      ? Object.getOwnPropertyDescriptor(audioEngine.ctx, 'createGain')
-      : undefined;
-    if (type === 'rv7000') {
-      const createGain = audioEngine.ctx.createGain.bind(audioEngine.ctx);
-      Object.defineProperty(audioEngine.ctx, 'createGain', {
-        configurable: true,
-        value: () => {
-          const gain = createGain();
-          bypassGains.push(gain);
-          return gain;
-        },
-      });
-    }
-    try {
-      device = audioEngine.createDevice(type as Parameters<typeof audioEngine.createDevice>[0], `Device smoke ${type}`);
-    } finally {
-      if (type === 'rv7000') {
-        if (gainDescriptor) Object.defineProperty(audioEngine.ctx, 'createGain', gainDescriptor);
-        else Reflect.deleteProperty(audioEngine.ctx, 'createGain');
-      }
-    }
-    if (type === 'rv7000') {
-      // The generic bypass shim is installed last and creates six gains: wet L/R, dry L/R, output L/R.
-      bypassGains = bypassGains.slice(-6);
-    }
+    device = audioEngine.createDevice(type as Parameters<typeof audioEngine.createDevice>[0], `Device smoke ${type}`);
     await waitReady(device);
     taps = tapOutputs(device);
     const inputs = [...device.audioInputs.values()];
@@ -159,12 +133,11 @@ async function probeEffect(type: string): Promise<number> {
       await pause(100);
       const repoweredPeak = peakOf(taps);
       const inputPeak = peakOf([inputTap]);
-      const shim = bypassGains.map((gain) => gain.gain.value.toFixed(3)).join('/');
       inputTap.disconnect();
       if (bypassPeak <= 1e-5 || restoredPeak <= 1e-5 || poweredOffPeak > 1e-5 || repoweredPeak <= 1e-5) {
-        throw new Error(`bypass/power transition failed (input=${inputPeak.toExponential(2)}, bypass=${bypassPeak.toExponential(2)}, restored=${restoredPeak.toExponential(2)}, off=${poweredOffPeak.toExponential(2)}, repowered=${repoweredPeak.toExponential(2)}, shim=${shim})`);
+        throw new Error(`bypass/power transition failed (input=${inputPeak.toExponential(2)}, bypass=${bypassPeak.toExponential(2)}, restored=${restoredPeak.toExponential(2)}, off=${poweredOffPeak.toExponential(2)}, repowered=${repoweredPeak.toExponential(2)})`);
       }
-      extraChecks.push(`RV7000 bypass/power restore passed (bypass ${bypassPeak.toExponential(2)}, repowered ${repoweredPeak.toExponential(2)}, shim ${shim})`);
+      extraChecks.push(`RV7000 bypass/power restore passed (bypass ${bypassPeak.toExponential(2)}, repowered ${repoweredPeak.toExponential(2)})`);
     }
     if (peak <= 1e-5) {
       let detail = '';
@@ -189,8 +162,7 @@ async function probeEffect(type: string): Promise<number> {
         const irDuration = convolver instanceof ConvolverNode ? convolver.buffer?.duration ?? 0 : 0;
         const dry = dryGain instanceof GainNode ? dryGain.gain.value : NaN;
         const wet = wetGain instanceof GainNode ? wetGain.gain.value : NaN;
-        const shim = bypassGains.map((gain) => gain.gain.value.toFixed(3)).join('/');
-        detail = `; RV diagnostics input=${inputPeak.toExponential(2)}, bypass=${bypassPeak.toExponential(2)}, raw=${rawPeak.toExponential(2)}, mix=${dry.toFixed(2)}/${wet.toFixed(2)}, shim=${shim}, IR=${irDuration.toFixed(2)} s`;
+        detail = `; RV diagnostics input=${inputPeak.toExponential(2)}, bypass=${bypassPeak.toExponential(2)}, raw=${rawPeak.toExponential(2)}, mix=${dry.toFixed(2)}/${wet.toFixed(2)}, IR=${irDuration.toFixed(2)} s`;
         inputTap.disconnect();
         rawTap.disconnect();
       }

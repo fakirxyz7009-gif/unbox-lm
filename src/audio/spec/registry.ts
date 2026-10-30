@@ -8,6 +8,7 @@ import { wavetableEngine } from './engines/wavetable.ts';
 import { fmEngine } from './engines/fm.ts';
 import { westcoastEngine } from './engines/westcoast.ts';
 import { modalEngine } from './engines/modal.ts';
+import { karplusEngine } from './engines/karplus.ts';
 import { bowedEngine, formantEngine } from './engines/sustained.ts';
 import { granularEngine, loopsEngine, samplerEngine } from './engines/sampler.ts';
 import { drumsEngine } from './engines/drums.ts';
@@ -30,6 +31,7 @@ const ENGINES: Record<EngineId, EngineFactory> = {
   fm: fmEngine,
   westcoast: westcoastEngine,
   modal: modalEngine,
+  karplus: karplusEngine,
   formant: formantEngine,
   bowed: bowedEngine,
   sampler: samplerEngine,

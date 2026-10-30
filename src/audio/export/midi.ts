@@ -88,8 +88,10 @@ export function exportMidi(engine: AudioEngine, range?: { start: number; end: nu
       if (!src) continue;
       for (const hit of hitsInWindow(src, tick, TICKS_PER_16TH, spb)) {
         if (hit.note.muted) continue;
-        const on = Math.round((pos - start) * PER16 + hit.offsetTicks * SCALE + (hit.note.microOffset ?? 0) * hit.stepTicks * SCALE);
-        const len = Math.max(1, Math.round(hit.lengthTicks * SCALE * 0.95));
+        // Swing delays every odd 16th by half the swing amount (the same offset the live scheduler uses); lengths are exact.
+        const swingSteps = pos % 2 === 1 ? engine.globalSwing * 0.5 : 0;
+        const on = Math.round((pos - start + swingSteps) * PER16 + hit.offsetTicks * SCALE + (hit.note.microOffset ?? 0) * hit.stepTicks * SCALE);
+        const len = Math.max(1, Math.round(hit.lengthTicks * SCALE));
         const notes = [hit.note.note, ...(hit.note.chordNotes ?? [])].map((n) => Math.max(0, Math.min(127, n + (t.pitchOffset ?? 0))));
         const vel = Math.max(1, Math.min(127, Math.round(hit.note.velocity * 127)));
         for (const n of notes) {
@@ -121,9 +123,13 @@ export function parseMidi(buf: ArrayBuffer): { ppq: number; bpm: number; tracks:
   const d = new DataView(buf);
   const u8 = new Uint8Array(buf);
   if (d.getUint32(0) !== 0x4d546864) throw new Error('Not a MIDI file');
-  const ppq = d.getUint16(12) & 0x7fff || 480;
+  const division = d.getUint16(12);
+  // A SMPTE time-code header has the top bit set: its ticks are not beats, so the file is refused rather than placed wrongly.
+  if (division & 0x8000) throw new Error('SMPTE time-code MIDI files are not supported. Save the file with musical (ticks per beat) timing.');
+  const ppq = division || 480;
   let p = 8 + d.getUint32(4);
   let bpm = 120;
+  let tempoSet = false;
   const out: MidiFileTrack[] = [];
   while (p + 8 <= u8.length) {
     const id = d.getUint32(p);
@@ -160,7 +166,11 @@ export function parseMidi(buf: ArrayBuffer): { ppq: number; bpm: number; tracks:
       if (status === 0xff) {
         const mt = u8[q++];
         const ml = readVlq();
-        if (mt === 0x51 && ml === 3 && bpm === 120) bpm = Math.round((60000000 / ((u8[q] << 16) | (u8[q + 1] << 8) | u8[q + 2])) * 100) / 100;
+        // The first tempo event sets the song tempo; a later change must not overwrite it.
+        if (mt === 0x51 && ml === 3 && !tempoSet) {
+          tempoSet = true;
+          bpm = Math.round((60000000 / ((u8[q] << 16) | (u8[q + 1] << 8) | u8[q + 2])) * 100) / 100;
+        }
         if (mt === 0x03) name = new TextDecoder().decode(u8.subarray(q, q + ml));
         q += ml;
       } else if (status === 0xf0 || status === 0xf7) {
@@ -169,14 +179,21 @@ export function parseMidi(buf: ArrayBuffer): { ppq: number; bpm: number; tracks:
         const note = u8[q++];
         const vel = u8[q++];
         const key = `${ch}:${note}`;
-        if (type === 0x90 && vel > 0) open.set(key, { tick, vel });
-        else {
+        const emit = (o: { tick: number; vel: number }, endTick: number) => {
+          let t = byCh.get(ch);
+          if (!t) byCh.set(ch, (t = { name: '', channel: ch, notes: [] }));
+          t.notes.push({ tick: o.tick, note, velocity: o.vel / 127, length: Math.max(1, endTick - o.tick) });
+        };
+        if (type === 0x90 && vel > 0) {
+          // A second note-on on the same key ends the first note here; it used to replace it and lose it.
+          const previous = open.get(key);
+          if (previous) emit(previous, tick);
+          open.set(key, { tick, vel });
+        } else {
           const o = open.get(key);
           if (o) {
             open.delete(key);
-            let t = byCh.get(ch);
-            if (!t) byCh.set(ch, (t = { name: '', channel: ch, notes: [] }));
-            t.notes.push({ tick: o.tick, note, velocity: o.vel / 127, length: Math.max(1, tick - o.tick) });
+            emit(o, tick);
           }
         }
       } else if (type === 0xc0 || type === 0xd0) q += 1;

@@ -10,10 +10,13 @@ type PadState = ReadonlyMap<number, PadSample | null>;
 const copy = (sample: PadSample | undefined | null): PadSample | null => sample ? { ...sample } : null;
 const equal = (a: PadState, b: PadState) => JSON.stringify([...a]) === JSON.stringify([...b]);
 
-function apply(host: SampleEditHost, deviceId: string, state: PadState): void {
+function apply(host: SampleEditHost, deviceId: string, state: PadState, notify = true): void {
   if (!host.devices.has(deviceId)) return;
   for (const [note, sample] of state) setPadSample(deviceId, note, copy(sample));
-  host.changed();
+  // deviceSamples publishes the live per-note state immediately.  The engine-level event is
+  // deliberately deferred during a drag so one trim gesture does not structurally re-render the
+  // whole workstation once per pointer frame.
+  if (notify) host.changed();
 }
 
 /** Copies metadata only; recorded audio stays immutable in the audio store. */
@@ -62,12 +65,15 @@ export function beginPadSampleGesture(host: SampleEditHost, deviceId: string, no
   return {
     update(sample) {
       if (!current()) return;
-      after = new Map([[note, copy(sample)]]);
-      apply(host, deviceId, after);
+      const next = new Map([[note, copy(sample)]]);
+      if (equal(after, next)) return;
+      after = next;
+      apply(host, deviceId, after, false);
     },
     commit() {
       if (current() && !equal(before, after) && !host.undoSuspended()) {
         const committed = after;
+        host.changed();
         undoJournal.push('', 'Trim note audio', () => apply(host, deviceId, before), () => apply(host, deviceId, committed));
       }
       active = false;

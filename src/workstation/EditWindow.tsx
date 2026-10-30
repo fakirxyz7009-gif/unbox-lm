@@ -4,8 +4,10 @@ import { X } from 'lucide-react';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
 import { DeviceFront } from '../rack/DeviceFront.tsx';
 import { capturePointer } from '../ui/skin/pointer.ts';
+import { useEscapeKey } from '../shell/useEscapeKey.ts';
 
 export const EditWindow: React.FC<{ dev: BaseDevice; onClose: () => void; onMessage: (msg: string, type: 'success' | 'error' | 'info') => void }> = ({ dev, onClose, onMessage }) => {
+  useEscapeKey(onClose);
   const [, force] = useReducer((n: number) => n + 1, 0);
   const [pos, setPos] = useState({ x: Math.max(20, window.innerWidth / 2 - 480), y: 70 });
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);

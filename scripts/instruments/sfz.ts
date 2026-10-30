@@ -187,6 +187,8 @@ export interface SfzOptions {
   allArticulations?: boolean;
   /** Keep CC1 xfin/xfout as a live mod-wheel layer crossfade instead of baking the default. */
   liveModWheel?: boolean;
+  /** Semitones added to every key range and key center. For a source that names its samples at another octave. */
+  keyShift?: number;
 }
 
 /**
@@ -212,7 +214,8 @@ export function readSfz(rootFile: string, read: (rel: string) => string | null, 
   let section = '';
   let region: { ops: Ops; defaultPath: string; keyOffset: number } | null = null;
   const merged: { ops: Ops; defaultPath: string; keyOffset: number }[] = [];
-  const keyOffset = () => (parseInt(control.note_offset ?? '0', 10) || 0) + 12 * (parseInt(control.octave_offset ?? '0', 10) || 0);
+  const keyOffset = () =>
+    (parseInt(control.note_offset ?? '0', 10) || 0) + 12 * (parseInt(control.octave_offset ?? '0', 10) || 0) + (opts.keyShift ?? 0);
   // Any header ends the open region / curve, so parent levels can't change while it is open.
   const close = () => {
     if (region) merged.push({ ...region, ops: { ...global, ...master, ...group, ...region.ops } });
@@ -414,7 +417,14 @@ export function readSfz(rootFile: string, read: (rel: string) => string | null, 
         drop(`generator ${sampleRaw}`);
         continue;
       }
-    } else sample = path.posix.normalize(path.posix.join(defaultPath.replace(/\\/g, '/'), sampleRaw));
+    } else {
+      sample = path.posix.normalize(path.posix.join(defaultPath.replace(/\\/g, '/'), sampleRaw));
+      // A sample outside the program's folder would read a file the pack does not own.
+      if (path.posix.isAbsolute(sample) || /^[a-zA-Z]:/.test(sample) || sample === '..' || sample.startsWith('../')) {
+        drop('sample outside its folder');
+        continue;
+      }
+    }
 
     const key = parseKey(ops.key);
     let lokey = parseKey(ops.lokey) ?? key ?? 0;

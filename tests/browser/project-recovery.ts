@@ -21,6 +21,13 @@ function recoveredProjectId(): string | null {
 
 async function run(): Promise<void> {
   projectManager.autosave = false;
+  // Switching projects with unsaved edits and autosave off asks first; the probe answers and records the prompt.
+  const prompts: string[] = [];
+  let answer = true;
+  window.confirm = (message?: string) => {
+    prompts.push(message ?? '');
+    return answer;
+  };
 
   const beforeRejectedImport = audioEngine.exportProjectJSON();
   expect(!audioEngine.importProjectJSON(JSON.stringify({ format: 'unbox-project', version: 5, devices: [] })),
@@ -60,7 +67,15 @@ async function run(): Promise<void> {
   audioEngine.commitEdit();
   projectManager.setNotes('Recovered edits for the existing target project.');
   const targetRecoveryJson = audioEngine.exportProjectJSON();
+  // Declining the prompt keeps the open project and its unsaved edits.
+  answer = false;
+  expect(!(await projectManager.open(baseId)), 'Declining the discard prompt still switched projects');
+  expect(projectManager.currentId === targetId && audioEngine.bpm === 131,
+    'Declining the discard prompt lost the open project’s unsaved edits');
+  answer = true;
   expect(await projectManager.open(baseId), 'Could not simulate startup into the last saved project');
+  expect(prompts.some((message) => message.includes('Discard them and open Last Saved Project')),
+    'Switching away from unsaved edits did not ask before discarding them');
   const existingTargetRecovery: RecoveryRecord = {
     json: targetRecoveryJson,
     at: Date.now(),

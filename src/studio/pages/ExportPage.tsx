@@ -133,7 +133,7 @@ export function ExportPage() {
             {s.range === 'custom' && (
               <>
                 <NumField title="From bar" value={s.startBar} min={1} step={1} onChange={(v) => set({ startBar: v })} width={50} suffix="to" />
-                <NumField title="To bar" value={s.endBar} min={s.startBar + 1} step={1} onChange={(v) => set({ endBar: v })} width={50} />
+                <NumField title="To bar (exclusive)" value={s.endBar} min={s.startBar + 1} step={1} onChange={(v) => set({ endBar: v })} width={50} />
               </>
             )}
             <span className="text-slate-500">{(range.end - range.start) / audioEngine.stepsPerBar} bars · {seconds.toFixed(1)} s</span>
@@ -165,14 +165,16 @@ export function ExportPage() {
                   <Sel value={String(s.kbps)} onChange={(v) => set({ kbps: Number(v) })} options={bitrateOptions.map((k) => ({ value: String(k), label: `${k} kbps` }))} />
                 </label>
               )}
-              <label className="flex items-center gap-1 col-span-2"><input type="checkbox" checked={s.dither} onChange={(e) => set({ dither: e.target.checked })} /> TPDF dither when reducing to 16 / 24 bit</label>
+              {['wav', 'aiff', 'flac'].includes(s.format) && (
+                <label className="flex items-center gap-1 col-span-2"><input type="checkbox" checked={s.dither} onChange={(e) => set({ dither: e.target.checked })} /> TPDF dither when reducing to 16 / 24 bit</label>
+              )}
             </div>
             <div className="mt-3 text-[11px] uppercase tracking-widest text-slate-500">Normalize (mix)</div>
             <div className="flex flex-wrap items-center gap-1">
               {(['off', 'peak', 'lufs'] as const).map((n) => (
                 <Btn key={n} on={s.normalize === n} onClick={() => set({ normalize: n })}>{n === 'off' ? 'Off' : n === 'peak' ? 'True peak' : 'Loudness (LUFS)'}</Btn>
               ))}
-              {s.normalize === 'peak' && <NumField value={s.peakDb} min={-24} max={0} step={0.1} onChange={(v) => set({ peakDb: v })} width={52} suffix="dBTP" />}
+              {s.normalize === 'peak' && <NumField title="True-peak ceiling" value={s.peakDb} min={-24} max={0} step={0.1} onChange={(v) => set({ peakDb: v })} width={52} suffix="dBTP ceiling" />}
               {s.normalize === 'lufs' && (
                 <>
                   <Sel value={String(s.lufs)} onChange={(v) => set({ lufs: Number(v) })} options={[[-8, 'Club −8'], [-9, 'Loud −9'], [-14, 'Spotify / YouTube −14'], [-16, 'Apple Music / podcast −16'], [-23, 'Broadcast EBU R128 −23'], [-24, 'Broadcast ATSC −24']].map(([v, l]) => ({ value: String(v), label: `${l} LUFS` }))} />
@@ -188,7 +190,8 @@ export function ExportPage() {
           <label className="flex flex-col gap-0.5 mb-1">File name
             <input value={s.fileName} onChange={(e) => set({ fileName: e.target.value })} className="bg-black/60 border border-slate-700 rounded px-1.5 py-0.5 outline-none focus:border-orange-500" />
           </label>
-          {s.what !== 'midi' &&
+          {s.what !== 'midi' && s.format === 'aac' && <p className="text-slate-500">AAC files are written without metadata tags.</p>}
+          {s.what !== 'midi' && s.format !== 'aac' &&
             (['title', 'artist', 'album', 'genre', 'year', 'isrc', 'comment'] as const).map((k) => (
               <label key={k} className="flex items-center gap-1 mb-0.5">
                 <span className="w-14 text-slate-500 uppercase text-[11px]">{k}</span>

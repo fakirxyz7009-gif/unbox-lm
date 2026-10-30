@@ -83,7 +83,9 @@ test('trim gesture records exactly one step and cancellation restores the starti
   gesture.update(sample('recording', { offset: 0.2 }));
   gesture.update(sample('recording', { offset: 0.3 }));
   assert.equal(undoJournal.canUndo, false);
+  assert.equal(f.changes(), 0, 'pointer moves stay in the sample-state subscription, not global engine renders');
   gesture.commit();
+  assert.equal(f.changes(), 1, 'the completed gesture publishes one structural change');
   assert.equal(undoJournal.undo(), 'Trim note audio');
   assert.equal(deviceSample(f.id)?.pads?.[64]?.offset, 0.1);
   const cancelled = beginPadSampleGesture(f.host, f.id, 64);

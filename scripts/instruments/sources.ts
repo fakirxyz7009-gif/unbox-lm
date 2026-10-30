@@ -103,7 +103,12 @@ export async function githubSource(spec: string, cacheRoot: string, log: (m: str
 export function folderSource(programFile: string): SfzSource {
   const abs = path.resolve(programFile);
   const root = path.dirname(abs).replace(/\\/g, '/');
-  const full = (rel: string) => path.posix.join(root, rel);
+  // Samples are read from inside the program's folder only; a '..' or absolute path would read other files.
+  const full = (rel: string) => {
+    const file = path.posix.join(root, rel);
+    if (!file.startsWith(`${root}/`)) throw new Error(`sample outside the instrument folder: ${rel}`);
+    return file;
+  };
   return {
     program: path.basename(abs),
     url: root,

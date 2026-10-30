@@ -9,6 +9,7 @@ import type { BaseDevice } from '../audio/BaseDevice.ts';
 import type { SequencerTrack } from '../audio/types.ts';
 import { deviceParams, type DeviceParam } from '../audio/deviceParams.ts';
 import { isLinked, setLinked } from '../audio/liveLink.ts';
+import { toast } from '../shell/toast.ts';
 import { syncTrackPatterns } from '../audio/sequencer/model.ts';
 import { EFFECT_CATALOG } from '../audio/effectCatalog.ts';
 import { useFrame } from '../nexa/useEngine.ts';
@@ -305,7 +306,10 @@ export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) 
             const fx = EFFECT_CATALOG.find((x) => `${x.type}::${x.name}` === e.target.value);
             if (!fx) return;
             const d = audioEngine.createDevice(fx.type, fx.name);
-            audioEngine.insertEffectOnTrack(d.id, dev.id);
+            if (!audioEngine.insertEffectOnTrack(d.id, dev.id)) {
+              audioEngine.removeDevice(d.id, true);
+              toast('That effect could not be inserted on this part.', 'error');
+            }
           }}
           className="us-lcd-box bg-transparent font-label font-bold text-[13px] px-1"
           aria-label="Add an insert effect"

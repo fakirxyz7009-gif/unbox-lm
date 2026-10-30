@@ -7,11 +7,12 @@ import { GoogleGenAI, Type, type Schema } from '@google/genai';
 import { rankBuiltins, vstPortLayout } from '../../shared/rack/builtinCatalog.ts';
 import { planLocally } from '../../shared/rack/localPlanner.ts';
 import { localPreset, validatePreset, type CraftedPreset, type PresetParam } from '../../shared/rack/presetCraft.ts';
-import { planContextFromManifest, validatePlan } from '../../shared/rack/patchPlan.ts';
+import { MAX_PLAN_UNITS, planContextFromManifest, validatePlan } from '../../shared/rack/patchPlan.ts';
 import { CATEGORY_LABELS } from '../../shared/vst/categories.ts';
 import { isMountable, type ManifestItem, type MountableItem, type VstManifest } from '../../shared/vst/manifestTypes.ts';
 import { searchManifest } from '../../shared/vst/search.ts';
 import type { ManifestStore } from '../vst/manifestStore.ts';
+import { requireLoopback } from './routeGuards.ts';
 
 const AI_TIMEOUT_MS = 30_000;
 const MAX_PROMPT = 2000;
@@ -142,7 +143,7 @@ Rules:
 - "builtins" are listed with params; "moreBuiltins" are also available (type: name): use their type when they fit better (hardware emulations, classic rack devices). Players (role modulator, e.g. dual_arp, scales_chords) play the patch's instrument automatically.
 - Pick a presetId only from that unit's presets.
 - Add 1-4 Combiner macros (label + targets with min/max) for the most useful controls.
-- At most 8 units. Explain each unit in one short "why".`;
+- At most ${MAX_PLAN_UNITS} units. Explain each unit in one short "why".`;
 
 function libraryCandidates(prompt: string, manifest: VstManifest | null): MountableItem[] {
   if (!manifest) return [];
@@ -206,6 +207,7 @@ function combinatorContents(prompt: string, manifest: VstManifest | null): strin
 
 export function createAiRouter({ library }: { library: ManifestStore }): express.Router {
   const router = express.Router();
+  router.use(requireLoopback('The AI features are only available on this computer.'));
 
   router.post('/ai/combinator', aiGuard, async (req, res) => {
     const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
@@ -288,13 +290,17 @@ export function createAiRouter({ library }: { library: ManifestStore }): express
     const notes: string[] = Array.isArray(req.body?.notes) ? req.body.notes.filter((n: unknown): n is string => typeof n === 'string').slice(0, 20).map((n: string) => n.slice(0, 200)) : [];
     if (!m || typeof m !== 'object') return res.status(400).json({ error: 'Measurements are required.' });
     const nums: Record<string, number> = {};
-    for (const [k, v] of Object.entries(m as Record<string, unknown>).slice(0, 40)) if (typeof v === 'number' && Number.isFinite(v)) nums[k.slice(0, 40)] = Math.round(v * 100) / 100;
+    for (const [k, v] of Object.entries(m as Record<string, unknown>).slice(0, 20)) if (typeof v === 'number' && Number.isFinite(v)) nums[k.slice(0, 40)] = Math.round(v * 100) / 100;
     const ai = gemini();
     if (!ai) return res.json({ summary: null, tips: [], source: 'none' });
+    // The whole prompt stays within MAX_PROMPT: the notes take whatever room the measurements and instructions leave.
+    const before = `Measured mix (whole song): ${JSON.stringify(nums)}.\nLoudness goal: ${goal}.\nAutomatic mastering notes: `;
+    const after = `.\nExplain what the measurements say about this mix in 2-3 sentences, then give up to 5 concrete MIXING tips (levels, EQ, panning, arrangement) that the mastering chain cannot fix. Do not invent measurements.`;
+    const notesText = (notes.join(' ') || 'none').slice(0, Math.max(0, MAX_PROMPT - before.length - after.length));
     try {
       const response = await generate(ai, {
         model: textModel(),
-        contents: `Measured mix (whole song): ${JSON.stringify(nums)}.\nLoudness goal: ${goal}.\nAutomatic mastering notes: ${notes.join(' ') || 'none'}.\nExplain what the measurements say about this mix in 2-3 sentences, then give up to 5 concrete MIXING tips (levels, EQ, panning, arrangement) that the mastering chain cannot fix. Do not invent measurements.`,
+        contents: `${before}${notesText}${after}`,
         config: {
           systemInstruction: 'You are an experienced mix engineer talking to a producer. Plain words, no hype. JSON only.',
           responseMimeType: 'application/json',

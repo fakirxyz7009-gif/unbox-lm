@@ -437,10 +437,12 @@ export function buildPack(meta: PackMeta, draft: DraftZone[], o: BuildOptions = 
 }
 
 export function removePack(id: string): boolean {
+  // The id names a folder that is deleted recursively, so it must be a pack id that is in the index.
+  if (!/^[a-z0-9-]+$/.test(id)) throw new Error(`pack id "${id}" is not a pack id`);
   const index = readIndex();
   const at = index.packs.findIndex((p) => p.id === id);
-  fs.rmSync(path.join(PACKS_DIR, id), { recursive: true, force: true });
   if (at < 0) return false;
+  fs.rmSync(path.join(PACKS_DIR, id), { recursive: true, force: true });
   index.packs.splice(at, 1);
   writeIndex(index);
   return true;

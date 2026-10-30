@@ -68,6 +68,7 @@ async function run(): Promise<void> {
   await audioEngine.resumeContext();
   const cases: Case[] = [
     { type: 'parsec2', name: 'Additive Spectral Regression' },
+    { type: 'grain', name: 'Granular Sample Regression' },
     { type: 'complex1', name: 'West Coast Modular Regression' },
     { type: 'friktion', name: 'Bowed Physical Model Regression' },
     { type: 'objekt', name: 'Resonator Physical Model Regression' },

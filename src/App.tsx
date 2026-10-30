@@ -68,7 +68,19 @@ export default function App() {
       showToast(d.message, d.type);
     };
     window.addEventListener('unbox:toast', onToast);
-    return () => window.removeEventListener('unbox:toast', onToast);
+    const onOpenAi = () => setIsAICoPilotOpen(true);
+    window.addEventListener('unbox:open-ai', onOpenAi);
+    return () => {
+      window.removeEventListener('unbox:toast', onToast);
+      window.removeEventListener('unbox:open-ai', onOpenAi);
+    };
+  }, []);
+
+  // A new instrument becomes the selected part (shell/selectPart.ts): the piano roll and keyboards follow it.
+  useEffect(() => {
+    const onSelectPart = (e: Event) => setActivePlayableDeviceId((e as CustomEvent<string>).detail);
+    window.addEventListener('unbox:select-part', onSelectPart);
+    return () => window.removeEventListener('unbox:select-part', onSelectPart);
   }, []);
 
   useEffect(
@@ -224,6 +236,7 @@ export default function App() {
 
   // Global keyboard shortcuts
   useEffect(() => {
+    const CONTROL_SELECTOR = 'button, a[href], [role="button"], [role="slider"], [role="checkbox"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"], summary';
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -262,6 +275,12 @@ export default function App() {
         setIsShortcutsOpen((v) => !v);
         return;
       }
+      // Before the Alt block below, which returns for every Alt chord (Alt+Enter was unreachable there).
+      if (e.key === 'F10' || (e.altKey && e.code === 'Enter')) {
+        e.preventDefault();
+        handleTriggerShortcutAction('toggle_clip_fullscreen');
+        return;
+      }
       if (e.altKey) {
         const map: Record<string, string> = { '1': 'view_sequencer', '2': 'view_mixer', '3': 'view_rack', '4': 'toggle_split', s: 'open_stems', c: 'toggle_copilot', m: 'toggle_cv_matrix', f: 'flip_rack', k: 'toggle_keyboard' };
         const id = map[e.code.startsWith('Digit') ? e.code.slice(5) : k];
@@ -277,17 +296,15 @@ export default function App() {
         handleTriggerShortcutAction(fkeys[e.key]);
         return;
       }
-      if (e.key === 'F10' || (e.altKey && e.code === 'Enter')) {
-        e.preventDefault();
-        handleTriggerShortcutAction('toggle_clip_fullscreen');
-        return;
-      }
-      if (e.code === 'Space') {
+      // Space and Tab belong to a focused control (a button, a slider, a menu item) so the keyboard can operate it;
+      // the shortcuts take them only when no control has the focus.
+      const onControl = e.target instanceof Element && !!e.target.closest(CONTROL_SELECTOR);
+      if (e.code === 'Space' && !onControl) {
         e.preventDefault();
         handleTriggerShortcutAction('play_stop');
         return;
       }
-      if (e.code === 'Tab') {
+      if (e.code === 'Tab' && !onControl) {
         e.preventDefault();
         handleTriggerShortcutAction('flip_rack');
         return;

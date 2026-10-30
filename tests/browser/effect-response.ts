@@ -1,6 +1,8 @@
 import { audioEngine } from '../../src/audio/AudioEngine.ts';
 import type { BaseDevice } from '../../src/audio/BaseDevice.ts';
+import { RV7000Device } from '../../src/audio/devices/RV7000Device.ts';
 import { SpecDevice } from '../../src/audio/spec/SpecDevice.ts';
+import { cabinetImpulse } from '../../src/audio/spec/dsp.ts';
 import { ensureDynamicsWorklet } from '../../src/audio/spec/worklets.ts';
 
 const result = document.querySelector<HTMLPreElement>('#result');
@@ -165,6 +167,62 @@ async function probeRv7000Size(): Promise<string> {
   }
 }
 
+function rv7000Impulse(device: RV7000Device): AudioBuffer {
+  const convolver = Reflect.get(device, 'convolver') as unknown;
+  if (!(convolver instanceof ConvolverNode) || !convolver.buffer) throw new Error('RV7000 has no impulse response');
+  return convolver.buffer;
+}
+
+function probeRv7000Determinism(): string {
+  const live = new RV7000Device(audioEngine.ctx, 'rv7000_deterministic_live');
+  const offlineContext = new OfflineAudioContext(2, 1, audioEngine.ctx.sampleRate);
+  const offline = new RV7000Device(offlineContext as unknown as AudioContext, 'rv7000_deterministic_offline');
+  try {
+    const liveImpulse = rv7000Impulse(live);
+    const offlineImpulse = rv7000Impulse(offline);
+    if (liveImpulse.length !== offlineImpulse.length) {
+      throw new Error(`RV7000 impulse length changed between contexts (${liveImpulse.length} vs ${offlineImpulse.length})`);
+    }
+    for (let channel = 0; channel < liveImpulse.numberOfChannels; channel++) {
+      const liveData = liveImpulse.getChannelData(channel);
+      const offlineData = offlineImpulse.getChannelData(channel);
+      for (let i = 0; i < liveData.length; i++) {
+        if (Math.abs(liveData[i]! - offlineData[i]!) > 1e-8) {
+          throw new Error(`RV7000 impulse changed at channel ${channel}, frame ${i} between live and offline contexts`);
+        }
+      }
+    }
+    return `RV7000 impulse is deterministic across independent live/offline device graphs (${liveImpulse.length} frames)`;
+  } finally {
+    live.dispose();
+    offline.dispose();
+  }
+}
+
+function probeCabinetImpulseDeterminism(): string {
+  const ctx = audioEngine.ctx;
+  const live = cabinetImpulse(ctx, '4×12');
+  const offline = cabinetImpulse(new OfflineAudioContext(2, 1, ctx.sampleRate), '4×12');
+  const alternate = cabinetImpulse(ctx, '1×12');
+  if (live.length !== offline.length || live.numberOfChannels !== offline.numberOfChannels) {
+    throw new Error(`4×12 cabinet shape changed between contexts (${live.numberOfChannels}ch/${live.length} vs ${offline.numberOfChannels}ch/${offline.length})`);
+  }
+  let distinctSamples = 0;
+  for (let channel = 0; channel < live.numberOfChannels; channel++) {
+    const liveData = live.getChannelData(channel);
+    const offlineData = offline.getChannelData(channel);
+    const alternateData = alternate.getChannelData(channel);
+    for (let i = 0; i < liveData.length; i++) {
+      if (Math.abs(liveData[i]! - offlineData[i]!) > 1e-8) {
+        throw new Error(`4×12 cabinet impulse changed at channel ${channel}, frame ${i} between live and offline contexts`);
+      }
+      if (Math.abs(liveData[i]! - alternateData[i]!) > 1e-5) distinctSamples++;
+    }
+  }
+  if (distinctSamples < 64) throw new Error(`4×12 and 1×12 cabinet impulses were not materially distinct (${distinctSamples} differing samples)`);
+  return `Cabinet IR is deterministic across live/offline contexts; 4×12 and 1×12 differ at ${distinctSamples} samples`;
+}
+
 async function probeCompressor(silence: GainNode): Promise<string> {
   const ctx = audioEngine.ctx;
   const device = await prepareDevice('mclass_compressor', 'Compressor response');
@@ -257,6 +315,8 @@ async function run(): Promise<void> {
   try {
     for (const test of EQ_CASES) results.push(await probeEq(test, silence));
     results.push(await probeRv7000Size());
+    results.push(probeRv7000Determinism());
+    results.push(probeCabinetImpulseDeterminism());
     results.push(await probeCompressor(silence));
     resultNode.dataset.status = 'passed';
     resultNode.textContent = `PASS · ${results.join('; ')}`;

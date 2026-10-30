@@ -63,7 +63,7 @@ test('chunk boundaries preserve filter and transient state', () => {
 
   for (const key of Object.keys(chunked) as (keyof FourBandSplitChannels)[]) {
     for (let i = 0; i < left.length; i++) {
-      assert.ok(Math.abs(chunked[key][i] - single[key][i]) < 1e-7, `${key} differs at chunk boundary ${i}`);
+      assert.ok(Math.abs(chunked[key][i] - single[key][i]) < 1e-7, `${String(key)} differs at chunk boundary ${i}`);
     }
   }
 });

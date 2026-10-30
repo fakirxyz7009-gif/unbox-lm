@@ -28,7 +28,7 @@ interface Edges {
 }
 
 const signature = (c: ArrangementClip) =>
-  [c.startBar, c.lengthBars, c.audioId, c.audioOffset, c.gainDb, c.fadeIn, c.fadeOut, c.reverse, c.pitch, c.warp, c.sourceBpm, c.loopAudio, c.loopSec, c.muted].join('|');
+  [c.startBar, c.lengthBars, c.audioId, c.audioOffset, c.gainDb, c.fadeIn, c.fadeOut, c.fadeCurve, c.invertPhase, c.reverse, c.pitch, c.warp, c.sourceBpm, c.loopAudio, c.loopSec, c.muted].join('|');
 
 export class ClipVoices {
   private voices = new Map<string, Voice>();

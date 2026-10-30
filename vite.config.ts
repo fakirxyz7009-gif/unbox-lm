@@ -34,10 +34,20 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@breezystack/lamejs')) {
                 return 'vendor-lame';
               }
-              if (id.includes('react') || id.includes('motion')) {
-                return 'vendor-ui';
+              // Basic Pitch and TensorFlow.js load only when an AI transcription runs (a dynamic import), so they
+              // stay out of the chunk the app loads at start-up.
+              if (id.includes('@tensorflow') || id.includes('@spotify')) {
+                return 'vendor-ai';
               }
-              return 'vendor-core';
+              // Keep React, Motion, and their shared helpers together. Splitting
+              // them into `vendor-ui` and `vendor-core` made Rollup emit a
+              // circular chunk pair (core -> UI -> core), which in turn adds an
+              // unnecessary preload/evaluation ordering hazard at app startup.
+              return 'vendor-runtime';
+            }
+            // Basic Pitch's wrapper loads only when an AI transcription runs, so it gets a chunk of its own.
+            if (id.includes('src/audio/ai/basicPitch') || id.includes('src\\audio\\ai\\basicPitch')) {
+              return 'app-ai';
             }
             if (id.includes('src/audio') || id.includes('src\\audio')) {
               return 'app-audio-engine';

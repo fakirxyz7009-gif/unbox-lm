@@ -225,8 +225,9 @@ export async function renderSong(engine: AudioEngine, req: RenderRequest): Promi
     const smooth = new Map<string, number>();
     for (let p = req.startPos; p < req.endPos; p++) {
       for (let k = 0; k < 4; k++) {
+        const controlTime = timeOf(p + k / 4);
         ctl.push({
-          time: timeOf(p + k / 4),
+          time: controlTime,
           run: () => {
             for (const e of cvEntries) {
               const src = off.get(e.sourceDeviceId)!;
@@ -234,7 +235,8 @@ export async function renderSong(engine: AudioEngine, req: RenderRequest): Promi
               const get = src.cvOutputs.get(e.sourcePortId)?.getter;
               const cvIn = dst.cvInputs.get(e.targetParam);
               if (!get || !cvIn) continue;
-              const target = (e.inverted ? -get() : get()) * e.amount + e.offset;
+              const raw = get(controlTime);
+              const target = (e.inverted ? -raw : raw) * e.amount + e.offset;
               const v = (smooth.get(e.id) ?? target) + (target - (smooth.get(e.id) ?? target)) * 0.35;
               smooth.set(e.id, v);
               cvIn.param?.setTargetAtTime(v, ctx.currentTime, 0.01);

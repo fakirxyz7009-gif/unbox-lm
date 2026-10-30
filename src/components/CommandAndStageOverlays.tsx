@@ -259,6 +259,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
           a.href = url;
           a.download = `Unboxed_Hardware_Visualizer_${activeVisualizerTheme}.webm`;
           a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
         };
         recorder.start();
         videoRecorderRef.current = recorder;

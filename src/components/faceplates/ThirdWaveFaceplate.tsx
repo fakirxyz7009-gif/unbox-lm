@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ThirdWaveDevice } from '../../audio/devices/ThirdWaveDevice.ts';
+import { scheduleAudition } from '../../audio/audition.ts';
 import { Knob } from '../Knob.tsx';
 import { Wavetable3DWaterfall } from '../visualizers/Wavetable3DWaterfall.tsx';
 import { StereoGoniometer } from '../visualizers/StereoGoniometer.tsx';
@@ -94,11 +95,9 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
 
   const handleAudition = () => {
     setIsAuditioning(true);
-    device.noteOn(57, 0.9);
-    setTimeout(() => {
-      device.noteOff(57);
-      setIsAuditioning(false);
-    }, 600);
+    scheduleAudition(device, [{ note: 57, velocity: 0.9 }], 600);
+    // Presentation state only. The audible release is already scheduled on AudioContext time.
+    window.setTimeout(() => setIsAuditioning(false), 600);
   };
 
   return (

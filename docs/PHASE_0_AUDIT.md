@@ -1,6 +1,6 @@
 # Unbox Studio Phase 0 Audit and Baseline
 
-**Date:** 2026-10-28  
+**Date:** 2026-10-29  
 **Status:** **Not complete.** Static inventory, build/test baselines, controlled UI screenshots, simulated MIDI workflows, and a physical Impulse note recorded through the normal workstation UI and saved/reopened from IndexedDB are recorded. A browser export matrix now covers the supported PCM, lossless, and compressed formats, mix/stem parity, and normalization. Physical speaker output, broader runtime performance measurements, and packaged-app recovery remain open; Export-page interaction is now verified in Chrome.
 
 ## Executive assessment
@@ -945,3 +945,156 @@ After those runs, update the results here with machine/device/browser versions, 
 - Added two repeatable Chrome probes: one checks granular synthesis (`grain`) live and through the actual `renderSong` OfflineAudioContext path; the other checks additive/spectral (`parsec2`), west-coast modular (`complex1`), bowed physical (`friktion`), resonator physical (`objekt`) and wavetable/vector (`third_wave`) devices the same way. Every checked device rendered a measurable track signal both live and offline.
 - This exercises real Web Audio and export-graph paths, not a static catalog or a mocked oscillator. It does not claim sample-exact parity (the granular engine intentionally uses stochastic grain placement), feature equivalence to commercial instruments, or completion of the advanced-synthesis phase.
 - Verification: `npm run test:browser-granular` and `npm run test:browser-advanced-synthesis` passed in Chrome; the complete Node suite passed 185/185 with local loopback enabled, TypeScript passed, and the regenerated production web build contains 79 assets.
+
+## Follow-up — 2026-10-28 shared real-time scheduling hardening
+
+- Replaced the remaining device-owned `window.setInterval` loops in the spec-engine layer with one AudioEngine-owned, worker-backed look-ahead service. The shared service is used by granular held notes, stopped-transport clocked effects, groovebox note repeat, formant motion, and wavetable motion. Transport playback continues to service the same jobs from its normal AudioContext-time scheduler; only stopped transport uses the shared worker timer.
+- The granular engine now also fills from deterministic transport ticks, so its `renderSong` path does not depend on browser timers. This fixes the architectural mismatch in which a sustained live granular key needed an individual browser timer even though the application already owns an audio-time scheduler.
+- Chrome acceptance confirms granular audio while stopped, during transport, and in `OfflineAudioContext` (peaks 0.2165 / 0.2276 / 0.2193) with no granular `window` interval. A second stopped-live probe confirms clock, held-pad repeat, formant, and wavetable engines remain audible without device-owned intervals (peaks 0.3773 / 0.1392 / 0.1269). `npm run lint` passed.
+- The strengthened shared-service probe also observed the stopped Alligator pattern reach step 6 and a held-pad retrigger at 1.261 s; this proves the shared callbacks advance the tempo clock and schedule more than the initial drum hit.
+- Scheduler registration is deferred to the next worker/transport tick rather than invoked re-entrantly during voice construction. This fixes formant and wavetable factories that request motion before adding their voice to the pool. The acceptance probe now asserts and observed phase movement of 1.067 and 1.830 radians respectively, while granular remained audible in stopped, playing, paused, and offline paths after the fix (0.2185 / 0.2182 / 0.2228 / 0.2299 peaks).
+- The same granular probe now pauses transport while a separate live key is held, waits past the former 150 ms look-ahead, and measures continued output (paused-live peak 0.2122). `pauseTransport()` now hands active shared tasks to the stopped-transport service rather than leaving them unscheduled.
+- Regression verification after the change: `npm test` passed 200/200 with zero failures or skips; `node --check scripts/browser-probe-runner.cjs` and TypeScript passed; the production web build completed with 79 emitted assets.
+- This is scheduling and audible-output evidence, not a claim of sample-exact offline parity for stochastic grains or exhaustive sound-design equivalence. Phase 6 and the broader production-hardening roadmap remain partial.
+
+## Follow-up — 2026-10-28 3rd Wave wave-envelope lifecycle cleanup
+
+- The legacy 3rd Wave wavetable voice scheduled two wave-envelope transitions but kept only its first timer handle. A note release, 24-voice steal, or device disposal could therefore leave the second callback pending. Each voice now retains and clears every outstanding wave-envelope handle, and callbacks verify that their exact voice is still the active note before changing its waveform.
+- A dedicated Chrome regression creates all 24 voices, forces a 25th-note steal, releases the replacement note, then disposes the device. It records two callbacks per voice and passed only after all 50 callback handles were cleared exactly once across those lifecycle paths. `npm run lint` and the probe runner syntax check pass.
+- This is a resource/lifecycle repair, not a timing-model claim. `OscillatorNode.setPeriodicWave()` has no future-time scheduling API, so the legacy wave-envelope changes still use browser callbacks and are not certified for sample-exact OfflineAudioContext parity. A future audio-clock/worklet or scheduled crossfade redesign is required before that claim can be made.
+
+## Follow-up — 2026-10-28 Pulsar and player audio-clock routing
+
+- Pulsar's CV LFOs no longer use `performance.now()` and a private animation-frame loop. Each value is now a pure function of an AudioContext time supplied by the CV engine; sine, triangle, saw and square waveforms retain their shapes, while sample-and-hold is deterministic per audio-clock cycle. Offline control scheduling passes its exact render time to CV sources as well.
+- Chrome verified a 1.800 Pulsar sweep, exact scheduled-CV delivery of -0.9000 to a target, zero animation-frame requests for audio CV, deterministic OfflineAudioContext values, and zero CV when powered off.
+- Live player generators/held arpeggiators now share AudioEngine's worker-backed realtime service instead of starting a separate 25 ms browser interval. Target assignment no longer starts an idle service while stopped, avoiding a race where a just-assigned player could retire before the first live note was registered.
+- Chrome held a live MA-8 arpeggiator key and observed three generated synth notes at a 1.4502 source peak (0.2034 mixer peak) with zero player-owned `window` intervals. These checks strengthen timing ownership; full control-voltage fidelity for every legacy utility and exhaustive modulation/automation parity remain open.
+
+## Follow-up — 2026-10-29 captured-note override and editing regression
+
+- Per-note recorded audio is now a deliberate override layer above an imported multisample bank: it replaces only the chosen MIDI note, while neighbouring notes continue to use their bank zones. This supports replacing a particular synthetic/imported sound with a real recording without destroying the rest of the instrument.
+- The LCD editor's trim gesture updates the subscribed sample state while dragging, then emits one engine-level structural update and one undo step on commit. Escape/cancel returns to the original trim. This avoids a workstation-wide structural re-render for every pointer movement.
+- Verification: TypeScript passes; `npm test` reports 199 passing, 0 failing, and 2 expected Ollama-offline skips; Chrome note-audio, SoundFont-import, mixed-undo, CC0 VCSL Marimba, full built-in device/effect sweeps, project round-trip, and simulated MIDI recording probes pass. The marimba check decoded 30 recordings and measured MIDI 72 at 524.59 Hz with distinct low/mid/high velocity RMS values (0.0088 / 0.0394 / 0.1299). The production web build completed with 2,363 transformed modules in 44.16 seconds, and the Electron API bundle rebuilt successfully.
+- This is focused evidence for capture/edit/import behavior, not proof that every editing control, third-party bank, external audio interface, or unfinished roadmap phase is production-complete.
+
+## Follow-up — 2026-10-29 recorded stem-note defaults
+
+- The optional stem-note extraction path no longer creates a `Polytone` synth track for detected bass or vocals. Drums now use the recorded Big Rusty kit's real kick/snare/hat MIDI layout, bass uses recorded Growlybass, and vocal estimates use an explicitly named recorded-piano pitch guide rather than pretending to recreate vocals.
+- The samples-and-stems UI now states that Demucs separates the source audio supplied by the musician; it does not generate replacement audio. It also names the recorded target instrument and leaves the source stem unchanged.
+- Verification: a new regression confirms every default is a redistributable bundled multisample pack and that a real two-note bass transcription mounts `rec_growlybass` with MIDI 45/48, not a synthetic fallback. TypeScript passes; the full suite reports 201 passing, 0 failing, with two expected Ollama-offline skips; the normal production web build completed with 2,364 transformed modules in 42.36 seconds.
+- This changes only the default audition instrument for editable estimates. It does not assert source-separation accuracy, voice replacement, licensed-song import rights, or completion of Phase 7/8.
+
+## Follow-up — 2026-10-29 Samples & Stems keyboard-modal acceptance
+
+- The Samples & Stems dialog now has a programmatic heading, takes focus at its search field, constrains Tab and Shift+Tab to visible dialog controls, closes with Escape, stops any active audition on close, and restores focus to the control that opened it. This prevents keyboard focus from leaking into the live DAW behind a modal audio workflow.
+- The workstation LOAD browser now provides the same modal behavior for real recorded-instrument, audio-file, and SoundFont loading. Its instrument-search field still suppresses global DAW shortcuts while the user types, while leaving Tab and Escape available to the modal.
+- `npm run test:browser-sample-browser-a11y` and `npm run test:browser-patch-browser-a11y` mount the actual React dialogs in Chrome and verify their accessible names, initial focus, forward/reverse Tab wrapping, Escape close, and opener-focus restoration. Their local status-route stubs only isolate unavailable Express tool-capability checks; no audio or model behavior is mocked. The existing Chrome SoundFont acceptance also passed: Test Piano imported, rendered live and offline, retained velocity/filter/envelope/loop/choke behavior, and survived a `.unbox` archive round trip.
+- Verification: TypeScript and both new Chrome probes pass; the complete Node suite reports 201 passing, 0 failing, and 2 expected Ollama-offline skips. This closes two targeted Phase 9 accessibility gaps; broader screen-reader, keyboard, desktop-runtime, long-duration, and packaged-app acceptance remain open.
+
+## Follow-up — 2026-10-29 CV Matrix UI scheduling hardening
+
+- Removed the CV Matrix panel's 40 ms browser interval and per-tick React render. The matrix now publishes only structural device/mapping revisions; the live bipolar meter reads the existing CV value through the shared `useFrame()` loop and writes only changed DOM width/ARIA values.
+- The change preserves actual CV processing: `CVEngine.tickCV()` is still called by AudioEngine's shared real-time task while stopped and the transport scheduler while playing. It does not emit UI notifications from that real-time path.
+- New Node coverage verifies structural revision notifications do not fire from a live CV tick. The new Chrome UI probe mounts the actual matrix, adds/removes a route, measures a +0.40 V value as a 70.0% meter, and asserts zero `window.setInterval` calls. The existing shared-CV Chrome probe passes three AudioContext-time LFO updates over a 0.2080 range and verifies the task retires with its cable; its acceptance window now allows a cold worker up to 600 ms while retaining the three-update requirement.
+- Verification: TypeScript passes; the complete Node suite reports 202 passing, 0 failing, and 2 expected Ollama-offline skips; the production web bundle completed with 2,364 transformed modules in 20.39 seconds. This advances Phase 1/9 timing and UI hardening, not complete CV/modulation or production acceptance.
+
+## Follow-up — 2026-10-29 deterministic convolution rendering
+
+- The real Stack Guitar Amp and Low End Bass Amp cabinet paths already use Web Audio `ConvolverNode`s, but their procedural cabinet impulse added `Math.random()` noise for every audio context. An offline export could therefore have a subtly different cabinet colour than live playback. Cabinet IR generation is now seeded by cabinet selection and stereo channel, so it is stable across live and OfflineAudioContext renders while each cabinet remains distinct.
+- The same non-determinism existed in the flagship RV7000 reverb impulse and the outboard convolution-send fallback. Those generators now use the same local deterministic PRNG. Existing RV7000 cloning still retains the exact live response; deterministic construction additionally makes reopen/rebuild and independent offline graphs reproducible.
+- Chrome's real effects-response probe measured the normal EQ, reverb and dynamics checks and verified an independent RV7000 live/offline graph has an identical 153,600-frame impulse. It also verified a 4×12 cabinet is byte-stable across contexts and differs from a 1×12 at 3,838 samples. The measured compressor remains near unity below threshold and -16.70 dB above threshold / under an external key.
+- Verification: `npm run lint`, `npm run test:browser-effect-response`, and a production `npm run build` passed (2,364 transformed modules, 35.68 s). This makes the implemented convolution processors reproducible; it is not a claim of captured commercial cabinet IRs, exhaustive IR loading, or completion of Phase 8/9.
+
+## Follow-up — 2026-10-29 proxy-preview scheduling
+
+- The browser-side VST library is correctly labelled as proxy DSP, but its faceplate polled every 250 ms with a component-owned interval solely to notice that a recorded preview ended. It now uses the app's shared frame loop and only updates React state when `VstPluginDevice.isPreviewing` changes.
+- A Chrome regression mounts the actual faceplate with a controlled preview lifecycle, verifies both start and completion labels, and asserts zero `window.setInterval` calls. This preserves the explicit proxy label; it does not suggest native third-party VST execution.
+- Verification: `npm run lint`, `npm run test:browser-vst-faceplate-preview-ui`, and `npm run build` passed (2,364 transformed modules, 47.38 s). This is a narrow Phase 9 UI scheduling repair; recorder punch timing, native VST hosting and the broader production-hardening gates remain open.
+
+## Follow-up — 2026-10-29 RV7000 power-path repair
+
+- The complete Chrome audio-device sweep uncovered a real lifecycle defect: 109 instruments and 64 effects emitted sound, but RV7000's raw reverb output was audible while its generic bypass-wrapper output could remain measurable after power-off. An isolated check confirmed the wrapper's residual tail.
+- RV7000 now owns its existing dry/wet branches' power and bypass state, rather than being wrapped as a generic legacy effect. Power-off explicitly mutes both branches; bypass supplies the direct input; its offline clone carries the same power/bypass state and the exact live IR. This fixes the published output path instead of weakening the measurement threshold.
+- The isolated Chrome check now passes bypass, silence-on-power-off, and repower. The original long-order sweep also passes: all 109 playable instruments and 65 effects instantiate and emit in the shared Web Audio context. The focused response probe continues to measure RV7000's 1.54 / 3.20 / 3.84 s size responses and a deterministic 153,600-frame live/offline impulse.
+- Verification: TypeScript passes; the full local suite reports 241 passing, 0 failing, and 2 expected Ollama-offline skips; `npm run test:browser-devices`, `npm run test:browser-effect-response`, and production `npm run build` passed (2,370 transformed modules, 46.27 s). This closes one concrete effect lifecycle defect, not Phase 3/8/9 completion.
+
+## Follow-up — 2026-10-29 cold transport-start scheduling
+
+- A first live/offline parity run revealed that an organ arrangement could be silent on a cold start. The cause was not the recorded organ: if a worker callback arrived after the initial 40 ms look-ahead, the scheduler could place the first note and its already-ended note-off entirely in the past.
+- The transport scheduler now rebases an overdue `nextNoteTime` to the current AudioContext time before scheduling a step. It therefore starts the queued arrangement at the first available audio instant instead of silently consuming an expired event. This also protects an occasional main-thread stall at transport startup.
+- A dedicated Chrome regression starts the real transport, deliberately blocks the test page's main thread for 700 ms while AudioContext time continues, then observes the first arranged Subtractor note at a 0.2172 peak. The full live/offline parity matrix subsequently passes: recorded organ paths through gain, EQ, compression (including -19.29 dB sidechain reduction), delay and reverb, plus recorded drums, remain within its 20% RMS tolerance.
+- Verification: TypeScript passes; `npm run test:browser-transport-cold-start` and `npm run test:browser-audio-parity` pass. This is a concrete Phase 1 transport reliability repair, not an assertion of sample-accurate timing after arbitrary long browser suspension or completion of the roadmap.
+
+- Final regression for this repair: production `npm run build` completed with 2,370 transformed modules in 20.50 seconds. The full local suite reports 246 passing, 0 failing, and 2 expected skips because Ollama is not running. These checks include the local stems, recording, import/export, project, reference-catalog and timing suites; they do not substitute for the separate 10-minute browser soak or packaged-Electron acceptance.
+
+## Follow-up — 2026-10-29 source-separation disclosure
+
+- The optional splitter processes only the audio the musician selected: local DSP derives stems and local Spleeter/Demucs can analyse the same supplied source. Neither path creates a new song, performer, instrument, replacement sound, or generated waveform. UI labels, progress states, actions, and completion messages now call this “source separation” and say that plainly.
+- This is not merely a wording claim: precision regressions require the 4-, 6-, and 8-stem outputs to reconstruct the source at unity gain, and the chunked/single-pass result to be invariant. The user-facing Samples & Stems modal still passes its real Chrome focus/keyboard acceptance after the disclosure change.
+- Verification: TypeScript and `npm run test:browser-sample-browser-a11y` pass. The recorded-instrument workflow remains separately licensed/provenanced; source separation does not grant rights to use or distribute commercial songs.
+
+- Final regression: `npm test` reports 246 passing, 0 failing, and 2 expected Ollama-offline skips; production `npm run build` completed with 2,370 transformed modules in 45.72 seconds.
+
+## Follow-up — 2026-10-29 recorder punch-boundary scheduling
+
+- Replaced the recorder controller's 40 ms auto-punch poll and wall-clock post-roll timer. Audio takes now send the punch-out AudioContext frame to `unbox-recorder`; the worklet trims its final render quantum at that exact frame before reporting completion. MIDI-only takes, count-in state, and post-roll transport stopping use zero-gain scheduled native audio sources, so the controller transition follows the same audio clock without making sound.
+- A focused Chrome worklet probe captured a live constant signal and verified the requested punch edge at frame 15,488 exactly (within its one-frame assertion). Node coverage makes `window.setInterval` and `window.setTimeout` throw, then verifies MIDI-only punch-out schedules one silent native alarm at the exact grid time. The existing simulated MIDI controller recording and IndexedDB reopen acceptance still pass.
+- Verification: TypeScript passes; `npm run test:browser-recorder-frame-stop`, `npm run test:browser-midi`, and the full local suite pass (247 passing, 0 failing, 2 expected Ollama-offline skips); the production build completed with 2,370 modules in 44.81 seconds. This strengthens Phase 1/9 recording timing; real input-driver latency, complete hardware acceptance, long-duration desktop stability and all roadmap phase gates remain open.
+
+## Follow-up — 2026-10-29 10-minute browser audio endurance
+
+- The full `npm run test:browser-soak` acceptance ran the real Chrome Web Audio graph for 600 seconds with four instruments, delay, and reverb. Song position and AudioContext time had 0.000% drift; the wall/audio delta was 0.22%; every one-second signal window contained audio; and no render gap exceeded the 500 ms threshold (maximum 170.7 ms).
+- The probe observed one long main-thread task (756.0 ms maximum) and a 4.6 MB heap increase. Those values are recorded as the current Windows/Chrome baseline, not generalized as a guarantee for every device, project, driver, or packaged desktop environment.
+- This completes this particular browser-duration evidence run for Phase 9. Packaged Electron launch/recovery, broader physical-hardware matrices, accessibility-assistive-technology checks, plugin-host crash isolation, and the remaining roadmap acceptance criteria remain open.
+
+- The independent Chrome project-recovery regression also passes: malformed, future-version, unsupported-device and incomplete VST imports leave the open session intact; recovery and interrupted Save As restore the intended IndexedDB project without overwriting another project.
+
+## Follow-up — 2026-10-29 Electron readiness probe repair
+
+- The isolated Electron readiness test previously passed a fixture directory and a separated `--user-data-dir` argument. On this Electron 45/Windows host that invocation could silently exit without loading the fixture main process, producing a misleading 30-second timeout. The harness now passes `main.cjs` explicitly and uses `--user-data-dir=<path>`; `npm run test:electron-startup` proves both `main-loaded` and `app-ready`.
+- The next utility-process boundary now reaches its intended failure: Electron rejects the prototype’s `SharedArrayBuffer` message as non-cloneable. That is not hidden or reclassified as VST success. A compatible Electron transport must use an explicitly supported mechanism and still requires real-time DAW/audio-device integration, plugin state/editor support, crash isolation and compatibility acceptance.
+
+## Follow-up — 2026-10-29 real rack UI workflow
+
+- The actual React rack workflow passes in Chrome: it added a CC0 recorded acoustic guitar and a stereo delay from the library, verified the stereo auto-patch path, measured a 0.0255 routed guitar peak, performed undo/redo through the File menu, saved, reloaded, and retained both devices plus their cables.
+- This is end-to-end UI/project evidence for a recorded instrument and an insert effect; it does not assert native VST3 execution, broad accessibility coverage, or completion of Phase 2/9.
+
+- Final local baseline after the Electron probe regression: `npm run lint` passes; `npm test` reports 250 tests, 248 passes, 0 failures, and two expected skips because the optional local Ollama service is not running.
+
+## Follow-up — 2026-10-29 real Electron desktop smoke
+
+- Added `npm run test:electron-desktop-smoke`. It launches the actual `electron/main.cjs` entry with an isolated user-data directory, keeps its BrowserWindow hidden, waits until the main process has loaded the real app URL, fetches the served `index.html`, confirms the React-rendered Unbox title bar after two animation frames, and terminates only the process tree it created.
+- The source desktop smoke passed at `http://127.0.0.1:47821/`; the fixed-port listener was absent after teardown. The normal app is unaffected because its smoke URL handshake is enabled only when the test environment variable is present.
+- This advances the source-desktop launch/recovery baseline. It is not packaged-EXE, installer, physical-audio-device, or release-candidate acceptance; those Phase 9 gates remain open.
+
+## Follow-up — 2026-10-29 faceplate audition timing
+
+- The timing audit found that interactive device-faceplate audition buttons called `noteOff` from `setTimeout`. Those releases can be late whenever the renderer is busy, contrary to the AudioContext-time scheduling rule.
+- Added `src/audio/audition.ts`; it schedules paired note-on/off calls on a device's audio clock with one shared start time for chords. The raga/taal selector, classic synths, world instruments, physical-model faceplates, and Reason-style faceplates now use it. `tests/auditionTiming.test.ts` checks precise clock scheduling and invalid-duration bounds. No faceplate `setTimeout` now drives `noteOff`; Third Wave retains a timer only for its cosmetic button state.
+- Verification: `npm run lint` and the complete Node suite pass (253 passing checks, two expected local-Ollama skips).
+
+## Follow-up — 2026-10-29 Matrix CV audio-time scheduling
+
+- Matrix's old short gate used a wall-clock `setTimeout`, and the single mutable CV fields could let a future scheduler look-ahead step overwrite the currently audible note/curve value. That also made live gate behavior disagree with offline rendering, where the wall timer never ran.
+- Matrix now stores timestamped CV steps and its port getters evaluate them at the supplied audio time. The gate ends exactly 70 ms after its scheduled step, future steps remain inactive before their time, and note/curve values from two queued steps stay distinct. `tests/matrixAudioTiming.test.ts` covers both cases; no Matrix audio/CV path uses a JavaScript timer.
+
+## Follow-up — 2026-10-29 real-time bounce audio-clock boundary
+
+- The real-time bounce path had the same category of timing defect as the earlier recorder: it used wall-clock `setTimeout` calls for both song duration and the reverb/delay tail. That could stop a tempo-mapped arrangement before its final scheduled step when the UI timer drifted.
+- `bounceRealtimeWav()` now derives the duration from `ProjectTimeMap`, anchors it at `nextNoteTime` (the first scheduled transport instant), calls `WorkletCapture.stopAt()` with its exact tail-frame boundary, and uses a zero-gain native audio-clock alarm solely for the subsequent JavaScript transport state change. No bounce body or tail timing uses a renderer timer.
+- `tests/audioClockAlarm.test.ts` verifies the alarm's requested frame, stale/invalid target normalization, cleanup, and the absence of a bounce timeout. The new real Chrome bounce probe uses a tempo change that would have made the former root-BPM wall timer cut 375 ms early; it captures a 2.865 s WAV for the 625 ms body plus 2 s tail and observes 2.680 audio-clock seconds. The exact-frame recorder probe still cuts at its requested frame, and the real IndexedDB save/reopen probe preserves Matrix/CV state with 0.187 live / 0.393 offline peak. TypeScript and the full local suite pass (290 checks, two expected local-Ollama skips). This is timing hardening, not proof that every device tail, native plugin, or packaged app has production acceptance.
+
+## Follow-up — 2026-10-29 production vendor dependency repair
+
+- Production's two manually assigned general-purpose vendor chunks formed a Rollup cycle (`vendor-core → vendor-ui → vendor-core`). That was a genuine load-order warning, not a warning-threshold issue. The split now keeps React, Motion, and their shared helpers in one `vendor-runtime` chunk; the production rebuild emits no circular-chunk warning.
+- A 1.00 MB local transcription-model chunk remains intentionally dynamic. It is not preloaded by `index.html`; the built audio-engine chunk is its only dynamic importer. This records the remaining performance work honestly instead of shifting the warning limit.
+- The production bundle builds successfully and the source Electron smoke serves/mounts it. This does not test a portable executable or establish packaged desktop performance.
+
+## Follow-up — 2026-10-29 measured advanced devices and effect-behaviour sweep
+
+- The advanced-synthesis browser acceptance now covers Granule as well as additive/spectral, west-coast, bowed physical, resonator physical and wavetable/vector devices. Each was non-silent in live Chrome and an OfflineAudioContext; Granule measured 0.2231 / 0.2298 peak, live/offline.
+- The pitch-correction acceptance continued to pass: 205 Hz corrected to 195.98 Hz in C major and 207.62 Hz in A major, with a 195.99 Hz offline clone result. A CC0 Bear Sax MIDI-61 source shifted both down and up in its selected keys.
+- The full Web Audio sweep passes 109 playable instruments and 65 effects. The complete effect-behaviour pass measured no more than 0.044% dry-bypass RMS error, all 43 response-tested processors changed their stimulus, and all 25 utilities passed their routing/control checks.
+- During the audit, a stale RV7000 test monkey-patched `AudioContext.createGain` despite the device’s own dry/wet power/bypass graph. Separate failures read analyser history while a pad, polarity, or patchbay gain was still smoothing. The test now waits through the relevant AudioParam transition plus a fresh analyser window; targeted isolation confirms RV7000, the −15 dB DI pad, polarity inversion, and isolated patchbay Off routing without relaxing behavior thresholds.
+- This is browser-engine evidence only. It does not certify every tail/automation sequence, acoustic sound quality, native VST hosting, physical audio I/O, or packaged desktop execution.
+- Verification: TypeScript passes; the Node suite reports 290 passes, 0 failures and 2 expected local-Ollama skips. The advanced-synthesis, pitch-correction, full device-audio, and full effect-behaviour Chrome probes pass.

@@ -2,7 +2,7 @@
 // Serves the built web app (../dist) plus the /api routes (AI + D:\vsr library) from
 // api-server.cjs (built by `npm run build:api`). Without that bundle it falls back to a
 // static-only server.
-const { app, BrowserWindow, session } = require('electron');
+const { app, BrowserWindow, session, shell } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -67,6 +67,35 @@ async function startAppServer(root) {
 }
 
 let mainWindow = null;
+// Test-only handshake: a smoke run uses an isolated user-data directory and writes the
+// actual fallback/fixed app URL only after the hidden window has loaded it. Normal desktop
+// launches never set this variable and keep the ordinary visible-window behavior.
+const desktopSmokeUrlFile = process.env.UNBOX_DESKTOP_SMOKE_URL_FILE || '';
+const desktopSmokeRendererFile = process.env.UNBOX_DESKTOP_SMOKE_RENDERER_FILE || '';
+
+async function writeDesktopSmokeRendererStatus(win) {
+  if (!desktopSmokeRendererFile) return;
+  try {
+    // `loadURL()` confirms document navigation, but not that React has mounted its UI yet.
+    // Two frames give the synchronous React mount and first paint a deterministic chance to
+    // complete without adding any test code to the renderer bundle.
+    const status = await win.webContents.executeJavaScript(`
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => {
+        const root = document.getElementById('root');
+        resolve({
+          readyState: document.readyState,
+          hasRoot: Boolean(root),
+          rootChildren: root ? root.childElementCount : 0,
+          hasTitleBar: Boolean(document.querySelector('[data-testid="title-bar"]')),
+        });
+      })));
+    `, true);
+    fs.writeFileSync(desktopSmokeRendererFile, JSON.stringify(status), 'utf8');
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    fs.writeFileSync(desktopSmokeRendererFile, JSON.stringify({ error: detail }), 'utf8');
+  }
+}
 
 function failStartup(stage, error) {
   const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
@@ -80,8 +109,16 @@ function failStartup(stage, error) {
   app.exit(1);
 }
 
-process.on('uncaughtException', (error) => failStartup('uncaught-exception', error));
-process.on('unhandledRejection', (error) => failStartup('unhandled-rejection', error));
+// Before the window exists the app cannot run, so an error ends it. Afterwards one failed request or
+// timer must not close the DAW: the error is logged and the session keeps running.
+let startupComplete = false;
+function reportProcessError(stage, error) {
+  if (!startupComplete) return failStartup(stage, error);
+  recordStartupFailure(app.getPath('userData'), `runtime-${stage}`, error);
+  console.error(`Unbox Studio kept running after an error (${stage}): ${error instanceof Error ? error.message : String(error)}`);
+}
+process.on('uncaughtException', (error) => reportProcessError('uncaught-exception', error));
+process.on('unhandledRejection', (error) => reportProcessError('unhandled-rejection', error));
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -105,6 +142,7 @@ async function createWindow() {
     minHeight: 700,
     backgroundColor: '#100e0b',
     title: 'Unbox Studio',
+    show: !desktopSmokeUrlFile,
     autoHideMenuBar: true,
     webPreferences: {
       autoplayPolicy: 'no-user-gesture-required', // audio can start without a first click
@@ -118,14 +156,39 @@ async function createWindow() {
   win.webContents.on('render-process-gone', (_event, details) => {
     recordStartupFailure(app.getPath('userData'), 'renderer-process-gone', new Error(`${details.reason}: exit code ${details.exitCode}`));
   });
-  await win.loadURL(`http://127.0.0.1:${port}/`);
+  // The window shows only the app. Links that try to open another window go to the system browser.
+  const appUrl = `http://127.0.0.1:${port}/`;
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//.test(url)) void shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith(appUrl)) event.preventDefault();
+  });
+  await win.loadURL(appUrl);
+  if (desktopSmokeUrlFile) {
+    try {
+      fs.writeFileSync(desktopSmokeUrlFile, appUrl, 'utf8');
+    } catch (error) {
+      console.warn('Desktop smoke URL could not be recorded:', error && error.message);
+    }
+  }
+  await writeDesktopSmokeRendererStatus(win);
 }
 
 app.whenReady().then(async () => {
   const allowed = ['midi', 'midiSysex', 'media', 'audioCapture'];
-  session.defaultSession.setPermissionRequestHandler((_wc, permission, cb) => cb(allowed.includes(permission)));
-  session.defaultSession.setPermissionCheckHandler((_wc, permission) => allowed.includes(permission));
+  // Microphone access is needed for recording. Camera (video) access is never used, so a video request is refused.
+  session.defaultSession.setPermissionRequestHandler((_wc, permission, cb, details) => {
+    const wantsVideo = permission === 'media' && (details.mediaTypes ?? []).includes('video');
+    cb(allowed.includes(permission) && !wantsVideo);
+  });
+  session.defaultSession.setPermissionCheckHandler((_wc, permission, _origin, details) => {
+    const wantsVideo = permission === 'media' && details.mediaType === 'video';
+    return allowed.includes(permission) && !wantsVideo;
+  });
   await createWindow();
+  startupComplete = true;
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) void createWindow().catch((error) => failStartup('activate', error));
   });

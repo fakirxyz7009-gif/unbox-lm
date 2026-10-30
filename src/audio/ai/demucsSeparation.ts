@@ -1,16 +1,33 @@
 /**
- * Stem separation with the Demucs model, run on this computer (server/routes/separationRoutes.ts).
- * The browser sends one WAV, the server returns four stems (drums, bass, other, vocals) as WAV.
- * Unlike the four-band split in MusicSeparator.ts, these come from a trained model.
+ * Stem separation with Deezer Spleeter and Demucs models, run locally on this computer
+ * (server/routes/separationRoutes.ts). The browser sends one WAV; the server returns the stems the chosen
+ * model writes as WAV: four (htdemucs) or six, which add guitar and piano (htdemucs_6s).
  */
 import type { AudioAsset } from '../clips/audioStore.ts';
 import { encodeWav } from '../export/wav.ts';
 
-export const DEMUCS_STEMS = ['drums', 'bass', 'other', 'vocals'] as const;
+export const DEMUCS_STEMS = ['drums', 'bass', 'other', 'vocals', 'guitar', 'piano'] as const;
 export type DemucsStem = (typeof DEMUCS_STEMS)[number];
 
+/** htdemucs and htdemucs_ft write four stems; htdemucs_6s also writes guitar and piano. htdemucs_ft is slower and cleaner. */
+export type DemucsModel = 'htdemucs' | 'htdemucs_6s' | 'htdemucs_ft';
+
+/** How each stem is named and drawn in the Source Separation panel. */
+export const DEMUCS_STEM_INFO: Record<DemucsStem, { label: string; color: string; icon: string }> = {
+  vocals: { label: 'Vocals', color: '#f43f5e', icon: 'mic' },
+  drums: { label: 'Drums', color: '#0ea5e9', icon: 'drum' },
+  bass: { label: 'Bass', color: '#10b981', icon: 'guitar' },
+  other: { label: 'Other / Instruments', color: '#f59e0b', icon: 'keys' },
+  guitar: { label: 'Guitar', color: '#a855f7', icon: 'guitar' },
+  piano: { label: 'Piano', color: '#eab308', icon: 'keys' },
+};
+
 export interface DemucsStatus {
+  available?: boolean;
   demucs: boolean;
+  spleeter?: boolean;
+  engine?: 'spleeter' | 'demucs' | 'none';
+  models?: { id: DemucsModel; stems: DemucsStem[] }[];
 }
 
 /** Null when the separation route is not on this server (the share build) or cannot be reached. */
@@ -31,17 +48,26 @@ export function assetToWav(asset: AudioAsset): Blob {
   return encodeWav(channels, buffer.sampleRate, { bitDepth: 16, dither: false });
 }
 
-export async function separateWithDemucs(wav: Blob, onStatus?: (text: string) => void): Promise<Record<DemucsStem, Blob>> {
-  onStatus?.('Sending the audio to the local model…');
-  const res = await fetch('/api/separate/jobs', { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: wav });
+/** Sends the audio to the separator and downloads each stem its model returned. */
+export async function separateWithDemucs(
+  wav: Blob,
+  onStatus?: (text: string) => void,
+  options: { engine?: 'spleeter' | 'demucs'; model?: DemucsModel } = {}
+): Promise<Partial<Record<DemucsStem, Blob>>> {
+  onStatus?.('Sending source audio to the local Spleeter / Demucs separator…');
+  const query = new URLSearchParams();
+  if (options.engine) query.set('engine', options.engine);
+  if (options.model) query.set('model', options.model);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const res = await fetch(`/api/separate/jobs${suffix}`, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: wav });
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(data.error ?? `Separation failed (${res.status}).`);
   }
-  const { id } = (await res.json()) as { id: string };
-  const stems = {} as Record<DemucsStem, Blob>;
-  for (const stem of DEMUCS_STEMS) {
-    onStatus?.(`Downloading the ${stem} stem…`);
+  const { id, stems: names } = (await res.json()) as { id: string; stems: DemucsStem[] };
+  const stems: Partial<Record<DemucsStem, Blob>> = {};
+  for (const stem of names) {
+    onStatus?.(`Extracting ${DEMUCS_STEM_INFO[stem].label} stem…`);
     const part = await fetch(`/api/separate/jobs/${id}/${stem}`);
     if (!part.ok) throw new Error(`Could not download the ${stem} stem.`);
     stems[stem] = await part.blob();

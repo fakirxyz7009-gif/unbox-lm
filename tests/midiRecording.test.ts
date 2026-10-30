@@ -8,7 +8,7 @@ function createFixture() {
   let position16 = 0;
   let transportOrigin = 0;
   const node = {
-    connect() {},
+    connect() { return node; },
     disconnect() {},
     gain: { value: 1, setTargetAtTime() {} },
     channelCount: 2,
@@ -16,6 +16,7 @@ function createFixture() {
     fftSize: 2048,
     getFloatTimeDomainData() {},
   };
+  const scheduledSources: { onended: (() => void) | null; stoppedAt: number | null; start: () => void; stop: (time?: number) => void; connect: () => typeof node; disconnect: () => void }[] = [];
   const context = {
     currentTime: 0,
     sampleRate: 48_000,
@@ -25,6 +26,18 @@ function createFixture() {
     createChannelSplitter: () => node,
     createChannelMerger: () => node,
     createAnalyser: () => node,
+    createConstantSource: () => {
+      const source = {
+        onended: null as (() => void) | null,
+        stoppedAt: null as number | null,
+        start() {},
+        stop(time?: number) { source.stoppedAt = time ?? null; },
+        connect: () => node,
+        disconnect() {},
+      };
+      scheduledSources.push(source);
+      return source;
+    },
   };
   const ctx = context as unknown as AudioContext;
   const track = {
@@ -81,6 +94,7 @@ function createFixture() {
     getTransportOrigin: () => transportOrigin,
     setPosition: (pos: number) => { position16 = pos; },
     setTime: (time: number) => { context.currentTime = time; },
+    scheduledSources,
   };
 }
 
@@ -302,6 +316,41 @@ test('MIDI notes played during count-in are excluded from the recorded piano-rol
     ]);
   } finally {
     restoreWindow();
+  }
+});
+
+test('MIDI-only punch-out uses an AudioContext clock alarm, never a polling interval', async () => {
+  const fixture = createFixture();
+  const priorWindow = globalThis.window;
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      setInterval: () => { throw new Error('Punch-out must not install a wall-clock interval.'); },
+      clearInterval: () => {},
+      setTimeout: () => { throw new Error('Punch-out must not install a wall-clock timeout.'); },
+    },
+  });
+  try {
+    const recorder = new RecordController(fixture.host);
+    recorder.settings.punch = true;
+    recorder.settings.punchInBar = 0;
+    recorder.settings.punchOutBar = 0.25; // 4 sixteenths at 120 BPM = 0.5 s
+    assert.equal(await recorder.start(), true);
+    assert.equal(recorder.state, 'recording');
+    assert.equal(fixture.scheduledSources.length, 1, 'MIDI-only punch must create one silent native alarm');
+    const alarm = fixture.scheduledSources[0];
+    const expectedEnd = fixture.getTransportOrigin() + 0.5;
+    assert.equal(alarm.stoppedAt, expectedEnd, 'Native alarm must end at the exact punch grid time');
+
+    fixture.setPosition(4);
+    fixture.setTime(expectedEnd);
+    alarm.onended?.();
+    await Promise.resolve();
+    assert.equal(recorder.state, 'idle');
+    assert.equal(fixture.host.isRecording, false);
+  } finally {
+    if (priorWindow === undefined) Reflect.deleteProperty(globalThis, 'window');
+    else Object.defineProperty(globalThis, 'window', { configurable: true, value: priorWindow });
   }
 });
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
+import { scheduleAudition } from '../../audio/audition.ts';
 import { Knob } from '../Knob.tsx';
 import { VacuumTube } from '../VacuumTube.tsx';
 import { DeviceVisualizer } from '../visualizers/DeviceVisualizer.tsx';
@@ -40,8 +41,7 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
   };
 
   const triggerAudition = (note: number = 60, ms: number = 300) => {
-    (device as any).noteOn?.(note, 0.92);
-    setTimeout(() => (device as any).noteOff?.(note), ms);
+    scheduleAudition(device, [{ note, velocity: 0.92 }], ms);
   };
 
   // 6. OBJEKT: Physical Modeling Synthesizer
@@ -51,7 +51,7 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
         <div className="flex items-center space-x-3 bg-black/50 p-2 rounded border border-cyan-500/30">
           <div className="flex flex-col">
             <span className="text-[11px] font-mono font-black text-cyan-300 tracking-wider">BODYWORK PHYSICAL MODELING</span>
-            <span className="text-[11px] font-mono text-emerald-400">EXCITER &bull; 3 MODAL RESONATORS</span>
+            <span className="text-[11px] font-mono text-emerald-400">EXCITER • 3 MODAL RESONATORS</span>
             <select
               value={p.modalObject || 'Hollow Steel Plate'}
               onChange={(e) => setP('modalObject', e.target.value)}
@@ -87,7 +87,7 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
       <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-gradient-to-r from-[#141920] via-[#1c2530] to-[#141920] rounded border border-cyan-500/40">
         <div className="flex items-center space-x-3 bg-black/50 p-2 rounded border border-cyan-500/30">
           <div className="flex flex-col">
-            <span className="text-[11px] font-mono font-black text-cyan-300 tracking-wider">SESSION DRUM KITS &amp; ELECTRIC BASS</span>
+            <span className="text-[11px] font-mono font-black text-cyan-300 tracking-wider">SESSION DRUM KITS & ELECTRIC BASS</span>
             <select
               value={p.performanceMode || 'Reason Electric Bass (Fender Precision)'}
               onChange={(e) => setP('performanceMode', e.target.value)}
@@ -174,73 +174,73 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
   > = {
     pulveriser: {
       title: 'PULVERISER DEMOLITION COMPRESSOR',
-      subtitle: 'OPTICAL SQUASH &bull; TUBE DIRT &bull; TREMOR FILTER',
+      subtitle: 'OPTICAL SQUASH • TUBE DIRT • TREMOR FILTER',
       border: 'border-amber-500/50',
       knobs: ['SQUASH', 'DIRT DRIVE', 'FILTER', 'TREMOR', 'PARALLEL'],
     },
     rv9: {
       title: 'FLAGSTONE CONVOLUTION REVERB',
-      subtitle: 'SHIMMER &bull; VORTEX &bull; HALL CONVOLUTION',
+      subtitle: 'SHIMMER • VORTEX • HALL CONVOLUTION',
       border: 'border-cyan-500/40',
       knobs: ['SHIMMER', 'HIGH DAMP', 'DIFFUSION', 'DECAY', 'WET MIX'],
     },
     ripley: {
-      title: 'RIPLEY SPACE DELAY &amp; REVERB',
-      subtitle: 'TAPE WOBBLE &bull; DUCKER &bull; BITCRUSH',
+      title: 'RIPLEY SPACE DELAY & REVERB',
+      subtitle: 'TAPE WOBBLE • DUCKER • BITCRUSH',
       border: 'border-teal-500/40',
       knobs: ['WOBBLE', 'FILTER', 'FEEDBACK', 'SPACE', 'WET MIX'],
     },
     osmium: {
-      title: 'OSMIUM TUBE &amp; WAVEFOLD MATRIX',
+      title: 'OSMIUM TUBE & WAVEFOLD MATRIX',
       subtitle: 'MULTIBAND TRIODE / WAVEFOLD / FUZZ',
       border: 'border-rose-500/40',
       knobs: ['BIAS DRV', 'CROSSOVER', 'WAVEFOLD', 'SAG', 'OUTPUT'],
     },
     bvx_vocoder: {
       title: 'BV-X / BV512 FFT VOCODER',
-      subtitle: '512-BAND FFT &amp; 32-BAND VINTAGE CARRIER',
+      subtitle: '512-BAND FFT & 32-BAND VINTAGE CARRIER',
       border: 'border-orange-500/40',
       knobs: ['CARRIER', 'FORMANT', 'UNVOICED', 'DECAY', 'BLEND'],
     },
     neptune: {
-      title: 'NEPTUNE PITCH &amp; VOICE SYNTH',
-      subtitle: 'LIVE AUTO-PITCH &bull; FORMANT &bull; HARMONIZER',
+      title: 'NEPTUNE PITCH & VOICE SYNTH',
+      subtitle: 'LIVE AUTO-PITCH • FORMANT • HARMONIZER',
       border: 'border-sky-500/40',
       knobs: ['CORRECT', 'FORMANT', 'VIBRATO', 'HARMONY', 'SYNTH MIX'],
     },
     quartet: {
       title: 'QUARTET 4-VOICE CHORUS ENSEMBLE',
-      subtitle: 'BBD &bull; FFT &bull; GRANULAR ENSEMBLE',
+      subtitle: 'BBD • FFT • GRANULAR ENSEMBLE',
       border: 'border-indigo-500/40',
       knobs: ['DEPTH', 'WIDTH', 'DELAY', 'MOD RATE', 'ENSEMBLE'],
     },
     sweeper: {
-      title: 'SWEEPER DYNAMIC PHASER &amp; FLANGER',
-      subtitle: 'ENVELOPE FOLLOWER &bull; HARMONIC SWEEP',
+      title: 'SWEEPER DYNAMIC PHASER & FLANGER',
+      subtitle: 'ENVELOPE FOLLOWER • HARMONIC SWEEP',
       border: 'border-emerald-500/40',
       knobs: ['ENV SENS', 'CENTER HZ', 'SPREAD', 'LFO RATE', 'DEPTH'],
     },
     audiomatic: {
       title: 'AUDIOMATIC RETRO TRANSFORMER',
-      subtitle: 'TAPE &bull; VINYL &bull; VHS &bull; CIRCUIT TRANSFORM',
+      subtitle: 'TAPE • VINYL • VHS • CIRCUIT TRANSFORM',
       border: 'border-amber-400/40',
       knobs: ['TRANSFORM', 'BRIGHT', 'WEAR', 'SATURATE', 'DRY / WET'],
     },
     rotor: {
       title: 'ROTOR LESLIE SPEAKER EMULATION',
-      subtitle: 'DOPPLER HORN/DRUM &bull; TUBE OVERDRIVE',
+      subtitle: 'DOPPLER HORN/DRUM • TUBE OVERDRIVE',
       border: 'border-yellow-500/40',
       knobs: ['TUBE DRV', 'HORN BAL', 'DOPPLER', 'SPIN SPD', 'MIC DIST'],
     },
     softube_amp: {
-      title: 'SOFTUBE VALVE GUITAR &amp; BASS AMP',
-      subtitle: 'EL34 VALVE HEAD &bull; 4x12 / 8x10 CABINET',
+      title: 'SOFTUBE VALVE GUITAR & BASS AMP',
+      subtitle: 'EL34 VALVE HEAD • 4x12 / 8x10 CABINET',
       border: 'border-red-500/40',
       knobs: ['PRE GAIN', 'CAB TONE', 'PRESENCE', 'ROOM AIR', 'MASTER'],
     },
     midi_out: {
       title: 'MIDI OUT EXTERNAL HARDWARE MODULE',
-      subtitle: '16-CH WEBMIDI &bull; 8 CC ASSIGNABLE KNOBS',
+      subtitle: '16-CH WEBMIDI • 4 CC KNOBS',
       border: 'border-cyan-500/40',
       knobs: ['CC 1', 'CC 74', 'CC 71', 'CC 91', 'VELOCITY'],
     },
@@ -248,12 +248,16 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
 
   const meta = fxMeta[device.type] || {
     title: device.name.toUpperCase(),
-    subtitle: 'VINTAGE OUTBOARD TUBE &amp; MATRIX PROCESSOR',
+    subtitle: 'VINTAGE OUTBOARD TUBE & MATRIX PROCESSOR',
     border: 'border-amber-500/40',
     knobs: ['TUBE DRV', 'TONE HZ', 'CHARACTER', 'SYNC AMT', 'WET MIX'],
   };
 
   const driveVal = p.drive ?? 0.55;
+  // The MIDI Out module's knobs are its CC controls: each sends its CC on the chosen channel.
+  const ccKnobs = device.type === 'midi_out'
+    ? [{ label: 'CC 1', key: 'cc1Val' }, { label: 'CC 74', key: 'cc74Val' }, { label: 'CC 71', key: 'cc71Val' }, { label: 'CC 91', key: 'cc91Val' }]
+    : null;
 
   return (
     <div className={`flex flex-wrap items-center justify-between gap-2.5 p-2.5 bg-gradient-to-r from-[#17120d] via-[#221a12] to-[#17120d] rounded border ${meta.border}`}>
@@ -264,8 +268,8 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
 
       <div className="flex items-center space-x-2.5 bg-black/55 p-2 rounded border border-amber-700/35 shadow-inner">
         <div className="flex flex-col space-y-1">
-          <span className="text-[11px] font-mono font-black text-amber-200 tracking-wider" dangerouslySetInnerHTML={{ __html: meta.title }} />
-          <span className="text-[11px] font-mono text-amber-400/90" dangerouslySetInnerHTML={{ __html: meta.subtitle }} />
+          <span className="text-[11px] font-mono font-black text-amber-200 tracking-wider">{meta.title}</span>
+          <span className="text-[11px] font-mono text-amber-400/90">{meta.subtitle}</span>
           <div className="flex items-center space-x-1 pt-0.5">
             {['1/16', '1/8D', '1/4', 'GATE'].map((div) => (
               <button
@@ -282,11 +286,17 @@ export const ReasonRackFaceplate: React.FC<ReasonRackFaceplateProps> = ({ device
             ))}
           </div>
         </div>
-        <Knob label={meta.knobs[0]} value={p.drive ?? 0.55} min={0} max={1} step={0.02} size="sm" variant="bakelite" onChange={(v) => setP('drive', v)} />
-        <Knob label={meta.knobs[1]} value={p.cutoff ?? 4200} min={100} max={16000} step={40} unit="Hz" size="sm" variant="bakelite" onChange={(v) => setP('cutoff', v)} />
-        <Knob label={meta.knobs[2]} value={p.resonance ?? 3.2} min={0.5} max={15} step={0.2} size="sm" variant="brass" onChange={(v) => setP('resonance', v)} />
-        <Knob label={meta.knobs[3]} value={p.feedback ?? 0.35} min={0} max={0.9} step={0.02} size="sm" variant="bakelite" onChange={(v) => setP('feedback', v)} />
-        <Knob label={meta.knobs[4]} value={p.mix ?? 0.65} min={0} max={1} step={0.02} size="sm" variant="yellow" onChange={(v) => setP('mix', v)} />
+        {ccKnobs ? ccKnobs.map((k) => (
+          <Knob key={k.key} label={k.label} value={Number(p[k.key] ?? 0)} min={0} max={127} step={1} size="sm" variant="bakelite" onChange={(v) => setP(k.key, Math.round(v))} />
+        )) : (
+          <>
+            <Knob label={meta.knobs[0]} value={p.drive ?? 0.55} min={0} max={1} step={0.02} size="sm" variant="bakelite" onChange={(v) => setP('drive', v)} />
+            <Knob label={meta.knobs[1]} value={p.cutoff ?? 4200} min={100} max={16000} step={40} unit="Hz" size="sm" variant="bakelite" onChange={(v) => setP('cutoff', v)} />
+            <Knob label={meta.knobs[2]} value={p.resonance ?? 3.2} min={0.5} max={15} step={0.2} size="sm" variant="brass" onChange={(v) => setP('resonance', v)} />
+            <Knob label={meta.knobs[3]} value={p.feedback ?? 0.35} min={0} max={0.9} step={0.02} size="sm" variant="bakelite" onChange={(v) => setP('feedback', v)} />
+            <Knob label={meta.knobs[4]} value={p.mix ?? 0.65} min={0} max={1} step={0.02} size="sm" variant="yellow" onChange={(v) => setP('mix', v)} />
+          </>
+        )}
       </div>
 
       <DeviceVisualizer device={device} width={135} height={52} />

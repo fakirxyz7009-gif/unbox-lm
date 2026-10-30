@@ -83,7 +83,7 @@ export function wavLoop(file: string): [number, number] | null {
   for (let p = 12; p + 8 <= b.length; ) {
     const id = b.toString('ascii', p, p + 4);
     const size = b.readUInt32LE(p + 4);
-    if (id === 'smpl' && size >= 36 + 24 && b.readUInt32LE(p + 8 + 28) > 0) {
+    if (id === 'smpl' && size >= 36 + 24 && p + 8 + 36 + 16 <= b.length && b.readUInt32LE(p + 8 + 28) > 0) {
       const loop = p + 8 + 36;
       return [b.readUInt32LE(loop + 8), b.readUInt32LE(loop + 12)];
     }

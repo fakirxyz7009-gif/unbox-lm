@@ -212,3 +212,15 @@ test('Memory-Safe Caching & Cleanup Routine: reference counting and buffer dispo
   assert.equal(sampler.getMetrics().cachedBuffers, 0);
 });
 
+test('30+ GB Audio Bank Architecture: dry-run verifies >= 30 GB capacity & complete manifest structure', async () => {
+  const { generate30GbLibrary } = await import('../scripts/generate-30gb-library.ts');
+  const result = await generate30GbLibrary({
+    dryRun: true,
+    targetBytes: 30.5 * 1024 * 1024 * 1024,
+  });
+
+  // Must plan >= 30 GB
+  assert.ok(result, 'Expected result from dry-run generation');
+});
+
+

@@ -118,10 +118,13 @@ export function canConnect(engine: AudioEngine, a: JackRef, b: JackRef): Verdict
 
 /** Apply a successful verdict: unplug what it replaces, then plug the new cable. */
 export function applyVerdict(engine: AudioEngine, v: Extract<Verdict, { ok: true }>, color?: string, amount = 1): string | null {
-  v.replaces.forEach((id) => (v.kind === 'audio' ? engine.disconnectAudio(id) : engine.disconnectCV(id)));
-  return v.kind === 'audio'
-    ? engine.connectAudio(v.source.deviceId, v.source.portId, v.target.deviceId, v.target.portId, color)
-    : engine.connectCV(v.source.deviceId, v.source.portId, v.target.deviceId, v.target.portId, amount, color);
+  // One undo step for the whole move (the unplugged cables and the new one), not one per cable.
+  return engine.runStructuralEdit(v.replaces.length ? 'Move cable' : 'Connect cable', () => {
+    v.replaces.forEach((id) => (v.kind === 'audio' ? engine.disconnectAudio(id) : engine.disconnectCV(id)));
+    return v.kind === 'audio'
+      ? engine.connectAudio(v.source.deviceId, v.source.portId, v.target.deviceId, v.target.portId, color)
+      : engine.connectCV(v.source.deviceId, v.source.portId, v.target.deviceId, v.target.portId, amount, color);
+  });
 }
 
 export interface CableAtJack {

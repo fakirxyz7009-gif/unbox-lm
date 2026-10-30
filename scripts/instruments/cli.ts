@@ -4,7 +4,7 @@
  *   npm run instrument -- sfz <program.sfz | github:owner/repo/path/program.sfz> --id <id> --name <name>
  *        --kind drums|melodic --category <cat> --spdx <license> --author <who> [--source <url>]
  *        [--description <text>] [--notes <text>] [--sample-root <relative-path>] [--lanes "Kick=36:kick,Snare=38:snare,…"]
- *        [--remap 35=36,…] [--keys 21-108] [--all-keys] [--all-articulations] [--cc 64=0,…] [--channel 1] [--max-layers N] [--max-rr N]
+ *        [--remap 35=36,…] [--keys 21-108] [--key-shift -12] [--all-keys] [--all-articulations] [--cc 64=0,…] [--channel 1] [--max-layers N] [--max-rr N]
  *        [--key-step N] [--max-seconds S] [--max-seconds-key 49=5,…] [--tail-db -66] [--release S]
  *        [--note-polyphony N] [--format ogg|flac] [--quality 0-10] [--keep-cache] [--dry-run]
  *   npm run instrument -- recipe <recipe.json> [--dry-run] [--quality N]
@@ -96,9 +96,12 @@ async function cmdSfz(pos: string[], f: Record<string, string | true>): Promise<
   if (channel !== undefined && (!Number.isInteger(channel) || channel < 1 || channel > 16)) {
     throw new Error('--channel must be an integer from 1 to 16');
   }
+  const keyShift = numFlag(f, 'key-shift') ?? 0;
+  if (!Number.isInteger(keyShift) || Math.abs(keyShift) > 48) throw new Error('--key-shift must be a whole number of semitones, -48 to 48');
   const prog = readSfz(src.program, (rel) => src.read(rel), {
     cc,
     channel,
+    keyShift,
     allArticulations: f['all-articulations'] === true,
     liveModWheel: cc[1] === undefined,
   });

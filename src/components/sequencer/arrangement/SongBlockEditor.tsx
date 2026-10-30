@@ -6,6 +6,7 @@ import type { AutoLane, AutoPoint } from '../../../audio/automation/model.ts';
 import { valueAt } from '../../../audio/automation/model.ts';
 import { audioStore } from '../../../audio/clips/audioStore.ts';
 import { AudioClipWave, useAudioStoreVersion } from './AudioClipWave.tsx';
+import { useEscapeKey } from '../../../shell/useEscapeKey.ts';
 
 interface Props {
   audioEngine: AudioEngine;
@@ -18,6 +19,7 @@ const buttonClass = 'inline-flex items-center gap-1 rounded border border-slate-
 
 /** Edits the audio and automation captured inside one reusable song Block. */
 export function SongBlockEditor({ audioEngine, block, onClose }: Props) {
+  useEscapeKey(onClose);
   useAudioStoreVersion();
   const [revision, setRevision] = useState(0);
   const refresh = () => setRevision((value) => value + 1);

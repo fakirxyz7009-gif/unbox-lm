@@ -1,4 +1,5 @@
 import { audioEngine } from '../../src/audio/AudioEngine.ts';
+import { waitForAudioTime } from '../../src/audio/audioClockAlarm.ts';
 import { projectManager } from '../../src/project/ProjectManager.ts';
 
 const result = document.querySelector<HTMLPreElement>('#result');
@@ -114,7 +115,10 @@ async function run(): Promise<void> {
     resultNode.textContent = `Ready on ${input.name}. Press and release one key on the Impulse 25 within 60 seconds.`;
     console.info(`PHYSICAL_MIDI_READY ${input.name}`);
     await receivedNote;
-    await new Promise<void>((resolve) => window.setTimeout(resolve, 140));
+    // Let the recorder cross a short, audio-clock-defined duration so a very
+    // fast physical key release cannot collapse into a zero-length piano-roll
+    // note. This is not a wall-clock delay.
+    await waitForAudioTime(audioEngine.ctx, audioEngine.ctx.currentTime + 0.14);
     await audioEngine.recorder.stop();
     await audioEngine.stopTransport();
 

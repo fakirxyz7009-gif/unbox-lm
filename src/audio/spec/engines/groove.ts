@@ -80,10 +80,9 @@ export function grooveEngine(host: SpecHost): SpecEngine {
   const chokes = new Map<number, { g: GainNode; end: number }[]>();
   const held: HeldPad[] = [];
   const synthPool = new VoicePool<SynthVoice>(6);
-  let timer: number | null = null;
+  let removeRealtime: (() => void) | null = null;
   let lastPad = -1;
   let lastAt = 0;
-  const live = typeof window !== 'undefined' && ctx instanceof AudioContext;
 
   const loadKit = () => {
     const name = host.opt('kit') || 'Boom Bap';
@@ -161,12 +160,14 @@ export function grooveEngine(host: SpecHost): SpecEngine {
     for (let i = held.length - 1; i >= 0; i--) if (held[i].next >= held[i].end) held.splice(i, 1);
   }
 
-  const tick = () => {
-    scheduleRepeats(ctx.currentTime + 0.12);
-    if (!held.length && timer !== null) {
-      clearInterval(timer);
-      timer = null;
-    }
+  const ensureRealtime = (): void => {
+    if (removeRealtime || !held.length || !host.clock.requestRealtime) return;
+    removeRealtime = host.clock.requestRealtime((_now, until) => {
+      scheduleRepeats(until);
+      const keep = held.length > 0;
+      if (!keep) removeRealtime = null;
+      return keep;
+    });
   };
 
   function synthOn(note: number, vel: number, t: number): void {
@@ -204,7 +205,7 @@ export function grooveEngine(host: SpecHost): SpecEngine {
       if (REPEAT16[host.opt('noteRepeat')]) {
         const step = (60 / Math.max(20, host.clock.bpm()) / 4) * REPEAT16[host.opt('noteRepeat')];
         held.push({ note, vel, start: t, end: Infinity, next: t + step });
-        if (live && timer === null) timer = window.setInterval(tick, 25);
+        ensureRealtime();
       }
     },
     noteOff(note, t) {
@@ -223,6 +224,11 @@ export function grooveEngine(host: SpecHost): SpecEngine {
       synthPool.killAll(t);
       chokes.forEach((list) => list.forEach((c) => c.g.gain.setTargetAtTime(0, t, 0.005)));
     },
+    onStepTick(_pos, time) {
+      // Transport and OfflineAudioContext schedule held-pad repeats on the
+      // same AudioContext-time grid as the sequencer.
+      scheduleRepeats(time + 0.15);
+    },
     onParam(key) {
       if (key === 'kit') loadKit();
       else sync();
@@ -238,7 +244,8 @@ export function grooveEngine(host: SpecHost): SpecEngine {
       return { lastPad, lastAt, gr: comp.reduction, loaded: kit.length ? 1 : 0 };
     },
     dispose() {
-      if (timer !== null) clearInterval(timer);
+      removeRealtime?.();
+      removeRealtime = null;
       synthPool.killAll(ctx.currentTime);
     },
   };

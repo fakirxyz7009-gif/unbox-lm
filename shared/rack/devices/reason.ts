@@ -443,7 +443,6 @@ export const REASON_SPECS: DeviceSpec[] = [
     params: [
       ...compParams({ threshold: [-40, 10, -10], sidechain: true, mix: false }),
       toggle('fastAttack', 'Fast Atk', 0, { section: 'Compressor' }),
-      toggle('peak', 'Peak', 0, { section: 'Compressor' }),
       db('gateThreshold', 'Gate Thr', -80, 0, -80, { section: 'Gate / Expander', cv: true }),
       db('gateRange', 'Range', -60, 0, -40, { section: 'Gate / Expander' }),
       secs('gateHold', 'Hold', 0.001, 2, 0.05, { section: 'Gate / Expander' }),

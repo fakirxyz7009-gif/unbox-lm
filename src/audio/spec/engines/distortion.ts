@@ -6,6 +6,7 @@
  *  - audiomatic: retro transformer presets (tape, vinyl, VHS, psyche, radio, lo-fi, hi-fi,
  *    old phone, cassette, spread, dust, broken) built from one fixed chain.
  *  - amp / bassAmp: preamp channel, tone stack, presence / mid sweep, cabinet impulse, volume.
+ *  - drive: drive pedal voicings (Overdrive, Screamer, Hard Clip, Fuzz), see drive.ts.
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import {
@@ -21,12 +22,14 @@ import {
   setSmooth,
   stopAll
 } from '../dsp.ts';
+import { drivePedal } from './drive.ts';
 
 export function distortionEngine(host: SpecHost): SpecEngine {
   const model = String(host.cfg.model ?? 'd11');
   if (model === 'pulveriser') return pulveriser(host);
   if (model === 'audiomatic') return audiomatic(host);
   if (model === 'amp' || model === 'bassAmp') return amp(host, model === 'bassAmp');
+  if (model === 'drive') return drivePedal(host);
   return d11(host);
 }
 

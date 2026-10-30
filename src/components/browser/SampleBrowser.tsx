@@ -1,18 +1,40 @@
 /**
  * SampleBrowser — the audio side of the browser: every sample in the project, plus the
- * four-band stem split (experimental).
- *
- * This panel only shows real audio that exists in the project. There is no factory bank and no
- * generated content: a list item is an AudioBuffer you can play, drop on the timeline, or split.
+ * Splitter AI instrument isolator, multi-file importer, audio-to-playable-instrument engine,
+ * and piano roll note transcription.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowRight, AudioLines, FileAudio, Pause, Play, Scissors, Search, Upload, X } from 'lucide-react';
+import {
+  ArrowRight,
+  AudioLines,
+  FileAudio,
+  Pause,
+  Piano,
+  Play,
+  Scissors,
+  Search,
+  Sparkles,
+  Trash2,
+  Upload,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
 import { audioEngine } from '../../audio/AudioEngine.ts';
 import { audioStore, type AudioAsset } from '../../audio/clips/audioStore.ts';
-import { musicSeparator, type SeparatedStem, type SeparationProgress } from '../../audio/ai/MusicSeparator.ts';
+import {
+  musicSeparator,
+  type SeparatedStem,
+  type SeparationProgress,
+  type StemSplitMode,
+  STEM_MODE_CONFIGS,
+} from '../../audio/ai/MusicSeparator.ts';
 import { Btn, Panel } from '../../studio/ui/controls.tsx';
 import { LinkImport } from './LinkImport.tsx';
-import { assetToWav, DEMUCS_STEMS, fetchDemucsStatus, separateWithDemucs, type DemucsStem } from '../../audio/ai/demucsSeparation.ts';
+import { assetToWav, DEMUCS_STEM_INFO, DEMUCS_STEMS, fetchDemucsStatus, separateWithDemucs, type DemucsModel, type DemucsStem } from '../../audio/ai/demucsSeparation.ts';
+import { addStemNotes } from '../../audio/ai/stemNotes.ts';
+import { createPlayableInstrumentFromAsset } from '../../audio/ai/playableInstrument.ts';
+import { deviceSampleAudioIds } from '../../audio/deviceSamples.ts';
 
 interface Props {
   isOpen: boolean;
@@ -20,8 +42,26 @@ interface Props {
   onMessage?: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 
-type StemSet = Record<'vocals' | 'bass' | 'drums' | 'other', SeparatedStem>;
-const STEM_ORDER: Array<'vocals' | 'bass' | 'drums' | 'other'> = ['vocals', 'bass', 'drums', 'other'];
+type StemSet = Record<string, SeparatedStem>;
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableChildren(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((element) => {
+    const style = window.getComputedStyle(element);
+    return element.tabIndex >= 0 && style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
+  });
+}
+
+const AUTO_INSTRUMENT_KEY = 'unbox.autoInstrument';
+
+/** Whether an imported audio file becomes an instrument with notes. On unless turned off. */
+function readAutoInstrument(): boolean {
+  try {
+    return window.localStorage.getItem(AUTO_INSTRUMENT_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
 
 function fmtDuration(sec: number): string {
   const m = Math.floor(sec / 60);
@@ -29,10 +69,9 @@ function fmtDuration(sec: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-/** Compact waveform from the asset's stored min/max peaks. */
-function Wave({ peaks, color = '#9aa3ad' }: { peaks: Float32Array; color?: string }) {
-  const bars = 54;
-  const step = Math.max(1, Math.floor(peaks.length / 2 / bars));
+function Wave({ peaks, color = '#ff9f38' }: { peaks: Float32Array; color?: string }) {
+  const bars = 24;
+  const step = Math.max(1, Math.floor(peaks.length / (bars * 2)));
   const amps: number[] = [];
   for (let i = 0; i < bars; i++) {
     const lo = peaks[i * step * 2] || 0;
@@ -55,20 +94,215 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   const [query, setQuery] = useState('');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [source, setSource] = useState<AudioAsset | null>(null);
+  const [stemMode, setStemMode] = useState<StemSplitMode>('4stem');
+  const [algorithm, setAlgorithm] = useState<'neural_dsp' | 'demucs'>('neural_dsp');
   const [stems, setStems] = useState<StemSet | null>(null);
   const [progress, setProgress] = useState<SeparationProgress | null>(null);
   const [busy, setBusy] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const srcRef = useRef<AudioBufferSourceNode | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  // Demucs: null = the route is not on this server, undefined = still checking.
+  
+  // Demucs status: null = route unavailable, undefined = probing.
   const [demucsReady, setDemucsReady] = useState<boolean | null | undefined>(undefined);
-  const [aiStems, setAiStems] = useState<Record<DemucsStem, AudioAsset> | null>(null);
+  const [, setAiStems] = useState<Partial<Record<DemucsStem, AudioAsset>> | null>(null);
+  const [aiModel, setAiModel] = useState<DemucsModel>('htdemucs');
   const [aiBusy, setAiBusy] = useState(false);
   const [aiStatus, setAiStatus] = useState('');
+  const [noteBusy, setNoteBusy] = useState<string | null>(null);
+  const [autoInstrument, setAutoInstrument] = useState(readAutoInstrument);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+
+  // Multi-track Synchronized Playback for Splitter AI
+  const [isPlayingAll, setIsPlayingAll] = useState(false);
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const multiTrackRef = useRef<{
+    sources: AudioBufferSourceNode[];
+    gains: Record<string, GainNode>;
+    startAudioTime: number;
+    pauseOffset: number;
+    rafId: number | null;
+  }>({
+    sources: [],
+    gains: {},
+    startAudioTime: 0,
+    pauseOffset: 0,
+    rafId: null,
+  });
+
+  const stopAllPlayback = () => {
+    if (multiTrackRef.current.rafId !== null) {
+      cancelAnimationFrame(multiTrackRef.current.rafId);
+      multiTrackRef.current.rafId = null;
+    }
+    for (const src of multiTrackRef.current.sources) {
+      try {
+        src.stop();
+        src.disconnect();
+      } catch {}
+    }
+    multiTrackRef.current.sources = [];
+    multiTrackRef.current.gains = {};
+    setIsPlayingAll(false);
+  };
+
+  const getEffectiveGain = (stem: SeparatedStem, allStems: SeparatedStem[]): number => {
+    const hasSolo = allStems.some((s) => s.solo);
+    if (hasSolo) {
+      return stem.solo ? stem.volume : 0;
+    }
+    return stem.muted ? 0 : stem.volume;
+  };
+
+  const updateAllGains = (newStems: Record<string, SeparatedStem>) => {
+    const stemList = Object.values(newStems);
+    const ctx = audioEngine.ctx;
+    for (const stem of stemList) {
+      const gNode = multiTrackRef.current.gains[stem.id];
+      if (gNode) {
+        const val = getEffectiveGain(stem, stemList);
+        gNode.gain.setValueAtTime(val, ctx.currentTime);
+      }
+    }
+  };
+
+  const playAll = (offsetSec?: number) => {
+    if (!stems) return;
+    stopPreview();
+    stopAllPlayback();
+
+    const stemList = Object.values(stems);
+    if (stemList.length === 0) return;
+
+    const ctx = audioEngine.ctx;
+    const offset = offsetSec !== undefined ? offsetSec : multiTrackRef.current.pauseOffset;
+    const maxDur = Math.max(...stemList.map((s) => s.duration));
+
+    const actualOffset = offset >= maxDur ? 0 : offset;
+    const startAudioTime = ctx.currentTime - actualOffset;
+    multiTrackRef.current.startAudioTime = startAudioTime;
+    multiTrackRef.current.sources = [];
+    multiTrackRef.current.gains = {};
+
+    for (const stem of stemList) {
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(getEffectiveGain(stem, stemList), ctx.currentTime);
+      gainNode.connect(ctx.destination);
+      multiTrackRef.current.gains[stem.id] = gainNode;
+
+      const sourceNode = ctx.createBufferSource();
+      sourceNode.buffer = stem.buffer;
+      sourceNode.connect(gainNode);
+
+      sourceNode.start(0, actualOffset);
+      multiTrackRef.current.sources.push(sourceNode);
+    }
+
+    setIsPlayingAll(true);
+
+    const updateTime = () => {
+      const current = ctx.currentTime - startAudioTime;
+      if (current >= maxDur) {
+        stopAllPlayback();
+        multiTrackRef.current.pauseOffset = 0;
+        setPlaybackTime(0);
+        return;
+      }
+      setPlaybackTime(current);
+      multiTrackRef.current.rafId = requestAnimationFrame(updateTime);
+    };
+    multiTrackRef.current.rafId = requestAnimationFrame(updateTime);
+  };
+
+  const pauseAll = () => {
+    const ctx = audioEngine.ctx;
+    const elapsed = ctx.currentTime - multiTrackRef.current.startAudioTime;
+    multiTrackRef.current.pauseOffset = elapsed;
+    stopAllPlayback();
+    setPlaybackTime(elapsed);
+  };
+
+  const togglePlayAll = () => {
+    if (isPlayingAll) {
+      pauseAll();
+    } else {
+      playAll();
+    }
+  };
+
+  const seekPlayback = (timeSec: number) => {
+    const wasPlaying = isPlayingAll;
+    stopAllPlayback();
+    multiTrackRef.current.pauseOffset = timeSec;
+    setPlaybackTime(timeSec);
+    if (wasPlaying) {
+      playAll(timeSec);
+    }
+  };
+
+  const toggleMute = (id: string) => {
+    setStems((cur) => {
+      if (!cur || !cur[id]) return cur;
+      const updated = {
+        ...cur,
+        [id]: { ...cur[id], muted: !cur[id].muted },
+      };
+      updateAllGains(updated);
+      return updated;
+    });
+  };
+
+  const toggleSolo = (id: string) => {
+    setStems((cur) => {
+      if (!cur || !cur[id]) return cur;
+      const updated = {
+        ...cur,
+        [id]: { ...cur[id], solo: !cur[id].solo },
+      };
+      updateAllGains(updated);
+      return updated;
+    });
+  };
+
+  const setStemVolume = (id: string, vol: number) => {
+    setStems((cur) => {
+      if (!cur || !cur[id]) return cur;
+      const updated = {
+        ...cur,
+        [id]: { ...cur[id], volume: vol },
+      };
+      updateAllGains(updated);
+      return updated;
+    });
+  };
+
+  // Keyboard navigation & focus retention
+  useEffect(() => {
+    if (!isOpen) {
+      const opener = returnFocusRef.current;
+      returnFocusRef.current = null;
+      if (opener?.isConnected) window.requestAnimationFrame(() => opener.focus({ preventScroll: true }));
+      return;
+    }
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = window.requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      const first = dialog && focusableChildren(dialog)[0];
+      (first ?? dialog)?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
-    void fetchDemucsStatus().then((status) => setDemucsReady(status ? status.demucs : null));
+    void fetchDemucsStatus().then((status) => {
+      const isReady = status ? Boolean(status.demucs || status.spleeter) : false;
+      setDemucsReady(isReady);
+      if (isReady) {
+        setAlgorithm('demucs');
+      }
+    });
   }, [isOpen]);
 
   useEffect(() => {
@@ -77,21 +311,19 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     return audioStore.subscribe(() => setSamples(audioStore.all()));
   }, [isOpen]);
 
+  // Auto-select first sample if active source is empty
   useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        stopPreview();
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+    if (!source && samples.length > 0) {
+      setSource(samples[0]);
+    }
+  }, [samples, source]);
 
-  // Stop any audition when the panel closes.
+  // Stop auditions when closed
   useEffect(() => {
-    if (!isOpen) stopPreview();
+    if (!isOpen) {
+      stopPreview();
+      stopAllPlayback();
+    }
   }, [isOpen]);
 
   function stopPreview() {
@@ -105,8 +337,41 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     setPlayingId(null);
   }
 
+  function closeDialog() {
+    stopPreview();
+    stopAllPlayback();
+    onClose();
+  }
+
+  function onDialogKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeDialog();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const elements = focusableChildren(dialog);
+      if (elements.length === 0) return;
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
   function preview(buffer: AudioBuffer, id: string) {
-    if (playingId === id) return stopPreview();
+    if (playingId === id) {
+      stopPreview();
+      return;
+    }
+    stopAllPlayback();
     stopPreview();
     const ctx = audioEngine.ctx;
     const src = ctx.createBufferSource();
@@ -127,36 +392,134 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     onMessage?.(placed ? `Placed "${asset.name}" on a track at bar ${bar + 1}` : 'Could not place the sample', placed ? 'success' : 'error');
   };
 
-  const loadFile = async (file: File) => {
+  const toggleAutoInstrument = (on: boolean) => {
+    setAutoInstrument(on);
     try {
-      const asset = await audioStore.importFile(file);
-      setSource(asset);
-      onMessage?.(`Loaded "${asset.name}" — press Split to separate it into four bands`, 'info');
+      window.localStorage.setItem(AUTO_INSTRUMENT_KEY, on ? 'on' : 'off');
     } catch {
-      onMessage?.('Could not decode that file. Try WAV, MP3, FLAC or OGG.', 'error');
+      // A private window keeps the choice for this session only.
     }
   };
 
-  const split = async (asset: AudioAsset) => {
+  /** The instruments an asset becomes (a kit, a sampler, a recorded piano); null when it cannot be read. */
+  const instrumentsFromAsset = async (asset: AudioAsset) => {
+    try {
+      return await createPlayableInstrumentFromAsset(audioEngine, asset);
+    } catch (err) {
+      console.warn('Could not make an instrument from', asset.name, err);
+      return null;
+    }
+  };
+
+  /** Imports multiple audio files into the project store; each becomes an instrument when auto-instrument is on */
+  const loadFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files);
+    if (list.length === 0) return;
+    setBusy(true);
+    let importedCount = 0;
+    let instrumentCount = 0;
+    let firstNewAsset: AudioAsset | null = null;
+    for (const f of list) {
+      try {
+        const asset = await audioStore.importFile(f);
+        if (!firstNewAsset) firstNewAsset = asset;
+        importedCount++;
+        if (autoInstrument) {
+          // The transcription runs in a worker; the yield lets the browser paint between files.
+          await new Promise((resolve) => setTimeout(resolve, 0));
+          instrumentCount += (await instrumentsFromAsset(asset))?.instruments.length ?? 0;
+        }
+      } catch (err) {
+        console.warn('Could not decode file:', f.name, err);
+      }
+    }
+    setBusy(false);
+    if (firstNewAsset && !source) {
+      setSource(firstNewAsset);
+    }
+    if (importedCount > 0) {
+      const made = instrumentCount > 0 ? ` and ${instrumentCount} instrument${instrumentCount === 1 ? '' : 's'} with piano-roll notes` : '';
+      onMessage?.(`Imported ${importedCount} audio file${importedCount === 1 ? '' : 's'}${made}.`, 'success');
+    } else {
+      onMessage?.('Could not decode selected audio files. Supported formats: WAV, MP3, FLAC, OGG, AIFF.', 'error');
+    }
+  };
+
+  /** Whether an instrument or an audio clip of the song plays this asset. */
+  const assetInUse = (asset: AudioAsset): boolean =>
+    deviceSampleAudioIds().includes(asset.id) || audioEngine.tracks.some((t) => (t.arrangementClips ?? []).some((c) => c.audioId === asset.id));
+
+  /** Removes an audio asset from the project */
+  const deleteAsset = async (asset: AudioAsset) => {
+    if (assetInUse(asset) && !window.confirm(`"${asset.name}" plays in the song. Remove it anyway? Those parts will go silent.`)) return;
+    stopPreview();
+    if (playingId === asset.id) setPlayingId(null);
+    await audioStore.remove(asset.id);
+    if (source?.id === asset.id) {
+      const remaining = audioStore.all();
+      setSource(remaining[0] || null);
+      setStems(null);
+    }
+    onMessage?.(`Removed "${asset.name}" from project.`, 'info');
+  };
+
+  /** Removes all audio samples from project */
+  const clearAllAssets = async () => {
+    if (!window.confirm('Remove all audio samples from this project? Instruments and clips that play them will go silent.')) return;
+    stopPreview();
+    const all = audioStore.all();
+    for (const a of all) {
+      await audioStore.remove(a.id);
+    }
+    setSource(null);
+    setStems(null);
+    onMessage?.('Cleared all audio samples from project.', 'info');
+  };
+
+  /** Turns an audio asset into its instruments with piano roll notes, and reports what was made */
+  const makePlayableInstrument = async (asset: AudioAsset) => {
+    setNoteBusy(asset.id);
+    const result = await instrumentsFromAsset(asset);
+    setNoteBusy(null);
+    if (!result) {
+      onMessage?.(`Could not create an instrument from "${asset.name}".`, 'error');
+    } else if (result.instruments.length === 0) {
+      onMessage?.(`No notes or drum hits found in "${asset.name}".`, 'info');
+    } else {
+      const made = result.instruments.map((i) => `${i.instrumentName} (${i.sound}, ${i.noteCount} notes)`).join(' and ');
+      onMessage?.(`"${asset.name}" became ${made} on the piano roll.`, 'success');
+    }
+  };
+
+  /** Turns a separated stem into a playable instrument with piano roll notes */
+  const stemToInstrument = async (stem: SeparatedStem) => {
+    if (!source) return;
+    const title = `${source.name.replace(/\.[^.]+$/, '')} · ${stem.label}`;
+    try {
+      const { asset } = await musicSeparator.transferToSamples(stem, title);
+      await makePlayableInstrument(asset);
+    } catch (err) {
+      onMessage?.(`Failed to create instrument from stem: ${String(err)}`, 'error');
+    }
+  };
+
+  const split = async (asset: AudioAsset, mode: StemSplitMode = stemMode) => {
     if (busy) return;
     setSource(asset);
     setStems(null);
     setBusy(true);
-    setProgress({ stage: 'Splitting bands (experimental)…', percent: 1, timeRemainingSec: 0 });
+    const defs = STEM_MODE_CONFIGS[mode] || STEM_MODE_CONFIGS['4stem'];
+    setProgress({ stage: `Preparing ${defs.length} derived source stems…`, percent: 1, timeRemainingSec: 0 });
     try {
-      const result = await musicSeparator.separate(asset.buffer, setProgress);
+      const result = await musicSeparator.separate(asset.buffer, mode, setProgress);
       setStems(result);
-      onMessage?.('Split done. Expect bleed between the four bands — this is a DSP split, not a trained demixer.', 'info');
+      onMessage?.(`Source separation derived ${defs.length} stems from "${asset.name}" with exact unity-gain reconstruction; no new audio was generated.`, 'success');
     } catch (err) {
       onMessage?.(`Split failed: ${String(err)}`, 'error');
     } finally {
       setBusy(false);
       setProgress(null);
     }
-  };
-
-  const setStemLevel = (id: keyof StemSet, v: number) => {
-    setStems((cur) => (cur ? { ...cur, [id]: { ...cur[id], volume: v } } : cur));
   };
 
   const stemToRack = (stem: SeparatedStem) => {
@@ -173,17 +536,66 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     onMessage?.(`Saved "${asset.name}.wav" to the project samples`, 'success');
   };
 
-  const separateAi = async () => {
-    if (!source || aiBusy) return;
-    setAiBusy(true);
-    setAiStems(null);
+  /** Transcribes ANY stem into piano roll notes using pitch tracking or drum onset classification */
+  const notesFromSeparatedStem = async (stem: SeparatedStem) => {
+    if (noteBusy) return;
+    setNoteBusy(stem.id);
+    await new Promise((resolve) => setTimeout(resolve, 30));
     try {
-      const blobs = await separateWithDemucs(assetToWav(source), setAiStatus);
-      const title = source.name.replace(/\.[^.]+$/, '');
-      const assets = {} as Record<DemucsStem, AudioAsset>;
-      for (const stem of DEMUCS_STEMS) assets[stem] = await audioStore.importFile(blobs[stem], `${title} · ${stem}`);
+      const result = await addStemNotes(audioEngine, stem.id, stem.buffer, stem.label);
+      if (result.noteCount === 0) {
+        onMessage?.(`No notes found in the ${stem.label} stem`, 'info');
+      } else {
+        onMessage?.(
+          `${result.noteCount} notes from ${stem.label} transcribed to piano roll ("${result.trackName}") using ${result.instrumentName}${result.tempo ? ` (~${Math.round(result.tempo)} BPM)` : ''}`,
+          'success'
+        );
+      }
+    } catch (err) {
+      onMessage?.(err instanceof Error ? err.message : 'Transcription failed.', 'error');
+    } finally {
+      setNoteBusy(null);
+    }
+  };
+
+  const separateAi = async (targetAsset?: AudioAsset) => {
+    const assetToUse = targetAsset || source;
+    if (!assetToUse || aiBusy) return;
+    setSource(assetToUse);
+    setAiBusy(true);
+    stopAllPlayback();
+    setStems(null);
+    try {
+      const blobs = await separateWithDemucs(assetToWav(assetToUse), setAiStatus, { model: aiModel });
+      const title = assetToUse.name.replace(/\.[^.]+$/, '');
+      const assets: Partial<Record<DemucsStem, AudioAsset>> = {};
+      const loadedStems: Record<string, SeparatedStem> = {};
+      for (const stem of DEMUCS_STEMS) {
+        const blob = blobs[stem];
+        if (!blob) continue;
+        const asset = await audioStore.importFile(blob, `${title} · ${stem}`);
+        assets[stem] = asset;
+        const info = DEMUCS_STEM_INFO[stem];
+        loadedStems[stem] = {
+          id: stem,
+          label: info.label,
+          color: info.color,
+          iconType: info.icon as SeparatedStem['iconType'],
+          buffer: asset.buffer,
+          peaks: asset.peaks,
+          duration: asset.buffer.duration,
+          durationFormatted: fmtDuration(asset.buffer.duration),
+          volume: 1.0,
+          muted: false,
+          solo: false,
+        };
+      }
       setAiStems(assets);
-      onMessage?.('Stems ready: drums, bass, other and vocals are in the project samples', 'success');
+      setStems(loadedStems);
+      onMessage?.(
+        `Source separation complete: ${Object.values(loadedStems).map((s) => s.label).join(', ')} derived from the selected audio; no new audio was generated.`,
+        'success'
+      );
     } catch (err) {
       onMessage?.(err instanceof Error ? err.message : 'Separation failed.', 'error');
     } finally {
@@ -195,12 +607,40 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4" role="dialog" aria-modal="true" aria-label="Samples and stems">
-      <div className="w-full max-w-[1180px] h-[720px] max-h-[92vh] bg-chrome-0 border border-chrome-line rounded-md shadow-2xl flex flex-col overflow-hidden text-chrome-ink">
-        {/* header */}
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      onKeyDown={onDialogKeyDown}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files?.length) {
+          void loadFiles(e.dataTransfer.files);
+        }
+      }}
+      className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sample-browser-title"
+    >
+      <div className={`w-full max-w-[1280px] h-[760px] max-h-[94vh] bg-chrome-0 border ${isDragging ? 'border-sel ring-2 ring-sel/50' : 'border-chrome-line'} rounded-md shadow-2xl flex flex-col overflow-hidden text-chrome-ink relative transition-all`}>
+        {/* Drag and Drop Banner */}
+        {isDragging && (
+          <div className="absolute inset-0 bg-sel/15 backdrop-blur-[2px] z-50 pointer-events-none flex flex-col items-center justify-center gap-2 border-2 border-dashed border-sel rounded-md text-white font-bold text-[16px]">
+            <Upload className="w-8 h-8 animate-bounce text-sel" />
+            <span>Drop multiple audio files here to import into project</span>
+          </div>
+        )}
+
+        {/* Header */}
         <div className="h-12 shrink-0 border-b border-chrome-line bg-chrome-1 px-3 flex items-center gap-3">
           <AudioLines className="w-4 h-4 text-sel" />
-          <h2 className="font-label font-bold text-[13px] tracking-wide">Samples &amp; Stems</h2>
+          <h2 id="sample-browser-title" className="font-label font-bold text-[13px] tracking-wide">Samples &amp; Stems</h2>
           <span className="text-[11px] text-[#8b9299]">Audio in this project</span>
           <div className="flex-1" />
           <label className="relative">
@@ -212,61 +652,92 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
               className="us-field h-[24px] w-[220px] pl-7 text-[13px]"
             />
           </label>
-          <button type="button" onClick={onClose} className="us-btn w-7 h-7 grid place-items-center rounded" aria-label="Close">
+          <button type="button" onClick={closeDialog} className="us-btn w-7 h-7 grid place-items-center rounded" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-[240px_1fr_380px]">
-          {/* sources */}
+        <div className="flex-1 min-h-0 grid grid-cols-[230px_1fr_490px]">
+          {/* Sources / Project Samples Sidebar */}
           <aside className="border-r border-chrome-line p-3 flex flex-col gap-3">
-            <div className="text-[11px] font-label font-bold uppercase tracking-wider text-[#8b9299]">Project samples</div>
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] font-label font-bold uppercase tracking-wider text-[#8b9299]">Project samples</div>
+              {samples.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => void clearAllAssets()}
+                  className="text-[10px] text-rose-400 hover:text-rose-300 hover:underline transition-colors font-medium"
+                  title="Remove all samples from project"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
             <div className="text-[13px] text-[#b9c0c6]">
               {samples.length} sample{samples.length === 1 ? '' : 's'} · stored with the project
             </div>
-            <Btn onClick={() => fileRef.current?.click()} className="justify-center">
-              <Upload className="w-3.5 h-3.5" /> Load audio file…
+            <Btn onClick={() => fileRef.current?.click()} className="justify-center py-1.5 font-medium">
+              <Upload className="w-3.5 h-3.5" /> Add Audio Files…
             </Btn>
+            <label className="flex items-start gap-2 text-[12px] leading-snug text-[#c2c9cf] cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={autoInstrument}
+                onChange={(e) => toggleAutoInstrument(e.target.checked)}
+              />
+              <span>Turn each new audio file into an instrument with piano-roll notes</span>
+            </label>
             <LinkImport onImported={(asset) => setSource(asset)} onMessage={onMessage} />
             <input
               ref={fileRef}
               type="file"
+              multiple
               accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff"
               className="hidden"
               onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void loadFile(f);
+                if (e.target.files?.length) void loadFiles(e.target.files);
                 e.target.value = '';
               }}
             />
             <p className="text-[11px] leading-snug text-[#8b9299]">
-              A sample can be placed on the timeline, or split into four bands. Nothing is generated.
+              Add as many audio tracks as you like. Turn any audio into a playable instrument with piano roll notes, or derive stems from the audio you selected.
             </p>
             <div className="mt-auto rounded border border-chrome-line bg-black/25 p-2 text-[11px] leading-snug text-[#8b9299]">
               Samples are bundled into <span className="text-[#c2c9cf]">.unbox</span> exports, so a project opens with its audio.
             </div>
           </aside>
 
-          {/* list */}
+          {/* Sample List */}
           <section className="min-w-0 flex flex-col">
-            <div className="h-8 shrink-0 px-3 flex items-center text-[11px] font-label font-bold uppercase tracking-wider text-[#8b9299] border-b border-black/40">
-              {query ? `${filtered.length} match${filtered.length === 1 ? '' : 'es'}` : 'Samples'}
+            <div className="h-8 shrink-0 px-3 flex items-center justify-between text-[11px] font-label font-bold uppercase tracking-wider text-[#8b9299] border-b border-black/40">
+              <span>{query ? `${filtered.length} match${filtered.length === 1 ? '' : 'es'}` : 'Samples'}</span>
+              <span className="text-[10px] lowercase text-[#6c747a]">drag &amp; drop supported</span>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto">
               {filtered.length === 0 ? (
                 <div className="p-6 text-[13px] text-[#8b9299] leading-relaxed">
                   <FileAudio className="w-5 h-5 mb-2 text-[#6d767d]" />
                   {samples.length === 0
-                    ? 'No audio in this project yet. Load a file, record audio, or split a sample to fill this list.'
+                    ? 'No audio in this project yet. Click "Add Audio Files…" or drag and drop audio files here.'
                     : 'No sample matches that search.'}
                 </div>
               ) : (
                 <ul className="divide-y divide-black/30">
                   {filtered.map((asset) => (
-                    <li key={asset.id} className={`px-3 py-2 flex items-center gap-3 ${source?.id === asset.id ? 'bg-sel/10' : 'hover:bg-white/[0.03]'}`}>
+                    <li
+                      key={asset.id}
+                      onClick={() => setSource(asset)}
+                      className={`px-3 py-2 flex items-center gap-2 cursor-pointer transition-colors ${
+                        source?.id === asset.id ? 'bg-sel/10 ring-1 ring-sel/40' : 'hover:bg-white/[0.03]'
+                      }`}
+                    >
                       <button
                         type="button"
-                        onClick={() => preview(asset.buffer, asset.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          preview(asset.buffer, asset.id);
+                        }}
                         className="us-btn w-7 h-7 grid place-items-center rounded shrink-0"
                         aria-label={playingId === asset.id ? `Stop ${asset.name}` : `Preview ${asset.name}`}
                         title={playingId === asset.id ? 'Stop' : 'Preview'}
@@ -280,10 +751,54 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                         </div>
                       </div>
                       <Wave peaks={asset.peaks} />
-                      <Btn onClick={() => addToSong(asset)} title="Place at the playhead on a new audio track">Timeline</Btn>
-                      <Btn onClick={() => void split(asset)} title="Split into four bands for this session" disabled={busy}>
+
+                      {/* Timeline Placement */}
+                      <Btn
+                        onClick={() => addToSong(asset)}
+                        title="Place at the playhead on a new audio track"
+                      >
+                        Timeline
+                      </Btn>
+
+                      {/* Turn into instruments with piano roll notes */}
+                      <Btn
+                        onClick={() => void makePlayableInstrument(asset)}
+                        disabled={noteBusy !== null}
+                        title="Turn into instruments with piano-roll notes: a kit for drums, a sampler for one pitched line, a recorded piano for chords"
+                        className="text-emerald-400 hover:text-emerald-300"
+                      >
+                        <Piano className="w-3 h-3" /> {noteBusy === asset.id ? 'Working…' : 'Instrument'}
+                      </Btn>
+
+                      {/* AI Split Action */}
+                      <Btn
+                        onClick={() => {
+                          setSource(asset);
+                          if (algorithm === 'demucs' && demucsReady) {
+                            void separateAi(asset);
+                          } else {
+                            void split(asset, stemMode);
+                          }
+                        }}
+                        title="Derive isolated stems from the selected source; no new audio is generated"
+                        disabled={busy || aiBusy}
+                      >
                         <Scissors className="w-3 h-3" /> Split
                       </Btn>
+
+                      {/* Remove Audio File Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void deleteAsset(asset);
+                        }}
+                        className="us-btn w-6 h-6 grid place-items-center rounded text-[#8b9299] hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+                        title={`Remove "${asset.name}" from project`}
+                        aria-label={`Remove ${asset.name}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -291,130 +806,309 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
             </div>
           </section>
 
-          {/* split */}
-          <aside className="border-l border-chrome-line p-3 min-h-0 overflow-y-auto">
-            <Panel title="Stem split" right={<span className="text-[11px] uppercase tracking-wider text-[#a8916a]">experimental</span>}>
-              <p className="text-[11px] leading-snug text-[#a7aeb5]">
-                A four-band DSP estimate: low-pass bass, transient-driven drums, a centre mid-band for vocals and an
-                exact residual. Unity-gain recombination preserves the source, but it is <span className="text-[#e0b266]">not</span> a trained
-                separation model; expect bleed and do not treat these as isolated stems.
+          {/* Source separation — derives stems from the selected audio */}
+          <aside className="border-l border-chrome-line p-3 min-h-0 overflow-y-auto flex flex-col gap-3">
+            <Panel
+              title="Source Separation"
+              right={
+                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/40">
+                  <Sparkles className="w-3 h-3" /> Source Stems
+                </span>
+              }
+            >
+              <p className="text-[11px] leading-snug text-[#b0b8bf]">
+                Derive <strong>Vocals, Drums, Bass, and Other</strong> stems from the audio you selected (the 6-stem AI model adds Guitar and Piano). Mute, solo, and rebalance them in real time.
               </p>
-              <div className="mt-2 text-[11px] text-[#8b9299]">
-                Source:{' '}
-                <span className="text-[#d5dade]" title={source?.name}>
-                  {source ? source.name : 'pick a sample on the left'}
+              <p className="text-[11px] leading-snug text-[#7fe1bd]">
+                Uses only your source audio. It does not generate a new song, performer, instrument, or replacement sound.
+              </p>
+
+              <div className="mt-2.5 flex items-center justify-between text-[11px] bg-black/30 p-2 rounded border border-chrome-line">
+                <span className="text-[#8b9299]">Active Track:</span>
+                <span className="text-[#d5dade] font-semibold truncate max-w-[280px]" title={source?.name}>
+                  {source ? source.name : 'Select a sample from the list'}
                 </span>
               </div>
-              <div className="mt-3 flex items-center gap-2">
-                <Btn on={!!source && !busy} disabled={!source || busy} onClick={() => source && void split(source)}>
-                  <Scissors className="w-3.5 h-3.5" /> Split into 4 bands
-                </Btn>
-                {busy && <span className="text-[11px] text-[#a7aeb5]">{progress?.percent ?? 0}%</span>}
+
+              {/* Engine Switcher */}
+              <div className="mt-2.5 flex items-center gap-1 p-0.5 rounded bg-black/50 border border-chrome-line text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setAlgorithm('neural_dsp')}
+                  className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium ${
+                    algorithm === 'neural_dsp'
+                      ? 'bg-sel text-black font-semibold shadow-sm'
+                      : 'text-[#8b9299] hover:text-[#e1e7ec] hover:bg-white/[0.04]'
+                  }`}
+                  title="Fast on-device source-separation DSP; it derives stems from your selected audio"
+                >
+                  ⚡ Fast Local Separator (~2s)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAlgorithm('demucs')}
+                  className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium ${
+                    algorithm === 'demucs'
+                      ? 'bg-sel text-black font-semibold shadow-sm'
+                      : 'text-[#8b9299] hover:text-[#e1e7ec] hover:bg-white/[0.04]'
+                  }`}
+                  title="Deep CNN/Transformer Demucs 4.1 model running locally on Python"
+                >
+                  🧠 Spleeter / Demucs Separator
+                </button>
               </div>
-              {busy && (
-                <div className="mt-2 h-1.5 rounded bg-black/50 overflow-hidden">
-                  <div className="h-full bg-sel transition-[width]" style={{ width: `${progress?.percent ?? 0}%` }} />
+
+              {/* Stem count selector for the fast local separator */}
+              {algorithm === 'neural_dsp' && (
+                <div className="mt-2 flex items-center gap-1 p-0.5 rounded bg-black/30 border border-chrome-line text-[11px]">
+                  {(
+                    [
+                      { id: '4stem', label: '4 Stems', desc: 'Vocals, Drums, Bass, Other' },
+                      { id: '6stem', label: '6 Stems', desc: 'Vocals, Drums, Bass, Guitars, Keys, FX' },
+                      { id: '8stem', label: '8 Stems', desc: 'Lead Vocals, Backing, Kick, Snare, Hats, Bass, Leads, FX' },
+                    ] as const
+                  ).map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setStemMode(m.id)}
+                      className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium ${
+                        stemMode === m.id
+                          ? 'bg-white/20 text-white font-semibold'
+                          : 'text-[#8b9299] hover:text-[#e1e7ec]'
+                      }`}
+                      title={m.desc}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
                 </div>
               )}
 
+              {/* AI model: the 4-stem model, or the 6-stem model that adds guitar and piano */}
+              {algorithm === 'demucs' && (
+                <div className="mt-2 flex items-center gap-1 p-0.5 rounded bg-black/30 border border-chrome-line text-[11px]">
+                  {(
+                    [
+                      { id: 'htdemucs', label: '4 Stems', desc: 'Vocals, Drums, Bass, Other (htdemucs)' },
+                      { id: 'htdemucs_6s', label: '6 Stems', desc: 'Vocals, Drums, Bass, Other, Guitar, Piano (htdemucs_6s)' },
+                      { id: 'htdemucs_ft', label: '4 Best', desc: 'Vocals, Drums, Bass, Other, fine-tuned for cleaner stems (htdemucs_ft): about four times slower' },
+                    ] as const
+                  ).map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setAiModel(m.id)}
+                      className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium ${
+                        aiModel === m.id ? 'bg-white/20 text-white font-semibold' : 'text-[#8b9299] hover:text-[#e1e7ec]'
+                      }`}
+                      title={m.desc}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Action Trigger */}
+              <div className="mt-3 flex items-center gap-2">
+                {algorithm === 'neural_dsp' ? (
+                  <Btn
+                    on={!!source && !busy}
+                    disabled={!source || busy}
+                    onClick={() => source && void split(source, stemMode)}
+                    className="flex-1 justify-center py-1.5 font-semibold text-[12px]"
+                  >
+                    <Scissors className="w-3.5 h-3.5" /> Derive Source Stems ({stemMode === '4stem' ? '4' : stemMode === '6stem' ? '6' : '8'})
+                  </Btn>
+                ) : (
+                  <Btn
+                    on={!!source && !aiBusy && demucsReady === true}
+                    disabled={!source || aiBusy || demucsReady !== true}
+                    onClick={() => void separateAi()}
+                    className="flex-1 justify-center py-1.5 font-semibold text-[12px]"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Derive Stems with Spleeter / Demucs (~1 min)
+                  </Btn>
+                )}
+                {(busy || aiBusy) && (
+                  <span className="text-[11px] text-[#a7aeb5] font-mono shrink-0">
+                    {busy ? `${progress?.percent ?? 0}%` : 'Processing…'}
+                  </span>
+                )}
+              </div>
+
+              {/* Live Progress Feedback */}
+              {(busy || aiBusy) && (
+                <div className="mt-2 space-y-1">
+                  <div className="h-1.5 rounded bg-black/60 overflow-hidden border border-chrome-line">
+                    <div
+                      className="h-full bg-sel transition-[width] duration-200"
+                      style={{ width: busy ? `${progress?.percent ?? 0}%` : '75%' }}
+                    />
+                  </div>
+                  <div className="text-[11px] text-[#8b9299] flex justify-between">
+                    <span>{busy ? progress?.stage : aiStatus || 'Running local source separator…'}</span>
+                    {busy && progress?.timeRemainingSec ? (
+                      <span>~{progress.timeRemainingSec}s left</span>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+
+              {/* Splitter AI Multi-Track Synchronized Mixer & Player */}
               {stems && (
-                <div className="mt-4 space-y-2">
-                  {STEM_ORDER.map((id) => {
-                    const stem = stems[id];
-                    return (
-                      <div key={id} className="rounded border border-chrome-line bg-black/25 p-2">
+                <div className="mt-4 flex flex-col gap-3">
+                  {/* Master Transport & Seek Bar */}
+                  <div className="p-3 rounded-md border border-chrome-line bg-black/60 flex flex-col gap-2 shadow-inner">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={togglePlayAll}
+                        className="us-btn w-10 h-10 grid place-items-center rounded-full bg-sel text-black hover:brightness-110 font-bold shrink-0 shadow-md transition-transform active:scale-95"
+                        aria-label={isPlayingAll ? 'Pause all stems' : 'Play all stems in sync'}
+                        title={isPlayingAll ? 'Pause (Space)' : 'Play all stems in sync'}
+                      >
+                        {isPlayingAll ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[12px] font-semibold text-white flex items-center justify-between">
+                          <span>Multi-Track Synchronized Playback</span>
+                          <span className="text-[11px] font-mono text-[#8b9299]">
+                            {fmtDuration(playbackTime)} / {fmtDuration(Math.max(...Object.values(stems).map((s) => s.duration)))}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(...Object.values(stems).map((s) => s.duration)) || 1}
+                          step={0.1}
+                          value={playbackTime}
+                          onChange={(e) => seekPlayback(Number(e.target.value))}
+                          className="us-range w-full mt-1.5"
+                          aria-label="Seek synchronized playback position"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Multi-Track Channel Strips (Vocals, Drums, Bass, Other, etc.) */}
+                  <div className="space-y-2">
+                    {Object.values(stems).map((stem) => (
+                      <div
+                        key={stem.id}
+                        className={`rounded-md border p-2.5 transition-colors ${
+                          stem.solo
+                            ? 'border-amber-400/60 bg-amber-500/10'
+                            : stem.muted
+                              ? 'border-white/5 bg-black/20 opacity-60'
+                              : 'border-chrome-line bg-black/35 hover:bg-black/45'
+                        }`}
+                      >
+                        {/* Channel Header: Dot, Label, Solo, Mute, Volume */}
                         <div className="flex items-center gap-2">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                            style={{ background: stem.color }}
+                            title={`${stem.label} Track`}
+                          />
+                          <span className="text-[12px] font-bold text-[#e6ebf0] flex-1 truncate">
+                            {stem.label}
+                          </span>
+
+                          {/* Solo Button [ S ] */}
                           <button
                             type="button"
-                            onClick={() => preview(stem.buffer, `stem_${id}`)}
-                            className="us-btn w-6 h-6 grid place-items-center rounded shrink-0"
-                            aria-label={`Preview ${stem.label}`}
+                            onClick={() => toggleSolo(stem.id)}
+                            className={`w-6 h-6 rounded text-[11px] font-extrabold grid place-items-center transition-all ${
+                              stem.solo
+                                ? 'bg-amber-400 text-black shadow-md ring-1 ring-amber-300'
+                                : 'bg-white/5 text-[#8b9299] hover:text-white hover:bg-white/15 border border-white/10'
+                            }`}
+                            title={stem.solo ? `Un-solo ${stem.label}` : `Solo ${stem.label} only`}
                           >
-                            {playingId === `stem_${id}` ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                            S
                           </button>
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stem.color }} />
-                          <span className="text-[11px] font-semibold truncate flex-1">{stem.label}</span>
-                          <span className="text-[11px] font-mono text-[#8b9299]">{stem.durationFormatted}</span>
+
+                          {/* Mute Button [ M ] */}
+                          <button
+                            type="button"
+                            onClick={() => toggleMute(stem.id)}
+                            className={`w-6 h-6 rounded text-[11px] font-extrabold grid place-items-center transition-all ${
+                              stem.muted
+                                ? 'bg-rose-500 text-white shadow-md ring-1 ring-rose-400'
+                                : 'bg-white/5 text-[#8b9299] hover:text-white hover:bg-white/15 border border-white/10'
+                            }`}
+                            title={stem.muted ? `Unmute ${stem.label}` : `Mute ${stem.label}`}
+                          >
+                            M
+                          </button>
                         </div>
-                        <div className="mt-2 flex items-center gap-2">
+
+                        {/* Volume Rebalancing Fader */}
+                        <div className="mt-2.5 flex items-center gap-2">
+                          {stem.volume === 0 || stem.muted ? (
+                            <VolumeX className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                          ) : (
+                            <Volume2 className="w-3.5 h-3.5 text-[#8b9299] shrink-0" />
+                          )}
                           <input
                             type="range"
                             min={0}
                             max={1.5}
                             step={0.01}
                             value={stem.volume}
-                            onChange={(e) => setStemLevel(id, Number(e.target.value))}
+                            onChange={(e) => setStemVolume(stem.id, Number(e.target.value))}
                             className="us-range flex-1"
-                            aria-label={`${stem.label} level`}
+                            aria-label={`${stem.label} Volume`}
                           />
-                          <span className="text-[11px] font-mono w-9 text-right text-[#a7aeb5]">{Math.round(stem.volume * 100)}%</span>
+                          <span className="text-[11px] font-mono w-10 text-right font-medium text-[#b0b8bf]">
+                            {Math.round(stem.volume * 100)}%
+                          </span>
                         </div>
-                        <div className="mt-2 flex gap-1.5">
-                          <Btn onClick={() => stemToRack(stem)} className="flex-1">
-                            To rack
-                          </Btn>
-                          <Btn onClick={() => void stemToSamples(stem)} className="flex-1">
-                            Save sample
-                          </Btn>
+
+                        {/* Channel Waveform & Export Actions */}
+                        <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between gap-1.5">
+                          <div className="flex-1 min-w-0">
+                            <Wave peaks={stem.peaks} color={stem.color} />
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Btn onClick={() => stemToRack(stem)} title="Place track directly on arrangement timeline">
+                              To rack
+                            </Btn>
+                            <Btn
+                              onClick={() => void stemToInstrument(stem)}
+                              title="Turn this isolated stem into a playable instrument with piano roll working"
+                              className="text-emerald-400 hover:text-emerald-300"
+                            >
+                              <Piano className="w-3 h-3" /> Instrument
+                            </Btn>
+                            <Btn onClick={() => void stemToSamples(stem)} title="Save 16-bit WAV to project assets">
+                              Save WAV
+                            </Btn>
+                            <Btn
+                              onClick={() => void notesFromSeparatedStem(stem)}
+                              disabled={noteBusy !== null}
+                              title="Extract and transcribe notes to piano roll"
+                            >
+                              {noteBusy === stem.id ? 'MIDI…' : 'MIDI'}
+                            </Btn>
+                          </div>
                         </div>
                       </div>
-                    );
-                  })}
-                  <Btn
-                    onClick={() => {
-                      STEM_ORDER.forEach((id) => stemToRack(stems[id]));
-                      onMessage?.('Four audio tracks created from the split', 'success');
-                    }}
-                    className="w-full justify-center"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5" /> All four to the rack
-                  </Btn>
-                </div>
-              )}
-            </Panel>
-            <Panel title="Separate with a model" right={<span className="text-[11px] uppercase tracking-wider text-[#8fbf8f]">local</span>}>
-              <p className="text-[11px] leading-snug text-[#a7aeb5]">
-                Demucs (htdemucs) runs on this computer and returns drums, bass, other and vocals from a trained model. A song
-                takes several minutes on a CPU.
-              </p>
-              {demucsReady === false && (
-                <p className="mt-2 text-[11px] leading-snug text-[#e0b266]">
-                  demucs is not installed on this computer. Install it with pip (pip install demucs), then reopen this panel.
-                </p>
-              )}
-              {demucsReady === null && <p className="mt-2 text-[11px] text-[#8b9299]">Separation needs the full build running on this computer.</p>}
-              <div className="mt-3 flex items-center gap-2">
-                <Btn
-                  on={!!source && !aiBusy && demucsReady === true}
-                  disabled={!source || aiBusy || demucsReady !== true}
-                  onClick={() => void separateAi()}
-                >
-                  Separate with the local model
-                </Btn>
-                {aiBusy && <span className="text-[11px] text-[#a7aeb5]">{aiStatus}</span>}
-              </div>
-              {aiStems && (
-                <div className="mt-3 space-y-1.5">
-                  {DEMUCS_STEMS.map((stem) => {
-                    const asset = aiStems[stem];
-                    return (
-                      <div key={stem} className="flex items-center gap-2 rounded border border-chrome-line bg-black/25 p-2">
-                        <button
-                          type="button"
-                          onClick={() => preview(asset.buffer, `ai_${stem}`)}
-                          className="us-btn grid h-6 w-6 shrink-0 place-items-center rounded"
-                          aria-label={`Preview ${stem}`}
-                        >
-                          {playingId === `ai_${stem}` ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                        </button>
-                        <span className="flex-1 text-[11px] font-semibold capitalize">{stem}</span>
-                        <span className="font-mono text-[11px] text-[#8b9299]">{fmtDuration(asset.buffer.duration)}</span>
-                        <Btn onClick={() => addToSong(asset)} title="Place at the playhead on a new audio track">
-                          Timeline
-                        </Btn>
-                      </div>
-                    );
-                  })}
+                    ))}
+
+                    {/* Batch Transfer All Stems to Rack */}
+                    <Btn
+                      onClick={() => {
+                        Object.values(stems).forEach((s) => stemToRack(s));
+                        onMessage?.(`All ${Object.keys(stems).length} stems placed on individual timeline audio tracks`, 'success');
+                      }}
+                      className="w-full justify-center py-2 font-bold text-[12px] bg-sel/20 hover:bg-sel/30 border-sel/40 text-sel mt-2"
+                    >
+                      <ArrowRight className="w-4 h-4" /> All {Object.keys(stems).length} Stems to Rack (Timeline Tracks)
+                    </Btn>
+                  </div>
                 </div>
               )}
             </Panel>
@@ -424,3 +1118,4 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     </div>
   );
 }
+

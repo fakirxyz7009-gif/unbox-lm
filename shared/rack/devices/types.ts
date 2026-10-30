@@ -16,6 +16,7 @@ export type EngineId =
   | 'fm' // N-operator FM with algorithms
   | 'westcoast' // complex oscillator, wavefolder, low-pass gate, function generator
   | 'modal' // struck / plucked partials (piano, mallets, bells, plucked world instruments)
+  | 'karplus' // Karplus-Strong plucked string: a noise burst into a tuned delay loop
   | 'formant' // voices through vowel formants (choir, winds)
   | 'bowed' // bowed strings (sustained excitation + body resonances)
   | 'sampler' // multi-zone sample player

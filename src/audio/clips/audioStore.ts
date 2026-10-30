@@ -4,7 +4,8 @@
  * never depend on files outside the app.
  */
 import { sharedAudioContext } from '../AudioEngineGraph.ts';
-import { dbAll, dbGet, dbKeys, dbPut } from '../../project/db.ts';
+import { estimateTempo } from '../../../shared/analysis/tempo.ts';
+import { dbDelete, dbGet, dbPut } from '../../project/db.ts';
 
 export interface AudioAsset {
   id: string;
@@ -170,68 +171,15 @@ export function detectTransientTimes(buffer: AudioBuffer): number[] {
   return hits;
 }
 
-/** Estimates a steady tempo from transient energy in the first 60 seconds of audio. */
+/** Estimates a steady tempo from the clip's onsets (see shared/analysis/tempo.ts). */
 export function detectTempoBpm(buffer: AudioBuffer): number | null {
-  const framesPerSecond = 50;
-  const frameSamples = Math.max(1, Math.round(buffer.sampleRate / framesPerSecond));
-  const frameCount = Math.min(framesPerSecond * 60, Math.floor(buffer.length / frameSamples));
-  if (frameCount < framesPerSecond * 3) return null;
-
-  const channels = Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i));
-  const rms = new Float32Array(frameCount);
-  for (let frame = 0; frame < frameCount; frame++) {
-    const start = frame * frameSamples;
-    const end = Math.min(buffer.length, start + frameSamples);
-    let energy = 0;
-    let count = 0;
-    for (const channel of channels) {
-      for (let i = start; i < end; i++) {
-        energy += channel[i] * channel[i];
-        count++;
-      }
-    }
-    rms[frame] = count ? Math.sqrt(energy / count) : 0;
+  const length = Math.min(buffer.length, Math.round(90 * buffer.sampleRate));
+  const mono = new Float32Array(length);
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const data = buffer.getChannelData(c);
+    for (let i = 0; i < length; i++) mono[i] += data[i] / buffer.numberOfChannels;
   }
-
-  const onset = new Float32Array(frameCount);
-  let mean = 0;
-  for (let i = 1; i < frameCount; i++) {
-    onset[i] = Math.max(0, rms[i] - rms[i - 1]);
-    mean += onset[i];
-  }
-  mean /= frameCount;
-  let energy = 0;
-  for (let i = 0; i < frameCount; i++) {
-    onset[i] -= mean;
-    energy += onset[i] * onset[i];
-  }
-  if (energy < 1e-8) return null;
-
-  let bestBpm = 0;
-  let bestScore = -1;
-  for (let bpm = 50; bpm <= 220; bpm += 0.5) {
-    const lag = (framesPerSecond * 60) / bpm;
-    const first = Math.ceil(lag);
-    let cross = 0;
-    let aEnergy = 0;
-    let bEnergy = 0;
-    for (let i = first; i < frameCount; i++) {
-      const delayedAt = i - lag;
-      const lo = Math.floor(delayedAt);
-      const frac = delayedAt - lo;
-      const delayed = onset[lo] * (1 - frac) + onset[Math.min(frameCount - 1, lo + 1)] * frac;
-      const current = onset[i];
-      cross += current * delayed;
-      aEnergy += current * current;
-      bEnergy += delayed * delayed;
-    }
-    const score = aEnergy && bEnergy ? cross / Math.sqrt(aEnergy * bEnergy) : 0;
-    if (score > bestScore) {
-      bestScore = score;
-      bestBpm = bpm;
-    }
-  }
-  return bestScore >= 0.12 ? Math.round(bestBpm * 10) / 10 : null;
+  return estimateTempo(mono, buffer.sampleRate)?.bpm ?? null;
 }
 
 const newId = () => `aud_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -296,17 +244,6 @@ class AudioStore {
     this.notify();
   }
 
-  /** Replaces an asset's audio buffer in place (e.g. after DC offset removal or normalization) and updates peaks. */
-  replaceBuffer(id: string, newBuffer: AudioBuffer): void {
-    const a = this.assets.get(id);
-    if (!a) return;
-    a.buffer = newBuffer;
-    a.peaks = computePeaks(newBuffer);
-    this.reversed.delete(id);
-    void this.persist(a);
-    this.notify();
-  }
-
   /** Decodes an audio file (wav, mp3, ogg, flac, m4a, aif…) into the store. */
   async importFile(file: File | Blob, name?: string): Promise<AudioAsset> {
     const data = await file.arrayBuffer();
@@ -315,6 +252,37 @@ class AudioStore {
     const sourceBpm = bpmFromName(label);
     const detectedBpm = sourceBpm === undefined ? detectTempoBpm(buffer) ?? undefined : undefined;
     return this.add(label, buffer, { sourceBpm, detectedBpm });
+  }
+
+  /** Imports multiple audio files in parallel. */
+  async importFiles(files: (File | Blob)[]): Promise<AudioAsset[]> {
+    const results: AudioAsset[] = [];
+    for (const file of files) {
+      try {
+        const asset = await this.importFile(file);
+        results.push(asset);
+      } catch (err) {
+        console.warn('[audioStore] Failed to import audio file:', err);
+      }
+    }
+    return results;
+  }
+
+  /** Removes an audio asset from memory and IndexedDB. */
+  async remove(id: string): Promise<boolean> {
+    const existed = this.assets.delete(id);
+    this.reversed.delete(id);
+    this.missing.delete(id);
+    this.loading.delete(id);
+    try {
+      await dbDelete('audio', id);
+    } catch (e) {
+      console.warn(`[audioStore] Failed to remove asset ${id} from database:`, e);
+    }
+    if (existed) {
+      this.notify();
+    }
+    return existed;
   }
 
   private async persist(a: AudioAsset): Promise<void> {
@@ -363,15 +331,6 @@ class AudioStore {
     return want.filter((_, i) => !got[i]);
   }
 
-  /** Metadata of everything saved in the app database (for the media manager). */
-  async storedIds(): Promise<string[]> {
-    return dbKeys('audio');
-  }
-
-  async storedSummaries(): Promise<{ id: string; name: string; seconds: number; bytes: number }[]> {
-    const all = await dbAll<StoredAudio>('audio');
-    return all.map((r) => ({ id: r.id, name: r.name, seconds: r.length / r.sampleRate, bytes: r.length * 4 * r.channels.length }));
-  }
 }
 
 /** "Drum Loop 124bpm" / "loop_90_bpm" → 124 / 90. */

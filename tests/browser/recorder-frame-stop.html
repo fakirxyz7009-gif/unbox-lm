@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unbox recorder frame-stop probe</title>
+  </head>
+  <body>
+    <h1>Unbox recorder frame-stop probe</h1>
+    <pre id="result" data-status="running">Scheduling exact recorder punch boundary…</pre>
+    <script type="module">
+      try {
+        await import('./recorder-frame-stop.ts');
+      } catch (error) {
+        const result = document.querySelector('#result');
+        if (result) {
+          result.dataset.status = 'failed';
+          result.textContent = `MODULE FAIL · ${error instanceof Error ? error.stack ?? error.message : String(error)}`;
+        }
+      }
+    </script>
+  </body>
+</html>

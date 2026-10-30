@@ -8,16 +8,12 @@ import express, { type Request } from 'express';
 import { ITEM_KINDS, type ItemKind, type SoundCategory } from '../../shared/vst/manifestTypes.ts';
 import { searchManifest } from '../../shared/vst/search.ts';
 import type { ManifestStore } from '../vst/manifestStore.ts';
+import { guardAsync, isLocalRequest } from './routeGuards.ts';
 
 const AUDIO_TYPES: Record<string, string> = {
   wav: 'audio/wav', wave: 'audio/wav', ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg',
   flac: 'audio/flac', mp3: 'audio/mpeg', aif: 'audio/aiff', aiff: 'audio/aiff', m4a: 'audio/mp4',
 };
-
-function isLoopback(req: Request): boolean {
-  const a = req.socket.remoteAddress || '';
-  return a === '127.0.0.1' || a === '::1' || a === '::ffff:127.0.0.1';
-}
 
 function insideDir(file: string, dir: string): boolean {
   return path.resolve(file).toLowerCase().startsWith(path.resolve(dir).toLowerCase() + path.sep);
@@ -27,14 +23,14 @@ export function createVstRouter(store: ManifestStore): express.Router {
   const router = express.Router();
 
   router.use((req, res, next) => {
-    if (store.config.allowRemote || isLoopback(req)) return next();
+    if (store.config.allowRemote || isLocalRequest(req)) return next();
     res.status(403).json({ error: 'The plugin library is only available on this computer (set VST_LIBRARY_ALLOW_REMOTE=1 to share it).' });
   });
 
-  router.get('/manifest', async (_req, res) => {
+  router.get('/manifest', guardAsync(async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.json({ manifest: await store.get(), roots: store.config.roots, rootsAvailable: store.rootsAvailable, scanning: store.isScanning });
-  });
+  }));
 
   router.get('/status', (_req, res) => {
     res.json({ scanning: store.isScanning, progress: store.progress, roots: store.config.roots, rootsAvailable: store.rootsAvailable });
@@ -48,7 +44,7 @@ export function createVstRouter(store: ManifestStore): express.Router {
     }
   });
 
-  router.get('/search', async (req, res) => {
+  router.get('/search', guardAsync(async (req, res) => {
     const manifest = await store.get();
     if (!manifest) return res.json({ hits: [] });
     const kinds = String(req.query.kind ?? '')
@@ -62,9 +58,9 @@ export function createVstRouter(store: ManifestStore): express.Router {
       limit: Math.min(200, Math.max(1, Number(req.query.limit) || 50)),
     });
     res.json({ hits: hits.map((h) => ({ score: Math.round(h.score * 100) / 100, item: h.item })) });
-  });
+  }));
 
-  router.get('/file/:id', async (req, res) => {
+  router.get('/file/:id', guardAsync(async (req, res) => {
     const item = await store.item(String(req.params.id));
     if (!item || item.kind !== 'sample' || !item.playable || !item.file) return res.status(404).json({ error: 'Not a playable library sample' });
     const type = AUDIO_TYPES[item.format];
@@ -76,9 +72,9 @@ export function createVstRouter(store: ManifestStore): express.Router {
     res.sendFile(file, { maxAge: '1h' }, (err) => {
       if (err && !res.headersSent) res.status(404).json({ error: 'File not readable' });
     });
-  });
+  }));
 
-  router.get('/host/status', async (_req, res) => {
+  router.get('/host/status', guardAsync(async (_req, res) => {
     const manifest = await store.get();
     const hostable = manifest?.items.filter((i) => i.kind === 'plugin' && i.hostable && i.primaryVariant).length ?? 0;
     res.json({
@@ -86,7 +82,7 @@ export function createVstRouter(store: ManifestStore): express.Router {
       hostablePlugins: hostable,
       reason: 'No native plugin host process is installed, so plugin binaries are not loaded. Mounted units run Web Audio proxy DSP.',
     });
-  });
+  }));
 
   return router;
 }

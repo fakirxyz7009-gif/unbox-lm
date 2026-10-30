@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Router, type Request, type Response } from 'express';
-import { rateLimit, requireLoopback } from './routeGuards.ts';
+import { guardAsync, rateLimit, requireLoopback } from './routeGuards.ts';
 
 const MAX_LINK_LENGTH = 2048;
 export const MAX_IMPORT_MEGABYTES = 200;
@@ -152,7 +152,7 @@ export function createImportRouter(): Router {
     res.json(await toolStatus());
   });
 
-  router.post('/link', limit, async (req: Request, res: Response) => {
+  router.post('/link', limit, guardAsync(async (req: Request, res: Response) => {
     const checked = checkLink((req.body as { url?: unknown } | undefined)?.url);
     if ('error' in checked) return res.status(400).json({ error: checked.error });
     const tools = await toolStatus();
@@ -186,7 +186,7 @@ export function createImportRouter(): Router {
       cleanup();
       res.status(500).json({ error: 'The import failed unexpectedly.' });
     }
-  });
+  }));
 
   return router;
 }

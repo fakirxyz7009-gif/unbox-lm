@@ -5,8 +5,10 @@ import { humanize, legato, quantize, snapPitches, STRUM_MAX_MS, strum, transpose
 import { syncTrackPatterns } from '../../audio/sequencer/model.ts';
 import type { SequencerNote } from '../../audio/types.ts';
 import { useEngineVersion } from '../../nexa/useEngine.ts';
+import { useEscapeKey } from '../../shell/useEscapeKey.ts';
 
 function F8Body({ onClose }: { onClose: () => void }) {
+  useEscapeKey(onClose);
   useEngineVersion();
   const tracks = audioEngine.tracks.filter((t) => t.kind !== 'audio');
   const preferred = tracks.find((t) => t.deviceId === audioEngine.midiTargetDeviceId) ?? tracks[0];
@@ -99,6 +101,139 @@ function F8Body({ onClose }: { onClose: () => void }) {
             <input type="number" value={semis} onChange={(e) => setSemis(Number(e.target.value) || 0)} className="w-12 bg-neutral-800 border border-neutral-700 rounded text-cyan-200 text-[11px] px-1" aria-label="Semitones" />
             <button className={btn} onClick={() => apply(`Transposed +${semis}`, (s) => transpose(s, semis))}>+</button>
             <button className={btn} onClick={() => apply(`Transposed −${semis}`, (s) => transpose(s, -semis))}>−</button>
+          </div>
+
+          <div className="bg-neutral-900/90 p-2 rounded border border-cyan-500/50 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-cyan-300 text-[11px]">⚡ LOCAL HARDWARE AI GENERATOR</span>
+              <span className="text-[9px] font-mono text-emerald-400">ON-DEVICE</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                className="px-2 py-1 rounded bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-[10px] text-left truncate"
+                onClick={async () => {
+                  if (!track) return;
+                  const { localHardwareAi } = await import('../../ai/hardware/localHardwareAiEngine.ts');
+                  const ctx = {
+                    bpm: audioEngine.bpm,
+                    timeSignature: '4/4',
+                    stepsPerBar: 16,
+                    targetTrack: { id: track.id, name: track.name },
+                    patternLength: track.steps.length,
+                    focusedClip: null,
+                    tracks: audioEngine.tracks.map((t) => ({ id: t.id, name: t.name, muted: !!t.mute })),
+                  };
+                  const res = await localHardwareAi.generateMusicalActionsOnHardware('Generate minor chord progression', ctx);
+                  const act = res.actions.find((a) => a.type === 'write_notes');
+                  if (act && act.type === 'write_notes') {
+                    track.steps = Array.from({ length: Math.max(16, track.steps.length) }, () => null);
+                    for (const n of act.notes) {
+                      const idx = Math.round(n.step);
+                      if (idx < track.steps.length) {
+                        track.steps[idx] = { note: n.note, velocity: Math.round(n.velocity * 127), length: Math.max(1, Math.round(n.length)), probability: 1 };
+                      }
+                    }
+                    audioEngine.commitEdit();
+                    setDone(`Local AI Chords → ${track.name}`);
+                  }
+                }}
+              >
+                + AI Chords
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-[10px] text-left truncate"
+                onClick={async () => {
+                  if (!track) return;
+                  const { localHardwareAi } = await import('../../ai/hardware/localHardwareAiEngine.ts');
+                  const ctx = {
+                    bpm: audioEngine.bpm,
+                    timeSignature: '4/4',
+                    stepsPerBar: 16,
+                    targetTrack: { id: track.id, name: track.name },
+                    patternLength: track.steps.length,
+                    focusedClip: null,
+                    tracks: audioEngine.tracks.map((t) => ({ id: t.id, name: t.name, muted: !!t.mute })),
+                  };
+                  const res = await localHardwareAi.generateMusicalActionsOnHardware('Generate 16th note bassline', ctx);
+                  const act = res.actions.find((a) => a.type === 'write_notes');
+                  if (act && act.type === 'write_notes') {
+                    track.steps = Array.from({ length: Math.max(16, track.steps.length) }, () => null);
+                    for (const n of act.notes) {
+                      const idx = Math.round(n.step);
+                      if (idx < track.steps.length) {
+                        track.steps[idx] = { note: n.note, velocity: Math.round(n.velocity * 127), length: Math.max(1, Math.round(n.length)), probability: 1 };
+                      }
+                    }
+                    audioEngine.commitEdit();
+                    setDone(`Local AI Bassline → ${track.name}`);
+                  }
+                }}
+              >
+                + AI Bassline
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-[10px] text-left truncate"
+                onClick={async () => {
+                  if (!track) return;
+                  const { localHardwareAi } = await import('../../ai/hardware/localHardwareAiEngine.ts');
+                  const ctx = {
+                    bpm: audioEngine.bpm,
+                    timeSignature: '4/4',
+                    stepsPerBar: 16,
+                    targetTrack: { id: track.id, name: track.name },
+                    patternLength: track.steps.length,
+                    focusedClip: null,
+                    tracks: audioEngine.tracks.map((t) => ({ id: t.id, name: t.name, muted: !!t.mute })),
+                  };
+                  const res = await localHardwareAi.generateMusicalActionsOnHardware('Generate melodic arpeggio', ctx);
+                  const act = res.actions.find((a) => a.type === 'write_notes');
+                  if (act && act.type === 'write_notes') {
+                    track.steps = Array.from({ length: Math.max(16, track.steps.length) }, () => null);
+                    for (const n of act.notes) {
+                      const idx = Math.round(n.step);
+                      if (idx < track.steps.length) {
+                        track.steps[idx] = { note: n.note, velocity: Math.round(n.velocity * 127), length: Math.max(1, Math.round(n.length)), probability: 1 };
+                      }
+                    }
+                    audioEngine.commitEdit();
+                    setDone(`Local AI Arp → ${track.name}`);
+                  }
+                }}
+              >
+                + AI Arpeggio
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-[10px] text-left truncate"
+                onClick={async () => {
+                  if (!track) return;
+                  const { localHardwareAi } = await import('../../ai/hardware/localHardwareAiEngine.ts');
+                  const ctx = {
+                    bpm: audioEngine.bpm,
+                    timeSignature: '4/4',
+                    stepsPerBar: 16,
+                    targetTrack: { id: track.id, name: track.name },
+                    patternLength: track.steps.length,
+                    focusedClip: null,
+                    tracks: audioEngine.tracks.map((t) => ({ id: t.id, name: t.name, muted: !!t.mute })),
+                  };
+                  const res = await localHardwareAi.generateMusicalActionsOnHardware('Generate house drum beat', ctx);
+                  const act = res.actions.find((a) => a.type === 'write_notes');
+                  if (act && act.type === 'write_notes') {
+                    track.steps = Array.from({ length: Math.max(16, track.steps.length) }, () => null);
+                    for (const n of act.notes) {
+                      const idx = Math.round(n.step);
+                      if (idx < track.steps.length) {
+                        track.steps[idx] = { note: n.note, velocity: Math.round(n.velocity * 127), length: Math.max(1, Math.round(n.length)), probability: 1 };
+                      }
+                    }
+                    audioEngine.commitEdit();
+                    setDone(`Local AI Drum Beat → ${track.name}`);
+                  }
+                }}
+              >
+                + AI Drum Beat
+              </button>
+            </div>
           </div>
           {done && <div className="text-[11px] text-emerald-300">{done}</div>}
         </div>

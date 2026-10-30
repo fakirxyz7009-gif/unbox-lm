@@ -81,8 +81,9 @@ function sustainedEngine(host: SpecHost, kind: 'formant' | 'bowed'): SpecEngine 
   room.buffer = impulseResponse(ctx, kind === 'formant' ? { seconds: 3.4, decay: 3, damping: 0.45, early: 0.4, seed: 21 } : { seconds: 2.2, decay: 3.5, damping: 0.5, early: 0.5, seed: 23 });
   const roomWet = ctx.createGain();
   bus.connect(room).connect(roomWet).connect(host.outs[0]);
-  let motionTimer: number | null = null;
+  let removeMotionRealtime: (() => void) | null = null;
   let motionPhase = 0;
+  let motionAt = 0;
 
   const syncRoom = () => setSmooth(roomWet.gain, host.p('room', 0.2) * 0.9, ctx, 0.03);
   syncRoom();
@@ -93,24 +94,32 @@ function sustainedEngine(host: SpecHost, kind: 'formant' | 'bowed'): SpecEngine 
     return vowelFormants(vowel).map((f) => clamp(f * scale * shift, 80, 16000));
   };
 
-  const updateFormants = () => {
+  const updateFormants = (time = ctx.currentTime) => {
     const motion = host.p('vowelMotion', 0) * Math.sin(motionPhase) * 0.8;
     const fs = formantSet(host.p('vowel', 0) + motion);
-    pool.list.forEach((v) => v.formants.forEach((bank) => bank.forEach((bp, i) => setSmooth(bp.frequency, fs[i], ctx, 0.05))));
+    const at = Math.max(ctx.currentTime, time);
+    pool.list.forEach((v) => v.formants.forEach((bank) => bank.forEach((bp, i) => bp.frequency.setTargetAtTime(fs[i], at, 0.05))));
+  };
+
+  const advanceMotion = (time: number): boolean => {
+    if (kind !== 'formant' || host.p('vowelMotion', 0) < 0.01) return false;
+    pool.gc(time);
+    if (!pool.list.length) return false;
+    const elapsed = Math.max(0, time - motionAt);
+    motionAt = time;
+    motionPhase += elapsed * 0.35 * Math.PI * 2;
+    updateFormants(time);
+    return true;
   };
 
   const ensureMotion = () => {
-    if (kind !== 'formant' || motionTimer !== null || host.p('vowelMotion', 0) < 0.01 || !(ctx instanceof AudioContext)) return;
-    motionTimer = window.setInterval(() => {
-      motionPhase += 0.033 * 0.35 * Math.PI * 2;
-      pool.gc(ctx.currentTime);
-      if (!pool.list.length) {
-        if (motionTimer !== null) clearInterval(motionTimer);
-        motionTimer = null;
-        return;
-      }
-      updateFormants();
-    }, 33);
+    if (kind !== 'formant' || removeMotionRealtime || host.p('vowelMotion', 0) < 0.01 || !host.clock.requestRealtime) return;
+    motionAt = ctx.currentTime;
+    removeMotionRealtime = host.clock.requestRealtime((now) => {
+      const keep = advanceMotion(now);
+      if (!keep) removeMotionRealtime = null;
+      return keep;
+    });
   };
 
   function vibrato(o: OscillatorNode, t: number, v: SusVoice, rateJitter: number): void {
@@ -257,6 +266,11 @@ function sustainedEngine(host: SpecHost, kind: 'formant' | 'bowed'): SpecEngine 
     allNotesOff(t) {
       pool.killAll(t);
     },
+    onStepTick(_pos, time) {
+      // Offline contexts do not have the live scheduler, so the transport is
+      // the deterministic source of formant motion there.
+      if (!(ctx instanceof AudioContext)) advanceMotion(time);
+    },
     onParam(key) {
       if (key === 'room') syncRoom();
       else if (['vowel', 'formantShift', 'voiceType'].includes(key)) updateFormants();
@@ -271,10 +285,11 @@ function sustainedEngine(host: SpecHost, kind: 'formant' | 'bowed'): SpecEngine 
       }
     },
     meter() {
-      return { voices: pool.held().length };
+      return { voices: pool.held().length, motion: motionPhase };
     },
     dispose() {
-      if (motionTimer !== null) clearInterval(motionTimer);
+      removeMotionRealtime?.();
+      removeMotionRealtime = null;
       pool.killAll(ctx.currentTime);
     },
   };

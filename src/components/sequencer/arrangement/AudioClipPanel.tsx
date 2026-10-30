@@ -4,6 +4,9 @@ import { X } from 'lucide-react';
 import type { AudioEngine } from '../../../audio/AudioEngine.ts';
 import type { ArrangementClip, SequencerTrack } from '../../../audio/types.ts';
 import { audioStore, detectTempoBpm, detectTransientTimes, removeDcOffset, calculateClipRms } from '../../../audio/clips/audioStore.ts';
+import { monoSamples } from '../../../audio/ai/stemNotes.ts';
+import { transcribeInBackground } from '../../../audio/ai/transcribeInBackground.ts';
+import type { KeyEstimate } from '../../../../shared/analysis/keyDetection.ts';
 import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { Btn, NumField } from '../../../studio/ui/controls.tsx';
 import { AudioClipWave, useAudioStoreVersion } from './AudioClipWave.tsx';
@@ -48,6 +51,8 @@ export function AudioClipPanel({
   const seq = audioEngine.sequencer;
   const asset = audioStore.get(clip.audioId);
   const [tempoMessage, setTempoMessage] = useState('');
+  const [keyMessage, setKeyMessage] = useState('');
+  const [keyFound, setKeyFound] = useState<KeyEstimate | null>(null);
   const [sliceMessage, setSliceMessage] = useState('');
   const [selectedTakeId, setSelectedTakeId] = useState(clip.audioId ?? clip.takes?.[0]?.audioId ?? '');
   const [compStart, setCompStart] = useState(0);
@@ -79,9 +84,8 @@ export function AudioClipPanel({
   };
   const cleanDcOffset = () => {
     if (!asset) return;
-    const cleaned = removeDcOffset(asset.buffer);
-    audioStore.replaceBuffer(asset.id, cleaned);
-    audioEngine.changed();
+    // A new asset, so other clips that play the original keep their audio; the clip change is one undo step.
+    set({ audioId: audioStore.add(`${asset.name} (DC removed)`, removeDcOffset(asset.buffer)).id });
   };
   const detectTempo = () => {
     if (!asset) return;
@@ -94,6 +98,26 @@ export function AudioClipPanel({
     set({ sourceBpm: bpm });
     setTempoMessage(`Estimate: ${bpm} BPM. Check it before enabling tempo follow.`);
   };
+  const detectKeyOfClip = async () => {
+    if (!asset) return;
+    setKeyMessage('Detecting the key...');
+    const estimate = await transcribeInBackground('key', monoSamples(asset.buffer), asset.buffer.sampleRate);
+    if (!estimate) {
+      setKeyFound(null);
+      setKeyMessage('No pitched content, so no key.');
+      return;
+    }
+    audioStore.update(asset.id, { key: estimate.name });
+    setKeyFound(estimate);
+    setKeyMessage(`Key ${estimate.name}, clarity ${Math.round(estimate.clarity * 100)} %. Check it by ear before using it.`);
+  };
+  const useProjectKey = () => {
+    if (!keyFound) return;
+    audioEngine.rootKey = keyFound.root;
+    audioEngine.scaleType = keyFound.mode === 'major' ? 'major' : 'minor';
+    audioEngine.changed();
+    setKeyMessage(`Project key set to ${keyFound.name}: the piano roll now snaps to ${keyFound.mode === 'major' ? 'major' : 'natural minor'}.`);
+  };
   const useTakeRange = () => {
     if (!selectedTakeId) return;
     const start = Math.max(0, Math.min(clip.lengthBars, compStart));
@@ -105,7 +129,7 @@ export function AudioClipPanel({
   const sliceTransients = () => {
     if (!asset) return;
     const count = seq.sliceAudioAtTransients(track.id, clip.id, detectTransientTimes(asset.buffer));
-    setSliceMessage(count === null ? 'Turn off Reverse and Loop before slicing this clip.' : count === 0 ? 'No clear transients landed inside this clip.' : `Sliced at ${count - 1} detected attacks. Transient starts snap to the 16th grid.`);
+    setSliceMessage(count === null ? 'Turn off Reverse and Loop before slicing this clip.' : count === 0 ? 'No clear transients landed inside this clip.' : `Split at ${count - 1} detected attacks; each cut moved to the nearest 16th-note line, so it is not exactly on the attack.`);
   };
   return (
     <div className="border-t border-[#796d5b] us-metal p-2.5 flex flex-col gap-2 text-[11px] text-ink select-none shadow-sm" data-testid="audio-clip-panel">
@@ -164,6 +188,9 @@ export function AudioClipPanel({
         <Btn on={!!clip.reverse} onClick={() => set({ reverse: !clip.reverse })} title="Play the clip backwards">Reverse</Btn>
         <Btn onClick={detectTempo} title="Analyze transient spacing for a source tempo estimate">Detect BPM</Btn>
         {asset?.detectedBpm && <span className="text-violet-300">Estimate {asset.detectedBpm} BPM</span>}
+        <Btn onClick={() => void detectKeyOfClip()} title="Find the key of this clip from its harmony (Krumhansl-Kessler key profiles)">Detect key</Btn>
+        {asset?.key && <span className="text-violet-300">Key {asset.key}</span>}
+        {keyFound && <Btn onClick={useProjectKey} title="Set the piano roll's key and scale to this clip's key">Use as project key</Btn>}
         <Btn
           on={clip.warp === 'repitch'}
           tone="cyan"
@@ -178,9 +205,10 @@ export function AudioClipPanel({
         </Btn>
         {clip.loopAudio && <NumField title="Loop length (seconds of audio)" value={Math.round((clip.loopSec ?? 0) * 1000) / 1000} min={0.01} step={0.01} onChange={(v) => set({ loopSec: v })} suffix="s loop" />}
         <Btn onClick={() => asset && seq.fitAudioClip(track.id, clip.id, asset.buffer.duration)} title="Make the clip end where the audio ends">Fit length</Btn>
-        <Btn disabled={!asset || !!clip.reverse || !!clip.loopAudio} onClick={sliceTransients} title="Detect attacks in the audio and split the clip at the nearest 16th-note positions">Slice transients</Btn>
+        <Btn disabled={!asset || !!clip.reverse || !!clip.loopAudio} onClick={sliceTransients} title="Detect attacks in the audio and split the clip at the 16th-note line nearest to each one (cuts land on the grid, not exactly on the attack)">Slice at attacks</Btn>
       </div>
       {tempoMessage && <div className="text-violet-300" role="status">{tempoMessage}</div>}
+      {keyMessage && <div className="text-violet-300" role="status">{keyMessage}</div>}
       {sliceMessage && <div className="text-emerald-300" role="status">{sliceMessage}</div>}
       {clip.takes && clip.takes.length > 1 && (
         <div className="flex flex-col gap-2 border-t border-slate-800 pt-2" data-testid="audio-take-comp">

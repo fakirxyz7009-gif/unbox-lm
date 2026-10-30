@@ -14,6 +14,7 @@ import { AudioTrackDevice } from '../clips/AudioTrackDevice.ts';
 import { audioStore } from '../clips/audioStore.ts';
 import { InputManager } from './InputManager.ts';
 import { WorkletCapture, ensureRecorderWorklet } from './recorderWorklet.ts';
+import { toast } from '../../shell/toast.ts';
 import type { ProjectTimeMap } from '../time/ProjectTimeMap.ts';
 
 export type RecordMode = 'overdub' | 'replace' | 'takes';
@@ -94,7 +95,10 @@ export class RecordController {
   private jobs: AudioJob[] = [];
   private startPos = 0;
   private startTime = 0;
-  private watch: number | null = null;
+  /** A scheduled punch range; MIDI-only takes use a silent native alarm for their end event. */
+  private punchAlarm: { node: ConstantSourceNode | null; endPos: number; endTime: number } | null = null;
+  /** Silent native alarm that flips the visible count-in state at the audio-clock boundary. */
+  private countInAlarm: ConstantSourceNode | null = null;
   private midiPending = new Map<string, Pending>();
   private midiNotes = new Map<string, { deviceId: string; patternId: string | null; notes: ClipNote[]; startTick: number }>();
   private recordingPlaybackMode: PlaybackMode = 'song_arrangement';
@@ -224,7 +228,9 @@ export class RecordController {
       const dev = h.devices.get(track.deviceId) as AudioTrackDevice;
       return { track, capture: new WorkletCapture(h.ctx, dev.recordTap, 2), physical: !this.hasCables(dev) };
     });
-    this.jobs.forEach((j) => j.capture.start());
+    // Wait for each worklet's own render-thread acknowledgement before a
+    // count-in, punch edge, or physical note can be scheduled against it.
+    await Promise.all(this.jobs.map((j) => j.capture.start()));
     this.midiPending.clear();
     this.midiNotes.clear();
 
@@ -246,27 +252,82 @@ export class RecordController {
     }
     if (this.state !== 'count-in') this.state = 'recording';
     h.isRecording = true;
-    this.watch = window.setInterval(() => this.tick(), 40);
+    this.scheduleCountInState();
+    this.schedulePunchOut();
     h.changed();
     return true;
   }
 
-  /** Auto punch-out + post-roll. */
-  private tick(): void {
+  /**
+   * Schedule an exact worklet-frame capture boundary and a zero-gain AudioContext
+   * alarm for the controller transition. Unlike an interval, neither drifts with a
+   * busy UI thread and the final recorded sample cannot pass the punch edge.
+   */
+  private schedulePunchOut(): void {
     const h = this.host;
-    this.beginRecordingAfterCountIn();
-    if (!h.isPlaying) {
-      void this.stop();
+    if (!this.settings.punch || h.loopEnabled) return;
+    const endPos = Math.round(this.settings.punchOutBar * h.stepsPerBar);
+    const endTime = h.timeOfSongPosition(endPos);
+    if (endTime === null || endTime <= h.ctx.currentTime + 0.002) {
+      void this.stop(true);
       return;
     }
-    if (this.settings.punch && !h.loopEnabled) {
-      const outPos = Math.round(this.settings.punchOutBar * h.stepsPerBar);
-      if (h.getPlayheadPosition() >= outPos) void this.stop(true);
+    // Audio takes report only after their worklet has already cut its current quantum at the
+    // requested frame. Waiting for that report avoids racing an ordinary stop message against
+    // the exact-boundary message when the main thread is congested.
+    this.punchAlarm = { node: null, endPos, endTime };
+    const captures = this.jobs.map((job) => job.capture.stopAt(endTime));
+    if (captures.length) {
+      void Promise.all(captures).then(() => {
+        if (this.punchAlarm?.endTime === endTime) void this.stop(true);
+      });
+      return;
     }
+    // A MIDI-only take has no recorder worklet, so a zero-gain scheduled source gives it the
+    // same AudioContext-clock transition without a wall-clock polling loop.
+    const alarm = h.ctx.createConstantSource();
+    const silence = h.ctx.createGain();
+    silence.gain.value = 0;
+    alarm.connect(silence).connect(h.ctx.destination);
+    this.punchAlarm = { node: alarm, endPos, endTime };
+    alarm.onended = () => {
+      if (this.punchAlarm?.node !== alarm) return;
+      void this.stop(true);
+    };
+    alarm.start();
+    alarm.stop(endTime);
+  }
+
+  private scheduleCountInState(): void {
+    if (this.state !== 'count-in') return;
+    const h = this.host;
+    const alarm = h.ctx.createConstantSource();
+    const silence = h.ctx.createGain();
+    silence.gain.value = 0;
+    alarm.connect(silence).connect(h.ctx.destination);
+    this.countInAlarm = alarm;
+    alarm.onended = () => {
+      if (this.countInAlarm !== alarm) return;
+      this.countInAlarm = null;
+      this.beginRecordingAfterCountIn();
+      try { alarm.disconnect(); } catch {}
+    };
+    alarm.start();
+    alarm.stop(Math.max(h.ctx.currentTime + 0.002, this.startTime));
+  }
+
+  private clearCountInAlarm(): void {
+    const alarm = this.countInAlarm;
+    this.countInAlarm = null;
+    if (!alarm) return;
+    alarm.onended = null;
+    try { alarm.stop(this.host.ctx.currentTime); } catch {}
+    try { alarm.disconnect(); } catch {}
   }
 
   private beginRecordingAfterCountIn(): void {
     if (this.state !== 'count-in' || this.host.ctx.currentTime < this.startTime) return;
+    this.clearCountInAlarm();
     this.state = 'recording';
     this.host.changed();
   }
@@ -275,8 +336,14 @@ export class RecordController {
   async stop(auto = false): Promise<void> {
     if (this.state === 'idle') return;
     const h = this.host;
-    if (this.watch !== null) clearInterval(this.watch);
-    this.watch = null;
+    this.clearCountInAlarm();
+    const scheduledPunch = this.punchAlarm;
+    this.punchAlarm = null;
+    if (scheduledPunch?.node) {
+      scheduledPunch.node.onended = null;
+      try { scheduledPunch.node.stop(h.ctx.currentTime); } catch {}
+      try { scheduledPunch.node.disconnect(); } catch {}
+    }
     const spb = h.stepsPerBar;
     const s = this.settings;
     const now = h.ctx.currentTime;
@@ -284,7 +351,8 @@ export class RecordController {
     // Keep the fractional 16th position so held MIDI notes end where transport actually stopped.
     let endPos = h.getPlayheadPosition();
     if (s.punch) endPos = Math.min(endPos, Math.round(s.punchOutBar * spb));
-    const endTime = s.punch && auto ? h.timeOfSongPosition(endPos) ?? now : now;
+    if (auto && scheduledPunch) endPos = scheduledPunch.endPos;
+    const endTime = s.punch && auto ? scheduledPunch?.endTime ?? h.timeOfSongPosition(endPos) ?? now : now;
     this.state = 'idle';
     h.isRecording = false;
 
@@ -296,10 +364,25 @@ export class RecordController {
 
     if (auto && s.postRollBars > 0) {
       const stopAt = endTime + s.postRollBars * spb * (60 / h.bpm / 4);
-      window.setTimeout(() => h.isPlaying && !h.isRecording && h.stopTransport(), Math.max(0, (stopAt - h.ctx.currentTime) * 1000));
+      this.scheduleTransportStop(stopAt);
     }
     h.commitEdit();
     h.changed();
+  }
+
+  /** Keep post-roll on the audio clock as well; no wall-clock timer controls transport. */
+  private scheduleTransportStop(time: number): void {
+    const h = this.host;
+    const alarm = h.ctx.createConstantSource();
+    const silence = h.ctx.createGain();
+    silence.gain.value = 0;
+    alarm.connect(silence).connect(h.ctx.destination);
+    alarm.onended = () => {
+      try { alarm.disconnect(); } catch {}
+      if (h.isPlaying && !h.isRecording) h.stopTransport();
+    };
+    alarm.start();
+    alarm.stop(Math.max(h.ctx.currentTime + 0.002, time));
   }
 
   private placeAudio(j: AudioJob, data: { frame: number; channels: Float32Array[] }, endTime: number, loop: { start: number; end: number } | null): void {
@@ -313,7 +396,10 @@ export class RecordController {
       const i0 = Math.round((t0 + comp) * sr) - data.frame;
       const i1 = Math.round((t1 + comp) * sr) - data.frame;
       const n = i1 - i0;
-      if (n < sr * 0.05) return null;
+      if (n < sr * 0.05) {
+        toast('A take shorter than 50 ms was not kept.', 'info');
+        return null;
+      }
       const buf = new AudioBuffer({ length: n, numberOfChannels: data.channels.length, sampleRate: sr });
       data.channels.forEach((ch, c) => {
         const out = buf.getChannelData(c);
@@ -563,7 +649,7 @@ export class RecordController {
     const track = h.createAudioTrack('Master recording');
     track.mute = true;
     const capture = new WorkletCapture(h.ctx, h.masterTap, 2);
-    capture.start();
+    await capture.start();
     this.masterJob = { capture, track };
     h.changed();
     return true;

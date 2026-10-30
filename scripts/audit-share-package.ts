@@ -57,7 +57,7 @@ const extract = (relative: string): Buffer => {
 assert.ok(hasPath('dist/index.html'), 'Share archive is missing the DAW entry page');
 assert.ok(hasPath('dist/instruments/index.json'), 'Share archive is missing its instrument index');
 assert.ok(hasPath('dist/instruments/CREDITS.md'), 'Share archive is missing pack credits');
-assert.ok(!archiveEntries.some((entry) => /^dist\/(library|stems)(\/|$)/i.test(entry.replaceAll('\\', '/').replace(/^\/+/, ''))), 'Share build contains the local plugin library or private song stems');
+assert.ok(!archiveEntries.some((entry) => /^dist\/(library|stems|samples)(\/|$)/i.test(entry.replaceAll('\\', '/').replace(/^\/+/, ''))), 'Share build contains the local plugin library, private song stems or local sample recordings');
 
 const sourceIndex = JSON.parse(fs.readFileSync(path.resolve('public/instruments/index.json'), 'utf8')) as PackIndex;
 const bundleIndex = JSON.parse(extract('dist/instruments/index.json').toString('utf8')) as PackIndex;

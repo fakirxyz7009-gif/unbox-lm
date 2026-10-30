@@ -277,6 +277,7 @@ export const LibraryBrowser: React.FC<LibraryBrowserProps> = ({ onMountItem, onM
                       <div className="text-[11px] text-slate-500 truncate">{subtitle(item)}</div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      {item.kind === 'plugin' && <span className="proxy-chip" title="Runs as Web Audio proxy DSP, not the plugin binary">PROXY DSP</span>}
                       {item.kind === 'plugin' && !item.hostable && <span className="lib-flag" title={item.hostIssue}>{item.arch === 'x86' ? '32-bit' : item.format.toUpperCase()}</span>}
                       {previewId && (
                         <button type="button" className="lib-act" onClick={() => void audition(previewId)} aria-label={lib.auditioningId === previewId ? 'Stop preview' : 'Play preview'} title="Audition (plays straight to the speakers)">

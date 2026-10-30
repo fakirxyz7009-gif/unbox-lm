@@ -40,6 +40,23 @@ export class MidiNoteLifecycle<T> {
     }
   }
 
+  /** All Notes Off (CC 123) and System Reset: every held key on the channel, or on every channel, is released; sustained keys end too. */
+  allOff(
+    channel: number | undefined,
+    recordKeyRelease: (target: T, note: number, channel: number) => void,
+    releaseSound: (target: T, note: number) => void
+  ): void {
+    for (const [key, targets] of [...this.heldTargets]) {
+      const heldChannel = key >> 7;
+      if (channel !== undefined && heldChannel !== (channel & 0x0f)) continue;
+      const note = key & 0x7f;
+      targets.forEach((target) => recordKeyRelease(target, note, heldChannel));
+      targets.forEach((target) => releaseSound(target, note));
+      this.heldTargets.delete(key);
+    }
+    this.sustainReleased(releaseSound, channel);
+  }
+
   private key(channel: number, note: number): number {
     return ((channel & 0x0f) << 7) | (note & 0x7f);
   }

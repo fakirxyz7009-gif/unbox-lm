@@ -70,8 +70,22 @@ async function run(): Promise<void> {
     const levels = audioEngine.getTrackStereoLevels(grain.id);
     livePeak = Math.max(livePeak, levels.peakL, levels.peakR);
   }
+  // A pause is different from a hard stop: a held live note must continue
+  // past the original 150 ms transport look-ahead after the worker hands off.
+  grain.noteOn(67, 0.8, audioEngine.ctx.currentTime + 0.02);
+  await wait(70);
+  audioEngine.pauseTransport();
+  await wait(240);
+  let pausedPeak = 0;
+  for (let index = 0; index < 10; index++) {
+    await wait(20);
+    const levels = audioEngine.getTrackStereoLevels(grain.id);
+    pausedPeak = Math.max(pausedPeak, levels.peakL, levels.peakR);
+  }
+  grain.noteOff(67, audioEngine.ctx.currentTime);
   audioEngine.stopTransport();
   expect(livePeak > 1e-4, `Granular device was silent live (peak ${livePeak.toExponential(2)}).`);
+  expect(pausedPeak > 1e-4, `Granular device went silent after pausing transport (peak ${pausedPeak.toExponential(2)}).`);
 
   const channelId = audioEngine.mixer.ownerOf(grain.id);
   const offline = await renderSong(audioEngine, {
@@ -87,7 +101,7 @@ async function run(): Promise<void> {
   expect(offlinePeak > 1e-4, `Granular device was silent in OfflineAudioContext (peak ${offlinePeak.toExponential(2)}).`);
 
   result.dataset.status = 'passed';
-  result.textContent = `PASS · granular source rendered stopped-live (${stoppedPeak.toFixed(4)}), transport-live (${livePeak.toFixed(4)}) and offline (${offlinePeak.toFixed(4)}).`;
+  result.textContent = `PASS · granular source rendered stopped-live (${stoppedPeak.toFixed(4)}), transport-live (${livePeak.toFixed(4)}), paused-live (${pausedPeak.toFixed(4)}) and offline (${offlinePeak.toFixed(4)}).`;
 }
 
 void run().catch((error: unknown) => {

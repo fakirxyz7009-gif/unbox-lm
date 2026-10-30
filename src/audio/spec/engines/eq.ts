@@ -5,10 +5,14 @@
  *  - channel: SSL-style HPF / LPF, LF / HF shelf-or-bell, two parametric mids.
  *  - mclass: low cut, low shelf, two parametric bands, high shelf.
  *  - peq2: two parametric bands (B switchable).
+ *  - graphic: ten fixed peaking bands, 31 Hz to 16 kHz, each ±12 dB (GRAPHIC_HZ).
  * The filter chain is built once; knobs move gains / frequencies smoothly.
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import { clamp, setSmooth, tubeCurve } from '../dsp.ts';
+
+/** Centre frequencies of the graphic EQ's ten octave-spaced bands. */
+const GRAPHIC_HZ = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 
 const num = (s: string) => {
   const m = /([\d.]+)\s*(k?)/i.exec(s);
@@ -98,6 +102,14 @@ export function eqEngine(host: SpecHost): SpecEngine {
       S(hi.frequency, host.p('hiFreq', 9000));
       S(hi.gain, host.p('hiGain', 0));
     };
+  } else if (model === 'graphic') {
+    const bands = GRAPHIC_HZ.map((f) => {
+      const band = add('peaking');
+      band.frequency.value = f;
+      band.Q.value = 1.41;
+      return band;
+    });
+    sync = () => bands.forEach((band, i) => S(band.gain, host.p(`g${i}`, 0)));
   } else {
     const a = add('peaking');
     const b = add('peaking');

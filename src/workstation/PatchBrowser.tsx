@@ -5,7 +5,7 @@
  * effect plugins (inserted on the part) and samples (put on an audio track at the playhead, or
  * played on the part's keys). "Audio file": any audio file becomes the part's sound.
  */
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, Upload, X } from 'lucide-react';
 import { audioEngine } from '../audio/AudioEngine.ts';
 import type { DeviceType, SequencerTrack } from '../audio/types.ts';
@@ -35,6 +35,14 @@ const SOURCES: { id: Source; label: string }[] = [
 ];
 const isEffectPlugin = (i: ManifestItem) => i.kind === 'plugin' && i.role === 'effect';
 const PACK_BY_DEVICE_TYPE = new Map<string, (typeof SHIPPED_PACKS)[number]>(SHIPPED_PACKS.map((pack) => [packDeviceType(pack.id), pack]));
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableChildren(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((element) => {
+    const style = window.getComputedStyle(element);
+    return element.tabIndex >= 0 && style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
+  });
+}
 
 interface Props {
   /** The part to replace; null = only "add as new part". */
@@ -185,8 +193,8 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
   const mount = (item: MountableItem, presetId?: string) => {
     const dev = audioEngine.createVstDevice(snapshotFromItem(item, vstLibrary.manifest), { presetId });
     if (dev.role === 'effect') {
-      if (track) audioEngine.insertEffectOnTrack(dev.id, track.deviceId);
-      setNote(`${dev.name} inserted on part ${partNo}`);
+      const inserted = !!track && audioEngine.insertEffectOnTrack(dev.id, track.deviceId);
+      setNote(inserted ? `${dev.name} inserted on part ${partNo}` : `${dev.name} is in the rack; it could not be inserted on part ${partNo}`);
       return;
     }
     onChosen(dev.id);
@@ -195,9 +203,48 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
   /** An audio file becomes the part's sound (replace) or a new part's (add, on the Zone One sampler). */
   const audioPicker = useRef<HTMLInputElement>(null);
   const sf2Picker = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   const [sf2, setSf2] = useState<ParsedSf2 | null>(null);
   const [sf2Name, setSf2Name] = useState('');
   const [dropOver, setDropOver] = useState(false);
+  useEffect(() => {
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = window.requestAnimationFrame(() => searchRef.current?.focus({ preventScroll: true }));
+    return () => {
+      window.cancelAnimationFrame(frame);
+      const opener = returnFocusRef.current;
+      if (opener?.isConnected) window.requestAnimationFrame(() => opener.focus({ preventScroll: true }));
+    };
+  }, []);
+
+  const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const targets = focusableChildren(dialog);
+    if (!targets.length) {
+      event.preventDefault();
+      dialog.focus({ preventScroll: true });
+      return;
+    }
+    const first = targets[0];
+    const last = targets[targets.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !dialog.contains(active))) {
+      event.preventDefault();
+      last.focus({ preventScroll: true });
+    } else if (!event.shiftKey && (active === last || !dialog.contains(active))) {
+      event.preventDefault();
+      first.focus({ preventScroll: true });
+    }
+  };
   const applyAudioFile = async (file: File) => {
     if (!isAudioFile(file)) {
       setNote(`${file.name} is not an audio file`);
@@ -277,10 +324,20 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center" onPointerDown={onClose} role="dialog" aria-label="Load instrument" data-testid="patch-browser">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      onKeyDown={onDialogKeyDown}
+      className="fixed inset-0 z-50 bg-black/60 grid place-items-center"
+      onPointerDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="patch-browser-title"
+      data-testid="patch-browser"
+    >
       <div className="us-metal us-metal-frame w-[860px] max-w-[94vw] h-[560px] max-h-[86vh] flex flex-col p-3 gap-2" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3">
-          <span className="font-label font-extrabold text-[22px] text-ink tracking-wide">LOAD</span>
+          <h2 id="patch-browser-title" className="font-label font-extrabold text-[22px] text-ink tracking-wide">LOAD</h2>
           <div className="flex rounded-[5px] overflow-hidden border border-[#8f959c]">
             {track && (
               <button type="button" onClick={() => setMode('replace')} className={`px-3 h-[28px] font-label font-bold text-[13px] ${mode === 'replace' ? 'bg-[#4b5159] text-white' : 'bg-[#e9ebee] text-[#4b5159]'}`}>
@@ -293,7 +350,18 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
           </div>
           <label className="flex-1 flex items-center gap-1 us-btn-light rounded px-2 h-[28px]">
             <Search className="w-4 h-4 text-[#5b616a]" />
-            <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.stopPropagation()} placeholder="Search instruments…" className="flex-1 bg-transparent outline-none text-[13px] text-ink" />
+            <input
+              ref={searchRef}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(event) => {
+                // Preserve the dialog's Tab/Escape handling, but do not let letters typed into
+                // the search field trigger the DAW's global musical/transport shortcuts.
+                if (event.key !== 'Tab' && event.key !== 'Escape') event.stopPropagation();
+              }}
+              placeholder="Search instruments…"
+              className="flex-1 bg-transparent outline-none text-[13px] text-ink"
+            />
           </label>
           <button type="button" onClick={onClose} className="us-btn rounded w-8 h-8 grid place-items-center" aria-label="Close">
             <X className="w-4 h-4" />

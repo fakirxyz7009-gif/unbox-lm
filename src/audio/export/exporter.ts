@@ -144,6 +144,8 @@ export async function runExport(engine: AudioEngine, s: ExportSettings, onProgre
     const loud = measureLoudness(Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c)), buf.sampleRate);
     const gainDb = normalize(buf, s, loud);
     onProgress(0.86, `Encoding ${ext.toUpperCase()}`);
+    // Lets the label paint before a long synchronous encode (the encoders do not yield on their own).
+    await new Promise((resolve) => setTimeout(resolve, 0));
     const blob = await encode(buf, s, (f) => onProgress(0.86 + f * 0.13, `Encoding ${ext.toUpperCase()}`));
     onProgress(1, 'Done');
     const after = gainDb ? measureLoudness(Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c)), buf.sampleRate) : loud;

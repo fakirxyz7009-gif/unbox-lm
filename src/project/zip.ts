@@ -123,9 +123,13 @@ export async function readZip(blob: Blob): Promise<Map<string, Uint8Array>> {
     const lExtra = dv.getUint16(local + 28, true);
     const start = local + 30 + lName + lExtra;
     const body = buf.subarray(start, start + csize);
-    if (method === 0) out.set(name, body);
-    else if (method === 8) out.set(name, await inflateRaw(body));
-    else throw new Error(`Unsupported zip compression in ${name}`);
+    if (method !== 0 && method !== 8) throw new Error(`Unsupported zip compression in ${name}`);
+    const data = method === 0 ? body : await inflateRaw(body);
+    // A truncated or altered entry must not reach the project as silently wrong audio or JSON.
+    if (data.length !== dv.getUint32(p + 24, true) || crc32(data) !== dv.getUint32(p + 16, true)) {
+      throw new Error(`The archive is damaged: ${name} does not match its checksum`);
+    }
+    out.set(name, data);
     p += 46 + nameLen + extraLen + commentLen;
   }
   return out;

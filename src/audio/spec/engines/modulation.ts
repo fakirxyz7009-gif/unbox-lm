@@ -6,9 +6,11 @@
  *    shimmer grains), Spectral (chorus on the highs only) — all built once, mode = crossfade.
  *  - sweeper: phaser / flanger / filter with LFO and envelope follower.
  *  - un16: 4 / 8 / 16 detuned delay voices (unison thickener).
+ *  - rotary / tremolo: rotating speaker (horn and drum rotors) and stereo tremolo (rotary.ts).
  */
 import type { SpecEngine, SpecHost } from '../SpecDevice.ts';
 import { buildChorus, buildFollower, buildPitchShifter, clamp, setSmooth, stopAll } from '../dsp.ts';
+import { rotaryCabinet, stereoTremolo } from './rotary.ts';
 
 export function modulationEngine(host: SpecHost): SpecEngine {
   switch (String(host.cfg.model ?? 'cf101')) {
@@ -20,6 +22,10 @@ export function modulationEngine(host: SpecHost): SpecEngine {
       return sweeper(host);
     case 'un16':
       return unison(host);
+    case 'rotary':
+      return rotaryCabinet(host);
+    case 'tremolo':
+      return stereoTremolo(host);
     default:
       return cf101(host);
   }
