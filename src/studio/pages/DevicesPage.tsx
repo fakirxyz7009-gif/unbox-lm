@@ -18,6 +18,8 @@ import { snapshotFromItem } from '../../vst/VstPluginDevice.ts';
 import type { MountableItem } from '../../../shared/vst/manifestTypes.ts';
 import { Btn, Panel } from '../ui/controls.tsx';
 import type { PageId } from '../sections.ts';
+import { toast } from '../../shell/toast.ts';
+import { showConfirm } from '../../shell/dialogService.ts';
 
 type Cat = Extract<PageId, 'instruments' | 'drums' | 'synths' | 'sampler' | 'effects' | 'patchbay'>;
 
@@ -98,12 +100,24 @@ export function DevicesPage({ cat, onOpenDevice, onOpenRear }: { cat: Cat; onOpe
   const add = (type: DeviceType, name: string) => {
     const dev = audioEngine.createDevice(type, name);
     if (cat === 'effects' && targetId && !audioEngine.insertEffectOnTrack(dev.id, targetId)) {
-      window.alert('Added to the rack, but it could not be inserted on that channel (patch it on the back of the rack).');
+      toast('Added to the rack, but it could not be inserted on that channel (patch it on the back of the rack).', 'error');
     }
   };
   const addLib = (item: MountableItem) => {
     const dev = audioEngine.createVstDevice(snapshotFromItem(item, vstLibrary.manifest));
     if (dev.role === 'effect' && targetId) audioEngine.insertEffectOnTrack(dev.id, targetId);
+  };
+
+  const removeDevice = (id: string, name: string) => {
+    void showConfirm({
+      title: 'Remove device',
+      message: `Remove “${name}” from the project? Its track, clips and cables are removed as well.`,
+      confirmLabel: 'Remove',
+    }).then((ok) => {
+      if (!ok) return;
+      audioEngine.removeDevice(id);
+      toast(`Removed ${name}`, 'info');
+    });
   };
 
   const preview = async (type: DeviceType, name: string) => {
@@ -217,7 +231,7 @@ export function DevicesPage({ cat, onOpenDevice, onOpenRear }: { cat: Cat; onOpe
             {inProject.map((d) => (
               <li key={d.id} className="flex items-center gap-1">
                 <button type="button" className="flex-1 text-left truncate hover:text-orange-300" onClick={() => onOpenDevice(d.id)} title="Open in the rack">{d.name}</button>
-                <button type="button" aria-label={`Remove ${d.name}`} title="Remove" className="text-slate-500 hover:text-red-400" onClick={() => window.confirm(`Remove ${d.name}?`) && audioEngine.removeDevice(d.id)}><Trash2 className="w-3 h-3" /></button>
+                <button type="button" aria-label={`Remove ${d.name}`} title="Remove" className="text-slate-500 hover:text-red-400" onClick={() => removeDevice(d.id, d.name)}><Trash2 className="w-3 h-3" /></button>
               </li>
             ))}
             {!inProject.length && <li className="text-slate-500">None yet.</li>}

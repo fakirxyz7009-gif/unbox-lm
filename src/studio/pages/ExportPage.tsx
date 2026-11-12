@@ -13,6 +13,7 @@ import { downloadBlob } from '../../audio/export/wav.ts';
 import { useEngineVersion } from '../../nexa/useEngine.ts';
 import { projectManager } from '../../project/ProjectManager.ts';
 import { Btn, NumField, Panel, Sel } from '../ui/controls.tsx';
+import { showAlert, showConfirm } from '../../shell/dialogService.ts';
 
 const fmtDb = (v: number | undefined, unit: string) => (v === undefined || !Number.isFinite(v) ? '—' : `${v.toFixed(1)} ${unit}`);
 const STANDARD_BITRATES = [96, 128, 160, 192, 256, 320];
@@ -225,7 +226,29 @@ export function ExportPage() {
             <div className="text-[11px] uppercase tracking-widest text-slate-500">Other</div>
             <Btn onClick={() => void audioEngine.bounceRealtimeWav()} title="Plays the song once and records the speakers' signal before the monitor section (catches anything live)">Real-time bounce (WAV)</Btn>
             <Btn onClick={() => midiRef.current?.click()}><FileMusic className="inline w-3 h-3" /> Import MIDI file…</Btn>
-            <input ref={midiRef} type="file" accept=".mid,.midi,audio/midi" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { const n = importMidi(audioEngine, await f.arrayBuffer(), { setTempo: window.confirm('Use the MIDI file tempo?'), atBar: 0 }); window.alert(`Imported ${n} MIDI track(s) as note clips.`); } catch (er) { window.alert(`MIDI import failed: ${(er as Error).message}`); } }} />
+            <input
+              ref={midiRef}
+              type="file"
+              accept=".mid,.midi,audio/midi"
+              hidden
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (!f) return;
+                try {
+                  const setTempo = await showConfirm({
+                    title: 'Import MIDI file',
+                    message: 'Use the tempo stored in the MIDI file?',
+                    confirmLabel: 'Use MIDI tempo',
+                    tone: 'normal',
+                  });
+                  const n = importMidi(audioEngine, await f.arrayBuffer(), { setTempo, atBar: 0 });
+                  await showAlert({ title: 'MIDI imported', message: `Imported ${n} MIDI track(s) as note clips.` });
+                } catch (er) {
+                  await showAlert({ title: 'MIDI import failed', message: (er as Error).message });
+                }
+              }}
+            />
           </div>
         </Panel>
       </div>

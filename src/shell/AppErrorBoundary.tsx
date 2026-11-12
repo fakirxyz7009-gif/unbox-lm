@@ -6,6 +6,7 @@
  */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { audioEngine } from '../audio/AudioEngine.ts';
+import { showAlert } from './dialogService.ts';
 
 interface Props {
   children: ReactNode;
@@ -43,7 +44,7 @@ export class AppErrorBoundary extends Component<Props, State> {
       setTimeout(() => URL.revokeObjectURL(url), 10000);
       this.setState({ copied: true });
     } catch (e) {
-      window.alert(`Could not read the project state: ${(e as Error).message}`);
+      void showAlert({ title: 'Could not read the project state', message: (e as Error).message });
     }
   };
 

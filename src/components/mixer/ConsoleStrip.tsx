@@ -23,6 +23,7 @@ import { LedButton } from '../../ui/skin/panel.tsx';
 import { vstLibrary } from '../../vst/libraryClient.ts';
 import { snapshotFromItem } from '../../vst/VstPluginDevice.ts';
 import { EqCurve } from './EqCurve.tsx';
+import { showAlert, showConfirm } from '../../shell/dialogService.ts';
 
 const KIND_BADGE: Record<ChannelRef['kind'], string> = { track: 'INST', audio: 'AUDIO', bus: 'BUS', return: 'RETURN', rack: 'RACK' };
 export const PALETTE = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#94a3b8'];
@@ -147,7 +148,15 @@ export function ConsoleStrip({ ch, buses, compact, selected, onSelect, onOpenDev
         <div className="flex items-center gap-1">
           <span className="cs-badge">{KIND_BADGE[ch.kind]}</span>
           {(ch.kind === 'bus' || ch.kind === 'return') && (
-            <button type="button" title="Delete this bus" aria-label="Delete bus" className="ml-auto text-ink/50 hover:text-red-600" onClick={() => window.confirm(`Delete ${s.name}? Channels routed to it go to the master.`) && m.deleteBus(ch.id)}>
+            <button type="button" title="Delete this bus" aria-label="Delete bus" className="ml-auto text-ink/50 hover:text-red-600" onClick={() => {
+              void showConfirm({
+                title: `Delete ${s.name}?`,
+                message: 'Channels routed to it go to the master.',
+                confirmLabel: 'Delete bus',
+              }).then((ok) => {
+                if (ok) m.deleteBus(ch.id);
+              });
+            }}>
               <Trash2 className="w-3 h-3" />
             </button>
           )}
@@ -216,7 +225,7 @@ export function ConsoleStrip({ ch, buses, compact, selected, onSelect, onOpenDev
                   onClose={() => setPicker(false)}
                   onPick={(t) => {
                     setPicker(false);
-                    if (!addInsert(ch.id, t)) window.alert('Could not insert here: the channel must reach the master through its own strip.');
+                    if (!addInsert(ch.id, t)) void showAlert({ title: 'Insert not available', message: 'Could not insert here: the channel must reach the master through its own strip.' });
                   }}
                 />
               )}
@@ -281,7 +290,7 @@ export function ConsoleStrip({ ch, buses, compact, selected, onSelect, onOpenDev
                 value={s.output && s.output !== ch.id ? s.output : 'master'}
                 onChange={(v) =>
                   set(() => {
-                    if (!m.setOutput(ch.id, v)) window.alert('That routing would create a feedback loop.');
+                    if (!m.setOutput(ch.id, v)) void showAlert({ title: 'Routing blocked', message: 'That routing would create a feedback loop.' });
                   })
                 }
                 options={[{ value: 'master', label: '→ Master' }, ...otherBuses.map((b) => ({ value: b.id, label: `→ ${b.settings.name}` }))]}

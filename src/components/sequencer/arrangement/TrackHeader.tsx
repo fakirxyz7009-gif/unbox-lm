@@ -9,6 +9,7 @@ import type { AudioEngine } from '../../../audio/AudioEngine.ts';
 import type { SequencerTrack } from '../../../audio/types.ts';
 import { syncTrackPatterns } from '../../../audio/sequencer/model.ts';
 import type { TimelinePalette } from './timelineTheme.ts';
+import { showAlert, showConfirm } from '../../../shell/dialogService.ts';
 
 interface Props {
   audioEngine: AudioEngine;
@@ -130,7 +131,7 @@ export const TrackHeader: React.FC<Props> = ({
               return;
             }
             void audioEngine.freezeTrack(t.id).then((id) => {
-              if (!id) window.alert('Freeze needs an arranged song, and cannot run while recording.');
+              if (!id) void showAlert({ title: 'Freeze unavailable', message: 'Freeze needs an arranged song, and cannot run while recording.' });
             });
           })}
           className={btn(!!(t.frozenFrom || t.frozenBy), 'bg-amber-400 text-black', light ? 'bg-white/70 text-[#59606a] border border-[#a7adb4]' : 'bg-slate-800 text-cyan-200')}
@@ -195,7 +196,13 @@ export const TrackHeader: React.FC<Props> = ({
             {patternSelect}
             <button
               onClick={stop(() => {
-                if (window.confirm(`Delete "${t.name}" and its ${t.kind === 'audio' ? 'clips' : 'instrument'}?`)) audioEngine.removeDevice(t.deviceId);
+                void showConfirm({
+                  title: `Delete "${t.name}"?`,
+                  message: `This removes the track and its ${t.kind === 'audio' ? 'clips' : 'instrument'}.`,
+                  confirmLabel: 'Delete track',
+                }).then((ok) => {
+                  if (ok) audioEngine.removeDevice(t.deviceId);
+                });
               })}
               className="w-4 h-4 grid place-items-center text-[#59606a] hover:text-red-600"
               title="Delete track"

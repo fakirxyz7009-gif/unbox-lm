@@ -36,6 +36,7 @@ import { addStemNotes } from '../../audio/ai/stemNotes.ts';
 import { createPlayableInstrumentFromAsset } from '../../audio/ai/playableInstrument.ts';
 import { deviceSampleAudioIds } from '../../audio/deviceSamples.ts';
 import { derivedAudioProvenance } from '../../../shared/audio/provenance.ts';
+import { showConfirm } from '../../shell/dialogService.ts';
 
 interface Props {
   isOpen: boolean;
@@ -479,7 +480,11 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
 
   /** Removes an audio asset from the project */
   const deleteAsset = async (asset: AudioAsset) => {
-    if (assetInUse(asset) && !window.confirm(`"${asset.name}" plays in the song. Remove it anyway? Those parts will go silent.`)) return;
+    if (assetInUse(asset) && !(await showConfirm({
+      title: 'Remove audio sample',
+      message: `"${asset.name}" plays in the song. Remove it anyway? Those parts will go silent.`,
+      confirmLabel: 'Remove',
+    }))) return;
     stopPreview();
     if (playingId === asset.id) setPlayingId(null);
     await audioStore.remove(asset.id);
@@ -493,7 +498,11 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
 
   /** Removes all audio samples from project */
   const clearAllAssets = async () => {
-    if (!window.confirm('Remove all audio samples from this project? Instruments and clips that play them will go silent.')) return;
+    if (!(await showConfirm({
+      title: 'Clear all audio samples',
+      message: 'Remove all audio samples from this project? Instruments and clips that play them will go silent.',
+      confirmLabel: 'Remove all',
+    }))) return;
     stopPreview();
     const all = audioStore.all();
     for (const a of all) {

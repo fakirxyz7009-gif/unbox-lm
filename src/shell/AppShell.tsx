@@ -77,7 +77,7 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
     try {
       await projectManager.importArchive(f, f.name.replace(/\.[^.]+$/, ''));
     } catch (e) {
-      window.alert(`That file could not be imported: ${(e as Error).message}`);
+      toast(`That file could not be imported: ${(e as Error).message}`, 'error');
     }
   };
 

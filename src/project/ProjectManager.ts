@@ -9,6 +9,7 @@ import { deleteRecordingJournal, discardCompletedRecordingJournals, listRecordin
 import { newSeqId } from '../audio/sequencer/model.ts';
 import { encodeWav, safeFileName } from '../audio/export/wav.ts';
 import { toast } from '../shell/toast.ts';
+import { showConfirm } from '../shell/dialogService.ts';
 import { dbAll, dbByIndex, dbDelete, dbGet, dbPut, requestPersistence } from './db.ts';
 import { parseImportableProject } from './projectFormat.ts';
 import { GENRE_TEMPLATES, applyTemplate } from './templates.ts';
@@ -642,7 +643,11 @@ class ProjectManager {
   private async keepUnsaved(next: string): Promise<boolean> {
     if (!this.currentId || !this.dirty) return true;
     if (this.autosave) return this.save();
-    return window.confirm(`"${this.currentName}" has unsaved changes. Discard them and ${next}?`);
+    return showConfirm({
+      title: 'Unsaved changes',
+      message: `"${this.currentName}" has unsaved changes. Discard them and ${next}?`,
+      confirmLabel: 'Discard',
+    });
   }
 
   /**

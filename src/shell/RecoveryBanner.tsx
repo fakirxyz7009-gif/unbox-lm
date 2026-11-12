@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { projectManager, type RecoveryRecord } from '../project/ProjectManager.ts';
 import type { RecordingJournalManifest } from '../audio/recording/recordingJournal.ts';
+import { showConfirm } from './dialogService.ts';
 
 export function RecoveryBanner() {
   const [rec, setRec] = useState<RecoveryRecord | null>(projectManager.recovery);
@@ -46,7 +47,13 @@ export function RecoveryBanner() {
           type="button"
           disabled={busy}
           onClick={() => {
-            if (window.confirm(`Discard the unsaved changes from ${label}? They cannot be recovered afterwards.`)) void projectManager.discardRecovery();
+            void showConfirm({
+              title: 'Discard recovered changes?',
+              message: `Discard the unsaved changes from ${label}? They cannot be recovered afterwards.`,
+              confirmLabel: 'Discard',
+            }).then((ok) => {
+              if (ok) void projectManager.discardRecovery();
+            });
           }}
           className="rounded border border-[#5a4a35] px-2 py-1 text-[11px] text-[#c2c9cf] hover:bg-white/5 disabled:opacity-50"
         >
@@ -75,7 +82,13 @@ export function RecoveryBanner() {
           type="button"
           disabled={busy}
           onClick={() => {
-            if (window.confirm('Discard this recorded-take recovery? Its durable audio chunks cannot be restored afterwards.')) void projectManager.discardRecordingJournal(take.sessionId);
+            void showConfirm({
+              title: 'Discard recorded take?',
+              message: 'Its durable audio chunks cannot be restored afterwards.',
+              confirmLabel: 'Discard take',
+            }).then((ok) => {
+              if (ok) void projectManager.discardRecordingJournal(take.sessionId);
+            });
           }}
           className="rounded border border-[#42626d] px-2 py-1 text-[11px] text-[#c2c9cf] hover:bg-white/5 disabled:opacity-50"
         >

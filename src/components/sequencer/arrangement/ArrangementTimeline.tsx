@@ -56,6 +56,7 @@ import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { gainToDb, meterPos } from '../../../studio/ui/levels.ts';
 import { rememberUi, setUi, useUi, type SeqTool } from '../../../shell/uiStore.ts';
 import { focusClip } from '../../../shell/clipFocus.ts';
+import { showAlert, showPrompt } from '../../../shell/dialogService.ts';
 import { setText, setWidth } from '../../../ui/skin/dom.ts';
 import { useFrame, useMeterFrame } from '../../../nexa/useEngine.ts';
 import { DARK_TIMELINE, LIGHT_TIMELINE } from './timelineTheme.ts';
@@ -1070,7 +1071,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
           if (c) at = c.startBar + c.lengthBars;
         }
       } catch (err) {
-        window.alert(`Could not import ${f.name}: ${(err as Error).message}`);
+        void showAlert({ title: 'Audio import failed', message: `Could not import ${f.name}: ${(err as Error).message}` });
       }
     }
     setImporting(null);
@@ -1459,8 +1460,14 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                     style={{ left: start * barPx, width: Math.max(18, length * barPx), color: light ? '#18212d' : '#fff7ed', background: `${block.color}55`, borderColor: block.color, cursor: tool === 'pointer' ? 'grab' : undefined }}
                     onPointerDown={(e) => onBlockDown(e, placement.id, placement.startBar)}
                     onDoubleClick={() => {
-                      const name = window.prompt('Rename song block', block.name);
-                      if (name !== null) audioEngine.renameSongBlock(block.id, name);
+                      void showPrompt({
+                        title: 'Rename song block',
+                        label: 'Block name',
+                        defaultValue: block.name,
+                        confirmLabel: 'Rename',
+                      }).then((name) => {
+                        if (name !== null) audioEngine.renameSongBlock(block.id, name);
+                      });
                     }}
                     title={`${block.name} · Scene ${block.patternIndex + 1} · ${length.toFixed(2)} bars · ${audioClipCount} captured audio clips · ${automationLaneCount} captured automation lanes. Drag to move; drag the right edge to resize.`}
                     data-testid="arr-block-clip"
@@ -1544,8 +1551,14 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                     type="button"
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={() => {
-                      const name = window.prompt('Rename track folder', folderStart.name);
-                      if (name !== null) audioEngine.renameTrackFolder(folderStart.id, name);
+                      void showPrompt({
+                        title: 'Rename track folder',
+                        label: 'Folder name',
+                        defaultValue: folderStart.name,
+                        confirmLabel: 'Rename',
+                      }).then((name) => {
+                        if (name !== null) audioEngine.renameTrackFolder(folderStart.id, name);
+                      });
                     }}
                     className="min-w-0 flex-1 truncate text-left font-bold text-[11px]"
                     title="Rename this track folder"

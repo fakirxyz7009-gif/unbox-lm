@@ -17,6 +17,8 @@ import {
 import { storageEstimate } from '../../project/db.ts';
 import { audioStore } from '../../audio/clips/audioStore.ts';
 import { Btn, Panel } from '../ui/controls.tsx';
+import { toast } from '../../shell/toast.ts';
+import { showConfirm, showPrompt } from '../../shell/dialogService.ts';
 
 function usePM(): number {
   return useSyncExternalStore(
@@ -78,11 +80,27 @@ export function ProjectsPage() {
     try {
       await fn();
     } catch (e) {
-      window.alert(`${label} failed: ${(e as Error).message}`);
+      toast(`${label} failed: ${(e as Error).message}`, 'error');
     } finally {
       setBusy(null);
       void refresh();
     }
+  };
+
+  const askConfirm = (next: { title: string; message: string; confirmLabel?: string; run: () => void | Promise<void> }) => {
+    void showConfirm({ title: next.title, message: next.message, confirmLabel: next.confirmLabel }).then((ok) => {
+      if (ok) void next.run();
+    });
+  };
+  const askPrompt = (next: { title: string; label: string; value: string; confirmLabel?: string; run: (value: string) => void | Promise<void> }) => {
+    void showPrompt({
+      title: next.title,
+      label: next.label,
+      defaultValue: next.value,
+      confirmLabel: next.confirmLabel,
+    }).then((value) => {
+      if (value !== null) void next.run(value);
+    });
   };
 
   const activeTrack = audioEngine.tracks[0];
@@ -118,9 +136,9 @@ export function ProjectsPage() {
         {recordingBusy && <span className="text-amber-300" role="status">Finishing a take — project changes wait until it is placed.</span>}
         <div className="flex-1" />
         <Btn onClick={() => void run('Save', () => pm.save())} title="Save now (Ctrl+S)"><Save className="inline w-3 h-3" /> Save</Btn>
-        <Btn onClick={() => { const l = window.prompt('Version name', `Version ${new Date().toLocaleTimeString()}`); if (l !== null) void run('Save version', () => pm.saveVersion(l)); }} title="Keep a named copy in the history"><History className="inline w-3 h-3" /> Save version</Btn>
-        <Btn onClick={() => { const n = window.prompt('Save as new project named', `${pm.currentName} copy`); if (n) void run('Save as', () => pm.saveAs(n)); }}>Save as…</Btn>
-        <Btn onClick={() => { const n = window.prompt('Template name', pm.currentName); if (n) void run('Save template', () => pm.saveAsTemplate(n)); }}>Save as template</Btn>
+        <Btn onClick={() => askPrompt({ title: 'Save version', label: 'Version name', value: `Version ${new Date().toLocaleTimeString()}`, confirmLabel: 'Save version', run: (label) => run('Save version', () => pm.saveVersion(label)) })} title="Keep a named copy in the history"><History className="inline w-3 h-3" /> Save version</Btn>
+        <Btn onClick={() => askPrompt({ title: 'Save as new project', label: 'Project name', value: `${pm.currentName} copy`, confirmLabel: 'Save as', run: (name) => run('Save as', () => pm.saveAs(name)) })}>Save as…</Btn>
+        <Btn onClick={() => askPrompt({ title: 'Save as template', label: 'Template name', value: pm.currentName, confirmLabel: 'Save template', run: (name) => run('Save template', () => pm.saveAsTemplate(name)) })}>Save as template</Btn>
         <Btn onClick={() => void run('Export archive', async () => { const r = await pm.exportArchive(); if (r) downloadBlob(r.blob, r.name); })} title="Project + all its audio in one .unbox file (collect & consolidate)"><Download className="inline w-3 h-3" /> Export .unbox</Btn>
         <Btn onClick={() => importRef.current?.click()} title="Open a .unbox archive or a project .json"><FileUp className="inline w-3 h-3" /> Import</Btn>
         <input ref={importRef} type="file" accept=".unbox,.zip,.json,application/json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run('Import', () => pm.importArchive(f, f.name.replace(/\.[^.]+$/, ''))); }} />
@@ -150,10 +168,10 @@ export function ProjectsPage() {
                   <div className="text-[11px] text-slate-500">{p.bpm} BPM · {p.key} · {p.tracks} tracks · {p.bars} bars · {ago(p.updatedAt)}{p.audioIds.length ? ` · ${p.audioIds.length} audio` : ''}</div>
                 </button>
                 {p.id !== pm.currentId && <Btn onClick={() => void run('Open', () => pm.open(p.id))}>Open</Btn>}
-                <button type="button" title="Rename" aria-label="Rename project" className="text-slate-500 hover:text-white" onClick={() => { const n = window.prompt('Rename project', p.name); if (n) void run('Rename', () => pm.rename(p.id, n)); }}><Pencil className="w-3 h-3" /></button>
+                <button type="button" title="Rename" aria-label="Rename project" className="text-slate-500 hover:text-white" onClick={() => askPrompt({ title: 'Rename project', label: 'Project name', value: p.name, confirmLabel: 'Rename', run: (name) => run('Rename', () => pm.rename(p.id, name)) })}><Pencil className="w-3 h-3" /></button>
                 <button type="button" title="Duplicate" aria-label="Duplicate project" className="text-slate-500 hover:text-white" onClick={() => void run('Duplicate', () => pm.duplicate(p.id))}><Copy className="w-3 h-3" /></button>
                 <button type="button" title="Export .unbox" aria-label="Export project" className="text-slate-500 hover:text-white" onClick={() => void run('Export', async () => { const r = await pm.exportArchive(p.id); if (r) downloadBlob(r.blob, r.name); })}><Download className="w-3 h-3" /></button>
-                <button type="button" title="Delete" aria-label="Delete project" className="text-slate-500 hover:text-red-400" onClick={() => window.confirm(`Delete "${p.name}" and its history? Audio used by other projects is kept.`) && void run('Delete', () => pm.remove(p.id))}><Trash2 className="w-3 h-3" /></button>
+                <button type="button" title="Delete" aria-label="Delete project" className="text-slate-500 hover:text-red-400" onClick={() => askConfirm({ title: 'Delete project', message: `Delete “${p.name}” and its history? Audio used by other projects is kept.`, confirmLabel: 'Delete', run: () => run('Delete', () => pm.remove(p.id)) })}><Trash2 className="w-3 h-3" /></button>
               </li>
             ))}
             {!shown.length && <li className="text-slate-500 p-2">No projects match.</li>}
@@ -168,13 +186,13 @@ export function ProjectsPage() {
         {/* new */}
         <Panel title="New project">
           <div className="flex gap-1 mb-2">
-            <Btn onClick={() => window.confirm('Start a new project with the 128 BPM C minor starter groove?') && void run('New project', () => pm.create('default', 'Untitled'))} title="Six tracks with an editable drum groove, bassline, pad chord and lead motif">Starter groove</Btn>
-            <Btn onClick={() => window.confirm('Start an empty project?') && void run('New project', () => pm.create('empty', 'Untitled'))}>Empty</Btn>
+            <Btn onClick={() => askPrompt({ title: 'New starter-groove project', label: 'Project name', value: 'Untitled', confirmLabel: 'Create project', run: (name) => run('New project', () => pm.create('default', name)) })} title="Six tracks with an editable drum groove, bassline, pad chord and lead motif">Starter groove</Btn>
+            <Btn onClick={() => askPrompt({ title: 'New empty project', label: 'Project name', value: 'Untitled', confirmLabel: 'Create project', run: (name) => run('New project', () => pm.create('empty', name)) })}>Empty</Btn>
           </div>
           <div className="text-[11px] uppercase tracking-widest text-slate-500 mb-1">Genre templates</div>
           <div className="grid grid-cols-2 gap-1 max-h-[380px] overflow-y-auto pr-1">
             {GENRE_TEMPLATES.map((t) => (
-              <button key={t.id} type="button" title={t.description} onClick={() => window.confirm(`Start a new ${t.name} project?`) && void run('New project', () => pm.create(t.id))} className="text-left rounded bg-slate-900/80 hover:bg-orange-500 hover:text-black px-2 py-1">
+              <button key={t.id} type="button" title={t.description} onClick={() => askPrompt({ title: `New ${t.name} project`, label: 'Project name', value: `${t.name} idea`, confirmLabel: 'Create project', run: (name) => run('New project', () => pm.create(t.id, name)) })} className="text-left rounded bg-slate-900/80 hover:bg-orange-500 hover:text-black px-2 py-1">
                 <div className="font-bold truncate">{t.name}</div>
                 <div className="text-[11px] opacity-70 truncate">{t.bpm} BPM · {t.description}</div>
               </button>
@@ -186,7 +204,7 @@ export function ProjectsPage() {
               {userTpl.map((t) => (
                 <div key={t.id} className="flex items-center gap-1">
                   <button type="button" className="flex-1 text-left rounded bg-slate-900/80 hover:bg-orange-500 hover:text-black px-2 py-1" onClick={() => void run('New project', () => pm.create(t.id, `${t.name} project`))}>{t.name} · {t.bpm} BPM</button>
-                  <button type="button" aria-label="Delete template" className="text-slate-500 hover:text-red-400" onClick={() => window.confirm(`Delete template "${t.name}"?`) && void run('Delete', () => pm.remove(t.id))}><Trash2 className="w-3 h-3" /></button>
+                  <button type="button" aria-label="Delete template" className="text-slate-500 hover:text-red-400" onClick={() => askConfirm({ title: 'Delete template', message: `Delete template “${t.name}”?`, confirmLabel: 'Delete', run: () => run('Delete', () => pm.remove(t.id)) })}><Trash2 className="w-3 h-3" /></button>
                 </div>
               ))}
             </>
@@ -197,7 +215,7 @@ export function ProjectsPage() {
               {audioEngine.tracks.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
             <Btn onClick={() => { const t = audioEngine.tracks.find((x) => x.id === tplTrack) ?? activeTrack; if (t) void run('Save track template', () => saveTrackTemplate(t.id, t.name)); }} title="Instrument + insert effects + channel settings">Save track template</Btn>
-            <Btn onClick={() => { const n = window.prompt('Mixer template name (buses, returns + inserts, VCAs, groups)', 'My mixer'); if (n) void run('Save mixer template', () => saveMixerTemplate(n)); }}>Save mixer…</Btn>
+            <Btn onClick={() => askPrompt({ title: 'Save mixer template', label: 'Template name (buses, returns + inserts, VCAs, groups)', value: 'My mixer', confirmLabel: 'Save template', run: (name) => run('Save mixer template', () => saveMixerTemplate(name)) })}>Save mixer…</Btn>
           </div>
           <ul className="space-y-0.5 max-h-32 overflow-y-auto">
             {trackTpl.map((t) => (
@@ -233,7 +251,7 @@ export function ProjectsPage() {
                 <li key={v.id} className="flex items-center gap-1">
                   <span className={`flex-1 truncate ${v.auto ? 'text-slate-500' : 'text-slate-200'}`}>{v.label}</span>
                   <span className="text-[11px] text-slate-500">{ago(v.createdAt)}</span>
-                  <Btn onClick={() => window.confirm(`Restore "${v.label}"? The current state is kept as a version first.`) && void run('Restore', () => pm.restoreVersion(v.id))}>Restore</Btn>
+                  <Btn onClick={() => askConfirm({ title: 'Restore version', message: `Restore “${v.label}”? The current state is kept as a version first.`, confirmLabel: 'Restore', run: () => run('Restore', () => pm.restoreVersion(v.id)) })}>Restore</Btn>
                   <button type="button" aria-label="Delete version" className="text-slate-500 hover:text-red-400" onClick={() => void run('Delete', () => pm.deleteVersion(v.id))}><Trash2 className="w-3 h-3" /></button>
                 </li>
               ))}
