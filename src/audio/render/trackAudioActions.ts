@@ -4,6 +4,7 @@ import { barsForSeconds } from '../clips/clipMath.ts';
 import { installSampleVoice, setPadSample } from '../deviceSamples.ts';
 import { audioPeak } from './renderDeviceNote.ts';
 import { renderSong } from './renderSong.ts';
+import { derivedAudioProvenance } from '../../../shared/audio/provenance.ts';
 
 export type TrackAudioAction = 'split' | 'chop16' | 'chop8' | 'chop4' | 'chopToKeys';
 export interface TrackAudioResult { trackId: string; clipId?: string; samplerDeviceId?: string; }
@@ -11,8 +12,9 @@ export interface TrackAudioResult { trackId: string; clipId?: string; samplerDev
 /** Audio edits use the actual track render and retain the track ID returned by audio-clip creation. */
 export async function applyTrackAudioAction(engine: AudioEngine, trackId: string, action: TrackAudioAction): Promise<TrackAudioResult> {
   const source = engine.tracks.find((track) => track.id === trackId);
-  if (!source || engine.isRecording) throw new Error('Choose a track after recording has stopped.');
+  if (!source || engine.recorder.busy) throw new Error('Choose a track after the current recording take has finished.');
   const existing = source.arrangementClips?.find((clip) => clip.kind === 'audio');
+  const sourceProvenance = existing?.audioId ? audioStore.get(existing.audioId)?.provenance : undefined;
   let rendered: AudioBuffer | null = null;
   if (!existing || action === 'chopToKeys') {
     const startPos = existing ? Math.floor(existing.startBar * engine.stepsPerBar) : 0;
@@ -25,6 +27,7 @@ export async function applyTrackAudioAction(engine: AudioEngine, trackId: string
     });
     if (audioPeak(rendered) <= 1e-7) throw new Error('This track has no audible notes or clips to render.');
     if (engine.tracks.find((track) => track.id === trackId) !== source) throw new Error('The track changed while its audio was rendering.');
+    if (engine.recorder.busy) throw new Error('Wait for the current recording take to finish before editing audio.');
   }
 
   const splitAt = action === 'split'
@@ -40,7 +43,9 @@ export async function applyTrackAudioAction(engine: AudioEngine, trackId: string
   return engine.runStructuralEdit('Edit track audio', () => {
     if (action === 'chopToKeys') {
       if (!rendered) throw new Error('The track render is unavailable.');
-      const asset = audioStore.add(`${source.name} Slices`, rendered);
+      const asset = audioStore.add(`${source.name} Slices`, rendered, {
+        provenance: derivedAudioProvenance(sourceProvenance, `Rendered slices of ${source.name}`, 'app-render'),
+      });
       const sampler = engine.createDevice('nnxt', `${source.name} Audio Slices`);
       const samplerTrack = engine.tracks.find((track) => track.deviceId === sampler.id);
       if (!samplerTrack) throw new Error('The slice sampler did not create a track.');
@@ -60,7 +65,9 @@ export async function applyTrackAudioAction(engine: AudioEngine, trackId: string
     let clip = existing;
     if (!clip) {
       if (!rendered) throw new Error('The track render is unavailable.');
-      const asset = audioStore.add(`${source.name} Audio`, rendered);
+      const asset = audioStore.add(`${source.name} Audio`, rendered, {
+        provenance: derivedAudioProvenance(sourceProvenance, `Rendered audio of ${source.name}`, 'app-render'),
+      });
       const ref = engine.addAudioClip(asset.id, 0);
       const createdTrack = ref && engine.tracks.find((track) => track.id === ref.trackId);
       const createdClip = createdTrack?.arrangementClips?.find((candidate) => candidate.id === ref?.clipId);

@@ -3,7 +3,7 @@
  * active tab or a full-screen page (Projects, Devices, Meters, Mastering, Export, Settings), and
  * the transport docked at the bottom.
  */
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { Activity, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, AudioLines, Bot, Command, HelpCircle, Menu as MenuIcon } from 'lucide-react';
 import { audioEngine } from '../audio/AudioEngine.ts';
 import { projectManager } from '../project/ProjectManager.ts';
@@ -61,6 +61,10 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
   }, [menuOpen]);
 
   const exportJson = () => {
+    if (audioEngine.recorder.busy) {
+      toast('Finish the current recording take before exporting the project.', 'info');
+      return;
+    }
     const url = URL.createObjectURL(new Blob([audioEngine.exportProjectJSON()], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
@@ -262,7 +266,7 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
 
       {/* tab or page */}
       <div className="unbox-screen-well flex-1 min-h-0 flex flex-col">
-        {page ? (
+        {page && (
           <div className="flex-1 min-h-0 flex flex-col bg-chrome-0">
             <div className="unbox-page-bar h-9 shrink-0 flex items-center gap-3 px-3">
               <button type="button" onClick={() => onPage(null)} className="us-btn rounded px-2 py-1 flex items-center gap-1 font-label font-bold text-[13px]" data-testid="page-back">
@@ -272,9 +276,9 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
             </div>
             <div className="flex-1 min-h-0 flex flex-col us-page">{renderPage(page)}</div>
           </div>
-        ) : (
-          content
         )}
+        {/* the tab stays alive behind a page, so closing the page does not rebuild it */}
+        <Activity mode={page ? 'hidden' : 'visible'}>{content}</Activity>
       </div>
 
       <TransportBar onOpenSettings={() => onPage('settings')} />

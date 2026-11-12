@@ -1,6 +1,6 @@
 /**
  * SampleBrowser — the audio side of the browser: every sample in the project, plus the
- * Splitter AI instrument isolator, multi-file importer, audio-to-playable-instrument engine,
+ * source-separation tools, multi-file importer, audio-to-playable-instrument engine,
  * and piano roll note transcription.
  */
 import React, { useEffect, useRef, useState } from 'react';
@@ -35,6 +35,7 @@ import { assetToWav, DEMUCS_STEM_INFO, DEMUCS_STEMS, fetchDemucsStatus, separate
 import { addStemNotes } from '../../audio/ai/stemNotes.ts';
 import { createPlayableInstrumentFromAsset } from '../../audio/ai/playableInstrument.ts';
 import { deviceSampleAudioIds } from '../../audio/deviceSamples.ts';
+import { derivedAudioProvenance } from '../../../shared/audio/provenance.ts';
 
 interface Props {
   isOpen: boolean;
@@ -96,6 +97,8 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   const [source, setSource] = useState<AudioAsset | null>(null);
   const [stemMode, setStemMode] = useState<StemSplitMode>('4stem');
   const [algorithm, setAlgorithm] = useState<'neural_dsp' | 'demucs'>('neural_dsp');
+  /** Deliberately per-session: a trained model is never selected or run merely because it is installed. */
+  const [modelSeparationConsent, setModelSeparationConsent] = useState(false);
   const [stems, setStems] = useState<StemSet | null>(null);
   const [progress, setProgress] = useState<SeparationProgress | null>(null);
   const [busy, setBusy] = useState(false);
@@ -131,6 +134,10 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     rafId: null,
   });
 
+  const getAuditionDestination = (): AudioNode => {
+    return audioEngine.monitor?.clickInput ?? audioEngine.ctx.destination;
+  };
+
   const stopAllPlayback = () => {
     if (multiTrackRef.current.rafId !== null) {
       cancelAnimationFrame(multiTrackRef.current.rafId);
@@ -140,6 +147,11 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
       try {
         src.stop();
         src.disconnect();
+      } catch {}
+    }
+    for (const gain of Object.values(multiTrackRef.current.gains)) {
+      try {
+        gain.disconnect();
       } catch {}
     }
     multiTrackRef.current.sources = [];
@@ -176,6 +188,9 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     if (stemList.length === 0) return;
 
     const ctx = audioEngine.ctx;
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
     const offset = offsetSec !== undefined ? offsetSec : multiTrackRef.current.pauseOffset;
     const maxDur = Math.max(...stemList.map((s) => s.duration));
 
@@ -184,11 +199,12 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     multiTrackRef.current.startAudioTime = startAudioTime;
     multiTrackRef.current.sources = [];
     multiTrackRef.current.gains = {};
+    const dest = getAuditionDestination();
 
     for (const stem of stemList) {
       const gainNode = ctx.createGain();
       gainNode.gain.setValueAtTime(getEffectiveGain(stem, stemList), ctx.currentTime);
-      gainNode.connect(ctx.destination);
+      gainNode.connect(dest);
       multiTrackRef.current.gains[stem.id] = gainNode;
 
       const sourceNode = ctx.createBufferSource();
@@ -299,9 +315,6 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     void fetchDemucsStatus().then((status) => {
       const isReady = status ? Boolean(status.demucs || status.spleeter) : false;
       setDemucsReady(isReady);
-      if (isReady) {
-        setAlgorithm('demucs');
-      }
     });
   }, [isOpen]);
 
@@ -325,6 +338,17 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
       stopAllPlayback();
     }
   }, [isOpen]);
+
+  // Reset drag state if drag is cancelled or leaves window
+  useEffect(() => {
+    const cancelDrag = () => setIsDragging(false);
+    window.addEventListener('dragend', cancelDrag);
+    window.addEventListener('mouseleave', cancelDrag);
+    return () => {
+      window.removeEventListener('dragend', cancelDrag);
+      window.removeEventListener('mouseleave', cancelDrag);
+    };
+  }, []);
 
   function stopPreview() {
     if (srcRef.current) {
@@ -374,9 +398,13 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     stopAllPlayback();
     stopPreview();
     const ctx = audioEngine.ctx;
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
+    const dest = getAuditionDestination();
     const src = ctx.createBufferSource();
     src.buffer = buffer;
-    src.connect(ctx.destination);
+    src.connect(dest);
     src.onended = () => setPlayingId((cur) => (cur === id ? null : cur));
     src.start();
     srcRef.current = src;
@@ -496,7 +524,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     if (!source) return;
     const title = `${source.name.replace(/\.[^.]+$/, '')} · ${stem.label}`;
     try {
-      const { asset } = await musicSeparator.transferToSamples(stem, title);
+      const { asset } = await musicSeparator.transferToSamples(stem, title, source.provenance);
       await makePlayableInstrument(asset);
     } catch (err) {
       onMessage?.(`Failed to create instrument from stem: ${String(err)}`, 'error');
@@ -513,7 +541,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
     try {
       const result = await musicSeparator.separate(asset.buffer, mode, setProgress);
       setStems(result);
-      onMessage?.(`Source separation derived ${defs.length} stems from "${asset.name}" with exact unity-gain reconstruction; no new audio was generated.`, 'success');
+      onMessage?.(`${defs.length} stems derived from "${asset.name}". They add up to the source exactly; expect some bleed between them (no new audio was generated).`, 'success');
     } catch (err) {
       onMessage?.(`Split failed: ${String(err)}`, 'error');
     } finally {
@@ -525,14 +553,14 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   const stemToRack = (stem: SeparatedStem) => {
     if (!source) return;
     const title = source.name.replace(/\.[^.]+$/, '');
-    musicSeparator.transferToRack(audioEngine, stem, title);
+    musicSeparator.transferToRack(audioEngine, stem, title, source.provenance);
     onMessage?.(`"${stem.label}" placed on its own audio track`, 'success');
   };
 
   const stemToSamples = async (stem: SeparatedStem) => {
     if (!source) return;
     const title = source.name.replace(/\.[^.]+$/, '');
-    const { asset } = await musicSeparator.transferToSamples(stem, title);
+    const { asset } = await musicSeparator.transferToSamples(stem, title, source.provenance);
     onMessage?.(`Saved "${asset.name}.wav" to the project samples`, 'success');
   };
 
@@ -561,19 +589,25 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
   const separateAi = async (targetAsset?: AudioAsset) => {
     const assetToUse = targetAsset || source;
     if (!assetToUse || aiBusy) return;
+    if (!modelSeparationConsent) {
+      onMessage?.('Allow the trained local model explicitly before running Spleeter or Demucs.', 'info');
+      return;
+    }
     setSource(assetToUse);
     setAiBusy(true);
     stopAllPlayback();
     setStems(null);
     try {
-      const blobs = await separateWithDemucs(assetToWav(assetToUse), setAiStatus, { model: aiModel });
+      const blobs = await separateWithDemucs(assetToWav(assetToUse), setAiStatus, { model: aiModel, consent: true });
       const title = assetToUse.name.replace(/\.[^.]+$/, '');
       const assets: Partial<Record<DemucsStem, AudioAsset>> = {};
       const loadedStems: Record<string, SeparatedStem> = {};
       for (const stem of DEMUCS_STEMS) {
         const blob = blobs[stem];
         if (!blob) continue;
-        const asset = await audioStore.importFile(blob, `${title} · ${stem}`);
+        const asset = await audioStore.importFile(blob, `${title} · ${stem}`, {
+          provenance: derivedAudioProvenance(assetToUse.provenance, `Model source separation stem: ${stem}`),
+        });
         assets[stem] = asset;
         const info = DEMUCS_STEM_INFO[stem];
         loadedStems[stem] = {
@@ -817,7 +851,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
               }
             >
               <p className="text-[11px] leading-snug text-[#b0b8bf]">
-                Derive <strong>Vocals, Drums, Bass, and Other</strong> stems from the audio you selected (the 6-stem AI model adds Guitar and Piano). Mute, solo, and rebalance them in real time.
+                Derive <strong>vocals, drums, bass and the other instruments</strong> from the audio you selected, then mute, solo and rebalance them. The built-in separator is quick signal processing with some bleed; the trained model is cleaner and can also give guitar and piano.
               </p>
               <p className="text-[11px] leading-snug text-[#7fe1bd]">
                 Uses only your source audio. It does not generate a new song, performer, instrument, or replacement sound.
@@ -830,6 +864,22 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                 </span>
               </div>
 
+              <label className="mt-2.5 flex items-start gap-2 rounded border border-amber-500/30 bg-amber-500/[0.07] p-2 text-[11px] leading-snug text-[#d8c49d]" data-testid="trained-separation-consent">
+                <input
+                  type="checkbox"
+                  checked={modelSeparationConsent}
+                  onChange={(event) => {
+                    setModelSeparationConsent(event.target.checked);
+                    // allowing it is asking for it: the installed model becomes the separator in use
+                    setAlgorithm(event.target.checked && demucsReady ? 'demucs' : 'neural_dsp');
+                  }}
+                  className="mt-0.5 shrink-0"
+                />
+                <span>
+                  I allow this session to use a <strong>trained local Spleeter/Demucs source-separation model</strong>. It is non-generative and derives only from my selected audio, but may bleed or artifact; it does not create verified human recordings or grant rights.
+                </span>
+              </label>
+
               {/* Engine Switcher */}
               <div className="mt-2.5 flex items-center gap-1 p-0.5 rounded bg-black/50 border border-chrome-line text-[11px]">
                 <button
@@ -840,32 +890,46 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                       ? 'bg-sel text-black font-semibold shadow-sm'
                       : 'text-[#8b9299] hover:text-[#e1e7ec] hover:bg-white/[0.04]'
                   }`}
-                  title="Fast on-device source-separation DSP; it derives stems from your selected audio"
+                  title="Signal processing on this computer, no model: held notes against drum hits, stereo position and lows. Quick, with some bleed between the stems."
                 >
-                  ⚡ Fast Local Separator (~2s)
+                  Built-in (quick, some bleed)
                 </button>
                 <button
                   type="button"
                   onClick={() => setAlgorithm('demucs')}
-                  className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium ${
+                  disabled={!modelSeparationConsent}
+                  aria-disabled={!modelSeparationConsent}
+                  data-testid="trained-separation-mode"
+                  className={`flex-1 py-1 px-1.5 rounded text-center transition-colors font-medium disabled:cursor-not-allowed disabled:opacity-45 ${
                     algorithm === 'demucs'
                       ? 'bg-sel text-black font-semibold shadow-sm'
                       : 'text-[#8b9299] hover:text-[#e1e7ec] hover:bg-white/[0.04]'
                   }`}
-                  title="Deep CNN/Transformer Demucs 4.1 model running locally on Python"
+                  title={modelSeparationConsent
+                    ? 'Trained Spleeter/Demucs source-separation model running locally'
+                    : 'Check the trained-model acknowledgement above before selecting this option'}
                 >
-                  🧠 Spleeter / Demucs Separator
+                  Trained model (cleanest)
                 </button>
               </div>
+              {demucsReady !== undefined && (
+                <p className="mt-1.5 text-[11px] leading-snug text-[#8b9299]" data-testid="trained-separation-availability">
+                  {demucsReady
+                    ? modelSeparationConsent
+                      ? 'A trained separator is installed on this computer and selected.'
+                      : 'A trained separator is installed on this computer: tick the box above to use it.'
+                    : 'No trained separator (Demucs or Spleeter) was found on this computer, so the built-in one is used.'}
+                </p>
+              )}
 
               {/* Stem count selector for the fast local separator */}
               {algorithm === 'neural_dsp' && (
                 <div className="mt-2 flex items-center gap-1 p-0.5 rounded bg-black/30 border border-chrome-line text-[11px]">
                   {(
                     [
-                      { id: '4stem', label: '4 Stems', desc: 'Vocals, Drums, Bass, Other' },
-                      { id: '6stem', label: '6 Stems', desc: 'Vocals, Drums, Bass, Guitars, Keys, FX' },
-                      { id: '8stem', label: '8 Stems', desc: 'Lead Vocals, Backing, Kick, Snare, Hats, Bass, Leads, FX' },
+                      { id: '4stem', label: '4 Stems', desc: 'Vocals / centre lead, drums, bass, other instruments' },
+                      { id: '6stem', label: '6 Stems', desc: 'The drums in three: kick, snare, hats. Plus vocals / centre lead, bass, other instruments' },
+                      { id: '8stem', label: '8 Stems', desc: 'As 6 stems, plus the near-centre layer and the wide, out-of-phase sound' },
                     ] as const
                   ).map((m) => (
                     <button
@@ -885,9 +949,9 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                 </div>
               )}
 
-              {/* AI model: the 4-stem model, or the 6-stem model that adds guitar and piano */}
+              {/* Trained local model: the 4-stem model, or the 6-stem model that adds guitar and piano. */}
               {algorithm === 'demucs' && (
-                <div className="mt-2 flex items-center gap-1 p-0.5 rounded bg-black/30 border border-chrome-line text-[11px]">
+                <div className="mt-2 flex items-center gap-1 p-0.5 rounded bg-black/30 border border-chrome-line text-[11px]" data-testid="trained-separation-options">
                   {(
                     [
                       { id: 'htdemucs', label: '4 Stems', desc: 'Vocals, Drums, Bass, Other (htdemucs)' },
@@ -924,11 +988,11 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
                 ) : (
                   <Btn
                     on={!!source && !aiBusy && demucsReady === true}
-                    disabled={!source || aiBusy || demucsReady !== true}
+                    disabled={!source || aiBusy || demucsReady !== true || !modelSeparationConsent}
                     onClick={() => void separateAi()}
                     className="flex-1 justify-center py-1.5 font-semibold text-[12px]"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Derive Stems with Spleeter / Demucs (~1 min)
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Derive With Trained Local Model (~1 min)
                   </Btn>
                 )}
                 {(busy || aiBusy) && (

@@ -103,6 +103,23 @@ test('Local Hardware AI: Musical Copilot generates chord progressions on local h
   assert.ok(res.source.includes('Local'));
 });
 
+test('Local Hardware AI: generated or replacement audio is refused before any control action is proposed', async () => {
+  const mockContext: AssistantContext = {
+    bpm: 120,
+    timeSignature: '4/4',
+    stepsPerBar: 16,
+    targetTrack: { id: 'track_1', name: 'Recorded Piano' },
+    patternLength: 16,
+    focusedClip: null,
+    tracks: [{ id: 'track_1', name: 'Recorded Piano', muted: false }],
+  };
+  const res = await localHardwareAi.generateMusicalActionsOnHardware('Create an AI vocal recording and replace this track', mockContext);
+  assert.equal(res.actions.length, 0);
+  assert.equal(res.rejected.length, 1);
+  assert.match(res.reply, /Audio generation and audio replacement are disabled/);
+  assert.equal(res.source, 'Local control-only policy');
+});
+
 test('Local Hardware AI: Musical Copilot handles tempo and transform actions on local hardware', async () => {
   const mockContext: AssistantContext = {
     bpm: 120,
@@ -205,7 +222,7 @@ test('Local Hardware AI: Acoustic Mix & Master Assistant evaluates LUFS and freq
   assert.ok(report.summary.includes('LUFS'));
   assert.ok(report.tips.length >= 1, 'Should generate engineering mix tips');
   assert.ok(report.tips.some((t) => t.includes('ceiling') || t.includes('Peak')), 'Should alert about True Peak exceeding ceiling');
-  assert.ok(report.source.includes('Local Hardware AI'));
+  assert.ok(report.source.startsWith('Local rules'), 'the mix notes say they come from rules, not a model');
 });
 
 test('Local Hardware AI: Automation curve generation for sidechain pump and sweeps', () => {

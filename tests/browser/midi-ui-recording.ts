@@ -105,6 +105,10 @@ async function run(): Promise<void> {
     await import(/* @vite-ignore */ appEntry);
     await waitFor(() => !!document.querySelector('[data-testid="transport-midi"]'), 'workstation transport');
     assertProbeStatusOverlay();
+    const assistantStatus = document.querySelector<HTMLElement>('[data-testid="status-local-ai"]');
+    if (!assistantStatus || !/no audio gen/i.test(assistantStatus.textContent ?? '') || !/never creates, renders or replaces audio/i.test(assistantStatus.title)) {
+      throw new Error('The visible local-assistant status does not promise its control-only, no-audio-generation policy.');
+    }
     const resourceUrl = (suffix: string): string => {
       const url = performance.getEntriesByType('resource')
         .map((entry) => entry.name)

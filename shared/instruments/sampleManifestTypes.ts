@@ -1,7 +1,7 @@
 /**
  * sampleManifestTypes.ts
  *
- * Types for the real multi-sampled audio manifest:
+ * Types for the multi-sampled audio manifest.
  * Mapping: Device ID -> Sub-Voice Name -> Velocity Layers -> Root Note / Pitch Zones -> File Path.
  * Supports pitch-shifting interpolation when chromatic samples have gaps (e.g., minor thirds).
  */
@@ -72,10 +72,64 @@ export interface DeviceSampleManifest {
   subVoices: Record<string, SubVoiceDefinition>;
 }
 
+/**
+ * How the audio in a cache was made. `unknown` is intentionally not playable
+ * through RealMultiSampler: a file path or an instrument-shaped filename is
+ * not evidence that a person recorded it.
+ */
+export type SampleSourceKind = 'recorded' | 'synthesized' | 'unknown';
+
+/**
+ * Source information for an entire multi-sample cache. Recorded caches need
+ * a concrete source and licence before the recorded-sample playback path will
+ * admit them. Synthetic caches remain useful for DSP development, but must
+ * never be presented as a musician performance.
+ */
+export interface SampleManifestProvenance {
+  sourceKind: SampleSourceKind;
+  source?: string;
+  license?: string;
+  performer?: string;
+  attribution?: string;
+  generator?: string;
+}
+
 export interface MultiSampleManifest {
   version: 1;
   generatedAt: string;
   /** Base URL path to sample files, e.g. "/samples/" */
   sampleBaseUrl?: string;
+  /** Omitted by legacy manifests. Omission is treated as unknown, not recorded. */
+  provenance?: SampleManifestProvenance;
   devices: Record<string, DeviceSampleManifest>;
+}
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Returns a human-readable reason when a manifest cannot safely supply an
+ * instrument advertised as a real recording. This is deliberately structural
+ * and dependency-free because it is used by both the server and browser.
+ */
+export function recordedManifestAdmissionError(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return 'manifest is not an object';
+  const manifest = value as Partial<MultiSampleManifest>;
+  if (manifest.version !== 1) return 'manifest version is unsupported';
+  if (!manifest.provenance || manifest.provenance.sourceKind !== 'recorded') {
+    return 'manifest is not declared as a recorded source';
+  }
+  if (!nonEmptyString(manifest.provenance.source)) return 'recorded manifest has no source';
+  if (!nonEmptyString(manifest.provenance.license)) return 'recorded manifest has no license';
+  if (!nonEmptyString(manifest.provenance.performer)) return 'recorded manifest has no performer or rights holder';
+  if (/\bcc\s*-?by\b/i.test(manifest.provenance.license) && !nonEmptyString(manifest.provenance.attribution)) {
+    return 'CC-BY recorded manifest has no attribution text';
+  }
+  if (!manifest.devices || typeof manifest.devices !== 'object') return 'recorded manifest has no device map';
+  return null;
+}
+
+export function isAdmittedRecordedManifest(value: unknown): value is MultiSampleManifest {
+  return recordedManifestAdmissionError(value) === null;
 }

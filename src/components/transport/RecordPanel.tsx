@@ -10,6 +10,8 @@ export function RecordPanel({ onClose }: { onClose: () => void }) {
   const [, bump] = useReducer((n: number) => n + 1, 0);
   const rec = audioEngine.recorder;
   const s = rec.settings;
+  const finalizing = rec.isFinalizing;
+  const recordActive = rec.state !== 'idle';
   const [inputs, setInputs] = useState<InputDeviceInfo[]>([]);
   const [gainDb, setGainDb] = useState(0);
   useEffect(() => {
@@ -24,7 +26,7 @@ export function RecordPanel({ onClose }: { onClose: () => void }) {
     <div className="absolute z-50 bottom-11 left-0 w-[420px] bg-[#0d121b] border border-red-800/70 rounded-lg shadow-2xl p-3 text-[11px] text-slate-300" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Record settings">
       <div className="flex items-center mb-2">
         <span className="font-black text-red-400 text-[13px]">● RECORD</span>
-        <span className="ml-2 text-slate-500">{armed.length ? `Armed: ${armed.map((t) => t.name).join(', ')}` : 'No track armed — use ● on a track (mixer or arrangement)'}</span>
+        <span className="ml-2 text-slate-500">{finalizing ? 'Finishing take — project changes are temporarily paused.' : armed.length ? `Armed: ${armed.map((t) => t.name).join(', ')}` : 'No track armed — use ● on a track (mixer or arrangement)'}</span>
         <button type="button" className="ml-auto text-slate-400 hover:text-white" onClick={onClose} aria-label="Close">✕</button>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -77,7 +79,7 @@ export function RecordPanel({ onClose }: { onClose: () => void }) {
         <StereoMeter read={() => rec.input.levels()} height={70} width={14} />
       </div>
       <div className="mt-2 flex gap-2">
-        <Btn tone="red" on={audioEngine.isRecording} onClick={() => { void rec.toggle().then(bump); }}>{audioEngine.isRecording ? '■ Stop recording' : '● Record armed tracks'}</Btn>
+        <Btn tone="red" on={recordActive} disabled={finalizing} title={finalizing ? 'Finishing the recorded take…' : undefined} onClick={() => { void rec.toggle().then(bump); }}>{finalizing ? 'Finishing take…' : recordActive ? '■ Stop recording' : '● Record armed tracks'}</Btn>
         <Btn tone="violet" on={rec.recordingMaster} onClick={() => { void rec.toggleMasterRecording().then(bump); }} title="Capture the master output onto a new (muted) audio track">
           {rec.recordingMaster ? '■ Stop master capture' : 'Capture master output'}
         </Btn>

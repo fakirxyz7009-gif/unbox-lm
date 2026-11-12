@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Music2, Play, Square } from 'lucide-react';
 import { Knob } from '../components/Knob.tsx';
-import { useFrame } from '../nexa/useEngine.ts';
+import { useFrame, useMeterFrame } from '../nexa/useEngine.ts';
 import { setWidth } from '../ui/skin/dom.ts';
 import { describeMacro } from '../vst/proxyDsp.ts';
 import type { VstPluginDevice } from '../vst/VstPluginDevice.ts';
@@ -17,7 +17,7 @@ function OutputMeter({ device }: { device: VstPluginDevice }) {
   const bar = useRef<HTMLDivElement>(null);
   const buf = useRef(new Float32Array(device.analyser.fftSize));
   const level = useRef(0);
-  useFrame(() => {
+  useMeterFrame(() => {
     if (!bar.current) return;
     device.analyser.getFloatTimeDomainData(buf.current);
     let peak = 0;
@@ -27,7 +27,7 @@ function OutputMeter({ device }: { device: VstPluginDevice }) {
   });
   return (
     <div className="h-1.5 w-full rounded-full bg-black/60 overflow-hidden" aria-hidden="true">
-      <div ref={bar} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500" style={{ width: '0%' }} />
+      <div ref={bar} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
     </div>
   );
 }

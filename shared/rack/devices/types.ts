@@ -82,7 +82,26 @@ export interface PortsDef {
 
 export type PanelFinish = 'brushed' | 'black' | 'wood' | 'cream' | 'white' | 'gloss' | 'retro' | 'blue' | 'red' | 'green' | 'orange' | 'grey' | 'gold' | 'purple' | 'teal';
 export type KnobStyle = 'cap' | 'chicken' | 'moog' | 'metal' | 'plastic' | 'vintage' | 'led' | 'pot';
-export type PanelDisplay = 'none' | 'scope' | 'gr' | 'meter' | 'pads' | 'steps' | 'xy' | 'lcd' | 'vu';
+export type PanelDisplay =
+  | 'none'
+  | 'scope'
+  | 'gr'
+  | 'meter'
+  | 'pads'
+  | 'steps'
+  | 'xy'
+  | 'lcd'
+  | 'vu'
+  | 'dual_quantum'
+  | 'triple_vu'
+  | 'dual_vu'
+  | 'distressor_leds'
+  | 'matrix_grid'
+  | 'industrial_step'
+  | 'touchscreen_pads'
+  | 'westcoast_gold'
+  | 'vectorscope'
+  | 'curve_mod';
 
 export interface PanelDef {
   finish: PanelFinish;

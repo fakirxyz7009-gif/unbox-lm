@@ -13,7 +13,7 @@ import { deviceParams } from '../audio/deviceParams.ts';
 import { localPreset, validatePreset, type CraftedPreset, type PresetParam } from '../../shared/rack/presetCraft.ts';
 import { MASTER_TARGETS, analyzeMix, autoMaster, suggestMastering, type MixAnalysis } from '../audio/mastering/assistant.ts';
 import { LocalAiPanel } from './LocalAiPanel.tsx';
-import { localHardwareAi, type HardwareAiBackend } from '../ai/hardware/localHardwareAiEngine.ts';
+import { localHardwareAi } from '../ai/hardware/localHardwareAiEngine.ts';
 import { useEscapeKey } from '../shell/useEscapeKey.ts';
 
 interface AICoPilotDrawerProps {
@@ -114,7 +114,8 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
     }
   };
 
-  const target = craftable.find((d) => d.id === deviceId) ?? craftable[0];
+  // until one is picked: the selected part, else the first device with parameters
+  const target = craftable.find((d) => d.id === deviceId) ?? craftable.find((d) => d.id === audioEngine.midiTarget()?.id) ?? craftable[0];
   const handleGeneratePreset = async () => {
     const dev = target;
     const prompt = presetPrompt.trim();
@@ -299,15 +300,13 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
             <div className="font-bold text-neutral-200 flex items-center gap-1.5">
               <span>Engine:</span>
               <span className="text-cyan-300 font-mono">
-                {aiEngineMode === 'hardware'
-                  ? `On-device AI (${hwState.gpu.vendor})`
-                  : 'Cloud Gemini AI'}
+                {aiEngineMode === 'hardware' ? (hwState.backend === 'ollama' && hwState.daemonOnline ? 'This computer (rules + Ollama)' : 'This computer (rules)') : 'Cloud: Google Gemini'}
               </span>
             </div>
-            <div className="text-[10px] text-neutral-400">
+            <div className="text-[11px] text-neutral-400">
               {aiEngineMode === 'hardware'
-                ? 'Rules and planners on this computer · WebGPU probed · no cloud request'
-                : 'Remote Google Gemini AI model (requires API key & cloud connectivity)'}
+                ? 'Keyword rules and the offline planner · no cloud request'
+                : 'Google Gemini, when GEMINI_API_KEY is set in .env; without it the server answers with the same rules'}
             </div>
           </div>
         </div>

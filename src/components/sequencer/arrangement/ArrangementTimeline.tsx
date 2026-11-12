@@ -40,7 +40,9 @@ import {
 } from 'lucide-react';
 import type { AudioEngine } from '../../../audio/AudioEngine.ts';
 import type { ArrangementClip, SequencerTrack, TrackFolder } from '../../../audio/types.ts';
-import { beatSteps, clipEndBar, findPattern, patternLength16ths, syncTrackPatterns } from '../../../audio/sequencer/model.ts';
+import { beatSteps, clipEndBar, cloneClip, findPattern, patternLength16ths, syncTrackPatterns } from '../../../audio/sequencer/model.ts';
+import { copiedClips, copyClips, type CopiedClip } from './clipClipboard.ts';
+import { toast } from '../../../shell/toast.ts';
 import { ClipPreview } from './ClipPreview.tsx';
 import { NoteClipEditor } from './NoteClipEditor.tsx';
 import { AudioClipWave } from './AudioClipWave.tsx';
@@ -49,11 +51,13 @@ import type { AutoMode, AutoTarget } from '../../../audio/automation/model.ts';
 import { targetKey } from '../../../audio/automation/model.ts';
 import { AudioClipPanel, clipSourcePeak } from './AudioClipPanel.tsx';
 import { audioStore, calculateClipRms, removeDcOffset } from '../../../audio/clips/audioStore.ts';
+import { derivedAudioProvenance } from '../../../../shared/audio/provenance.ts';
 import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { gainToDb, meterPos } from '../../../studio/ui/levels.ts';
-import { setUi, useUi, type SeqTool } from '../../../shell/uiStore.ts';
+import { rememberUi, setUi, useUi, type SeqTool } from '../../../shell/uiStore.ts';
 import { focusClip } from '../../../shell/clipFocus.ts';
 import { setText, setWidth } from '../../../ui/skin/dom.ts';
+import { useFrame, useMeterFrame } from '../../../nexa/useEngine.ts';
 import { DARK_TIMELINE, LIGHT_TIMELINE } from './timelineTheme.ts';
 import { TrackHeader } from './TrackHeader.tsx';
 import { SeqToolbar, type SnapId } from './SeqToolbar.tsx';
@@ -132,20 +136,25 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   const [barPx, setBarPxState] = useState(ui.timelineBarPx);
   const [laneH, setLaneHState] = useState(ui.timelineLaneH);
 
+  // The latest values live in refs so the setters can remember them outside React's state updaters
+  // (an updater may run during render, where touching the shared UI store is an error).
+  const barPxRef = useRef(barPx);
+  barPxRef.current = barPx;
+  const laneHRef = useRef(laneH);
+  laneHRef.current = laneH;
+
   const setBarPx = useCallback((valOrFn: number | ((prev: number) => number)) => {
-    setBarPxState((prev) => {
-      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
-      setUi({ timelineBarPx: next });
-      return next;
-    });
+    const next = typeof valOrFn === 'function' ? valOrFn(barPxRef.current) : valOrFn;
+    barPxRef.current = next;
+    setBarPxState(next);
+    rememberUi({ timelineBarPx: next });
   }, []);
 
   const setLaneH = useCallback((valOrFn: number | ((prev: number) => number)) => {
-    setLaneHState((prev) => {
-      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
-      setUi({ timelineLaneH: next });
-      return next;
-    });
+    const next = typeof valOrFn === 'function' ? valOrFn(laneHRef.current) : valOrFn;
+    laneHRef.current = next;
+    setLaneHState(next);
+    rememberUi({ timelineLaneH: next });
   }, []);
 
   const [follow, setFollow] = useState(true);
@@ -180,6 +189,10 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const rulerRef = useRef<HTMLCanvasElement | null>(null);
   const playheadRef = useRef<HTMLDivElement | null>(null);
+  /** The ruler's playhead marker (a DOM element, so the ruler canvas only redraws when the view changes). */
+  const rulerHeadRef = useRef<HTMLDivElement | null>(null);
+  /** Horizontal scroll, kept from scroll events: reading `scrollLeft` every frame forces a layout. */
+  const scrollLeftRef = useRef(0);
   const posRef = useRef<HTMLSpanElement | null>(null);
   const dragRef = useRef<Drag | null>(null);
   dragRef.current = drag;
@@ -191,8 +204,10 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       sc.scrollLeft = ui.timelineScrollX;
       sc.scrollTop = ui.timelineScrollY;
     }
+    scrollLeftRef.current = sc.scrollLeft;
     const onScroll = () => {
-      setUi({ timelineScrollX: sc.scrollLeft, timelineScrollY: sc.scrollTop });
+      scrollLeftRef.current = sc.scrollLeft;
+      rememberUi({ timelineScrollX: sc.scrollLeft, timelineScrollY: sc.scrollTop });
     };
     sc.addEventListener('scroll', onScroll, { passive: true });
     return () => sc.removeEventListener('scroll', onScroll);
@@ -297,7 +312,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     const w = Math.max(10, vpW - HEADER_W);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, RULER_H);
-    const sx = sc.scrollLeft;
+    const sx = scrollLeftRef.current;
     g.fillStyle = P.rulerBg;
     g.fillRect(0, 0, w, RULER_H);
     g.fillStyle = P.rulerLoopBand;
@@ -387,54 +402,54 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
         g.fill();
       }
     }
-
-    // playhead
-    const ph = (audioEngine.getPlayheadPosition() / spb) * barPx - sx;
-    g.fillStyle = light ? '#e8861a' : '#fbbf24';
-    g.beginPath();
-    g.moveTo(ph - 6, 26);
-    g.lineTo(ph + 6, 26);
-    g.lineTo(ph, 36);
-    g.closePath();
-    g.fill();
-  }, [audioEngine, barPx, vpW, spb, beatsPerBar, P, light, ui.editCursorBar]);
+  }, [audioEngine, barPx, vpW, beatsPerBar, P, ui.editCursorBar]);
 
   useLayoutEffect(() => {
     drawRuler();
   });
 
-  // playhead line, position readout, follow-scroll (rAF, DOM writes only)
-  useEffect(() => {
-    let raf = 0;
-    let lastPos = -1;
-    const tick = () => {
-      const pos = audioEngine.getPlayheadPosition();
-      if (pos !== lastPos || audioEngine.isPlaying) {
-        lastPos = pos;
-        const x = (pos / spb) * barPx;
-        // read scroll geometry before any style write (no forced layout); width comes from the ResizeObserver
-        const sc = scrollerRef.current;
-        if (sc && follow && audioEngine.isPlaying && !dragRef.current) {
-          const left = sc.scrollLeft;
-          const view = vpWRef.current - HEADER_W;
-          if (x < left || x > left + view - 24) sc.scrollLeft = Math.max(0, x - 48);
+  // Playhead line, ruler marker, position readout, follow-scroll and lane meters, in the shared frame
+  // loop. Each piece is written only when it changed; the ruler canvas redraws only on scroll (a
+  // render redraws it too, above), not every frame.
+  const frame = useRef({ x: Number.NaN, sx: Number.NaN, hx: Number.NaN });
+  useFrame(() => {
+    const st = frame.current;
+    const pos = audioEngine.getPlayheadPosition();
+    const x = (pos / spb) * barPx;
+    if (x !== st.x) {
+      st.x = x;
+      const sc = scrollerRef.current;
+      if (sc && follow && audioEngine.isPlaying && !dragRef.current) {
+        const left = scrollLeftRef.current;
+        const view = vpWRef.current - HEADER_W;
+        if (x < left || x > left + view - 24) {
+          sc.scrollLeft = Math.max(0, x - 48);
+          scrollLeftRef.current = Math.max(0, x - 48); // the scroll event corrects it if clamped
         }
-        if (playheadRef.current) playheadRef.current.style.transform = `translateX(${x}px)`;
-        const bar = Math.floor(pos / spb);
-        const inBar = pos - bar * spb;
-        const bs = beatSteps(audioEngine.timeSignature);
-        setText(posRef.current, `${bar + 1}.${Math.floor(inBar / bs) + 1}.${Math.floor(inBar % bs) + 1}`);
-        drawRuler();
       }
-      meterEls.current.forEach((el, devId) => {
-        const lv = audioEngine.mixer.levels(devId);
-        setWidth(el, Math.round(meterPos(gainToDb(Math.max(lv.peakL, lv.peakR)), -48, 3) * 100));
-      });
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [audioEngine, barPx, spb, follow, drawRuler]);
+      if (playheadRef.current) playheadRef.current.style.transform = `translateX(${x}px)`;
+      const bar = Math.floor(pos / spb);
+      const inBar = pos - bar * spb;
+      const bs = beatSteps(audioEngine.timeSignature);
+      setText(posRef.current, `${bar + 1}.${Math.floor(inBar / bs) + 1}.${Math.floor(inBar % bs) + 1}`);
+    }
+    const sx = scrollLeftRef.current;
+    if (sx !== st.sx) {
+      st.sx = sx;
+      drawRuler();
+    }
+    const hx = Math.round(x - sx);
+    if (hx !== st.hx && rulerHeadRef.current) {
+      st.hx = hx;
+      rulerHeadRef.current.style.transform = `translateX(${hx}px)`;
+    }
+  });
+  useMeterFrame(() => {
+    meterEls.current.forEach((el, devId) => {
+      const lv = audioEngine.mixer.levels(devId);
+      setWidth(el, Math.round(meterPos(gainToDb(Math.max(lv.peakL, lv.peakR)), -48, 3) * 100));
+    });
+  });
 
   useEffect(() => {
     const sc = scrollerRef.current;
@@ -452,21 +467,23 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     const onWheel = (e: WheelEvent) => {
       if (!e.ctrlKey && !e.altKey && !e.metaKey) return;
       e.preventDefault();
-      const f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      const delta = Math.max(-80, Math.min(80, e.deltaY));
+      const f = Math.exp(-delta * 0.003);
       if (e.altKey) {
         setLaneH((h) => Math.max(28, Math.min(140, Math.round(h * f))));
         return;
       }
       const r = sc.getBoundingClientRect();
       const px = e.clientX - r.left - HEADER_W;
-      const bar = (sc.scrollLeft + px) / barPx;
-      const nb = Math.max(4, Math.min(480, barPx * f));
+      const curBarPx = barPxRef.current;
+      const bar = (sc.scrollLeft + px) / curBarPx;
+      const nb = Math.max(4, Math.min(480, curBarPx * f));
       setBarPx(nb);
       requestAnimationFrame(() => (sc.scrollLeft = Math.max(0, bar * nb - px)));
     };
     sc.addEventListener('wheel', onWheel, { passive: false });
     return () => sc.removeEventListener('wheel', onWheel);
-  }, [barPx]);
+  }, [setBarPx, setLaneH]);
 
   useEffect(() => {
     if (!menu) return;
@@ -531,6 +548,64 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     audioEngine.commitEdit();
   };
 
+  /** Ctrl+C: the selected clips, each pattern clip with a snapshot of its pattern (so it can land on any instrument). */
+  const copyRefs = (refs: ClipRef[]): number => {
+    const items: CopiedClip[] = [];
+    for (const ref of refs) {
+      const f = findClip(ref);
+      if (!f) continue;
+      const isPattern = f.c.kind !== 'notes' && f.c.kind !== 'audio';
+      items.push({ clip: cloneClip(f.c), trackId: f.t.id, lane: tracks.indexOf(f.t), pattern: isPattern ? seq.snapshotPattern(f.t.id, f.c.patternId) : null });
+    }
+    if (items.length) copyClips(items);
+    return items.length;
+  };
+  const copySelected = () => {
+    const n = copyRefs([...selected].map((k) => {
+      const [trackId, clipId] = k.split('::');
+      return { trackId, clipId };
+    }));
+    if (n) toast(`Copied ${n} clip${n === 1 ? '' : 's'}: click a lane, then Ctrl+V`, 'info');
+  };
+
+  /**
+   * Ctrl+V: at the edit cursor (else the playhead's bar). The clips keep their spacing; they go to
+   * the lane you clicked (the selected part) and keep their lanes relative to each other. A clip
+   * that does not fit its lane (audio on an instrument track) goes back to the track it came from.
+   */
+  const pasteClips = () => {
+    const items = copiedClips();
+    if (!items.length) {
+      toast('Nothing copied yet: select clips and press Ctrl+C', 'info');
+      return;
+    }
+    const first = Math.min(...items.map((i) => i.clip.startBar));
+    const span = Math.max(...items.map((i) => clipEndBar(i.clip))) - first;
+    const at = ui.editCursorBar ?? Math.floor(audioEngine.getPlayheadPosition() / spb);
+    const firstLane = Math.min(...items.map((i) => i.lane));
+    const laneShift = activeTrack ? tracks.indexOf(activeTrack) - firstLane : 0;
+    const next = new Set<string>();
+    for (const it of items) {
+      const wanted = tracks[Math.max(0, Math.min(tracks.length - 1, it.lane + laneShift))];
+      const bar = at + (it.clip.startBar - first);
+      const pasted =
+        (wanted && seq.pasteClip(wanted.id, it.clip, bar, it.pattern, false)) ||
+        (tracks.some((t) => t.id === it.trackId) ? seq.pasteClip(it.trackId, it.clip, bar, it.pattern, false) : null);
+      if (pasted) {
+        const owner = tracks.find((t) => (t.arrangementClips || []).includes(pasted));
+        if (owner) next.add(keyOf({ trackId: owner.id, clipId: pasted.id }));
+      }
+    }
+    if (!next.size) {
+      toast('These clips do not fit here: audio clips paste on audio tracks, note and pattern clips on instruments', 'error');
+      return;
+    }
+    setSelected(next);
+    // the cursor moves past what was pasted, so Ctrl+V again continues the row
+    setUi({ editCursorBar: snapRound(at + span) });
+    audioEngine.commitEdit();
+  };
+
   const toggleMuteSelected = () => {
     selected.forEach((k) => {
       const [trackId, clipId] = k.split('::');
@@ -588,6 +663,11 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     let handled = true;
     if ((e.key === 'Delete' || e.key === 'Backspace') && selected.size) deleteSelected();
     else if (mod && e.key.toLowerCase() === 'd' && selected.size) duplicateSelected();
+    else if (mod && e.key.toLowerCase() === 'c' && selected.size) copySelected();
+    else if (mod && e.key.toLowerCase() === 'x' && selected.size) {
+      copySelected();
+      deleteSelected();
+    } else if (mod && e.key.toLowerCase() === 'v') pasteClips();
     else if (mod && e.key.toLowerCase() === 'j' && selected.size >= 2) healSelected();
     else if (!mod && e.key.toLowerCase() === 'm' && selected.size) toggleMuteSelected();
     else if (!mod && e.key.toLowerCase() === 'i') setTool('slip');
@@ -843,7 +923,8 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       for (const ref of d.refs) {
         const f = findClip(ref);
         if (!f) continue;
-        const laneIdx = tracks.indexOf(f.t) + (f.c.kind === 'notes' || f.c.kind === 'audio' ? d.deltaLanes : 0);
+        // any clip may change lanes; moveClip keeps it on its track where it does not fit (audio vs instrument)
+        const laneIdx = tracks.indexOf(f.t) + d.deltaLanes;
         const dest = tracks[Math.max(0, Math.min(tracks.length - 1, laneIdx))];
         let clipId = ref.clipId;
         if (d.copy) {
@@ -950,7 +1031,10 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     const k = keyOf({ trackId: t.id, clipId: c.id });
     const d = drag;
     if (d?.kind === 'move' && d.moved && d.refs.some((r) => keyOf(r) === k)) {
-      return { start: Math.max(0, c.startBar + d.deltaBars), len: c.lengthBars, lane: c.kind === 'notes' || c.kind === 'audio' ? laneIdx + d.deltaLanes : laneIdx, ghost: true };
+      const destLane = Math.max(0, Math.min(tracks.length - 1, laneIdx + d.deltaLanes));
+      const dest = tracks[destLane];
+      const fits = !!dest && (c.kind === 'audio' ? dest.kind === 'audio' : dest.kind !== 'audio');
+      return { start: Math.max(0, c.startBar + d.deltaBars), len: c.lengthBars, lane: fits ? destLane : laneIdx, ghost: true };
     }
     if (d?.kind === 'trim' && keyOf(d.ref) === k) {
       if (d.edge === 'end') return { start: c.startBar, len: Math.max(1 / spb, d.bar - c.startBar), lane: laneIdx };
@@ -1290,17 +1374,25 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                 <>TRACKS ({tracks.length})</>
               )}
             </div>
-            <canvas
-              ref={rulerRef}
-              className="sticky border-b"
-              style={{ left: HEADER_W, width: Math.max(10, vpW - HEADER_W), height: RULER_H, cursor: 'pointer', borderColor: P.headerBorder }}
-              width={Math.max(10, vpW - HEADER_W) * (window.devicePixelRatio || 1)}
-              height={RULER_H * (window.devicePixelRatio || 1)}
-              onPointerDown={onRulerDown}
-              onDoubleClick={onRulerDouble}
-              onContextMenu={(e) => e.preventDefault()}
-              data-testid="arr-ruler"
-            />
+            <div className="sticky flex-shrink-0 overflow-hidden" style={{ left: HEADER_W, width: Math.max(10, vpW - HEADER_W), height: RULER_H }}>
+              <canvas
+                ref={rulerRef}
+                className="block border-b"
+                style={{ width: Math.max(10, vpW - HEADER_W), height: RULER_H, cursor: 'pointer', borderColor: P.headerBorder }}
+                width={Math.max(10, vpW - HEADER_W) * (window.devicePixelRatio || 1)}
+                height={RULER_H * (window.devicePixelRatio || 1)}
+                onPointerDown={onRulerDown}
+                onDoubleClick={onRulerDouble}
+                onContextMenu={(e) => e.preventDefault()}
+                data-testid="arr-ruler"
+              />
+              <div
+                ref={rulerHeadRef}
+                aria-hidden
+                className="absolute left-0 pointer-events-none will-change-transform"
+                style={{ top: 26, marginLeft: -6, width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `10px solid ${light ? '#e8861a' : '#fbbf24'}` }}
+              />
+            </div>
           </div>
 
           {tracks.length === 0 && (
@@ -1694,7 +1786,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
           {/* playhead */}
           <div
             ref={playheadRef}
-            className={`absolute top-0 w-px pointer-events-none z-[15] ${light ? 'bg-[#e8861a]' : 'bg-amber-300 shadow-[0_0_6px_#fbbf24]'}`}
+            className={`absolute top-0 w-px pointer-events-none z-[15] will-change-transform ${light ? 'bg-[#e8861a]' : 'bg-amber-300 shadow-[0_0_6px_#fbbf24]'}`}
             style={{ left: HEADER_W, height: contentH }}
           />
         </div>
@@ -1731,6 +1823,9 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
           onEdit={(ref) => {
             const f = findClip(ref);
             if (f) onClipDouble(f.t, f.c);
+          }}
+          onCopy={(ref) => {
+            if (copyRefs([ref])) toast('Copied: click a lane, then Ctrl+V', 'info');
           }}
           snapBar={(b) => snapRound(b)}
         />
@@ -1774,8 +1869,9 @@ const ClipMenu: React.FC<{
   audioEngine: AudioEngine;
   onClose: () => void;
   onEdit: (ref: ClipRef) => void;
+  onCopy: (ref: ClipRef) => void;
   snapBar: (b: number) => number;
-}> = ({ menu, tracks, audioEngine, onClose, onEdit, snapBar }) => {
+}> = ({ menu, tracks, audioEngine, onClose, onEdit, onCopy, snapBar }) => {
   const seq = audioEngine.sequencer;
   const t = tracks.find((x) => x.id === menu.ref.trackId);
   const c = t?.arrangementClips?.find((x) => x.id === menu.ref.clipId);
@@ -1827,7 +1923,9 @@ const ClipMenu: React.FC<{
           {item('Clean DC Offset', () => {
             const a = audioStore.get(c.audioId);
             // A new asset for this clip only: other clips that play the original keep their audio.
-            if (a) seq.updateAudioClip(t.id, c.id, { audioId: audioStore.add(`${a.name} (DC removed)`, removeDcOffset(a.buffer)).id });
+            if (a) seq.updateAudioClip(t.id, c.id, { audioId: audioStore.add(`${a.name} (DC removed)`, removeDcOffset(a.buffer), {
+              provenance: derivedAudioProvenance(a.provenance, 'DC offset removed'),
+            }).id });
           })}
           {item('Transpose +1 semitone', () => seq.updateAudioClip(t.id, c.id, { pitch: (c.pitch ?? 0) + 1 }))}
           {item('Transpose -1 semitone', () => seq.updateAudioClip(t.id, c.id, { pitch: (c.pitch ?? 0) - 1 }))}
@@ -1841,6 +1939,7 @@ const ClipMenu: React.FC<{
         </>
       )}
       {item('Duplicate (Ctrl+D)', () => seq.duplicateClip(t.id, c.id), 'clip-menu-duplicate')}
+      {item('Copy (Ctrl+C)', () => onCopy(menu.ref), 'clip-menu-copy')}
       {item('Split here', () => seq.splitClip(t.id, c.id, snapBar(menu.bar)), 'clip-menu-split')}
       {item('Split at playhead', () => seq.splitClip(t.id, c.id, audioEngine.getPlayheadPosition() / audioEngine.stepsPerBar))}
       {item('Heal with Next Clip (Ctrl+J)', () => {
@@ -1871,6 +1970,37 @@ const ClipMenu: React.FC<{
                 {p.name}
               </option>
             ))}
+          </select>
+        </div>
+      )}
+      {c.kind !== 'audio' && tracks.some((x) => x.id !== t.id && x.kind !== 'audio') && (
+        <div className="px-3 py-1 border-t border-slate-800">
+          <div className="text-slate-500 text-[11px] mb-0.5">COPY TO PART (same bar)</div>
+          <select
+            value=""
+            onPointerDown={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              // a pattern clip takes a copy of its pattern to the other instrument (fitted to a kit's pads)
+              const isPattern = c.kind !== 'notes';
+              const made = seq.pasteClip(e.target.value, c, c.startBar, isPattern ? seq.snapshotPattern(t.id, c.patternId) : null);
+              const dest = tracks.find((x) => x.id === e.target.value);
+              if (made && dest) toast(`Copied to ${dest.name}`, 'success');
+              onClose();
+            }}
+            className="w-full bg-slate-900 text-white rounded border border-slate-700"
+            aria-label="Copy this clip to another part"
+            data-testid="clip-menu-copy-to"
+          >
+            <option value="" disabled>
+              Choose a part…
+            </option>
+            {tracks
+              .filter((x) => x.id !== t.id && x.kind !== 'audio')
+              .map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
           </select>
         </div>
       )}

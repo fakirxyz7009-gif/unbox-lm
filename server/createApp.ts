@@ -7,12 +7,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createAiRouter } from './routes/aiRoutes.ts';
 import { createStemsRouter } from './routes/stemsRoutes.ts';
+import { StemLibrary } from './stems/stemLibrary.ts';
 import { createImportRouter } from './routes/importRoutes.ts';
 import { createSeparationRouter } from './routes/separationRoutes.ts';
 import { createLocalAiRouter } from './routes/localAiRoutes.ts';
 import { createVstRouter } from './routes/vstRoutes.ts';
 import { ManifestStore, libraryConfigFromEnv } from './vst/manifestStore.ts';
 import { SHARE_BUILD } from './buildMode.ts';
+import { recordedManifestAdmissionError } from '../shared/instruments/sampleManifestTypes.ts';
 
 export interface AppOptions {
   baseDir: string;
@@ -33,34 +35,44 @@ export function createApp({ baseDir, bundleDir, bundleFallbackDir }: AppOptions)
   app.use('/library', express.static(config.bundleDir, { maxAge: '1h' }));
   if (bundleFallbackDir) app.use('/library', express.static(bundleFallbackDir, { maxAge: '1h' }));
 
-  // Multi-sampled real recordings (D:\samples high-capacity storage, SAMPLE_LIBRARY_PATH, or local public folder)
+  // A /samples cache is optional and may contain DSP-generated development
+  // material. Do not publish it through the recorded-instrument path unless
+  // its manifest attests an actual recording source, performer and licence.
+  const admittedSampleDirectory = (directory: string): boolean => {
+    const manifestPath = path.join(directory, 'sample-manifest.json');
+    try {
+      const candidate: unknown = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      const issue = recordedManifestAdmissionError(candidate);
+      if (!issue) return true;
+      console.warn(`Sample cache disabled at ${directory}: ${issue}.`);
+    } catch {
+      console.warn(`Sample cache disabled at ${directory}: unable to read sample-manifest.json.`);
+    }
+    return false;
+  };
+
   const primarySamplesDir = process.env.SAMPLE_LIBRARY_PATH
     ? path.resolve(process.env.SAMPLE_LIBRARY_PATH)
     : fs.existsSync('D:\\samples')
       ? 'D:\\samples'
       : path.resolve(baseDir, 'public', 'samples');
 
-  if (fs.existsSync(primarySamplesDir)) {
+  if (fs.existsSync(primarySamplesDir) && admittedSampleDirectory(primarySamplesDir)) {
     app.use('/samples', express.static(primarySamplesDir, { maxAge: '1h' }));
   }
 
-  // Fallback to public/samples if primary is external and a requested asset exists locally
+  // Fallback to public/samples only when it independently passes the same gate.
   const pubSamples = path.resolve(baseDir, 'public', 'samples');
-  if (primarySamplesDir !== pubSamples && fs.existsSync(pubSamples)) {
+  if (primarySamplesDir !== pubSamples && fs.existsSync(pubSamples) && admittedSampleDirectory(pubSamples)) {
     app.use('/samples', express.static(pubSamples, { maxAge: '1h' }));
   }
 
   if (!SHARE_BUILD) {
-    // Real acoustic stems and playable patches from D:\audio stems\daw_instruments
-    const STEMS_DISK = 'D:\\audio stems\\daw_instruments';
-    if (fs.existsSync(STEMS_DISK)) {
-      app.use('/stems', express.static(STEMS_DISK, { maxAge: '1h' }));
-    }
-    const STEMS_PUB = path.resolve(baseDir, 'public', 'stems', 'daw_instruments');
-    if (fs.existsSync(STEMS_PUB)) {
-      app.use('/stems', express.static(STEMS_PUB, { maxAge: '1h' }));
-    }
-    app.use('/api/stems', createStemsRouter());
+    // Local recorded-audio library. It streams only IDs admitted by its per-file
+    // provenance manifest; do not mount a broad /stems static directory here.
+    const stems = new StemLibrary(path.join(path.dirname(config.manifestPath), 'stem-folders.json'));
+    void stems.get().catch((e: unknown) => console.warn('Stem library scan failed:', e));
+    app.use('/api/stems', createStemsRouter(stems));
     // Links are downloaded only on this computer and only in the full build (see importRoutes.ts).
     app.use('/api/import', createImportRouter());
     // Stem separation with the local Demucs model (see separationRoutes.ts).

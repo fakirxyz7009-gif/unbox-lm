@@ -6,12 +6,13 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { Repeat, Keyboard as KeyboardIcon, SkipBack, Rewind, FastForward, Play, Pause, Square } from 'lucide-react';
 import { audioEngine } from '../audio/AudioEngine.ts';
-import { useEngineVersion, useFrame } from '../nexa/useEngine.ts';
+import { useBarTick, useEngineVersion, useFrame, useMeterFrame } from '../nexa/useEngine.ts';
 import { RecordPanel } from '../components/transport/RecordPanel.tsx';
 import { gainToDb, meterPos } from '../studio/ui/levels.ts';
 import { setText, setWidth } from '../ui/skin/dom.ts';
 import { RingKnob } from '../ui/skin/RingKnob.tsx';
 import { setUi, useUi } from './uiStore.ts';
+import { MIDI_NO_INPUT_GUIDANCE } from '../audio/midi/MidiInput.ts';
 
 const Readout: React.FC<{ label: string; children: React.ReactNode; className?: string; title?: string }> = ({ label, children, className = '', title }) => (
   <div className={`us-lcd px-2 h-[40px] flex flex-col justify-center leading-none ${className}`} title={title}>
@@ -22,6 +23,8 @@ const Readout: React.FC<{ label: string; children: React.ReactNode; className?: 
 
 function TempoField() {
   const [text, setText] = useState<string | null>(null);
+  // a tempo lane changes the BPM while playing
+  useBarTick(audioEngine.isPlaying);
   const taps = useRef<number[]>([]);
   const commit = () => {
     if (text !== null) {
@@ -76,7 +79,7 @@ function MasterMeter() {
   const clipRef = useRef<HTMLSpanElement>(null);
   const clipUntil = useRef(0);
   const buf = useRef(new Float32Array(audioEngine.analyserL.fftSize));
-  useFrame(() => {
+  useMeterFrame(() => {
     const peak = (an: AnalyserNode) => {
       an.getFloatTimeDomainData(buf.current);
       let p = 0;
@@ -98,7 +101,7 @@ function MasterMeter() {
       <div className="w-[104px] flex flex-col gap-[3px]">
         {[l, r].map((ref, i) => (
           <div key={i} className="h-[7px] rounded-sm bg-black/80 overflow-hidden shadow-inner">
-            <div ref={ref} className="h-full bg-gradient-to-r from-emerald-400 via-yellow-300 to-red-500" style={{ width: 0 }} />
+            <div ref={ref} className="h-full bg-gradient-to-r from-emerald-400 via-yellow-300 to-red-500 will-change-transform" style={{ width: 0 }} />
           </div>
         ))}
       </div>
@@ -143,7 +146,7 @@ function MidiLed({ onOpenSettings }: { onOpenSettings: () => void }) {
   } else if (midi.status !== 'ready') {
     [label, title, color] = ['MIDI…', 'Requesting MIDI access…', 'bg-slate-500'];
   } else if (!names.length) {
-    [label, title, color] = ['No MIDI', 'No MIDI keyboard connected — plug one in (no reload needed). Click: MIDI settings.', 'bg-slate-500'];
+    [label, title, color] = ['No MIDI', `${MIDI_NO_INPUT_GUIDANCE} Click for MIDI settings and a manual rescan.`, 'bg-slate-500'];
   } else {
     label = names.join(' + ');
     title = `${label}${busy ? ' — a port is in use by another program' : ''}: plays ${target ? target.name : 'the selected part'}. Click: MIDI settings & knob mapping.`;
@@ -164,15 +167,16 @@ function MidiLed({ onOpenSettings }: { onOpenSettings: () => void }) {
   );
 }
 
-const TBtn: React.FC<{ onClick: () => void; title: string; active?: boolean; color?: string; children: React.ReactNode; testId?: string }> = ({ onClick, title, active, color = '#d69b50', children, testId }) => (
+const TBtn: React.FC<{ onClick: () => void; title: string; active?: boolean; color?: string; children: React.ReactNode; testId?: string; disabled?: boolean }> = ({ onClick, title, active, color = '#d69b50', children, testId, disabled }) => (
   <button
     type="button"
     onClick={onClick}
+    disabled={disabled}
     title={title}
     aria-label={title}
     aria-pressed={active}
     data-testid={testId}
-    className="us-btn h-[34px] min-w-[34px] px-2 rounded-[6px] grid place-items-center"
+    className="us-btn h-[34px] min-w-[34px] px-2 rounded-[6px] grid place-items-center disabled:opacity-45"
     style={active ? { background: `linear-gradient(180deg, ${color}, ${color}aa)`, color: '#111', boxShadow: `0 0 10px ${color}88` } : undefined}
   >
     {children}
@@ -188,7 +192,8 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
   const timeRef = useRef<HTMLSpanElement>(null);
   const rec = audioEngine.recorder;
   const loop = audioEngine.getLoopRange();
-  useFrame(() => {
+  // readouts on the shared meter frames, so the frames in between paint nothing (see meterDue)
+  useMeterFrame(() => {
     const pos = audioEngine.getPlayheadPosition();
     const m = audioEngine.timeMap.tickToMusical(pos * 12);
     setText(posRef.current, `${String(m.bar).padStart(3, ' ')}.${m.beat}.${m.sixteenth}`);
@@ -217,18 +222,20 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
       <div className="relative flex" onClick={(e) => e.stopPropagation()}>
         <TBtn
           onClick={() => void rec.toggle().then(() => rec.message && setRecOpen(true))}
-          title="Record armed tracks"
-          active={audioEngine.isRecording}
+          title={rec.isFinalizing ? 'Finishing the recorded take…' : rec.state === 'arming' ? 'Cancel recording preparation' : 'Record armed tracks'}
+          active={rec.state !== 'idle'}
           color="#ff4d4d"
+          disabled={rec.isFinalizing}
         >
-          <span className={`w-3 h-3 rounded-full ${audioEngine.isRecording ? 'bg-black' : 'bg-red-500'}`} />
+          <span className={`w-3 h-3 rounded-full ${rec.isFinalizing ? 'bg-amber-300 animate-pulse' : rec.state !== 'idle' ? 'bg-black' : 'bg-red-500'}`} />
         </TBtn>
         <button type="button" className="us-btn h-[34px] w-4 rounded-r text-[11px]" title="Record settings: count-in, punch, input…" aria-label="Record settings" onClick={() => setRecOpen((v) => !v)}>
           ▾
         </button>
         {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
       </div>
-      {rec.message && <span className="text-[11px] text-red-300 max-w-40 leading-tight" role="status">{rec.message}</span>}
+      {rec.isFinalizing && <span className="text-[11px] text-amber-200 max-w-40 leading-tight" role="status">Finishing take…</span>}
+      {!rec.isFinalizing && rec.message && <span className="text-[11px] text-red-300 max-w-40 leading-tight" role="status">{rec.message}</span>}
 
       <div className="w-px h-8 bg-chrome-line mx-1" />
       <TBtn onClick={() => audioEngine.toggleLoop()} title="Loop between L and R (L)" active={audioEngine.loopEnabled} color="#d7ad6f" testId="transport-loop">

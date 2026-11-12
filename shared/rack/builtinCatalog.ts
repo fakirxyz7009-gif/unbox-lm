@@ -12,6 +12,10 @@ export type RackRole = UnitRole | 'modulator';
 export interface ParamRange {
   min: number;
   max: number;
+  /** Optional faceplate semantics for consumers that need to distinguish discrete controls. */
+  control?: 'knob' | 'fader' | 'toggle' | 'select' | 'buttons';
+  /** Whether a Rack macro may continuously interpolate this numeric value. Undefined is denied. */
+  macroMappable?: boolean;
 }
 
 export interface UnitPortLayout {
@@ -46,7 +50,21 @@ const VOLUME = { volume: { min: 0, max: 1.5 } };
 const SYNTH_CV = ['cv_cutoff', 'cv_pitch', 'cv_gate'];
 const WAVES = ['sawtooth', 'square', 'triangle', 'sine'];
 
-const LEGACY_BUILTINS: BuiltinDeviceSpec[] = [
+/**
+ * Legacy catalog `params` are an audited list of continuously variable controls. Modes and
+ * switches are deliberately stored in `options` / `booleans`; a numeric exception must set
+ * `macroMappable: false` at its declaration. Normalize the affirmative metadata here so an
+ * unknown/missing DeviceParam remains denied by the Rack macro policy.
+ */
+function legacyContinuousParams(params: Record<string, ParamRange>): Record<string, ParamRange> {
+  return Object.fromEntries(Object.entries(params).map(([key, range]) => [key, {
+    ...range,
+    control: range.control ?? 'knob',
+    macroMappable: range.macroMappable ?? true,
+  }]));
+}
+
+const LEGACY_BUILTIN_DEFINITIONS: BuiltinDeviceSpec[] = [
   {
     type: 'subtractor', name: 'Twin-Osc Analog Synth', role: 'instrument', category: 'synth',
     description: 'Dual-oscillator subtractive synth: punchy leads, basses, plucks',
@@ -267,9 +285,15 @@ const LEGACY_BUILTINS: BuiltinDeviceSpec[] = [
     description: '16-step CV sequencer: note (semitones), gate and curve outputs',
     tags: ['sequencer', 'arp', 'arpeggio', 'pattern', 'steps', 'acid'],
     audioIn: false, audioOut: false, cvIn: [], cvOut: ['note_cv', 'gate_cv', 'curve_cv'],
-    params: { numSteps: { min: 1, max: 32 } },
+    // Step count is a discrete structural setting, not a continuously interpolated macro target.
+    params: { numSteps: { min: 1, max: 32, control: 'buttons', macroMappable: false } },
   },
 ];
+
+const LEGACY_BUILTINS: BuiltinDeviceSpec[] = LEGACY_BUILTIN_DEFINITIONS.map((device) => ({
+  ...device,
+  params: legacyContinuousParams(device.params),
+}));
 
 /** Spec-driven devices (shared/rack/devices) as AI built-ins: real ports, ranges, options. */
 function fromSpec(s: DeviceSpec): BuiltinDeviceSpec {
@@ -279,7 +303,12 @@ function fromSpec(s: DeviceSpec): BuiltinDeviceSpec {
   for (const p of s.params) {
     if (p.options) options[p.key] = [...p.options];
     else if (p.control === 'toggle') booleans.push(p.key);
-    else params[p.key] = { min: p.min, max: p.max };
+    else params[p.key] = {
+      min: p.min,
+      max: p.max,
+      control: p.control ?? 'knob',
+      macroMappable: p.control !== 'select' && p.control !== 'buttons',
+    };
   }
   const cat = s.kind === 'player' ? 'modulator' : (s.category as SoundCategory);
   return {
@@ -336,10 +365,10 @@ export function vstPortLayout(role: UnitRole): UnitPortLayout {
 
 /** Numeric params every library unit accepts. */
 export const VST_PARAM_RANGES: Record<string, ParamRange> = {
-  macro1: { min: 0, max: 1 },
-  macro2: { min: 0, max: 1 },
-  macro3: { min: 0, max: 1 },
-  macro4: { min: 0, max: 1 },
-  mix: { min: 0, max: 1 },
-  output: { min: 0, max: 1.5 },
+  macro1: { min: 0, max: 1, control: 'knob', macroMappable: true },
+  macro2: { min: 0, max: 1, control: 'knob', macroMappable: true },
+  macro3: { min: 0, max: 1, control: 'knob', macroMappable: true },
+  macro4: { min: 0, max: 1, control: 'knob', macroMappable: true },
+  mix: { min: 0, max: 1, control: 'knob', macroMappable: true },
+  output: { min: 0, max: 1.5, control: 'knob', macroMappable: true },
 };

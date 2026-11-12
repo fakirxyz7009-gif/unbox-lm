@@ -12,7 +12,7 @@ import { isLinked, setLinked } from '../audio/liveLink.ts';
 import { toast } from '../shell/toast.ts';
 import { syncTrackPatterns } from '../audio/sequencer/model.ts';
 import { EFFECT_CATALOG } from '../audio/effectCatalog.ts';
-import { useFrame } from '../nexa/useEngine.ts';
+import { useDeviceAutomation, useFrame } from '../nexa/useEngine.ts';
 import { RingKnob } from '../ui/skin/RingKnob.tsx';
 import { automateMenuAt } from '../components/AutomateMenu.tsx';
 import type { ChannelParam } from '../audio/automation/model.ts';
@@ -27,6 +27,7 @@ import { LcdAudioClipBox } from './LcdAudioClipBox.tsx';
 import { deviceSample, type PadSample } from '../audio/deviceSamples.ts';
 import { editCapturedPadSample } from '../audio/deviceSampleEdits.ts';
 import { drumLanesFor } from '../audio/drumLanes.ts';
+import { MIDI_NO_INPUT_GUIDANCE } from '../audio/midi/MidiInput.ts';
 
 export type LcdPage = 'easy' | 'clip' | 'mix' | 'fx' | 'midi' | 'combi' | `sec:${string}`;
 
@@ -65,6 +66,7 @@ function sectionsOf(params: DeviceParam[]): { id: string; label: string; params:
 
 export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) => {
   const [, force] = useReducer((n: number) => n + 1, 0);
+  useDeviceAutomation(dev?.id);
   const [touched, setTouched] = useState<{ label: string; value: string } | null>(null);
   const [rightBoxMode, setRightBoxMode] = useState<'clip' | 'adsr'>('clip');
   const voicesRef = useRef<HTMLSpanElement>(null);
@@ -330,7 +332,7 @@ export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) 
     const midiStatusText = midiPorts.some((port) => port.error)
       ? midiPorts.filter((port) => port.error).map((port) => `${port.name}: ${port.error}`).join(' · ')
       : midiStatus === 'ready'
-        ? midiPorts.length ? `Connected: ${midiPorts.map((port) => port.name).join(', ')}` : 'MIDI access ready; no connected input found.'
+        ? midiPorts.length ? `Connected: ${midiPorts.map((port) => port.name).join(', ')}` : `MIDI access ready. ${MIDI_NO_INPUT_GUIDANCE}`
         : midiStatus === 'connecting'
           ? 'Requesting MIDI access…'
           : midiStatus === 'blocked'
@@ -386,7 +388,7 @@ export const LcdEditor: React.FC<Props> = ({ dev, track, parts, page, onPage }) 
           </select>
         </label>
         <button type="button" className="self-start us-lcd-box px-2 font-bold" onClick={() => void audioEngine.enableMidiInput().then((ok) => { setTouched({ label: 'MIDI input', value: ok ? 'ready' : 'not available' }); force(); })}>
-          Connect / retry MIDI keyboard
+          {midiStatus === 'ready' && midiPorts.length === 0 ? 'Rescan MIDI keyboard' : 'Connect / retry MIDI keyboard'}
         </button>
       </div>
     );

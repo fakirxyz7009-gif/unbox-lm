@@ -11,7 +11,6 @@
  *  5. Macro Automation Modeling: Sidechain ducking pumps, filter risers, exponential LFO sweeps
  */
 
-import type { AssistantAction, AssistantNote } from '../../../shared/localAi/assistant.ts';
 import type { AutoPoint } from '../../audio/automation/model.ts';
 import type { MixAnalysis, MasterTarget } from '../../audio/mastering/assistant.ts';
 

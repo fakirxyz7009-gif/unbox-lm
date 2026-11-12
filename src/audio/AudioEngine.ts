@@ -46,6 +46,9 @@ import {
   SequencerTrack,
   SequencerNote,
   RackGroup,
+  RackMacro,
+  RackMacroTarget,
+  MAX_RACK_MACROS,
   ArrangementClip,
   FolderClip,
   ProjectMarker,
@@ -78,6 +81,9 @@ import {
   type PlaySource,
   type StepHit,
 } from './sequencer/model.ts';
+import { patternCycle16ths, varySteps } from './sequencer/patternVary.ts';
+import { sameSteps } from './sequencer/patternTransfer.ts';
+import { drumLanesFor } from './drumLanes.ts';
 import { SequencerEditor } from './sequencer/editor.ts';
 import { strumDelays } from './sequencer/midiTools.ts';
 import { MixerController } from './mixer/MixerController.ts';
@@ -86,10 +92,12 @@ import { MixBusDevice } from './mixer/MixBusDevice.ts';
 import { installBypassShim } from './mixer/bypassShim.ts';
 import { installExpression, setModWheel, setPitchBend } from './expression.ts';
 import { installLevelTrim, levelTrimOf } from './levelTrim.ts';
+import { deviceParams, isMacroMappableDeviceParam } from './deviceParams.ts';
 import { deviceSamplesSection, installSampleVoice } from './deviceSamples.ts';
 import { AudioTrackDevice } from './clips/AudioTrackDevice.ts';
 import { ClipVoices } from './clips/clipVoices.ts';
 import { audioStore } from './clips/audioStore.ts';
+import { derivedAudioProvenance } from '../../shared/audio/provenance.ts';
 import { audioClipRate, barsForSeconds, secPerBar } from './clips/clipMath.ts';
 import { RecordController } from './recording/RecordController.ts';
 import { ensureRecorderWorklet, WorkletCapture } from './recording/recorderWorklet.ts';
@@ -182,6 +190,7 @@ export class AudioEngine {
   public masterLimiter: DynamicsCompressorNode;
 
   // Real Web Audio Outboard Mastering & Hardware Emulation Chain
+  private masterDcBlocker!: BiquadFilterNode;
   private outboardDeEsser!: BiquadFilterNode;
   private outboardTubeShaper!: WaveShaperNode;
   private outboardOptoComp!: DynamicsCompressorNode;
@@ -244,6 +253,17 @@ export class AudioEngine {
   /** Registers a module's block in project files (key must be unique). */
   public registerProjectSection(key: string, section: ProjectSection): void {
     this.projectSections.set(key, section);
+  }
+
+  /** ProjectManager supplies this late-bound identity so the recorder can journal active takes without a module cycle. */
+  private recordingJournalInfoSource: () => { projectId: string | null; projectName: string } = () => ({ projectId: null, projectName: 'Untitled' });
+
+  public setRecordingJournalInfoSource(source: () => { projectId: string | null; projectName: string }): void {
+    this.recordingJournalInfoSource = source;
+  }
+
+  public recordingJournalInfo(): { projectId: string | null; projectName: string } {
+    return this.recordingJournalInfoSource();
   }
 
   public analyserL: AnalyserNode;
@@ -369,7 +389,17 @@ export class AudioEngine {
   ];
 
   // Master Transport & Sequencer Song/Arrangement Playback Detector State
-  public bpm: number = 124;
+  /**
+   * Song tempo. It lives in the tempo map, which playback, exports and the tempo lane read, so any
+   * plain `bpm = x` keeps them in step (a separate field drifted: the transport showed 128 while
+   * the song played at 124, and a tempo lane changed only the readout).
+   */
+  public get bpm(): number {
+    return this.timeMap.tempoMap.defaultBpm;
+  }
+  public set bpm(value: number) {
+    this.timeMap.tempoMap.setRootBpm(value);
+  }
   public isPlaying: boolean = false;
   public isRecording: boolean = false;
   /** Song mode: wrap from the R locator back to L. Off: playback stops at the song end. */
@@ -422,7 +452,9 @@ export class AudioEngine {
   private realtimeTimer: { stop: () => void } | null = null;
   private realtimeServiceQueued = false;
   private nextNoteTime: number = 0;
-  private scheduleAheadTime: number = 0.12;
+  // Notes are queued this far ahead, so a UI stall shorter than ~175 ms never reaches the audio
+  // (at 0.12 s a heavy re-render already pushed the beat late). Stop silences what is queued.
+  private scheduleAheadTime: number = 0.2;
   private lookaheadMs: number = 25;
 
 
@@ -536,6 +568,11 @@ export class AudioEngine {
     });
 
     // Real Web Audio Outboard Mastering & Hardware Emulation Chain
+    this.masterDcBlocker = this.ctx.createBiquadFilter();
+    this.masterDcBlocker.type = 'highpass';
+    this.masterDcBlocker.frequency.value = 12;
+    this.masterDcBlocker.Q.value = 0.707;
+
     this.outboardDeEsser = this.ctx.createBiquadFilter();
     this.outboardDeEsser.type = 'peaking';
     this.outboardDeEsser.frequency.value = 6800;
@@ -582,7 +619,8 @@ export class AudioEngine {
     wSplit.connect(wRL, 1).connect(wMerge, 0, 0);
     wSplit.connect(wRR, 1).connect(wMerge, 0, 1);
     wSplit.connect(wLR, 0).connect(wMerge, 0, 1);
-    wMerge.connect(this.outboardDeEsser);
+    wMerge.connect(this.masterDcBlocker);
+    this.masterDcBlocker.connect(this.outboardDeEsser);
     this.outboardDeEsser.connect(this.outboardTubeShaper);
     this.outboardTubeShaper.connect(this.outboardOptoComp);
     this.outboardOptoComp.connect(this.masterGain);
@@ -679,7 +717,9 @@ export class AudioEngine {
       const random = seededRandom(`outboard-ir:${durationSec}:${decay}:${rate}:channel:${ch}`);
       for (let i = 0; i < len; i++) {
         const t = i / len;
-        data[i] = (random() * 2 - 1) * Math.pow(1 - t, decay) * 0.5;
+        const val = (random() * 2 - 1) * Math.pow(1 - t, decay) * 0.5;
+        // Flush denormals below 1e-15 to strict 0 to prevent CPU microcode throttling
+        data[i] = Math.abs(val) < 1e-15 ? 0 : val;
       }
     }
     return buf;
@@ -804,6 +844,20 @@ export class AudioEngine {
   /** Structural change notification for modules (mixer, recorder, …): re-render + autosave. */
   public changed(): void {
     this.notify();
+  }
+
+  private changedFrame: number | null = null;
+  /**
+   * `changed()` at most once per frame, for edits that come many times a frame (a knob dragged or
+   * held on an arrow key): each one used to re-render the whole app.
+   */
+  public changedSoon(): void {
+    if (this.changedFrame !== null) return;
+    const run = () => {
+      this.changedFrame = null;
+      this.notify();
+    };
+    this.changedFrame = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : (setTimeout(run, 16) as unknown as number);
   }
 
   /** Mixer hook: automation drives this channel param during playback. */
@@ -987,6 +1041,7 @@ export class AudioEngine {
   }
 
   public undo(): boolean {
+    if (this.rejectWhileRecorderBusy('undoing')) return false;
     this.flushPendingUndo();
     return undoJournal.undo() !== null;
   }
@@ -1003,7 +1058,19 @@ export class AudioEngine {
   }
 
   public redo(): boolean {
+    if (this.rejectWhileRecorderBusy('redoing')) return false;
     return undoJournal.redo() !== null;
+  }
+
+  /**
+   * A recorder stop is asynchronous: its worklet still owns audio buffers while the UI says
+   * "finalizing". Rebuilding or disposing the graph in that interval would detach the take
+   * before it reaches the project, so destructive engine entry points refuse the transition.
+   */
+  private rejectWhileRecorderBusy(action: string): boolean {
+    if (!this.recorder.busy) return false;
+    toast(`Wait for the recording take to finish before ${action}.`, 'info');
+    return true;
   }
 
   // ---- Structural undo: add / delete a unit rebuilds the graph, so it restores a project snapshot ----
@@ -1097,12 +1164,16 @@ export class AudioEngine {
       trackFolders: this.trackFolders,
       songBlocks: this.songBlocks,
       blockPlacements: this.blockPlacements,
-      audioConnections: this.audioConnections.map((c) => ({
-        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, col: c.color,
-      })),
-      cvConnections: this.cvConnections.map((c) => ({
-        s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, a: c.amount, col: c.color,
-      })),
+      audioConnections: this.audioConnections
+        .filter((c) => (c.sourceDeviceId === 'master' || this.devices.has(c.sourceDeviceId)) && (c.targetDeviceId === 'master' || this.devices.has(c.targetDeviceId)))
+        .map((c) => ({
+          s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, col: c.color,
+        })),
+      cvConnections: this.cvConnections
+        .filter((c) => (c.sourceDeviceId === 'master' || this.devices.has(c.sourceDeviceId)) && (c.targetDeviceId === 'master' || this.devices.has(c.targetDeviceId)))
+        .map((c) => ({
+          s: c.sourceDeviceId, sp: c.sourcePortId, t: c.targetDeviceId, tp: c.targetPortId, a: c.amount, col: c.color,
+        })),
       rackGroups: this.rackGroups,
       // Module blocks: mixer, automation, audio clips, … (registerProjectSection)
       sections: Object.fromEntries([...this.projectSections].map(([k, s]) => [k, s.save()])),
@@ -1110,6 +1181,7 @@ export class AudioEngine {
   }
 
   public importProjectJSON(json: string): boolean {
+    if (this.rejectWhileRecorderBusy('loading another project')) return false;
     const parsed = parseImportableProject(json);
     if (!parsed) return false;
     if (parsed.devices.some((device) =>
@@ -1140,9 +1212,13 @@ export class AudioEngine {
           idMap.set(d.id, nd.id);
           if (nd instanceof VstPluginDevice) nd.restoreParams(d.params || {});
           else Object.entries(d.params || {}).forEach(([k, v]) => {
-            if (typeof v === 'number' || (k === 'subVoice' && typeof v === 'string')) nd.setParam(k, v);
+            if (typeof v === 'number' || (k === 'subVoice' && typeof v === 'string') || (nd instanceof RV7000Device && k === 'impulseAssetId' && typeof v === 'string')) nd.setParam(k, v);
             else if (k === 'target' && typeof v === 'string' && v) playerTargets.push([nd.id, v]);
           });
+          if (nd instanceof RV7000Device && typeof d.params?.impulseAssetId === 'string' && d.params.impulseAssetId) {
+            const impulse = audioStore.get(d.params.impulseAssetId);
+            if (impulse) nd.setCustomImpulse(impulse.id, impulse.buffer);
+          }
           if (nd instanceof MatrixDevice && d.matrix) nd.loadPatterns(d.matrix);
           nd.isPowered = d.isPowered !== false && d.type !== 'automation_clip';
           nd.isBypassed = !!d.isBypassed;
@@ -1263,17 +1339,42 @@ export class AudioEngine {
         const tgt = idMap.get(c.t);
         if (src && tgt) this.connectCV(src, c.sp, tgt, c.tp, typeof c.a === 'number' ? c.a : 1, typeof c.col === 'string' ? c.col : undefined);
       });
+      const restoredGroupIds = new Set<string>();
       (Array.isArray(p.rackGroups) ? p.rackGroups : []).forEach((g: RackGroup) => {
         const deviceIds = (g.deviceIds || []).map((id) => idMap.get(id)).filter((id): id is string => !!id);
         if (!deviceIds.length) return;
-        const macros = (g.macros || []).map((m) => ({
-          ...m,
-          targets: (m.targets || []).flatMap((t) => {
-            const deviceId = idMap.get(t.deviceId);
-            return deviceId ? [{ ...t, deviceId }] : [];
-          }),
-        }));
-        this.rackGroups.push({ ...g, deviceIds, macros });
+        let groupId = typeof g.id === 'string' && g.id.trim() ? g.id.trim().slice(0, 80) : '';
+        if (!groupId || restoredGroupIds.has(groupId)) {
+          do {
+            groupId = `group_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+          } while (restoredGroupIds.has(groupId));
+        }
+        restoredGroupIds.add(groupId);
+        const restored: RackGroup = {
+          id: groupId,
+          name: typeof g.name === 'string' && g.name.trim() ? g.name.trim().slice(0, 80) : 'Combiner',
+          deviceIds,
+          macros: [],
+          source: g.source === 'gemini' || g.source === 'local' || g.source === 'user' ? g.source : 'user',
+          ...(typeof g.prompt === 'string' && g.prompt ? { prompt: g.prompt.slice(0, 2000) } : {}),
+          ...(typeof g.description === 'string' && g.description ? { description: g.description.slice(0, 500) } : {}),
+        };
+        const macroIds = new Set<string>();
+        const rawMacros = Array.isArray(g.macros) ? g.macros : [];
+        restored.macros = rawMacros.slice(0, MAX_RACK_MACROS).map((macro) => {
+          const mapped = macro && typeof macro === 'object' ? {
+            ...(macro as RackMacro),
+            targets: Array.isArray((macro as RackMacro).targets)
+              ? (macro as RackMacro).targets.flatMap((target) => {
+                const deviceId = idMap.get(target.deviceId);
+                return deviceId ? [{ ...target, deviceId }] : [];
+              })
+              : [],
+          } : {};
+          return this.makeRackMacro(restored, mapped, macroIds);
+        });
+        this.rackGroups.push(restored);
+        restored.macros.forEach((macro) => this.setRackMacro(restored.id, macro.id, macro.value));
       });
       const sections = p.sections && typeof p.sections === 'object' ? (p.sections as Record<string, unknown>) : {};
       this.projectSections.forEach((s, k) => {
@@ -1310,10 +1411,12 @@ export class AudioEngine {
   // ---- Real-time bounce: records exactly what you hear (before the monitor section) ----
   public async bounceRealtimeWav(): Promise<boolean> {
     await this.resumeContext();
+    if (this.rejectWhileRecorderBusy('starting a real-time bounce')) return false;
     if (!(await ensureRecorderWorklet(this.ctx))) {
       toast('The real-time bounce could not start: the recorder is not available in this browser.', 'error');
       return false;
     }
+    if (this.rejectWhileRecorderBusy('starting a real-time bounce')) return false;
     // Whole arrangement in Song mode, one pass of the longest active pattern in Pattern mode (max 10 min).
     // This must agree with the scheduler, which follows the project tempo map
     // rather than assuming a constant root BPM.
@@ -1379,7 +1482,7 @@ export class AudioEngine {
   public readonly midi = new MidiInput((data) => this.handleMidiMessage(data));
 
   public enableMidiInput(): Promise<boolean> {
-    return this.midi.enable();
+    return this.midi.refresh();
   }
 
   /** Creates a sequencer lane that sends its note clips to the selected Web MIDI output. */
@@ -1850,10 +1953,69 @@ export class AudioEngine {
   // ---- Combinator groups (rack frames with macro knobs) ----
   public rackGroups: RackGroup[] = [];
 
+  /**
+   * Keep user-authored macro maps inside their Combiner and inside each target's declared
+   * continuous numeric range. This protects project import and avoids a stale macro writing an
+   * arbitrary property after a device has changed.
+   */
+  private rackMacroTargets(group: RackGroup, candidates: unknown): RackMacroTarget[] {
+    if (!Array.isArray(candidates)) return [];
+    const members = new Set(group.deviceIds);
+    return candidates.flatMap((candidate): RackMacroTarget[] => {
+      if (!candidate || typeof candidate !== 'object') return [];
+      const raw = candidate as Partial<RackMacroTarget>;
+      if (typeof raw.deviceId !== 'string' || !members.has(raw.deviceId) || typeof raw.param !== 'string') return [];
+      const device = this.devices.get(raw.deviceId);
+      const param = device && deviceParams(device).find((entry) =>
+        entry.key === raw.param &&
+        isMacroMappableDeviceParam(entry) &&
+        Number.isFinite(entry.min) &&
+        Number.isFinite(entry.max) &&
+        entry.min !== entry.max
+      );
+      if (!param || typeof raw.min !== 'number' || !Number.isFinite(raw.min) || typeof raw.max !== 'number' || !Number.isFinite(raw.max)) return [];
+      const clamp = (value: number) => Math.max(param.min, Math.min(param.max, value));
+      return [{ deviceId: raw.deviceId, param: raw.param, min: clamp(raw.min), max: clamp(raw.max) }];
+    });
+  }
+
+  private rackMacroLabel(value: unknown, fallback: string): string {
+    return typeof value === 'string' && value.trim() ? value.trim().slice(0, 48) : fallback;
+  }
+
+  private makeRackMacro(group: RackGroup, input: Partial<RackMacro>, usedIds: Set<string>): RackMacro {
+    let id = typeof input.id === 'string' && input.id.trim() ? input.id.trim().slice(0, 80) : '';
+    if (!id || usedIds.has(id)) {
+      do {
+        id = `macro_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      } while (usedIds.has(id));
+    }
+    usedIds.add(id);
+    const targets = this.rackMacroTargets(group, input.targets);
+    let value = typeof input.value === 'number' && Number.isFinite(input.value) ? Math.max(0, Math.min(1, input.value)) : 0.5;
+    // Creating a mapping should not unexpectedly pull its first target to min or max.  Match the
+    // current parameter if the caller did not explicitly choose a macro value.
+    if (!(typeof input.value === 'number' && Number.isFinite(input.value)) && targets.length) {
+      const target = targets[0];
+      const param = deviceParams(this.devices.get(target.deviceId)!).find((entry) => entry.key === target.param);
+      if (param && target.max !== target.min) value = Math.max(0, Math.min(1, (param.value - target.min) / (target.max - target.min)));
+    }
+    return {
+      id,
+      label: this.rackMacroLabel(input.label, `Macro ${usedIds.size}`),
+      value,
+      targets,
+    };
+  }
+
   public addRackGroup(group: Omit<RackGroup, 'id'>): RackGroup {
     const undoable = this.beginStructural('Create Combiner');
     try {
-      const created: RackGroup = { ...group, id: `group_${Date.now()}_${Math.random().toString(36).slice(2, 5)}` };
+      const created: RackGroup = { ...group, id: `group_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`, macros: [] };
+      const usedIds = new Set<string>();
+      created.macros = (Array.isArray(group.macros) ? group.macros : [])
+        .slice(0, MAX_RACK_MACROS)
+        .map((macro) => this.makeRackMacro(created, macro, usedIds));
       this.rackGroups.push(created);
       created.macros.forEach((m) => this.setRackMacro(created.id, m.id, m.value));
       this.notify();
@@ -1863,16 +2025,57 @@ export class AudioEngine {
     }
   }
 
+  /** Add one user-authored front-panel macro to an existing Combiner. */
+  public addRackMacro(groupId: string, input: Partial<RackMacro> = {}): RackMacro | null {
+    const group = this.rackGroups.find((entry) => entry.id === groupId);
+    if (!group || group.macros.length >= MAX_RACK_MACROS) return null;
+    return this.runStructuralEdit('Add Combiner macro', () => {
+      const macro = this.makeRackMacro(group, input, new Set(group.macros.map((entry) => entry.id)));
+      group.macros.push(macro);
+      this.setRackMacro(group.id, macro.id, macro.value);
+      this.notify();
+      return macro;
+    });
+  }
+
+  /** Update a macro name or its mapping targets as one undoable project edit. */
+  public updateRackMacro(groupId: string, macroId: string, input: Pick<Partial<RackMacro>, 'label' | 'targets'>): boolean {
+    return this.runStructuralEdit('Edit Combiner macro', () => {
+      const group = this.rackGroups.find((entry) => entry.id === groupId);
+      const macro = group?.macros.find((entry) => entry.id === macroId);
+      if (!group || !macro) return false;
+      if (input.label !== undefined) macro.label = this.rackMacroLabel(input.label, macro.label);
+      if (input.targets !== undefined) macro.targets = this.rackMacroTargets(group, input.targets);
+      this.setRackMacro(group.id, macro.id, macro.value);
+      this.notify();
+      return true;
+    });
+  }
+
+  /** Remove a macro mapping, keeping its member devices and their current parameter values. */
+  public removeRackMacro(groupId: string, macroId: string): boolean {
+    return this.runStructuralEdit('Remove Combiner macro', () => {
+      const group = this.rackGroups.find((entry) => entry.id === groupId);
+      if (!group || !group.macros.some((entry) => entry.id === macroId)) return false;
+      group.macros = group.macros.filter((entry) => entry.id !== macroId);
+      this.notify();
+      return true;
+    });
+  }
+
   /** Turn a Combinator macro: every target param follows value 0..1 between its min and max. */
   public setRackMacro(groupId: string, macroId: string, value: number): void {
-    const macro = this.rackGroups.find((g) => g.id === groupId)?.macros.find((m) => m.id === macroId);
-    if (!macro) return;
+    const group = this.rackGroups.find((entry) => entry.id === groupId);
+    const macro = group?.macros.find((entry) => entry.id === macroId);
+    if (!group || !macro) return;
     const prev = macro.value;
     const next = Math.max(0, Math.min(1, value));
     const apply = (v: number) => {
       macro.value = v;
-      macro.targets.forEach((t) => this.devices.get(t.deviceId)?.setParam(t.param, t.min + (t.max - t.min) * v));
-      this.changed();
+      this.rackMacroTargets(group, macro.targets).forEach((target) =>
+        this.devices.get(target.deviceId)?.setParam(target.param, target.min + (target.max - target.min) * v)
+      );
+      this.changedSoon();
     };
     apply(next);
     // A macro move is a user edit: undo puts the knob and the parameters it drives back (a build records nothing here).
@@ -1881,6 +2084,7 @@ export class AudioEngine {
 
   /** Remove a group frame; with `deleteDevices` its units are unmounted too (re-bridging the chain). */
   public removeRackGroup(groupId: string, deleteDevices = false): void {
+    if (deleteDevices && this.rejectWhileRecorderBusy('deleting the Combiner')) return;
     const undoable = this.beginStructural(deleteDevices ? 'Delete Combiner' : 'Ungroup Combiner');
     try {
       this.removeRackGroupInner(groupId, deleteDevices);
@@ -1935,13 +2139,16 @@ export class AudioEngine {
     return true;
   }
 
-  public removeDevice(deviceId: string, skipBridge: boolean = false): void {
+  public removeDevice(deviceId: string, skipBridge: boolean = false): boolean {
+    if (this.rejectWhileRecorderBusy('removing a device')) return false;
+    if (!this.devices.has(deviceId)) return false;
     const undoable = this.beginStructural('Delete device');
     try {
       this.removeDeviceInner(deviceId, skipBridge);
     } finally {
       if (undoable) this.endStructural();
     }
+    return true;
   }
 
   private removeDeviceInner(deviceId: string, skipBridge: boolean = false): void {
@@ -1970,12 +2177,18 @@ export class AudioEngine {
       (c) => c.sourceDeviceId === deviceId || c.targetDeviceId === deviceId
     );
     toRemoveAudio.forEach((c) => this.disconnectAudio(c.id));
+    this.audioConnections = this.audioConnections.filter(
+      (c) => c.sourceDeviceId !== deviceId && c.targetDeviceId !== deviceId
+    );
 
     // Disconnect CV cables
     const toRemoveCV = this.cvConnections.filter(
       (c) => c.sourceDeviceId === deviceId || c.targetDeviceId === deviceId
     );
     toRemoveCV.forEach((c) => this.disconnectCV(c.id));
+    this.cvConnections = this.cvConnections.filter(
+      (c) => c.sourceDeviceId !== deviceId && c.targetDeviceId !== deviceId
+    );
 
     // Remove associated sequencer tracks, then the mixer channel (routes / sends to it fall back to master)
     this.tracks = this.tracks.filter((t) => t.deviceId !== deviceId);
@@ -2186,13 +2399,15 @@ export class AudioEngine {
     const chosenColor = color || cvColors[this.cvConnections.length % cvColors.length];
     const connId = `cv_conn_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
 
+    const validAmount = Math.max(-1.0, Math.min(1.0, Number.isFinite(amount) ? amount : 1.0));
+
     // Register in CV Engine matrix for live modulation calculations and store matrixEntryId
     const matrixEntryId = this.cvEngine.addMatrixEntry({
       sourceDeviceId,
       sourcePortId,
       targetDeviceId,
       targetParam: targetPortId,
-      amount,
+      amount: validAmount,
       offset: 0,
       inverted: false,
     });
@@ -2203,7 +2418,7 @@ export class AudioEngine {
       sourcePortId,
       targetDeviceId,
       targetPortId,
-      amount,
+      amount: validAmount,
       color: chosenColor,
       matrixEntryId,
     });
@@ -2393,7 +2608,7 @@ export class AudioEngine {
    */
   public async freezeTrack(trackId: string): Promise<string | null> {
     const track = this.tracks.find((t) => t.id === trackId);
-    if (!track || track.kind === 'audio' || track.disabled || this.isRecording) return null;
+    if (!track || track.kind === 'audio' || track.disabled || this.recorder.busy) return null;
     // The freeze renders the arrangement; Block mode does not play it, so the frozen track would lose its song placements.
     if (this.playbackMode === 'pattern_loop') {
       toast('Switch to Song mode to freeze a track: Block mode does not play the arrangement.', 'info');
@@ -2419,12 +2634,14 @@ export class AudioEngine {
     }
     // The project may have changed while the offline render ran.
     const source = this.tracks.find((t) => t.id === trackId);
-    if (!source || source.disabled) return null;
+    if (!source || source.disabled || this.recorder.busy) return null;
 
     this.suppressUndoCapture = true;
     let audioTrack: SequencerTrack | null = null;
     try {
-      const asset = audioStore.add(`${source.name} (frozen)`, buffer);
+      const asset = audioStore.add(`${source.name} (frozen)`, buffer, {
+        provenance: derivedAudioProvenance(undefined, `Frozen offline render of ${source.name}`, 'app-render'),
+      });
       audioTrack = this.createAudioTrack(`${source.name} (frozen)`);
       audioTrack.color = source.color;
       audioTrack.frozenFrom = source.id;
@@ -2458,7 +2675,9 @@ export class AudioEngine {
   }
 
   /** Removes a frozen render and re-enables the instrument track it replaced. */
-  public unfreezeTrack(audioTrackId: string): boolean {    const bounce = this.tracks.find((t) => t.id === audioTrackId && !!t.frozenFrom);
+  public unfreezeTrack(audioTrackId: string): boolean {
+    if (this.rejectWhileRecorderBusy('unfreezing a track')) return false;
+    const bounce = this.tracks.find((t) => t.id === audioTrackId && !!t.frozenFrom);
     if (!bounce) return false;
     const before = this.exportProjectJSON();
     this.suppressUndoCapture = true;
@@ -3666,18 +3885,40 @@ export class AudioEngine {
     return `Auto-Align Engine quantized ${alignedCount} notes on "${track.name}" (${strengthPct}% phase & grid alignment).`;
   }
 
+  /** How many takes each track has had per style: every Generate gives a different one. */
+  private generatedTakes = new Map<string, number>();
+
+  /**
+   * Writes a pattern in `style` for the track. Each call is a new take on the style's riff (the
+   * first is the plain riff); `asNew` puts it in a new pattern (named after `label`) instead of
+   * replacing the edited one. `commit: false` leaves the undo step to the caller (several parts at once).
+   */
   public generateInstrumentPattern(
     trackId: string,
-    style: 'industrial' | 'acid' | 'bass' | 'chords' | 'melody' | 'arp' | 'drums' | 'euclidean' | 'world'
+    style: 'industrial' | 'acid' | 'bass' | 'chords' | 'melody' | 'arp' | 'drums' | 'euclidean' | 'world',
+    opts: { asNew?: boolean; label?: string; commit?: boolean } = {}
   ): void {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
     const dev = this.devices.get(track.deviceId);
+    const takeKey = `${trackId}|${style}`;
+    const take = this.generatedTakes.get(takeKey) ?? 0;
+    this.generatedTakes.set(takeKey, take + 1);
+    if (opts.asNew) {
+      const label = opts.label || style.charAt(0).toUpperCase() + style.slice(1);
+      this.sequencer.createPattern(trackId, { name: `${label} ${take + 1}` }, false);
+    }
     const len = syncTrackPatterns(track, this.activePatternIndex).length;
     const newSteps: (SequencerNote | null)[] = Array(len).fill(null);
-    // drum machines: kick / snare / closed hat / open hat on their real pads
-    const drumKit = dev?.type === 'redrum' || (dev instanceof SpecDevice && !!dev.spec.pads?.length);
-    const drumNotes = (['kick', 'snare', 'hatC', 'hatO'] as const).map((r) => this.drumNoteFor(dev, r));
+    // drum machines: kick / snare / closed hat / open hat on their real pads (a kit without those
+    // voices, e.g. hand drums, gives its first pads the roles: see kitRolesOf)
+    const roles = this.kitRolesOf(track);
+    const drumKit = !!roles;
+    const pads = this.padNotesOf(track) ?? [];
+    const taken = roles ? [roles.kick, roles.snare, roles.hat] : [];
+    const wantOpen = this.drumNoteFor(dev, 'hatO');
+    const openHat = pads.includes(wantOpen) && !taken.includes(wantOpen) ? wantOpen : (pads.find((p) => !taken.includes(p)) ?? roles?.hat ?? wantOpen);
+    const drumNotes = roles ? [roles.kick, roles.snare, roles.hat, openHat] : (['kick', 'snare', 'hatC', 'hatO'] as const).map((r) => this.drumNoteFor(dev, r));
     const intervals = this.getScaleIntervals(this.scaleType);
     const rootC3 = 48 + this.rootKey;
     const rootC4 = 60 + this.rootKey;
@@ -3786,12 +4027,17 @@ export class AudioEngine {
               };
             }
           } else {
-            if (i % 4 === 0) {
-              newSteps[barOffset + i] = { note: drumKit ? drumNotes[0] : 48, velocity: 1.0, length: 1 };
-            } else if (i % 8 === 4) {
-              newSteps[barOffset + i] = { note: drumKit ? drumNotes[1] : 60, velocity: 0.95, length: 1 };
-            } else if (i % 2 === 1) {
-              newSteps[barOffset + i] = { note: drumKit ? drumNotes[2] : 67, velocity: 0.82, length: 1 };
+            // kick on 1 and 3 (and the "and" of 3), snare on 2 and 4, hats on the 8ths, an open hat before the bar line.
+            // The snare test comes first: it used to sit behind the kick's and never played.
+            const [kick, snare, hat, open] = drumKit ? drumNotes : [48, 60, 67, 72];
+            const hits: number[] = [];
+            if (i % 8 === 4) hits.push(snare);
+            else if (i % 8 === 0 || i === 10) hits.push(kick);
+            if (i === 14) hits.push(open);
+            else if (i % 2 === 0) hits.push(hat);
+            const notes = [...new Set(hits)];
+            if (notes.length) {
+              newSteps[barOffset + i] = { note: notes[0], velocity: i % 4 === 0 ? 1.0 : 0.82, length: 1, chordNotes: notes.length > 1 ? notes.slice(1) : undefined };
             }
           }
         }
@@ -3800,9 +4046,25 @@ export class AudioEngine {
 
     // Only the edited (active) pattern changes; the other patterns of the track are left alone.
     const active = syncTrackPatterns(track, this.activePatternIndex);
-    for (let i = 0; i < active.length; i++) track.steps[i] = newSteps[i] ?? null;
+    let idHash = 2166136261;
+    for (let i = 0; i < trackId.length; i++) idHash = Math.imul(idHash ^ trackId.charCodeAt(i), 16777619);
+    const takeOf = (n: number) =>
+      varySteps(newSteps, n === 0 ? 0 : ((idHash ^ Math.imul(n, 0x9e3779b1)) >>> 0) + style.length || 1, {
+        drumNotes: drumKit ? drumNotes : undefined,
+        snap: (m) => this.snapMidiToScale(m),
+        stepsPerBar: 16,
+      });
+    // Never hand out what another pattern already plays: two instruments asking for the same style
+    // (or one instrument asking again in a new pattern) get different takes.
+    const existing: (SequencerNote | null)[][] = [];
+    for (const t of this.tracks) for (const p of t.patternList ?? []) if (p !== active && p.length === active.length) existing.push(p.steps.slice(0, p.length));
+    let n = take;
+    let varied = takeOf(n);
+    for (let guard = 0; guard < 12 && existing.some((e) => sameSteps(e, varied)); guard++) varied = takeOf(++n);
+    this.generatedTakes.set(takeKey, n + 1);
+    for (let i = 0; i < active.length; i++) track.steps[i] = varied[i] ?? null;
 
-    this.notify();
+    if (opts.commit !== false) this.commitEdit();
   }
 
   /** Click on every beat of the time signature; accent on the downbeat. */
@@ -4083,6 +4345,28 @@ export class AudioEngine {
     };
   }
 
+  /** Pad notes of a track's instrument when it is a drum kit, in pad order (null = a pitched instrument). */
+  public padNotesOf(track: SequencerTrack): number[] | null {
+    const lanes = drumLanesFor(this.devices.get(track.deviceId));
+    return lanes ? lanes.map((l) => l.note) : null;
+  }
+
+  /** Kick / snare / closed hat of a track's instrument when it is a drum kit (null = a pitched instrument). */
+  public kitRolesOf(track: SequencerTrack): { kick: number; snare: number; hat: number } | null {
+    const pads = this.padNotesOf(track);
+    if (!pads?.length) return null;
+    const dev = this.devices.get(track.deviceId);
+    // a kit without those voices (hand drums…) gives its first free pads the roles, so a groove still uses three sounds
+    const used = new Set<number>();
+    const pick = (role: 'kick' | 'snare' | 'hatC', i: number): number => {
+      const want = this.drumNoteFor(dev, role);
+      const note = pads.includes(want) && !used.has(want) ? want : (pads.find((p) => !used.has(p)) ?? pads[i % pads.length]);
+      used.add(note);
+      return note;
+    };
+    return { kick: pick('kick', 0), snare: pick('snare', 1), hat: pick('hatC', 2) };
+  }
+
   /** Note that plays a drum role on an instrument (pads by voice, Redrum lanes, else GM). */
   public drumNoteFor(dev: BaseDevice | undefined, role: 'kick' | 'snare' | 'hatC' | 'hatO' | 'clap' | 'perc'): number {
     const gm = { kick: 36, snare: 38, hatC: 42, hatO: 46, clap: 39, perc: 37 }[role];
@@ -4196,13 +4480,38 @@ export class AudioEngine {
         if (pos < songEnd && next >= songEnd) this.pendingStopTime = this.nextNoteTime;
       }
     }
+    // Pattern mode loops with the patterns: back to the start once every playing pattern has come
+    // round (the transport used to count bars forever, away from what the editors show).
+    if (this.playbackMode === 'pattern_loop' && this.launchOrigin.size === 0) {
+      const cycle = this.patternCycle16ths();
+      if (cycle && next >= cycle) next = 0;
+    }
     const prevBar = this.currentSongBar;
     this.songPosition = next;
     this.currentSongBar = Math.floor(next / this.stepsPerBar);
     this.currentStep = next % Math.max(16, this.patternLength);
-    // Step lights listen per 16th (onStep); the whole UI re-renders only once per bar.
+    // Step lights listen per 16th (onStep), bar readouts per bar (onBar). Playback itself never
+    // re-renders the whole UI: that froze the rack for ~100 ms at every bar line.
     this.stepListeners.forEach((cb) => cb());
-    if (this.currentSongBar !== prevBar) this.notify();
+    if (this.currentSongBar !== prevBar) this.barListeners.forEach((cb) => cb());
+  }
+
+  private barListeners = new Set<() => void>();
+  /** Called when the playing bar changes (readouts that change at most once per bar, e.g. an automated tempo). */
+  public onBar(cb: () => void): () => void {
+    this.barListeners.add(cb);
+    return () => this.barListeners.delete(cb);
+  }
+
+  /** Pattern mode: 16ths until every instrument's edited pattern is back at its start (null = no common loop). */
+  public patternCycle16ths(): number | null {
+    const lens = this.tracks
+      .filter((t) => t.kind !== 'audio' && !t.disabled)
+      .map((t) => {
+        const p = syncTrackPatterns(t, this.activePatternIndex);
+        return p.length * divisionTicks(p.division);
+      });
+    return patternCycle16ths(lens, TICKS_PER_16TH, this.stepsPerBar);
   }
 
   private stepListeners = new Set<() => void>();
@@ -4274,13 +4583,14 @@ export class AudioEngine {
       c.release.value = src.release.value;
       return c;
     };
+    const dcBlock = biquad(this.masterDcBlocker);
     const deEss = biquad(this.outboardDeEsser);
     const tube = ctx.createWaveShaper();
     tube.curve = this.outboardTubeShaper.curve;
     tube.oversample = this.outboardTubeShaper.oversample;
     const opto = comp(this.outboardOptoComp);
     const master = gain(this.masterGain.gain.value);
-    merge.connect(deEss).connect(tube).connect(opto).connect(master);
+    merge.connect(dcBlock).connect(deEss).connect(tube).connect(opto).connect(master);
     const conv = ctx.createConvolver();
     conv.buffer = this.outboardConvolver.buffer && this.outboardConvolver.buffer.sampleRate === ctx.sampleRate ? this.outboardConvolver.buffer : this.buildImpulseResponse(ctx, 1.85, 2.8);
     opto.connect(conv).connect(gain(this.outboardReverbWet.gain.value)).connect(master);
@@ -4596,10 +4906,10 @@ export class AudioEngine {
   }
 
   /** Empties the project (devices, tracks, cables, mixer, markers, module blocks) for New / templates. */
-  public resetProject(): void {
+  public resetProject(): boolean {
+    if (this.rejectWhileRecorderBusy('starting a new project')) return false;
     this.suppressUndoCapture = true;
     try {
-      if (this.recorder.state !== 'idle') void this.recorder.stop();
       this.stopTransport();
       Array.from(this.devices.values()).forEach((d) => this.removeDevice(d.id, true));
       this.tracks = [];
@@ -4635,22 +4945,25 @@ export class AudioEngine {
     undoJournal.clear();
     this.lastTracksJson = '';
     this.notify();
+    return true;
   }
 
   /** New project: the default instruments + Reverb / Delay returns (`empty`: returns only). */
-  public newProject(empty = false): void {
-    this.resetProject();
+  public newProject(empty = false): boolean {
+    if (!this.resetProject()) return false;
     if (empty) {
       this.bpm = 120;
       this.createDefaultReturns();
       this.notify();
-      return;
+      return true;
     }
     this.initDefaultSession();
     this.notify();
+    return true;
   }
 
-  public clearAllRackDevices(): void {
+  public clearAllRackDevices(): boolean {
+    if (this.rejectWhileRecorderBusy('clearing the rack')) return false;
     Array.from(this.devices.keys()).forEach((id) => this.removeDevice(id));
     this.tracks = [];
     this.trackFolders = [];
@@ -4660,13 +4973,15 @@ export class AudioEngine {
     this.cvConnections = [];
     this.rackGroups = [];
     this.notify();
+    return true;
   }
 
   // Optional 1-click manual starter kit if user chooses to unbox a pre-wired ensemble
-  public unboxStarterEnsemble(): void {
-    this.clearAllRackDevices();
+  public unboxStarterEnsemble(): boolean {
+    if (!this.clearAllRackDevices()) return false;
     this.initDefaultSession();
     this.notify();
+    return true;
   }
 
   // ============================================================================

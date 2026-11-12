@@ -105,9 +105,10 @@ function F8Body({ onClose }: { onClose: () => void }) {
 
           <div className="bg-neutral-900/90 p-2 rounded border border-cyan-500/50 space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-cyan-300 text-[11px]">⚡ LOCAL HARDWARE AI GENERATOR</span>
-              <span className="text-[9px] font-mono text-emerald-400">ON-DEVICE</span>
+              <span className="font-bold text-cyan-300 text-[11px]">⚡ LOCAL MIDI ASSISTANT</span>
+              <span className="text-[9px] font-mono text-emerald-400">NO AUDIO GEN</span>
             </div>
+            <div className="text-[10px] text-slate-400">Creates editable MIDI-note suggestions only; it never generates or replaces audio.</div>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 className="px-2 py-1 rounded bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-[10px] text-left truncate"

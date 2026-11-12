@@ -283,7 +283,9 @@ export function normalizeTrackSequencerData(track: SequencerTrack, spb: number, 
   track.arrangementClips = (track.arrangementClips || [])
     .filter((c) => c && typeof c === 'object')
     .map((c) => {
-      const kind = c.kind === 'notes' ? 'notes' : 'pattern';
+      // Audio clips are first-class arrangement clips. Treating every non-note clip as a
+      // pattern here silently rewrote recorded/imported audio on every project reopen.
+      const kind = c.kind === 'notes' || c.kind === 'audio' ? c.kind : 'pattern';
       const clip: ArrangementClip = {
         ...c,
         id: c.id || newSeqId('clip'),
@@ -296,9 +298,16 @@ export function normalizeTrackSequencerData(track: SequencerTrack, spb: number, 
         if (!clip.patternId || !ids.has(clip.patternId)) clip.patternId = active.id;
         delete clip.notes;
         delete clip.loopBars;
-      } else {
+      } else if (kind === 'notes') {
         clip.notes = Array.isArray(c.notes) ? c.notes.filter((n) => n && typeof n.step === 'number') : [];
         if (!(Number(clip.loopBars) > 0)) delete clip.loopBars;
+      } else {
+        // An audio clip never needs a MIDI source. Old/corrupt project data may contain one;
+        // omit it rather than letting a later editor interpret the clip as musical notes.
+        delete clip.patternId;
+        delete clip.patternIndex;
+        delete clip.notes;
+        delete clip.loopBars;
       }
       if (!(Number(clip.offsetSteps) > 0)) delete clip.offsetSteps;
       return clip;

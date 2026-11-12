@@ -36,8 +36,8 @@ async function run(): Promise<void> {
   opener.click();
   await until(() => !!document.querySelector<HTMLElement>('[role="dialog"]'), 'LOAD dialog did not open');
   const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
-  const search = document.querySelector<HTMLInputElement>('[placeholder="Search instruments…"]')!;
-  await until(() => document.activeElement === search, 'Opening LOAD did not focus instrument search');
+  const search = document.querySelector<HTMLInputElement>('[aria-label="Search the browser"]')!;
+  await until(() => document.activeElement === search, 'Opening LOAD did not focus the browser search');
   expect(dialog.getAttribute('aria-modal') === 'true' && dialog.getAttribute('aria-labelledby') === 'patch-browser-title', 'LOAD dialog lost its accessible modal name');
   const entries = focusables(dialog);
   expect(entries.length > 1, 'LOAD did not expose a keyboard focus order');
@@ -56,7 +56,7 @@ async function run(): Promise<void> {
   await until(() => !document.querySelector('[role="dialog"]'), 'Escape did not close LOAD');
   await until(() => document.activeElement === opener, 'Closing LOAD did not restore focus to its opener');
   result.dataset.status = 'passed';
-  result.textContent = 'PASS · LOAD has an accessible modal name, starts at instrument search, wraps Tab and Shift+Tab, closes with Escape, and returns focus to its opener.';
+  result.textContent = 'PASS · LOAD has an accessible modal name, starts at the browser search, wraps Tab and Shift+Tab, closes with Escape, and returns focus to its opener.';
 }
 void run().catch((error: unknown) => {
   result.dataset.status = 'failed';

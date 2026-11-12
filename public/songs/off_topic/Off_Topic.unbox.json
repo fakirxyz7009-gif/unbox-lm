@@ -1,0 +1,407 @@
+{
+  "format": "unbox-project",
+  "version": 4,
+  "bpm": 84.0,
+  "globalSwing": 0.12,
+  "patternLength": 16,
+  "rootKey": "F#",
+  "scaleType": "minor",
+  "timeSignature": "4/4",
+  "sequencer": {
+    "playbackMode": "song_arrangement",
+    "noteChaseEnabled": true,
+    "loopEnabled": false,
+    "loopStartBar": 0,
+    "loopEndBar": 76,
+    "loopFollowsSong": true,
+    "arrangementMinBars": 76,
+    "markers": [
+      {
+        "id": "m1",
+        "name": "Intro (Choral)",
+        "bar": 0,
+        "color": "#06b6d4"
+      },
+      {
+        "id": "m2",
+        "name": "Verse 1",
+        "bar": 8,
+        "color": "#10b981"
+      },
+      {
+        "id": "m3",
+        "name": "Chorus 1",
+        "bar": 16,
+        "color": "#f59e0b"
+      },
+      {
+        "id": "m4",
+        "name": "Breakdown",
+        "bar": 24,
+        "color": "#8b5cf6"
+      },
+      {
+        "id": "m5",
+        "name": "Off The Cuff (Rap)",
+        "bar": 28,
+        "color": "#ef4444"
+      },
+      {
+        "id": "m6",
+        "name": "Verse 2",
+        "bar": 36,
+        "color": "#10b981"
+      },
+      {
+        "id": "m7",
+        "name": "Chorus 2",
+        "bar": 44,
+        "color": "#f59e0b"
+      },
+      {
+        "id": "m8",
+        "name": "Choral Climax",
+        "bar": 54,
+        "color": "#ec4899"
+      },
+      {
+        "id": "m9",
+        "name": "Outro Wash",
+        "bar": 68,
+        "color": "#3b82f6"
+      }
+    ],
+    "activePatternIndex": 0
+  },
+  "devices": [
+    {
+      "id": "dev_vocal",
+      "type": "audio_track",
+      "name": "Lead Vocal",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "volume": 0.9,
+        "pan": 0.0
+      }
+    },
+    {
+      "id": "dev_drums",
+      "type": "audio_track",
+      "name": "Drums & Percussion",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "volume": 0.85,
+        "pan": 0.0
+      }
+    },
+    {
+      "id": "dev_bass",
+      "type": "subtractor",
+      "name": "808 Sub-Bass",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "osc1_wave": 0,
+        "osc1_octave": 1,
+        "osc1_semi": 0,
+        "osc2_wave": 1,
+        "osc2_octave": 2,
+        "osc2_semi": 0,
+        "osc2_level": 0.25,
+        "filter_cutoff": 0.35,
+        "filter_resonance": 0.15,
+        "filter_type": 0,
+        "amp_attack": 0.01,
+        "amp_decay": 0.25,
+        "amp_sustain": 0.75,
+        "amp_release": 0.18
+      }
+    },
+    {
+      "id": "dev_rhodes",
+      "type": "poly_synth",
+      "name": "Rhodes EPiano",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "engine_type": "fm",
+        "carrier_ratio": 1.0,
+        "mod_ratio": 1.0,
+        "mod_index": 2.2,
+        "amp_attack": 0.008,
+        "amp_decay": 0.3,
+        "amp_sustain": 0.6,
+        "amp_release": 0.4
+      }
+    },
+    {
+      "id": "dev_pad",
+      "type": "thor",
+      "name": "Lush Analog Pad",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "filter_cutoff": 0.45,
+        "filter_resonance": 0.2,
+        "amp_attack": 0.6,
+        "amp_decay": 0.4,
+        "amp_sustain": 0.7,
+        "amp_release": 0.8
+      }
+    },
+    {
+      "id": "dev_lead",
+      "type": "europa",
+      "name": "Arp Lead",
+      "isPowered": true,
+      "isBypassed": false,
+      "params": {
+        "filter_cutoff": 0.7,
+        "filter_resonance": 0.3,
+        "amp_attack": 0.005,
+        "amp_decay": 0.04,
+        "amp_sustain": 0.2,
+        "amp_release": 0.05
+      }
+    }
+  ],
+  "tracks": [
+    {
+      "id": "trk_vocal",
+      "name": "Lead Vocal",
+      "deviceId": "dev_vocal",
+      "kind": "audio",
+      "color": "#ec4899",
+      "volume": 0.9,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_vocal_01",
+          "name": "Off Topic Vocal",
+          "kind": "audio",
+          "startBar": 0,
+          "lengthBars": 76,
+          "audioId": "aud_vocal_off_topic",
+          "audioOffset": 0,
+          "gainDb": 0.0,
+          "fadeIn": 0.05,
+          "fadeOut": 1.5
+        }
+      ]
+    },
+    {
+      "id": "trk_drums",
+      "name": "Drums & Percussion",
+      "deviceId": "dev_drums",
+      "kind": "audio",
+      "color": "#f59e0b",
+      "volume": 0.85,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_drums_01",
+          "name": "Drums Full Stem",
+          "kind": "audio",
+          "startBar": 0,
+          "lengthBars": 76,
+          "audioId": "aud_drums_off_topic",
+          "audioOffset": 0,
+          "gainDb": 0.0
+        }
+      ]
+    },
+    {
+      "id": "trk_bass",
+      "name": "808 Sub-Bass",
+      "deviceId": "dev_bass",
+      "kind": "instrument",
+      "color": "#ef4444",
+      "volume": 0.8,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_bass_01",
+          "name": "808 Bass Line",
+          "kind": "notes",
+          "startBar": 8,
+          "lengthBars": 64,
+          "loopBars": 8
+        }
+      ]
+    },
+    {
+      "id": "trk_rhodes",
+      "name": "Rhodes EPiano",
+      "deviceId": "dev_rhodes",
+      "kind": "instrument",
+      "color": "#06b6d4",
+      "volume": 0.7,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_rhodes_01",
+          "name": "Rhodes Chords",
+          "kind": "notes",
+          "startBar": 0,
+          "lengthBars": 76,
+          "loopBars": 8
+        }
+      ]
+    },
+    {
+      "id": "trk_pad",
+      "name": "Lush Analog Pad",
+      "deviceId": "dev_pad",
+      "kind": "instrument",
+      "color": "#8b5cf6",
+      "volume": 0.55,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_pad_01",
+          "name": "Ambient Pad",
+          "kind": "notes",
+          "startBar": 0,
+          "lengthBars": 76,
+          "loopBars": 8
+        }
+      ]
+    },
+    {
+      "id": "trk_lead",
+      "name": "Arp Lead",
+      "deviceId": "dev_lead",
+      "kind": "instrument",
+      "color": "#10b981",
+      "volume": 0.5,
+      "pan": 0.0,
+      "muted": false,
+      "solo": false,
+      "arrangementClips": [
+        {
+          "id": "clip_lead_01",
+          "name": "Arp Plucks",
+          "kind": "notes",
+          "startBar": 16,
+          "lengthBars": 52,
+          "loopBars": 8
+        }
+      ]
+    }
+  ],
+  "audioConnections": [
+    {
+      "s": "dev_vocal",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#ec4899"
+    },
+    {
+      "s": "dev_vocal",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#ec4899"
+    },
+    {
+      "s": "dev_drums",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#f59e0b"
+    },
+    {
+      "s": "dev_drums",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#f59e0b"
+    },
+    {
+      "s": "dev_bass",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#ef4444"
+    },
+    {
+      "s": "dev_bass",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#ef4444"
+    },
+    {
+      "s": "dev_rhodes",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#06b6d4"
+    },
+    {
+      "s": "dev_rhodes",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#06b6d4"
+    },
+    {
+      "s": "dev_pad",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#8b5cf6"
+    },
+    {
+      "s": "dev_pad",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#8b5cf6"
+    },
+    {
+      "s": "dev_lead",
+      "sp": "out_l",
+      "t": "master",
+      "tp": "master_l",
+      "col": "#10b981"
+    },
+    {
+      "s": "dev_lead",
+      "sp": "out_r",
+      "t": "master",
+      "tp": "master_r",
+      "col": "#10b981"
+    }
+  ],
+  "cvConnections": [],
+  "trackFolders": [],
+  "songBlocks": [],
+  "blockPlacements": [],
+  "rackGroups": [],
+  "sections": {
+    "project": {
+      "meta": {
+        "title": "Off Topic (feat. moonchild)",
+        "artist": "Unbox Studio Production",
+        "bpm": 84.0,
+        "key": "F# Minor",
+        "genre": "Neo-Soul / Downtempo / Electronic"
+      },
+      "notes": "Full production produced using the user's uploaded 3:35 vocal stem from wikiloops (#300553: Off Topic by moonchild). Composed in F# Minor at 84 BPM."
+    }
+  }
+}

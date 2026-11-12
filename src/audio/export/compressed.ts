@@ -41,13 +41,18 @@ function id3(meta?: AudioMeta): Uint8Array {
 
 export async function encodeMp3(channels: Float32Array[], sampleRate: number, kbps = 320, meta?: AudioMeta, onProgress?: (f: number) => void): Promise<Blob> {
   if (![32000, 44100, 48000].includes(sampleRate)) throw new Error('MP3 needs 32, 44.1 or 48 kHz.');
+  if (!channels || channels.length === 0 || !channels[0] || channels[0].length === 0) {
+    throw new Error('MP3 encoder received empty channel data.');
+  }
   const { Mp3Encoder } = await import('@breezystack/lamejs');
   const nCh = Math.min(2, channels.length);
   const enc = new Mp3Encoder(nCh, sampleRate, kbps);
   const toInt = (f: Float32Array, from: number, to: number) => {
     const out = new Int16Array(to - from);
     for (let i = from; i < to; i++) {
-      const v = Math.max(-1, Math.min(1, f[i] + (Math.random() - Math.random()) / 32768));
+      const raw = f[i];
+      const samp = Number.isFinite(raw) ? raw : 0;
+      const v = Math.max(-1, Math.min(1, samp + (Math.random() - Math.random()) / 32768));
       out[i - from] = v < 0 ? v * 32768 : v * 32767;
     }
     return out;

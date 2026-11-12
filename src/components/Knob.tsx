@@ -17,7 +17,7 @@ interface KnobProps {
   formatValue?: (val: number) => string;
 }
 
-export const Knob: React.FC<KnobProps> = ({
+const KnobComponent: React.FC<KnobProps> = ({
   label,
   value,
   min,
@@ -32,8 +32,8 @@ export const Knob: React.FC<KnobProps> = ({
   formatValue,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const startYRef = useRef(0);
-  const startValRef = useRef(0);
+  const lastYRef = useRef(0);
+  const currentValRef = useRef(0);
 
   // Store initial value as default reset value if not explicitly provided
   const initialDefaultRef = useRef<number>(
@@ -55,8 +55,8 @@ export const Knob: React.FC<KnobProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
-    startYRef.current = e.clientY;
-    startValRef.current = clampedVal;
+    lastYRef.current = e.clientY;
+    currentValRef.current = clampedVal;
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -69,17 +69,19 @@ export const Knob: React.FC<KnobProps> = ({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
-    startYRef.current = e.touches[0].clientY;
-    startValRef.current = clampedVal;
+    lastYRef.current = e.touches[0].clientY;
+    currentValRef.current = clampedVal;
   };
 
   const handlePointerMove = useCallback(
     (clientY: number, isFine: boolean) => {
-      const deltaY = startYRef.current - clientY;
-      const sensitivity = isFine ? 400 : 150;
+      const deltaY = lastYRef.current - clientY;
+      lastYRef.current = clientY;
+      const sensitivity = isFine ? 500 : 160;
       const range = max - min;
       const deltaVal = (deltaY / sensitivity) * range;
-      let nextVal = startValRef.current + deltaVal;
+      let nextVal = Math.min(max, Math.max(min, currentValRef.current + deltaVal));
+      currentValRef.current = nextVal;
 
       if (step > 0) {
         nextVal = Math.round(nextVal / step) * step;
@@ -322,4 +324,6 @@ export const Knob: React.FC<KnobProps> = ({
     </div>
   );
 };
+
+export const Knob = React.memo(KnobComponent);
 

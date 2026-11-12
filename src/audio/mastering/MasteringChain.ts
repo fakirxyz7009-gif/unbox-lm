@@ -379,7 +379,16 @@ function apply(n: Nodes, s: MasteringState, ctx: BaseAudioContext, smooth: boole
   // imager
   sw(n.img, s.imager.on);
   set(n.img.sideGain.gain, s.imager.width);
-  set(n.img.sideHp.frequency, Math.max(10, s.imager.monoBelow || 10));
+  if (s.imager.monoBelow > 0) {
+    n.img.sideHp.type = 'highpass';
+    set(n.img.sideHp.frequency, Math.max(10, s.imager.monoBelow));
+  } else {
+    // When monoBelow is 0 or disabled, convert to a 0 dB peaking filter (exact identity pass-through)
+    // to prevent 10 Hz highpass phase rotation across the side channel.
+    n.img.sideHp.type = 'peaking';
+    n.img.sideHp.gain.value = 0;
+    set(n.img.sideHp.frequency, 1000);
+  }
   // clipper
   sw(n.clip, s.clipper.on);
   set(n.clip.pre.gain, dbg(s.clipper.driveDb));

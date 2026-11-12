@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStepTick } from '../../nexa/useEngine.ts';
+import { useEscapeKey } from '../../shell/useEscapeKey.ts';
 import { AudioEngine } from '../../audio/AudioEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
 import { SequencerTrack, SequencerNote, DeviceType, InternalOptionCategory } from '../../audio/types.ts';
@@ -7,13 +8,19 @@ import { Knob } from '../Knob.tsx';
 import StepEditor from '../../nexa/StepEditor.tsx';
 import { drumLanesFor } from '../../audio/drumLanes.ts';
 import { PatternManager } from './PatternManager.tsx';
+import { GEN_STYLES, generateFor, setGenStyle, useGenStyle, type GenStyle } from './PatternGenerateMenu.tsx';
 import { ArrangementTimeline } from './arrangement/ArrangementTimeline.tsx';
 import { TrackPanel } from './arrangement/TrackPanel.tsx';
 import { PatternPianoRoll } from './pianoRoll/PatternPianoRoll.tsx';
 import { PianoRollHardwareConsole } from './pianoRoll/PianoRollHardwareConsole.tsx';
 import { syncTrackPatterns } from '../../audio/sequencer/model.ts';
+import { patternToRoll } from './pianoRoll/rollAdapters.ts';
+import { writePatternRoll } from './pianoRoll/patternWrite.ts';
+import { chopNotes, isEditError, legatoToNext, nudgeLengths } from './pianoRoll/rollEdits.ts';
+import { toast } from '../../shell/toast.ts';
 import { SpecDevice } from '../../audio/spec/SpecDevice.ts';
 import { ClipLauncherPanel } from './ClipLauncherPanel.tsx';
+import { SamplerDock } from './pianoRoll/SamplerDock.tsx';
 import { applyTrackAudioAction, type TrackAudioAction } from '../../audio/render/trackAudioActions.ts';
 import { focusClip } from '../../shell/clipFocus.ts';
 import { RECORDED_INSTRUMENT_OPTIONS } from '../../audio/instrumentCatalog.ts';
@@ -123,6 +130,30 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
   const [graphParam, setGraphParam] = useState<GraphLaneId>('velocity');
   const [globalSwing, setGlobalSwing] = useState<number>(audioEngine.globalSwing || 0);
   const [showGeneratorMenu, setShowGeneratorMenu] = useState<boolean>(false);
+  // the menu covers the editor's right-hand controls: Escape or a click outside closes it
+  const generatorMenuRef = useRef<HTMLDivElement>(null);
+  useEscapeKey(() => setShowGeneratorMenu(false), showGeneratorMenu);
+  useEffect(() => {
+    if (!showGeneratorMenu) return;
+    const onDown = (e: PointerEvent) => {
+      if (!generatorMenuRef.current?.contains(e.target as Node)) setShowGeneratorMenu(false);
+    };
+    window.addEventListener('pointerdown', onDown, true);
+    return () => window.removeEventListener('pointerdown', onDown, true);
+  }, [showGeneratorMenu]);
+  // The instrument / generator, song and part rows fold away when the editor is short (the Mixer
+  // tab's split view), so the piano roll keeps its height; a button overrides it either way.
+  const chassisRef = useRef<HTMLDivElement>(null);
+  const [shortEditor, setShortEditor] = useState(false);
+  const [railsChoice, setRailsChoice] = useState<boolean | null>(null);
+  const showRails = railsChoice ?? !shortEditor;
+  useEffect(() => {
+    const el = chassisRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setShortEditor(entry.contentRect.height < 620));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const [activeMenuTrackId, setActiveMenuTrackId] = useState<string | null>(null);
 
   // Piano Roll & Step Grid Surgical Editing + Precision Grid System State
@@ -138,9 +169,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
   const [magneticGridSnap, setMagneticGridSnap] = useState<boolean>(true);
   const [showScaleGuides, setShowScaleGuides] = useState<boolean>(true);
   const [showGhostNotes, setShowGhostNotes] = useState<boolean>(true);
-  const [patternGenStyle, setPatternGenStyle] = useState<
-    'industrial' | 'acid' | 'bass' | 'chords' | 'melody' | 'arp' | 'drums' | 'euclidean' | 'world'
-  >('industrial');
+  const patternGenStyle = useGenStyle();
   const [, setForceUpdate] = useState(0);
 
   // Sync selectedTrackId when activeDeviceId changes (e.g. from bottom StudioKeyboard or Rack)
@@ -264,12 +293,12 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
         }
       }
 
-      // Ctrl + D: generate a pattern for the selected track
+      // Ctrl + D: generate for the selected track. Never over notes: a pattern that has some is kept
+      // and the take goes into a new one (Ctrl+D is Duplicate in the timeline and the piano roll, so
+      // it must not wipe anything here). Ctrl + Shift + D: a new take in place.
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
         e.preventDefault();
-        if (activeTrack) {
-          audioEngine.generateInstrumentPattern(activeTrack.id, patternGenStyle);
-        }
+        if (activeTrack) generateFor(audioEngine, activeTrack, patternGenStyle, !e.shiftKey && activeTrack.steps.some(Boolean));
         return;
       }
 
@@ -385,56 +414,26 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     return null;
   };
 
-  // Change length of a specific note or all notes on active track
-  // Batch extend / reduce note lengths on the active track
-  const handleBatchNoteLengthTransform = (
-    mode: 'inc' | 'dec' | 'double' | 'halve' | 'legato' | 'staccato' | 'chop16'
-  ) => {
+  // Lengths of every note of the active pattern, chord notes included, through the piano roll's
+  // own edits (one undo step each); when nothing applies the reason is shown instead.
+  const handleBatchNoteLengthTransform = (mode: 'inc' | 'dec' | 'legato' | 'chop16') => {
     if (!activeTrack) return;
-
-    const len = gridSteps;
-    const activeIndices: number[] = [];
-    for (let s = 0; s < len; s++) {
-      if (activeTrack.steps[s]) activeIndices.push(s);
+    const end = syncTrackPatterns(activeTrack, audioEngine.activePatternIndex).length;
+    const notes = patternToRoll(activeTrack.steps);
+    const all = new Set<string>();
+    const out =
+      mode === 'inc'
+        ? nudgeLengths(notes, all, 1, 1, end)
+        : mode === 'dec'
+          ? nudgeLengths(notes, all, -1, 1, end)
+          : mode === 'legato'
+            ? legatoToNext(notes, all, end)
+            : chopNotes(notes, all, 1);
+    if (isEditError(out)) {
+      toast(out.error, 'info');
+      return;
     }
-
-    if (mode === 'legato') {
-      for (let i = 0; i < activeIndices.length; i++) {
-        const curStep = activeIndices[i];
-        const nextStep = i + 1 < activeIndices.length ? activeIndices[i + 1] : len;
-        const n = activeTrack.steps[curStep]!;
-        activeTrack.steps[curStep] = { ...n, length: Math.max(1, nextStep - curStep) };
-      }
-    } else if (mode === 'staccato') {
-      activeIndices.forEach((s) => {
-        const n = activeTrack.steps[s]!;
-        activeTrack.steps[s] = { ...n, length: 1 };
-      });
-    } else if (mode === 'chop16') {
-      activeIndices.forEach((s) => {
-        const n = activeTrack.steps[s]!;
-        const origLen = Math.max(1, n.length || 1);
-        for (let k = 0; k < origLen && s + k < len; k++) {
-          activeTrack.steps[s + k] = {
-            ...n,
-            length: 1,
-            velocity: k === 0 ? n.velocity : Math.max(0.5, n.velocity * 0.85),
-          };
-        }
-      });
-    } else {
-      activeIndices.forEach((s) => {
-        const n = activeTrack.steps[s]!;
-        const curL = Math.max(1, n.length || 1);
-        let nextL = curL;
-        if (mode === 'inc') nextL = curL + 1;
-        else if (mode === 'dec') nextL = Math.max(1, curL - 1);
-        else if (mode === 'double') nextL = curL * 2;
-        else if (mode === 'halve') nextL = Math.max(1, Math.floor(curL / 2));
-        activeTrack.steps[s] = { ...n, length: Math.min(len - s, nextL) };
-      });
-    }
-    audioEngine['notify']?.();
+    writePatternRoll(audioEngine, activeTrack, out.notes);
     setForceUpdate((x) => x + 1);
   };
 
@@ -630,32 +629,32 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     setActiveMenuTrackId(null);
   };
 
-  // Multi-Track Ensemble Loop Starters
-  const applyEnsembleStarter = (genre: 'industrial' | 'trap' | 'house' | 'synthwave' | 'dnb') => {
-    tracks.forEach((t, idx) => {
-      const lower = t.name.toLowerCase();
-      if (lower.includes('redrum') || lower.includes('drum') || lower.includes('dhol') || lower.includes('tabla')) {
-        audioEngine.generateInstrumentPattern(t.id, genre === 'industrial' ? 'euclidean' : 'drums');
-      } else if (lower.includes('subtractor') || lower.includes('bass') || lower.includes('monotone')) {
-        audioEngine.generateInstrumentPattern(t.id, genre === 'industrial' ? 'industrial' : 'bass');
-      } else if (lower.includes('3x') || lower.includes('sytrus') || lower.includes('thor')) {
-        audioEngine.generateInstrumentPattern(t.id, genre === 'synthwave' ? 'arp' : 'acid');
-      } else if (lower.includes('flex') || lower.includes('europa')) {
-        audioEngine.generateInstrumentPattern(t.id, 'chords');
-      } else {
-        audioEngine.generateInstrumentPattern(t.id, idx % 2 === 0 ? 'melody' : 'industrial');
-      }
+  // A take for every part at once, each in the role its instrument suggests (one undo step; the tempo stays)
+  const generateAllParts = () => {
+    let leads = 0;
+    const parts = tracks.filter((t) => t.kind !== 'audio');
+    parts.forEach((t) => {
+      const what = `${t.name} ${audioEngine.devices.get(t.deviceId)?.type ?? ''}`.toLowerCase();
+      const style: GenStyle = audioEngine.padNotesOf(t)
+        ? 'drums'
+        : /bass|\bsub\b|monotone/.test(what)
+          ? 'bass'
+          : /pad|string|choir|organ|keys|piano|harmonium|europa|flex/.test(what)
+            ? 'chords'
+            : /pluck|guitar|harp|sitar|tumbi|santoor|mallet|marimba|bell/.test(what)
+              ? 'arp'
+              : leads++ % 2 === 0
+                ? 'melody'
+                : 'industrial';
+      audioEngine.generateInstrumentPattern(t.id, style, { commit: false });
     });
-    if (genre === 'industrial') audioEngine.setBpm(132);
-    else if (genre === 'house') audioEngine.setBpm(126);
-    else if (genre === 'trap') audioEngine.setBpm(140);
-    else if (genre === 'synthwave') audioEngine.setBpm(118);
-    else if (genre === 'dnb') audioEngine.setBpm(174);
+    audioEngine.commitEdit();
+    toast(`New takes for ${parts.length} parts (Ctrl+Z brings the old ones back)`, 'success');
   };
 
   // Add generator
   const handleAddGenerator = (type: DeviceType, customName?: string) => {
-    const dev = audioEngine.createDevice(type, customName);
+    const dev = audioEngine.runStructuralEdit('Add instrument', () => audioEngine.createDevice(type, customName));
     const track = audioEngine.getOrCreateTrackForDevice(dev.id);
     if (track) {
       setSelectedTrackId(track.id);
@@ -690,7 +689,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
       </div>
 
       {/* CENTER WORKSPACE CHASSIS */}
-      <div className="unbox-sequencer-console flex-1 flex flex-col overflow-hidden font-sans border-y shadow-2xl">
+      <div ref={chassisRef} className="unbox-sequencer-console flex-1 flex flex-col overflow-hidden font-sans border-y shadow-2xl">
         {/* 1. TOP MASTER WORKSTATION TOOLBAR: 7 VIEWS, PATTERN BANK, SOLO/TOGETHER PLAYBACK & GENERATOR HOST */}
         <div className="unbox-seq-toprail min-h-[50px] border-b px-3 py-1.5 flex flex-wrap items-center justify-between flex-shrink-0 gap-2">
           {/* Left: 7 Workstation View Tabs with Shortcut Badges + Internal Subsystem Inspector Trigger */}
@@ -802,8 +801,19 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
               METRO {audioEngine.metronomeEnabled ? 'ON' : 'OFF'}
             </button>
 
+            <button
+              type="button"
+              onClick={() => setRailsChoice(!showRails)}
+              aria-pressed={showRails}
+              className="px-2 py-1 rounded font-bold border bg-black/40 text-neutral-300 border-neutral-700 hover:text-white"
+              title="Show / hide the instrument, generator, song and part rows (they fold away by themselves when the editor is short)"
+              data-testid="seq-controls-toggle"
+            >
+              {showRails ? 'HIDE CONTROLS' : 'SHOW CONTROLS'}
+            </button>
+
             {/* + Add Generator / Instrument Hosting Button */}
-            <div className="relative">
+            <div className="relative" ref={generatorMenuRef}>
               <button
                 onClick={() => setShowGeneratorMenu(!showGeneratorMenu)}
                 className="px-2.5 py-1 rounded bg-gradient-to-r from-[#163238] to-[#204952] hover:from-[#204952] hover:to-[#2a5e6a] text-[#c8f5f8] border border-[#32585f] text-xs font-mono font-bold flex items-center space-x-1 shadow-md cursor-pointer"
@@ -852,12 +862,11 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                       { type: 'tumbi' as DeviceType, name: 'Tumbi Folk Resonator', desc: 'High-tension plucked string' },
                       { type: 'tanpura' as DeviceType, name: 'Tanpura & Drone Generator', desc: 'Harmonic overtone drone & string' },
                       { type: 'world_instrument' as DeviceType, customName: 'Royal Sitar', name: 'Royal Sitar (World)', desc: 'Resonant plucked string synth' },
-                      { type: 'world_instrument' as DeviceType, customName: 'Alto Saxophone', name: 'Alto Saxophone (Brass/Wind)', desc: 'Warm expressive reed horn' },
                       { type: 'percussion_electronic' as DeviceType, customName: 'Tropical Steelpan & Marimba', name: 'Steelpan & Marimba', desc: 'Tuned mallet percussion' },
                     ].map((gen, i) => (
                       <button
                         key={`${gen.type}_${i}`}
-                        onClick={() => handleAddGenerator(gen.type, (gen as any).customName)}
+                        onClick={() => handleAddGenerator(gen.type, 'customName' in gen ? gen.customName : undefined)}
                         className="w-full text-left px-2.5 py-1.5 rounded hover:bg-[#064e3b] text-neutral-200 hover:text-emerald-100 transition-colors flex flex-col group"
                       >
                         <span className="font-bold text-white group-hover:text-emerald-300">{gen.name}</span>
@@ -877,7 +886,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
         </div>
 
         {/* 2. SECOND BAR: ACTIVE INSTRUMENT SWITCHER, PER-INSTRUMENT PATTERN GENERATOR & SCALE ENGINE */}
-        <div className="unbox-seq-instrumentrail min-h-[40px] border-b px-3 py-1 flex flex-wrap items-center justify-between text-xs font-mono flex-shrink-0 gap-2">
+        <div className={`unbox-seq-instrumentrail min-h-[40px] border-b px-3 py-1 flex-wrap items-center justify-between text-xs font-mono flex-shrink-0 gap-2 ${showRails ? 'flex' : 'hidden'}`}>
           {/* Active Instrument Selector (Synced with Piano Roll & Bottom MIDI Keyboard) */}
           <div className="flex items-center space-x-2 bg-neutral-900/90 border border-[#2b5860] rounded px-2 py-0.5">
             <Music className="w-3.5 h-3.5 text-cyan-400" />
@@ -908,34 +917,39 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
             <span className="text-[11px] text-amber-300 font-bold">PATTERN GENERATOR:</span>
             <select
               value={patternGenStyle}
-              onChange={(e) => setPatternGenStyle(e.target.value as any)}
+              onChange={(e) => setGenStyle(e.target.value as GenStyle)}
               className="bg-[#18202c] text-amber-200 text-[11px] font-bold px-1.5 py-0.5 rounded border border-amber-600/50"
+              aria-label="Pattern style"
             >
-              <option value="industrial">Industrial EBM Riff (Multi-Step)</option>
-              <option value="acid">Acid 303 Glide Sequence</option>
-              <option value="bass">Sustained Sub & Rolling Bass</option>
-              <option value="chords">Polyphonic Sustained Chords</option>
-              <option value="melody">Expressive Lead / World Phrase</option>
-              <option value="arp">16th-Note Arpeggiator</option>
-              <option value="drums">Industrial Drum Groove</option>
-              <option value="euclidean">Euclidean Polyrhythm (3/8)</option>
+              {GEN_STYLES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
             </select>
             <button
-              onClick={() => {
-                if (!activeTrack) return;
-                audioEngine.generateInstrumentPattern(activeTrack.id, patternGenStyle);
-              }}
+              onClick={() => activeTrack && generateFor(audioEngine, activeTrack, patternGenStyle, false)}
               className="px-2 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold"
-              title="Generate pattern ONLY for the currently selected instrument without erasing other tracks"
+              title="A new take of this style in the pattern you are editing: different every press, other parts untouched (Ctrl+Shift+D)"
+              data-testid="rail-generate"
             >
               GENERATE FOR {activeTrack?.name.split(' ')[0].toUpperCase() || 'INSTRUMENT'}
             </button>
             <button
-              onClick={() => applyEnsembleStarter('industrial')}
+              onClick={() => activeTrack && generateFor(audioEngine, activeTrack, patternGenStyle, true)}
               className="px-2 py-0.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold"
-              title="Generate synchronized patterns across ALL instruments to play together"
+              title="The take goes into a new pattern, so the one you are editing is kept (Ctrl+D)"
+              data-testid="rail-generate-new"
             >
-              GENERATE ALL ENSEMBLE
+              + NEW
+            </button>
+            <button
+              onClick={generateAllParts}
+              className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-amber-200 border border-amber-600/50 text-[11px] font-bold"
+              title="A new take for every part at once: drums a groove, bass a bass line, pads chords, the others a lead or an arpeggio. Replaces the pattern each part is on (one undo step)."
+              data-testid="rail-generate-all"
+            >
+              ALL PARTS
             </button>
           </div>
 
@@ -984,35 +998,10 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
         </div>
 
         {/* 2.5 SEQUENCER SONG ARRANGEMENT & PATTERN PLAYBACK DETECTOR BODY + MAIN SOUND SCULPTOR */}
-        <div className="unbox-seq-songrail border-b px-3 py-2 flex flex-col gap-2 flex-shrink-0 font-mono text-[11px]">
+        <div className={`unbox-seq-songrail border-b px-3 py-2 flex-col gap-2 flex-shrink-0 font-mono text-[11px] ${showRails ? 'flex' : 'hidden'}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             {/* Left: Song & Pattern Playback Detector Engine Status */}
             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-              {/* Playback Scope Mode Switcher */}
-              <div className="flex items-center space-x-1 bg-slate-950 p-0.5 rounded border border-slate-800">
-                {(
-                  [
-                    { id: 'song_arrangement', label: 'SONG · CLIPS', help: 'Playback follows clips placed across the song arrangement.' },
-                    { id: 'pattern_loop', label: 'PATTERN · LOOP', help: 'Playback loops the selected pattern on each track, independent of song clip placement.' },
-                  ] as const
-                ).map((pm) => (
-                  <button
-                    key={pm.id}
-                    onClick={() => audioEngine.setPlaybackMode(pm.id)}
-                    aria-label={pm.help}
-                    aria-pressed={audioEngine.playbackMode === pm.id}
-                    title={pm.help}
-                    className={`px-2 py-0.5 rounded font-bold transition-all ${
-                      audioEngine.playbackMode === pm.id
-                        ? 'bg-cyan-500 text-slate-950'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {pm.label}
-                  </button>
-                ))}
-              </div>
-
               {/* Active Song Bar & Arrangement Section Indicator */}
               <div className="flex items-center space-x-1.5 bg-slate-950/90 px-2.5 py-1 rounded border border-emerald-500/40">
                 <span className="text-slate-400">SONG BAR:</span>
@@ -1084,12 +1073,14 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
           )}
         </div>
 
-        <TrackPanel
-          audioEngine={audioEngine}
-          track={allTracks.find((t) => t.id === selectedTrackId) ?? activeTrack}
-          onOpenRack={onSelectDeviceForRack}
-          onOpenMixer={onNavigateToMixerTrack}
-        />
+        <div className={showRails ? 'contents' : 'hidden'}>
+          <TrackPanel
+            audioEngine={audioEngine}
+            track={allTracks.find((t) => t.id === selectedTrackId) ?? activeTrack}
+            onOpenRack={onSelectDeviceForRack}
+            onOpenMixer={onNavigateToMixerTrack}
+          />
+        </div>
 
         {/* 3. MAIN WORKSPACE VIEW */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -1510,7 +1501,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
 
           {/* VIEW MODE B: FULL MULTI-STEP NOTE-EDITING PIANO ROLL WITH HARDWARE WORKSTATION CONSOLE */}
           {viewMode === 'piano_roll' && activeTrack && (
-            <div className="flex-1 flex flex-col overflow-hidden bg-[#100d0a]">
+            <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-[#100d0a]">
               {(audioActionBusy || audioActionError) && (
                 <p role={audioActionError ? 'alert' : 'status'} className="px-3 py-2 text-sm text-[#ffd699]">
                   {audioActionError ?? 'Rendering track audio…'}
@@ -1553,7 +1544,18 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                 setForceUpdate={setForceUpdate}
               />
 
-              {/* MAIN PIANO ROLL: canvas, all 128 notes, unlimited length (src/components/sequencer/pianoRoll) */}
+              {/* MAIN PIANO ROLL: canvas, all 128 notes, unlimited length (src/components/sequencer/pianoRoll).
+                  SamplerDock: drop audio / library sounds on it to play them chromatically. */}
+              <SamplerDock
+                track={activeTrack}
+                device={activeDevice}
+                onSelectPart={(devId) => {
+                  // the new track is not in this render's list yet: select it through the engine
+                  const t = audioEngine.tracks.find((x) => x.deviceId === devId);
+                  if (t) setSelectedTrackId(t.id);
+                  onTrackSelect?.(devId);
+                }}
+              >
               <PatternPianoRoll
                 audioEngine={audioEngine}
                 track={activeTrack}
@@ -1579,6 +1581,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                 isDrumKit={activeDevice?.type === 'redrum'}
                 padNames={activeDevice instanceof SpecDevice && activeDevice.spec.pads ? new Map(activeDevice.spec.pads.map((pd) => [pd.note, pd.name])) : undefined}
               />
+              </SamplerDock>
             </div>
           )}
 

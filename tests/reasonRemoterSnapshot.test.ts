@@ -29,8 +29,10 @@ interface Snapshot {
 test('Reason Remoter reference snapshot reconciles with its captured and rechecked totals', async () => {
   const snapshotPath = resolve(process.cwd(), 'docs/reason-remoter-snapshot-2026-10-26.json');
   const markdownPath = resolve(process.cwd(), 'docs/REASON_REMOTER_FULL_LIST.md');
+  const truthTablePath = resolve(process.cwd(), 'docs/UNBOX_FEATURE_TRUTH_TABLE.md');
   const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8')) as Snapshot;
   const markdown = await readFile(markdownPath, 'utf8');
+  const truthTable = await readFile(truthTablePath, 'utf8');
 
   assert.equal(snapshot.source, 'https://www.reasonremoter.uk/rack-extension-list/');
   assert.match(snapshot.capturedOn, /^\d{4}-\d{2}-\d{2}$/);
@@ -84,4 +86,5 @@ test('Reason Remoter reference snapshot reconciles with its captured and recheck
   assert.deepEqual(markdownProducts, expectedMarkdownProducts, 'Markdown product rows must match JSON names, categories, developers, versions and dates');
   assert.ok(markdown.includes(`totals were checked again on ${snapshot.totalsLastCheckedOn}`));
   assert.ok(markdown.includes('24 rows as developer “Reason Studios” and 940 as other developers'));
+  assert.ok(truthTable.includes(`its reported totals were rechecked on ${snapshot.totalsLastCheckedOn}`), 'truth table must use the snapshot totals review date');
 });

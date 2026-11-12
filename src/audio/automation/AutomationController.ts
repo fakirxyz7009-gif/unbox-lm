@@ -337,12 +337,16 @@ export class AutomationController {
   }
 
   private ramp(p: AudioParam, v0: number, v1: number, time: number, dur: number): void {
+    const safeV0 = Number.isFinite(v0) ? v0 : 0;
+    const safeV1 = Number.isFinite(v1) ? v1 : safeV0;
+    const safeTime = Math.max(0, Number.isFinite(time) ? time : 0);
+    const safeDur = Math.max(0.001, Number.isFinite(dur) ? dur : 0.02);
     try {
-      p.cancelScheduledValues(time);
-      p.setValueAtTime(v0, time);
-      p.linearRampToValueAtTime(v1, time + dur);
+      p.cancelScheduledValues(safeTime);
+      p.setValueAtTime(safeV0, safeTime);
+      p.linearRampToValueAtTime(safeV1, safeTime + safeDur);
     } catch {
-      // param of a removed node
+      // param of a removed node or time scheduling error
     }
   }
 

@@ -20,11 +20,24 @@ export interface DeviceParam {
   curve?: 'lin' | 'log';
   unit?: string;
   step?: number;
+  /** The faceplate control kind when this is a spec device. */
+  control?: 'knob' | 'fader' | 'toggle' | 'select' | 'buttons';
+  /** Explicit eligibility for a Rack macro's continuous interpolation. */
+  macroMappable?: boolean;
 }
 
 const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 const pretty = (key: string) => key.replace(/([a-z])([A-Z0-9])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
 const LOG_KEYS = /cutoff|freq|attack|decay|release|time|rate/i;
+
+/**
+ * Rack macros interpolate a 0..1 control value into a target range. Do not infer eligibility
+ * from a numeric range: a mode selector can also be encoded as numbers. Parameter producers
+ * must opt in, which makes missing/new metadata safe by default for macro authoring and imports.
+ */
+export function isMacroMappableDeviceParam(param: Pick<DeviceParam, 'macroMappable'>): boolean {
+  return param.macroMappable === true;
+}
 
 export function deviceParams(dev: BaseDevice): DeviceParam[] {
   if (dev instanceof SpecDevice) {
@@ -40,6 +53,8 @@ export function deviceParams(dev: BaseDevice): DeviceParam[] {
       curve: p.curve,
       unit: p.unit,
       step: p.step,
+      control: p.control,
+      macroMappable: !p.options && p.control !== 'toggle' && p.control !== 'select' && p.control !== 'buttons',
     }));
   }
   const ranges = dev instanceof VstPluginDevice ? VST_PARAM_RANGES : BUILTIN_BY_TYPE.get(dev.type)?.params;
@@ -52,5 +67,7 @@ export function deviceParams(dev: BaseDevice): DeviceParam[] {
     value: num(dev.params[key], r.min),
     defaultValue: num(dev.params[key], r.min),
     curve: r.min > 0 && r.max / r.min >= 50 && LOG_KEYS.test(key) ? 'log' : 'lin',
+    control: r.control ?? 'knob',
+    macroMappable: r.macroMappable === true,
   }));
 }

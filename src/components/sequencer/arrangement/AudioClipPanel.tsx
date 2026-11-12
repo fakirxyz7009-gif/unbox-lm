@@ -11,6 +11,7 @@ import type { KeyEstimate } from '../../../../shared/analysis/keyDetection.ts';
 import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { Btn, NumField } from '../../../studio/ui/controls.tsx';
 import { AudioClipWave, useAudioStoreVersion } from './AudioClipWave.tsx';
+import { derivedAudioProvenance } from '../../../../shared/audio/provenance.ts';
 
 /** Peak (linear) of the part of the source a clip plays. */
 export function clipSourcePeak(c: ArrangementClip, bpm: number, spb: number): number {
@@ -88,7 +89,9 @@ export function AudioClipPanel({
   const cleanDcOffset = () => {
     if (!asset) return;
     // A new asset, so other clips that play the original keep their audio; the clip change is one undo step.
-    set({ audioId: audioStore.add(`${asset.name} (DC removed)`, removeDcOffset(asset.buffer)).id });
+    set({ audioId: audioStore.add(`${asset.name} (DC removed)`, removeDcOffset(asset.buffer), {
+      provenance: derivedAudioProvenance(asset.provenance, 'DC offset removed'),
+    }).id });
   };
   const cleanNoise = async () => {
     if (!asset || cleaning) return;
@@ -97,7 +100,9 @@ export function AudioClipPanel({
     try {
       const cleaned = await denoiseBuffer(asset.buffer);
       // A new asset, like Remove DC: the original stays for other clips, and the clip change is one undo step.
-      set({ audioId: audioStore.add(`${asset.name} (clean)`, cleaned).id });
+      set({ audioId: audioStore.add(`${asset.name} (clean)`, cleaned, {
+        provenance: derivedAudioProvenance(asset.provenance, 'RNNoise cleanup'),
+      }).id });
       setCleanMessage('Noise removed with RNNoise. Check it against the original by ear: it can thin out music.');
     } catch (error) {
       setCleanMessage(`Noise removal failed: ${error instanceof Error ? error.message : String(error)}`);

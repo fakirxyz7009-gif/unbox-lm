@@ -13,10 +13,10 @@ interface Props {
 }
 
 /** Compact knob: vertical drag, Shift = fine, wheel, double-click resets, arrow keys. */
-export default function NexaKnob({
+function NexaKnobComponent({
   label, value, min = 0, max = 1, def, color = '#fb923c', size = 34, format, onChange,
 }: Props) {
-  const drag = useRef<{ y: number; v: number } | null>(null);
+  const drag = useRef<{ lastY: number; v: number } | null>(null);
   const span = max - min;
   const norm = Math.max(0, Math.min(1, (value - min) / span));
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
@@ -47,16 +47,24 @@ export default function NexaKnob({
         className="cursor-ns-resize outline-none focus-visible:ring-1 focus-visible:ring-orange-400 rounded-full"
         onPointerDown={(e) => {
           (e.target as Element).setPointerCapture(e.pointerId);
-          drag.current = { y: e.clientY, v: value };
+          drag.current = { lastY: e.clientY, v: value };
         }}
         onPointerMove={(e) => {
-          if (!drag.current) return;
+          const d = drag.current;
+          if (!d) return;
+          const dy = d.lastY - e.clientY;
+          d.lastY = e.clientY;
           const k = e.shiftKey ? 600 : 150;
-          onChange(clamp(drag.current.v + ((drag.current.y - e.clientY) / k) * span));
+          d.v = clamp(d.v + (dy / k) * span);
+          onChange(d.v);
         }}
         onPointerUp={() => (drag.current = null)}
         onDoubleClick={() => def !== undefined && onChange(def)}
-        onWheel={(e) => onChange(clamp(value - Math.sign(e.deltaY) * span * (e.shiftKey ? 0.005 : 0.03)))}
+        onWheel={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onChange(clamp(value - Math.sign(e.deltaY) * span * (e.shiftKey ? 0.005 : 0.03)));
+        }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowUp' || e.key === 'ArrowRight') onChange(clamp(value + span * 0.02));
           if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') onChange(clamp(value - span * 0.02));
@@ -83,3 +91,5 @@ export default function NexaKnob({
     </div>
   );
 }
+
+export default React.memo(NexaKnobComponent);

@@ -87,6 +87,7 @@ export function ProjectsPage() {
 
   const activeTrack = audioEngine.tracks[0];
   const meta = pm.meta;
+  const recordingBusy = audioEngine.recorder.busy;
   const field = (k: keyof typeof meta, label: string, w = 'w-full') => (
     <label className="flex flex-col gap-0.5 text-[11px] uppercase tracking-wider text-slate-500">
       {label}
@@ -114,6 +115,7 @@ export function ProjectsPage() {
           className="bg-transparent text-[13px] font-black text-white outline-none border-b border-transparent focus:border-orange-500 w-64"
         />
         <span className="text-slate-500">{pm.status}{pm.lastSavedAt ? ` · ${ago(pm.lastSavedAt)}` : ''}</span>
+        {recordingBusy && <span className="text-amber-300" role="status">Finishing a take — project changes wait until it is placed.</span>}
         <div className="flex-1" />
         <Btn onClick={() => void run('Save', () => pm.save())} title="Save now (Ctrl+S)"><Save className="inline w-3 h-3" /> Save</Btn>
         <Btn onClick={() => { const l = window.prompt('Version name', `Version ${new Date().toLocaleTimeString()}`); if (l !== null) void run('Save version', () => pm.saveVersion(l)); }} title="Keep a named copy in the history"><History className="inline w-3 h-3" /> Save version</Btn>

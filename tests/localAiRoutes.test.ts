@@ -63,6 +63,21 @@ test('chat refuses requests it cannot use before calling any model', async () =>
   }
 });
 
+test('chat refuses audio generation and replacement requests before contacting a local model', async () => {
+  const { server, base } = await listen();
+  try {
+    const { status, data } = await post(base, {
+      model: 'qwen2.5-coder:3b',
+      message: 'Generate a realistic vocal audio stem and replace the singer.',
+      context,
+    });
+    assert.equal(status, 400);
+    assert.match(String(data.error), /Audio generation and audio replacement are disabled/);
+  } finally {
+    server.close();
+  }
+});
+
 test('a model that is not installed gets a clear message', async () => {
   const status = await fetch('http://127.0.0.1:11434/api/tags', { signal: AbortSignal.timeout(3000) }).then((r) => r.ok).catch(() => false);
   if (!status) return;

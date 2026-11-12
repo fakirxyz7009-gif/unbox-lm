@@ -10,7 +10,8 @@ import type { MonitorState } from '../../audio/mixer/MonitorController.ts';
 import { Btn, Panel, Sel, Slide } from '../ui/controls.tsx';
 import { useFrame } from '../../nexa/useEngine.ts';
 import { clearMidi, learnMidi, MIDI_TARGETS, midiLearning, midiMap, resetMidiMap, subscribeMidiMap } from '../../workstation/midiControls.ts';
-import { localHardwareAi, type HardwareAiBackend } from '../../ai/hardware/localHardwareAiEngine.ts';
+import { localHardwareAi } from '../../ai/hardware/localHardwareAiEngine.ts';
+import { MIDI_NO_INPUT_GUIDANCE } from '../../audio/midi/MidiInput.ts';
 
 const NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function describeMidi(d: Uint8Array): string {
@@ -62,8 +63,9 @@ function MidiPanel() {
         : midi.status !== 'ready'
           ? 'Looking for MIDI devices…'
           : '';
+  const canRetry = midi.status !== 'unsupported' && (midi.status !== 'ready' || midi.ports.length === 0);
   return (
-    <Panel title="MIDI" right={midi.status !== 'ready' && midi.status !== 'unsupported' ? <Btn onClick={() => void midi.enable()}>{midi.status === 'blocked' ? 'Ask again' : 'Connect MIDI'}</Btn> : undefined}>
+    <Panel title="MIDI" right={canRetry ? <Btn onClick={() => void midi.refresh()}>{midi.status === 'ready' ? 'Rescan MIDI' : midi.status === 'blocked' ? 'Ask again' : 'Connect MIDI'}</Btn> : undefined}>
       <div className="space-y-2 text-[11px]" data-testid="midi-panel">
         {status && <div className="text-amber-300">{status}</div>}
         <div className="text-slate-400">
@@ -85,7 +87,7 @@ function MidiPanel() {
         )}
         {midi.status === 'ready' &&
           (midi.ports.length === 0 ? (
-            <div className="text-slate-500">No MIDI input connected. Plug one in — it appears here without a reload.</div>
+            <div className="text-slate-500">{MIDI_NO_INPUT_GUIDANCE}</div>
           ) : (
             <ul className="space-y-0.5">
               {midi.ports.map((p) => (
@@ -266,14 +268,14 @@ function HardwareAiPanel() {
     >
       <div className="space-y-3 text-[11px]" data-testid="hardware-ai-settings-panel">
         <div className="text-slate-400">
-          The rack planner, preset crafter and mix analysis run in this app on this computer. WebGPU is probed for the adapter details below. A local Ollama server, when it is running, answers chat questions. None of this path sends prompts, song state or audio to a cloud service; the CLOUD switch in the Co-Pilot does, when you choose it.
+          The rack planner, preset crafter and mix analysis run in this app on this computer. They only produce control suggestions—never generated audio or replacement instrument sounds. WebGPU is probed for the adapter details below. A local Ollama server, when it is running, answers chat questions. None of this path sends prompts, song state or audio to a cloud service; the CLOUD switch in the Co-Pilot does, when you choose it.
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono pt-1 border-t border-slate-800">
-          <span className="text-slate-400">Physical GPU Vendor</span>
+          <span className="text-slate-400">Graphics adapter</span>
           <span className="text-cyan-300 font-bold">{hwState.gpu.vendor}</span>
 
-          <span className="text-slate-400">WebGPU Acceleration</span>
+          <span className="text-slate-400">WebGPU (probed, not used)</span>
           <span className={hwState.gpu.supported ? 'text-emerald-400' : 'text-amber-400'}>
             {hwState.gpu.supported ? 'Adapter found (probed)' : 'No WebGPU adapter'}
           </span>
@@ -284,7 +286,7 @@ function HardwareAiPanel() {
           <span className="text-slate-400">Max GPU Buffer</span>
           <span className="text-slate-200">{hwState.gpu.maxBufferSizeMb ? `${hwState.gpu.maxBufferSizeMb} MB` : 'Dynamic System RAM'}</span>
 
-          <span className="text-slate-400">Local Neural Daemon</span>
+          <span className="text-slate-400">Local model (Ollama)</span>
           <span className={hwState.daemonOnline ? 'text-emerald-400' : 'text-slate-400'}>
             {hwState.daemonOnline ? `Online (${hwState.daemonModels.length} models installed)` : 'Not running (the built-in rule engine answers)'}
           </span>
@@ -295,7 +297,7 @@ function HardwareAiPanel() {
 
         <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
           <Btn on tone="cyan" disabled={isBenchmarking} onClick={() => void runBenchmark()}>
-            {isBenchmarking ? 'Running GPU Shader Benchmark…' : 'Benchmark on-device AI'}
+            {isBenchmarking ? 'Timing the planner…' : 'Time the local planner'}
           </Btn>
           {benchmarkLatency !== null && (
             <span className="font-mono text-emerald-400">

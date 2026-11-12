@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ASSISTANT_LIMITS, checkAssistantReply, type AssistantContext } from '../shared/localAi/assistant.ts';
+import { ASSISTANT_LIMITS, audioGenerationRequestRejection, checkAssistantReply, type AssistantContext } from '../shared/localAi/assistant.ts';
 
 const context: AssistantContext = {
   bpm: 120,
@@ -94,4 +94,12 @@ test('reply text loses control characters and is cut to the limit', () => {
   const out = checked({ reply: `hi\u0007 there ${'x'.repeat(2000)}` });
   assert.ok(!out.reply.includes('\u0007'));
   assert.equal(out.reply.length, ASSISTANT_LIMITS.maxReplyChars);
+});
+
+test('audio generation or replacement requests are refused while symbolic music requests remain available', () => {
+  assert.match(audioGenerationRequestRejection('Generate a realistic singer vocal audio stem') ?? '', /disabled/i);
+  assert.match(audioGenerationRequestRejection('Replace this piano recording with an AI sound') ?? '', /disabled/i);
+  assert.match(audioGenerationRequestRejection('Convert the voice to another singer') ?? '', /disabled/i);
+  assert.equal(audioGenerationRequestRejection('Generate a minor chord progression in the piano roll'), null);
+  assert.equal(audioGenerationRequestRejection('Write a house drum beat as MIDI notes'), null);
 });

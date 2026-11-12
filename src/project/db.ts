@@ -5,9 +5,9 @@
  */
 
 export const DB_NAME = 'unbox-studio';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
-export type StoreName = 'projects' | 'versions' | 'audio' | 'samples' | 'presets' | 'media' | 'settings';
+export type StoreName = 'projects' | 'versions' | 'audio' | 'samples' | 'presets' | 'media' | 'settings' | 'recordingJournal';
 const STORES: { name: StoreName; key: string; indexes?: string[] }[] = [
   { name: 'projects', key: 'id', indexes: ['updatedAt'] },
   { name: 'versions', key: 'id', indexes: ['projectId'] },
@@ -16,6 +16,7 @@ const STORES: { name: StoreName; key: string; indexes?: string[] }[] = [
   { name: 'presets', key: 'id', indexes: ['deviceType'] },
   { name: 'media', key: 'id' },
   { name: 'settings', key: 'key' },
+  { name: 'recordingJournal', key: 'id', indexes: ['sessionId'] },
 ];
 
 let opening: Promise<IDBDatabase> | null = null;
@@ -65,10 +66,31 @@ export async function dbPut<T>(store: StoreName, value: T): Promise<void> {
   await committed(tx, tx.objectStore(store).put(value));
 }
 
+/** Writes a bounded batch in one transaction (used for non-realtime recovery journaling). */
+export async function dbPutMany<T>(store: StoreName, values: T[]): Promise<void> {
+  if (!values.length) return;
+  const db = await openDb();
+  const tx = db.transaction(store, 'readwrite');
+  const os = tx.objectStore(store);
+  let last: IDBRequest | null = null;
+  values.forEach((value) => { last = os.put(value); });
+  await committed(tx, last!);
+}
+
 export async function dbDelete(store: StoreName, key: string): Promise<void> {
   const db = await openDb();
   const tx = db.transaction(store, 'readwrite');
   await committed(tx, tx.objectStore(store).delete(key));
+}
+
+export async function dbDeleteMany(store: StoreName, keys: string[]): Promise<void> {
+  if (!keys.length) return;
+  const db = await openDb();
+  const tx = db.transaction(store, 'readwrite');
+  const os = tx.objectStore(store);
+  let last: IDBRequest | null = null;
+  keys.forEach((key) => { last = os.delete(key); });
+  await committed(tx, last!);
 }
 
 export async function dbAll<T>(store: StoreName): Promise<T[]> {

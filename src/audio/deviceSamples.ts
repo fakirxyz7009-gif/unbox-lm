@@ -24,8 +24,20 @@ export interface KeySample {
   /** Linear gain (1 = 0 dB). */
   level: number;
   attack: number;
+  /** Seconds from the attack peak to the sustain level (older projects: none = 0.3). */
+  decay?: number;
+  /** Held level, 0..1 of the peak (none = 1). */
+  sustain?: number;
   release: number;
+  /** Repeat the loop region while the key is held (then the release). */
   loop: boolean;
+  /** Loop region in seconds of the file (none = the whole file). */
+  loopStart?: number;
+  loopEnd?: number;
+  /** 'gate': the note stops at key-up; 'oneShot': the whole file plays (drums, chops). Ignored while looping. */
+  mode?: 'gate' | 'oneShot';
+  /** Seconds into the file where every note starts (skips leading silence; none = 0). */
+  start?: number;
 }
 
 export interface PadSample {
@@ -84,7 +96,7 @@ export interface DeviceSampleState {
   multiSample?: MultiSampleZone[];
 }
 
-export const DEFAULT_KEY_SAMPLE: Omit<KeySample, 'audioId'> = { root: 60, tune: 0, level: 1, attack: 0.003, release: 0.25, loop: false };
+export const DEFAULT_KEY_SAMPLE: Omit<KeySample, 'audioId'> = { root: 60, tune: 0, level: 1, attack: 0.003, decay: 0.3, sustain: 1, release: 0.25, loop: false, mode: 'gate' };
 const MAX_VOICES = 64;
 
 const samples = new Map<string, DeviceSampleState>();
@@ -230,11 +242,126 @@ export function detectPitch(buffer: AudioBuffer): { note: number; cents: number 
   return { note, cents: Math.round((midi - note) * 100) };
 }
 
+function monoOf(buffer: AudioBuffer): Float32Array {
+  const mono = new Float32Array(buffer.length);
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const d = buffer.getChannelData(c);
+    for (let i = 0; i < d.length; i++) mono[i] += d[i] / buffer.numberOfChannels;
+  }
+  return mono;
+}
+
+/** 20 ms RMS blocks of the mono mix. */
+function envelope(mono: Float32Array, sr: number): { block: number; rms: Float32Array; peakAt: number; peak: number } {
+  const block = Math.max(1, Math.round(sr * 0.02));
+  const rms = new Float32Array(Math.floor(mono.length / block));
+  let peak = 0;
+  let peakAt = 0;
+  for (let b = 0; b < rms.length; b++) {
+    let s = 0;
+    for (let i = b * block; i < (b + 1) * block; i++) s += mono[i] * mono[i];
+    rms[b] = Math.sqrt(s / block);
+    if (rms[b] > peak) {
+      peak = rms[b];
+      peakAt = b;
+    }
+  }
+  return { block, rms, peakAt, peak };
+}
+
+/** How the file behaves after its attack: dies away (drum, pluck) or holds (organ, harmonium, pad). */
+function envelopeShape(buffer: AudioBuffer, mono: Float32Array): { percussive: boolean; sustained: boolean } {
+  const { rms, peakAt, peak } = envelope(mono, buffer.sampleRate);
+  if (peak < 1e-4 || rms.length < 4) return { percussive: true, sustained: false };
+  // percussive: under −20 dB of the peak within 400 ms
+  const within = Math.min(rms.length, peakAt + 20);
+  let percussive = false;
+  for (let b = peakAt; b < within; b++) if (rms[b] < peak * 0.1) percussive = true;
+  // sustained: from 60 ms after the peak to 80 % of the file it stays above −9 dB
+  const from = peakAt + 3;
+  const to = Math.floor(rms.length * 0.8);
+  let sustained = buffer.duration >= 0.6 && buffer.duration <= 12 && to - from >= 10;
+  for (let b = from; sustained && b < to; b++) if (rms[b] < peak * 0.35) sustained = false;
+  return { percussive, sustained };
+}
+
+/** Where the sound begins (seconds): the first 20 ms block above −40 dB of the loudest, less 5 ms; 0 when that is under 20 ms in. */
+export function soundStart(buffer: AudioBuffer, mono: Float32Array = monoOf(buffer)): number {
+  const { block, rms, peak } = envelope(mono, buffer.sampleRate);
+  if (peak < 1e-4) return 0;
+  const first = rms.findIndex((r) => r >= peak * 0.01);
+  const sec = Math.max(0, (first * block) / buffer.sampleRate - 0.005);
+  return sec >= 0.02 ? Math.round(sec * 1000) / 1000 : 0;
+}
+
+const risingZeroAfter = (x: Float32Array, i: number) => {
+  for (let k = Math.max(1, i); k < x.length; k++) if (x[k - 1] < 0 && x[k] >= 0) return k;
+  return -1;
+};
+
+/**
+ * A loop region in the held part of a sample (seconds), matched so the waveform at the loop end
+ * continues the one at the loop start: both on rising zero crossings, the end chosen among the
+ * crossings before `to` for the smallest difference over the next 10 ms. Null when there is no
+ * held part long enough.
+ */
+export function findLoopPoints(buffer: AudioBuffer, from?: number, to?: number): { start: number; end: number } | null {
+  const sr = buffer.sampleRate;
+  const mono = monoOf(buffer);
+  const { block, rms, peakAt, peak } = envelope(mono, sr);
+  if (peak < 1e-4) return null;
+  let lastLoud = rms.length - 1;
+  while (lastLoud > peakAt && rms[lastLoud] < peak * 0.35) lastLoud--;
+  const s0 = from !== undefined ? Math.round(from * sr) : Math.max((peakAt + 3) * block, Math.round(mono.length * 0.2));
+  const e0 = to !== undefined ? Math.round(to * sr) : Math.min(mono.length - 1, lastLoud * block);
+  const W = Math.round(sr * 0.01);
+  const start = risingZeroAfter(mono, s0);
+  if (start < 0 || e0 - start < sr * 0.05) return null;
+  const searchFrom = Math.max(start + Math.round(sr * 0.05), e0 - Math.round(sr * 0.05));
+  let best = -1;
+  let bestErr = Infinity;
+  for (let i = risingZeroAfter(mono, searchFrom); i > 0 && i <= e0; i = risingZeroAfter(mono, i + 1)) {
+    if (i + W >= mono.length) break;
+    let err = 0;
+    for (let k = 0; k < W; k++) {
+      const d = mono[start + k] - mono[i + k];
+      err += d * d;
+    }
+    if (err < bestErr) {
+      bestErr = err;
+      best = i;
+    }
+  }
+  return best > start ? { start: start / sr, end: best / sr } : null;
+}
+
+/**
+ * Settings for a freshly loaded file: root from its pitch (C4 when it has none), one-shot for
+ * percussive or unpitched sounds, a loop for short held sounds.
+ */
+export function keySampleDefaults(buffer: AudioBuffer): Omit<KeySample, 'audioId'> {
+  const pitch = detectPitch(buffer);
+  const mono = monoOf(buffer);
+  const start = soundStart(buffer, mono);
+  const base: Omit<KeySample, 'audioId'> = {
+    ...DEFAULT_KEY_SAMPLE,
+    root: pitch?.note ?? DEFAULT_KEY_SAMPLE.root,
+    tune: pitch ? -pitch.cents : 0,
+    ...(start > 0 ? { start } : {}),
+  };
+  const shape = envelopeShape(buffer, mono);
+  if (!pitch || shape.percussive) return { ...base, mode: 'oneShot' };
+  if (shape.sustained) {
+    const lp = findLoopPoints(buffer);
+    if (lp) return { ...base, loop: true, loopStart: lp.start, loopEnd: lp.end };
+  }
+  return base;
+}
+
 /** Decodes a file into the audio store and makes it the instrument's sound (keys mode). */
 export async function loadKeySampleFile(deviceId: string, file: File | Blob): Promise<KeySample> {
   const asset = await audioStore.importFile(file);
-  const pitch = detectPitch(asset.buffer);
-  const sample: KeySample = { ...DEFAULT_KEY_SAMPLE, audioId: asset.id, root: pitch?.note ?? DEFAULT_KEY_SAMPLE.root, tune: pitch ? -pitch.cents : 0 };
+  const sample: KeySample = { ...keySampleDefaults(asset.buffer), audioId: asset.id };
   setKeySample(deviceId, sample);
   return sample;
 }
@@ -654,7 +781,25 @@ export function installSampleVoice(dev: BaseDevice): void {
       }
       const k = st.keys;
       const keyBuf = k && audioStore.get(k.audioId)?.buffer;
-      if (k && keyBuf) return play(dev, note, keyBuf, { rate: Math.pow(2, (note - k.root + k.tune / 100) / 12), level: k.level, attack: k.attack, release: k.release, loop: k.loop, oneShot: false }, velocity, time);
+      if (k && keyBuf) {
+        // a loop region must sit inside the file and be at least a few milliseconds long
+        const ls = k.loop && k.loopStart !== undefined && k.loopEnd !== undefined && k.loopEnd - k.loopStart > 0.002 && k.loopEnd <= keyBuf.duration
+          ? { loopStart: Math.max(0, k.loopStart), loopEnd: k.loopEnd }
+          : {};
+        return play(dev, note, keyBuf, {
+          rate: Math.pow(2, (note - k.root + k.tune / 100) / 12),
+          level: k.level,
+          attack: k.attack,
+          decay: k.decay ?? 0.3,
+          sustain: k.sustain ?? 1,
+          release: k.release,
+          loop: k.loop,
+          ...ls,
+          oneShot: !k.loop && k.mode === 'oneShot',
+          // start inside the file, before the loop end so a loop still has something to repeat
+          offset: Math.max(0, Math.min(k.start ?? 0, (ls.loopEnd ?? keyBuf.duration) - 0.01)),
+        }, velocity, time);
+      }
     }
     noteOn(note, velocity, time);
   };
@@ -690,8 +835,15 @@ function parseKey(raw: unknown): KeySample | undefined {
     tune: num(k.tune, d.tune, -100, 100),
     level: num(k.level, d.level, 0, 4),
     attack: num(k.attack, d.attack, 0.001, 5),
+    decay: num(k.decay, d.decay ?? 0.3, 0.001, 10),
+    sustain: num(k.sustain, d.sustain ?? 1, 0, 1),
     release: num(k.release, d.release, 0.01, 10),
     loop: k.loop === true,
+    ...(typeof k.loopStart === 'number' && typeof k.loopEnd === 'number' && k.loopEnd > k.loopStart
+      ? { loopStart: num(k.loopStart, 0, 0, 3600), loopEnd: num(k.loopEnd, 0, 0, 3600) }
+      : {}),
+    mode: k.mode === 'oneShot' ? 'oneShot' : 'gate',
+    ...(typeof k.start === 'number' && k.start > 0 ? { start: num(k.start, 0, 0, 3600) } : {}),
   };
 }
 

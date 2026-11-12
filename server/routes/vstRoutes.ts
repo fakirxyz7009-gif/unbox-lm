@@ -4,7 +4,7 @@
  * a request can never name a filesystem path.
  */
 import path from 'node:path';
-import express, { type Request } from 'express';
+import express from 'express';
 import { ITEM_KINDS, type ItemKind, type SoundCategory } from '../../shared/vst/manifestTypes.ts';
 import { searchManifest } from '../../shared/vst/search.ts';
 import type { ManifestStore } from '../vst/manifestStore.ts';

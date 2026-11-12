@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, Keyboard, Zap, Music, Sliders, Layers, Cpu, MousePointer2 } from 'lucide-react';
 
 interface ShortcutHelpModalProps {
@@ -12,6 +12,15 @@ interface Item {
   label: string;
   /** Global action run when the row is clicked (see App.handleTriggerShortcutAction). */
   action?: string;
+}
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableChildren(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((element) => {
+    const style = window.getComputedStyle(element);
+    return element.tabIndex >= 0 && style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
+  });
 }
 
 /** Only keys that the app really handles (App.tsx, SequencerView.tsx, the rack and the keyboards). */
@@ -78,11 +87,13 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
     items: [
       { key: 'Q W E R', label: 'Select · Pencil · Eraser · Razor' },
       { key: 'T Y U', label: 'Mute · Zoom (Alt-click = out) · Hand' },
-      { key: 'B', label: 'Block / Song' },
+      { key: 'B', label: 'Pattern / Song (what the transport plays)' },
       { key: 'L  /  C', label: 'Loop on / off · Click on / off', action: 'toggle_loop' },
       { key: 'Enter', label: 'Edit Mode: open the selected clip' },
       { key: 'Ctrl+wheel / Alt+wheel', label: 'Zoom time / lane height' },
       { key: 'Del · Ctrl+D · M', label: 'Delete · duplicate · mute the selected clips' },
+      { key: 'Ctrl+C · Ctrl+X · Ctrl+V', label: 'Copy · cut · paste clips (paste goes to the selected part, at the edit cursor)' },
+      { key: 'Drag a clip to another part', label: 'Moves it there with its pattern (Alt = copy)' },
     ],
   },
   {
@@ -102,7 +113,8 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
       { key: 'Alt+← / →', label: 'Shorten / lengthen the notes' },
       { key: 'Alt+↑ / ↓', label: 'Transpose ±1 semitone' },
       { key: '−  /  =', label: 'Halve / double the pattern length' },
-      { key: 'Ctrl+D', label: 'Generate a pattern for the selected track' },
+      { key: 'Ctrl+D', label: 'Generate for the selected track (into a new pattern when the edited one has notes)' },
+      { key: 'Ctrl+Shift+D', label: 'Generate a new take in the edited pattern' },
     ],
   },
   {
@@ -151,25 +163,76 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
 ];
 
 export const ShortcutHelpModal: React.FC<ShortcutHelpModalProps> = ({ isOpen, onClose, onTriggerShortcutAction }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = window.requestAnimationFrame(() => closeRef.current?.focus({ preventScroll: true }));
+    return () => {
+      window.cancelAnimationFrame(frame);
+      const opener = returnFocusRef.current;
+      if (opener?.isConnected) window.requestAnimationFrame(() => opener.focus({ preventScroll: true }));
+    };
+  }, [isOpen]);
+
+  const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    // Do not allow a key read as a shortcut-help interaction to reach the live workstation.
+    event.stopPropagation();
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const targets = focusableChildren(dialog);
+    if (!targets.length) {
+      event.preventDefault();
+      dialog.focus({ preventScroll: true });
+      return;
+    }
+    const first = targets[0];
+    const last = targets[targets.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !dialog.contains(active))) {
+      event.preventDefault();
+      last.focus({ preventScroll: true });
+    } else if (!event.shiftKey && (active === last || !dialog.contains(active))) {
+      event.preventDefault();
+      first.focus({ preventScroll: true });
+    }
+  };
+
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 select-none" onClick={onClose}>
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="w-full max-w-6xl max-h-[90vh] bg-[#080b11] border border-cyan-500/50 rounded-xl shadow-2xl flex flex-col overflow-hidden font-mono"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="Keyboard shortcuts"
+        aria-modal="true"
+        aria-labelledby="shortcut-help-title"
+        onKeyDown={onDialogKeyDown}
       >
         <div className="px-5 py-3 bg-[#0b1322] border-b border-cyan-500/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Keyboard className="w-5 h-5 text-cyan-400" />
             <div>
-              <h2 className="text-sm font-black tracking-widest text-white uppercase">Keyboard shortcuts</h2>
+              <h2 id="shortcut-help-title" className="text-sm font-black tracking-widest text-white uppercase">Keyboard shortcuts</h2>
               <p className="text-[11px] text-slate-400">Keys work anywhere except while typing in a field. Click a row to run it.</p>
             </div>
           </div>
           <button
+            ref={closeRef}
+            type="button"
             onClick={onClose}
+            aria-label="Close keyboard shortcuts"
             className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
           >
             <span>ESC</span>
@@ -186,18 +249,22 @@ export const ShortcutHelpModal: React.FC<ShortcutHelpModalProps> = ({ isOpen, on
                   <span className="text-[11px] font-black tracking-wider uppercase">{group.title}</span>
                 </div>
                 <div className="space-y-1.5">
-                  {group.items.map((item) => (
-                    <div
-                      key={item.key}
-                      onClick={() => item.action && onTriggerShortcutAction?.(item.action)}
-                      className={`flex items-center justify-between gap-2 p-1.5 rounded bg-[#070a12] border border-slate-800/80 ${
-                        item.action ? 'hover:border-cyan-500/50 hover:bg-cyan-950/20 cursor-pointer' : ''
-                      }`}
-                    >
+                  {group.items.map((item) => {
+                    const className = `flex w-full items-center justify-between gap-2 rounded border border-slate-800/80 bg-[#070a12] p-1.5 text-left ${
+                      item.action ? 'cursor-pointer hover:border-cyan-500/50 hover:bg-cyan-950/20' : ''
+                    }`;
+                    const content = <>
                       <span className="text-[11px] text-slate-300 leading-tight">{item.label}</span>
                       <kbd className="px-2 py-0.5 rounded bg-slate-900 text-cyan-300 border border-cyan-500/40 text-[11px] font-black whitespace-nowrap">{item.key}</kbd>
-                    </div>
-                  ))}
+                    </>;
+                    return item.action ? (
+                      <button key={item.key} type="button" onClick={() => onTriggerShortcutAction?.(item.action!)} className={className}>
+                        {content}
+                      </button>
+                    ) : (
+                      <div key={item.key} className={className}>{content}</div>
+                    );
+                  })}
                 </div>
               </div>
             );

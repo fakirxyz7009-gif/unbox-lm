@@ -1,7 +1,8 @@
 /**
- * Stem separation with Deezer Spleeter and Demucs models, run locally on this computer
- * (server/routes/separationRoutes.ts). The browser sends one WAV; the server returns the stems the chosen
- * model writes as WAV: four (htdemucs) or six, which add guitar and piano (htdemucs_6s).
+ * Optional trained, non-generative source separation with Deezer Spleeter and Demucs, run locally
+ * on this computer (server/routes/separationRoutes.ts). The browser sends one selected-source WAV;
+ * the server returns derived stems from the chosen model. A per-session explicit consent signal is
+ * required in both the browser and loopback route; model output is never a verified recording.
  */
 import type { AudioAsset } from '../clips/audioStore.ts';
 import { encodeWav } from '../export/wav.ts';
@@ -41,21 +42,25 @@ export async function fetchDemucsStatus(): Promise<DemucsStatus | null> {
   }
 }
 
-/** The asset's audio as a 16-bit WAV, the format the separator reads. */
+/** The asset's audio as a 24-bit WAV to preserve full dynamic range without clipping. */
 export function assetToWav(asset: AudioAsset): Blob {
   const { buffer } = asset;
   const channels = Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c));
-  return encodeWav(channels, buffer.sampleRate, { bitDepth: 16, dither: false });
+  return encodeWav(channels, buffer.sampleRate, { bitDepth: 24, dither: false });
 }
 
 /** Sends the audio to the separator and downloads each stem its model returned. */
 export async function separateWithDemucs(
   wav: Blob,
   onStatus?: (text: string) => void,
-  options: { engine?: 'spleeter' | 'demucs'; model?: DemucsModel } = {}
+  options: { engine?: 'spleeter' | 'demucs'; model?: DemucsModel; consent?: boolean } = {}
 ): Promise<Partial<Record<DemucsStem, Blob>>> {
+  if (options.consent !== true) {
+    throw new Error('Explicit consent is required before a trained Spleeter or Demucs model can process audio.');
+  }
   onStatus?.('Sending source audio to the local Spleeter / Demucs separator…');
   const query = new URLSearchParams();
+  query.set('consent', 'trained-model-separation');
   if (options.engine) query.set('engine', options.engine);
   if (options.model) query.set('model', options.model);
   const suffix = query.toString() ? `?${query.toString()}` : '';

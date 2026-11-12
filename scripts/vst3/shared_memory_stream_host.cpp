@@ -392,6 +392,10 @@ int workerMain(const wchar_t* pluginArgument, const wchar_t* mappingName,
     AudioBusBuffers outputBus{};
     outputBus.numChannels = 2;
     outputBus.channelBuffers32 = outputChannels;
+    // The event-list capacity is fixed by the shared block protocol. Constructing EventList
+    // allocates its backing array, so keep one list for the worker lifetime and clear it per
+    // block rather than allocating/freeing in the real-time processing loop.
+    EventList events(static_cast<int32_t>(kMaxMidiEvents));
     InterlockedExchange(&region->ready, 1);
     SetEvent(outputEvent);
 
@@ -413,8 +417,8 @@ int workerMain(const wchar_t* pluginArgument, const wchar_t* mappingName,
                 signalError(region, outputEvent, 14);
                 break;
             }
-            EventList events(static_cast<int32_t>(kMaxMidiEvents));
             if (midiInstrument) {
+                events.clear();
                 if (slot.eventCount > kMaxMidiEvents) {
                     signalError(region, outputEvent, 15);
                     break;
@@ -508,6 +512,7 @@ int parentMain(const std::filesystem::path& pluginPath, bool paced, bool midiIns
     PROCESS_INFORMATION process{};
     std::vector<PendingBlock> pending;
     std::vector<double> roundTripMs;
+    std::vector<uint32_t> missedDeadlineSequences;
     bool processStarted = false;
     bool highResolutionTimer = false;
     uint32_t acknowledgements = 0;
@@ -611,6 +616,7 @@ int parentMain(const std::filesystem::path& pluginPath, bool paced, bool midiIns
                     if (paced && !item.deadlineMissed && now.QuadPart >= item.deadline.QuadPart) {
                         item.deadlineMissed = true;
                         ++deadlineMisses;
+                        missedDeadlineSequences.push_back(item.sequence);
                     }
                     ++index;
                 }
@@ -636,6 +642,10 @@ int parentMain(const std::filesystem::path& pluginPath, bool paced, bool midiIns
                 consumeCompleted(now);
             }
 
+            if (readLong(&region->error) != 0)
+                throw std::runtime_error("VST3 worker reported shared audio ring error " +
+                    std::to_string(readLong(&region->error)));
+
             auto& slot = region->slots[sequence % kSlotCount];
             bool recordedBackpressure = false;
             while (readLong(&slot.state) != kSlotFree) {
@@ -644,7 +654,11 @@ int parentMain(const std::filesystem::path& pluginPath, bool paced, bool midiIns
                     recordedBackpressure = true;
                 }
                 if (paced) {
-                    std::cerr << "Shared audio ring slot was not free at the scheduled block boundary.\n";
+                    std::cerr << "Shared audio ring slot was not free at the scheduled block boundary"
+                              << " (sequence=" << sequence
+                              << "; slot-state=" << readLong(&slot.state)
+                              << "; pending=" << pending.size()
+                              << "; maximum-schedule-lateness=" << maxScheduleLateness << " ms).\n";
                     throw std::runtime_error("shared audio ring capacity exhausted");
                 }
                 if (WaitForSingleObject(outputEvent, 5000) != WAIT_OBJECT_0)
@@ -688,6 +702,16 @@ int parentMain(const std::filesystem::path& pluginPath, bool paced, bool midiIns
             if (timerLate && lateness > 1.0)
                 ++lateSchedules;
             consumeCompleted(now);
+        }
+
+        if (paced && deadlineMisses != 0) {
+            std::string sequences;
+            for (size_t i = 0; i < missedDeadlineSequences.size(); ++i) {
+                if (i != 0) sequences += ",";
+                sequences += std::to_string(missedDeadlineSequences[i]);
+            }
+            throw std::runtime_error("one-block response deadline missed " +
+                std::to_string(deadlineMisses) + " time(s); sequences=" + sequences);
         }
 
         while (!pending.empty()) {

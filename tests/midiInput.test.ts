@@ -1,6 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MidiInput } from '../src/audio/midi/MidiInput.ts';
+import { MIDI_NO_INPUT_GUIDANCE, MidiInput } from '../src/audio/midi/MidiInput.ts';
+
+test('a granted but empty MIDI access can be rescanned without asking permission again', async () => {
+  const listeners = new Set<EventListener>();
+  const input: FakeInput = {
+    id: 'impulse-25',
+    name: 'Novation Impulse 25',
+    state: 'connected',
+    connection: 'closed',
+    async open() { this.connection = 'open'; return this; },
+    addEventListener(_type, listener) { listeners.add(listener); },
+    send(data) { listeners.forEach((listener) => listener({ data: new Uint8Array(data) } as unknown as MIDIMessageEvent)); },
+  };
+  const inputs = new Map<string, MIDIInput>();
+  let requests = 0;
+  const access = { inputs, outputs: new Map(), onstatechange: null as ((event: Event) => void) | null };
+  const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { requestMIDIAccess: async () => { requests++; return access; } } });
+  try {
+    const midi = new MidiInput(() => undefined);
+    assert.equal(await midi.enable(), true);
+    assert.equal(midi.status, 'ready');
+    assert.equal(midi.ports.length, 0);
+    assert.match(MIDI_NO_INPUT_GUIDANCE, /data cable/i);
+
+    inputs.set(input.id, input as unknown as MIDIInput);
+    assert.equal(await midi.refresh(), true);
+    assert.equal(requests, 1, 'refresh must reuse the granted MIDIAccess rather than prompt again');
+    assert.deepEqual(midi.ports.map((port) => port.name), ['Novation Impulse 25']);
+  } finally {
+    if (previousNavigator) Object.defineProperty(globalThis, 'navigator', previousNavigator);
+    else Reflect.deleteProperty(globalThis, 'navigator');
+  }
+});
 
 interface FakeInput {
   id: string;

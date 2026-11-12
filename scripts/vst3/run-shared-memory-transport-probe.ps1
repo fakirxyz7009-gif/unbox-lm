@@ -1,3 +1,8 @@
+param(
+  [ValidateRange(1, 20)]
+  [int]$PacedRuns = 1
+)
+
 $ErrorActionPreference = 'Stop'
 $sourceRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $smokeScript = Join-Path $PSScriptRoot 'smoke.ps1'
@@ -22,9 +27,12 @@ if ($LASTEXITCODE -ne 0) {
   throw "The offline shared-memory transport probe failed with exit code $LASTEXITCODE."
 }
 
-& $hostExe $plugin --paced
-if ($LASTEXITCODE -ne 0) {
-  throw "The paced shared-memory transport probe failed with exit code $LASTEXITCODE."
+for ($run = 1; $run -le $PacedRuns; $run++) {
+  if ($PacedRuns -gt 1) { Write-Output "Paced delay transport run $run/$PacedRuns" }
+  & $hostExe $plugin --paced
+  if ($LASTEXITCODE -ne 0) {
+    throw "The paced delay shared-memory transport probe failed on run $run/$PacedRuns with exit code $LASTEXITCODE."
+  }
 }
 
 & $hostExe $synth --midi-burst
@@ -32,7 +40,10 @@ if ($LASTEXITCODE -ne 0) {
   throw "The MIDI shared-memory burst probe failed with exit code $LASTEXITCODE."
 }
 
-& $hostExe $synth --midi-paced
-if ($LASTEXITCODE -ne 0) {
-  throw "The paced MIDI shared-memory probe failed with exit code $LASTEXITCODE."
+for ($run = 1; $run -le $PacedRuns; $run++) {
+  if ($PacedRuns -gt 1) { Write-Output "Paced MIDI transport run $run/$PacedRuns" }
+  & $hostExe $synth --midi-paced
+  if ($LASTEXITCODE -ne 0) {
+    throw "The paced MIDI shared-memory probe failed on run $run/$PacedRuns with exit code $LASTEXITCODE."
+  }
 }

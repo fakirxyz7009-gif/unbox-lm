@@ -85,7 +85,7 @@ export class UniversalWorldInstrumentDevice extends BaseDevice {
 
     const vel = Math.max(0.15, Math.min(1.2, velocity));
 
-    // 1. Prioritize playing 100% real recorded multi-samples via RealMultiSampler!
+    // 1. Prefer a provenance-admitted recorded cache when one is available.
     const playedReal = realMultiSampler.playNote(
       this.id,
       this.instrumentName,

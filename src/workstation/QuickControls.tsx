@@ -5,7 +5,7 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
 import { deviceParams } from '../audio/deviceParams.ts';
-import { useFrame } from '../nexa/useEngine.ts';
+import { useDeviceAutomation, useFrame } from '../nexa/useEngine.ts';
 import { audioEngine } from '../audio/AudioEngine.ts';
 import { toast } from '../shell/toast.ts';
 import { RingKnob } from '../ui/skin/RingKnob.tsx';
@@ -14,6 +14,7 @@ import { assignQuick, quickControls, QUICK_COUNT } from './partState.ts';
 
 export const QuickControls: React.FC<{ dev: BaseDevice | null }> = ({ dev }) => {
   const [, force] = useReducer((n: number) => n + 1, 0);
+  useDeviceAutomation(dev?.id);
   // hardware knobs (midiControls.ts) turn these too: redraw at most once per frame
   const midiSeen = useRef(midiControlChanges.version);
   useFrame(() => {
@@ -28,6 +29,22 @@ export const QuickControls: React.FC<{ dev: BaseDevice | null }> = ({ dev }) => 
     window.addEventListener('pointerdown', close);
     return () => window.removeEventListener('pointerdown', close);
   }, [menu]);
+  const handlersRef = useRef<Map<string, (v: number) => void>>(new Map());
+  useEffect(() => {
+    handlersRef.current.clear();
+  }, [dev]);
+  const getSlotHandler = (key: string) => {
+    let fn = handlersRef.current.get(key);
+    if (!fn) {
+      fn = (v: number) => {
+        dev?.setParam(key, v);
+        force();
+      };
+      handlersRef.current.set(key, fn);
+    }
+    return fn;
+  };
+
   const slots = dev ? quickControls(dev) : Array<null>(QUICK_COUNT).fill(null);
   const menuParam = menu ? slots[menu.slot] ?? null : null;
   return (
@@ -46,10 +63,7 @@ export const QuickControls: React.FC<{ dev: BaseDevice | null }> = ({ dev }) => 
             size={36}
             label={p.label}
             title={`${p.label} — right-click to assign another parameter`}
-            onChange={(v) => {
-              dev.setParam(p.key, v);
-              force();
-            }}
+            onChange={getSlotHandler(p.key)}
             onContextMenu={(e) => {
               e.preventDefault();
               setMenu({ slot: i, x: e.clientX, y: e.clientY });

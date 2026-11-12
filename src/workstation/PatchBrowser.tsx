@@ -1,40 +1,31 @@
 /**
- * LOAD: instrument browser for a part. Recorded instruments first, then every playable built-in.
- * Choosing one replaces the part's instrument (its notes, clips, mixer settings and effects stay)
- * or adds it as a new part. Library tabs: plugin-library presets / instruments (new part),
- * effect plugins (inserted on the part) and samples (put on an audio track at the playhead, or
- * played on the part's keys). "Audio file": any audio file becomes the part's sound.
+ * LOAD: the browser (src/browser) in a dialog for one workstation part. Instruments replace the
+ * part's instrument (its notes, clips, mixer settings and effects stay) or become a new part; effects
+ * are inserted on the part; audio (stems, samples, project audio, an audio file) becomes the part's
+ * sound, played across the keys; a SoundFont preset becomes its multisample map.
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, Upload, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, FileAudio, Layers, X } from 'lucide-react';
 import { audioEngine } from '../audio/AudioEngine.ts';
 import type { DeviceType, SequencerTrack } from '../audio/types.ts';
-import { PLAYABLE_INSTRUMENT_CATEGORIES } from '../audio/instrumentCatalog.ts';
-import { filterRecordedInstrumentCategories, isRecordedInstrument } from '../studio/pages/deviceCatalogFilters.ts';
 import { audioStore } from '../audio/clips/audioStore.ts';
-import { LibraryQuickList } from '../rack/LibraryQuickList.tsx';
 import { vstLibrary } from '../vst/libraryClient.ts';
 import { snapshotFromItem } from '../vst/VstPluginDevice.ts';
-import type { ManifestItem, MountableItem, SampleItem } from '../../shared/vst/manifestTypes.ts';
+import { isMountable, type MountableItem } from '../../shared/vst/manifestTypes.ts';
 import { swapPartInstrument } from './swapPatch.ts';
-import { loadKeySampleFile } from '../audio/deviceSamples.ts';
-import { setMultiSample, type MultiSampleZone } from '../audio/deviceSamples.ts';
+import { loadKeySampleFile, setMultiSample, type MultiSampleZone } from '../audio/deviceSamples.ts';
 import { parseSf2, type ParsedSf2, type Sf2Preset, type Sf2Sample, type Sf2Zone } from '../audio/soundfont/sf2.ts';
 import { isAudioFile } from '../rack/DeviceSampleBar.tsx';
-import { SHIPPED_PACKS } from '../../shared/instruments/packs.ts';
-import { isRedistributable, packDeviceType } from '../../shared/instruments/catalogTypes.ts';
+import { createSamplerPart } from '../audio/stemLibraryClient.ts';
+import { SpecDevice } from '../audio/spec/SpecDevice.ts';
+import { Browser, type BrowserAction } from '../browser/Browser.tsx';
+import type { BrowserEntry, BrowserSection } from '../browser/entries.ts';
+import { addToSong, loadAsSound } from '../browser/entryActions.ts';
+import { toast } from '../shell/toast.ts';
+import { userFileProvenance } from '../../shared/audio/provenance.ts';
 
-type Source = 'built-in' | 'audio' | 'soundfont' | 'presets' | 'effects' | 'samples';
-const SOURCES: { id: Source; label: string }[] = [
-  { id: 'built-in', label: 'Instruments' },
-  { id: 'audio', label: 'Audio file' },
-  { id: 'soundfont', label: 'SoundFont' },
-  { id: 'presets', label: 'Library presets' },
-  { id: 'effects', label: 'Library effects' },
-  { id: 'samples', label: 'Samples' },
-];
-const isEffectPlugin = (i: ManifestItem) => i.kind === 'plugin' && i.role === 'effect';
-const PACK_BY_DEVICE_TYPE = new Map<string, (typeof SHIPPED_PACKS)[number]>(SHIPPED_PACKS.map((pack) => [packDeviceType(pack.id), pack]));
+const LOAD_SECTIONS: BrowserSection[] = ['instruments', 'stems', 'samples', 'project', 'library', 'effects', 'utilities'];
+
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function focusableChildren(container: HTMLElement): HTMLElement[] {
@@ -52,7 +43,6 @@ interface Props {
   onChosen: (deviceId: string) => void;
 }
 
-const CATEGORIES = [...PLAYABLE_INSTRUMENT_CATEGORIES].sort((a, b) => Number(b.label.startsWith('Recorded')) - Number(a.label.startsWith('Recorded')));
 
 interface Sf2BufferSource {
   left: Sf2Sample;
@@ -123,7 +113,9 @@ function materializeSf2Preset(bank: ParsedSf2, preset: Sf2Preset, fileName: stri
         const rightData = buffer.getChannelData(1);
         for (let i = 0; i < length; i++) rightData[i] = bank.pcm[rightStart + i] / 32768;
       }
-      const asset = audioStore.add(`${fileName} · ${preset.name} · ${source.left.name || 'Sample'}`, buffer);
+      const asset = audioStore.add(`${fileName} · ${preset.name} · ${source.left.name || 'Sample'}`, buffer, {
+        provenance: userFileProvenance(fileName),
+      });
       audioId = asset.id;
       assetIds.set(cacheKey, audioId);
     }
@@ -162,67 +154,29 @@ function materializeSf2Preset(bank: ParsedSf2, preset: Sf2Preset, fileName: stri
 }
 
 export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen }) => {
-  const [cat, setCat] = useState(CATEGORIES[0]?.label ?? '');
-  const [q, setQ] = useState('');
   const [mode, setMode] = useState<'replace' | 'add'>(track ? 'replace' : 'add');
-  const [source, setSource] = useState<Source>('built-in');
-  const [recordedOnly, setRecordedOnly] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
-  const visibleCategories = useMemo(
-    () => filterRecordedInstrumentCategories(CATEGORIES, recordedOnly),
-    [recordedOnly],
-  );
-  const items = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    const pool = needle ? visibleCategories.flatMap((c) => c.items.map((i) => ({ ...i, cat: c.label }))) : (visibleCategories.find((c) => c.label === cat)?.items ?? []).map((i) => ({ ...i, cat }));
-    return pool.filter((i) => !needle || `${i.name} ${i.desc} ${i.cat}`.toLowerCase().includes(needle));
-  }, [cat, q, visibleCategories]);
-
-  const choose = (type: DeviceType, name: string) => {
-    if (mode === 'replace' && track) {
-      const dev = swapPartInstrument(track, type, name);
-      if (dev) onChosen(dev.id);
-    } else {
-      const dev = audioEngine.createDevice(type, name);
-      onChosen(dev.id);
-    }
-    onClose();
-  };
-
-  /** Library unit: instruments become a new part, effects go on the part's chain. */
-  const mount = (item: MountableItem, presetId?: string) => {
-    const dev = audioEngine.createVstDevice(snapshotFromItem(item, vstLibrary.manifest), { presetId });
-    if (dev.role === 'effect') {
-      const inserted = !!track && audioEngine.insertEffectOnTrack(dev.id, track.deviceId);
-      setNote(inserted ? `${dev.name} inserted on part ${partNo}` : `${dev.name} is in the rack; it could not be inserted on part ${partNo}`);
-      return;
-    }
-    onChosen(dev.id);
-    onClose();
-  };
-  /** An audio file becomes the part's sound (replace) or a new part's (add, on the Zone One sampler). */
+  const replace = mode === 'replace' && !!track;
   const audioPicker = useRef<HTMLInputElement>(null);
   const sf2Picker = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const returnFocusRef = useRef<HTMLElement | null>(null);
+  // read during the first render: the browser's effect focuses its search before ours runs
+  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : null));
   const [sf2, setSf2] = useState<ParsedSf2 | null>(null);
   const [sf2Name, setSf2Name] = useState('');
   const [dropOver, setDropOver] = useState(false);
-  useEffect(() => {
-    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const frame = window.requestAnimationFrame(() => searchRef.current?.focus({ preventScroll: true }));
-    return () => {
-      window.cancelAnimationFrame(frame);
-      const opener = returnFocusRef.current;
+
+  useEffect(
+    () => () => {
       if (opener?.isConnected) window.requestAnimationFrame(() => opener.focus({ preventScroll: true }));
-    };
-  }, []);
+    },
+    [opener],
+  );
 
   const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
-      onClose();
+      if (sf2) setSf2(null);
+      else onClose();
       return;
     }
     if (event.key !== 'Tab') return;
@@ -245,81 +199,113 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
       first.focus({ preventScroll: true });
     }
   };
+
+  /** The device that gets a sound: this part, or a new sampler part. */
+  const soundTarget = (name: string) => (replace && track ? track.deviceId : createSamplerPart(name));
+  const done = (deviceId: string) => {
+    onChosen(deviceId);
+    onClose();
+  };
+
+  const chooseInstrument = (type: DeviceType, name: string) => {
+    const dev = replace && track ? swapPartInstrument(track, type, name) : audioEngine.runStructuralEdit('Add part', () => audioEngine.createDevice(type, name));
+    if (dev) done(dev.id);
+  };
+
+  const insertEffect = (create: () => { id: string; name: string }): string => {
+    if (!track) throw new Error('Choose a part first: effects are inserted on a part');
+    const dev = audioEngine.runStructuralEdit('Add effect', create);
+    return audioEngine.insertEffectOnTrack(dev.id, track.deviceId) ? `${dev.name} inserted on part ${partNo}` : `${dev.name} is in the rack: patch it on the rear panel (Tab)`;
+  };
+
+  const mountLibrary = (item: MountableItem, presetId?: string): string | void => {
+    const snap = snapshotFromItem(item, vstLibrary.manifest);
+    if (snap.role === 'effect') return insertEffect(() => audioEngine.createVstDevice(snap, { presetId }));
+    const dev = audioEngine.runStructuralEdit('Add part', () => audioEngine.createVstDevice(snap, { presetId }));
+    done(dev.id);
+  };
+
+  const actionsFor = (e: BrowserEntry): BrowserAction[] => {
+    const r = e.ref;
+    if (r.kind === 'builtin') {
+      if (r.role === 'instrument') return [{ label: replace ? 'Load' : '+ Part', title: replace ? `Play part ${partNo} with ${r.name} (its notes stay)` : 'Add a new part', run: () => chooseInstrument(r.type, r.name) }];
+      if (r.role === 'effect') return track ? [{ label: 'Insert', title: `Insert on part ${partNo}`, run: () => insertEffect(() => audioEngine.createDevice(r.type, r.name)) }] : [];
+      return [
+        {
+          label: 'Add',
+          title: track ? `Add it; a player plays part ${partNo}` : 'Add it to the rack',
+          run: () => {
+            const dev = audioEngine.runStructuralEdit('Add device', () => audioEngine.createDevice(r.type, r.name));
+            if (track && dev instanceof SpecDevice && dev.spec.kind === 'player') audioEngine.setPlayerTarget(dev.id, track.deviceId);
+            return `Added ${dev.name}`;
+          },
+        },
+      ];
+    }
+    if (r.kind === 'library' && r.item.kind !== 'sample') {
+      const item = r.item;
+      if (isMountable(item)) {
+        const effect = item.kind === 'plugin' && item.role === 'effect';
+        if (effect && !track) return [];
+        return [{ label: effect ? 'Insert' : '+ Part', title: effect ? `Insert on part ${partNo} (proxy DSP)` : 'Add as a new part (proxy DSP)', run: () => mountLibrary(item) }];
+      }
+      const target = item.kind === 'preset' ? vstLibrary.item(item.targetId) : undefined;
+      return target && isMountable(target) ? [{ label: 'Load', title: `Add ${target.name} with this preset`, run: () => mountLibrary(target, item.id) }] : [];
+    }
+    return [
+      {
+        label: replace ? 'Load' : '+ Part',
+        title: replace ? `Part ${partNo} plays this sound across the keys (its notes stay)` : 'A new part that plays this sound across the keys',
+        run: async () => {
+          const id = soundTarget(e.name);
+          const msg = await loadAsSound(e, id);
+          done(id);
+          return msg;
+        },
+      },
+      { label: '+ Song', title: 'Put it on an audio track at the playhead', run: () => addToSong(e) },
+    ];
+  };
+
   const applyAudioFile = async (file: File) => {
     if (!isAudioFile(file)) {
-      setNote(`${file.name} is not an audio file`);
+      toast(`${file.name} is not an audio file`, 'error');
       return;
     }
-    setNote(`Loading ${file.name}…`);
     try {
-      const devId = mode === 'replace' && track ? track.deviceId : audioEngine.createDevice('nn19', file.name.replace(/\.[^.]+$/, '')).id;
-      await loadKeySampleFile(devId, file);
+      const id = soundTarget(file.name.replace(/\.[^.]+$/, ''));
+      await loadKeySampleFile(id, file);
       audioEngine.changed();
-      onChosen(devId);
-      onClose();
+      done(id);
     } catch {
-      setNote(`${file.name} could not be decoded (WAV, MP3, OGG, Opus, FLAC and M4A/AAC work)`);
-    }
-  };
-  const sampleAsSound = async (item: SampleItem) => {
-    try {
-      const res = await fetch(vstLibrary.previewUrl(item.id));
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      await applyAudioFile(new File([blob], `${item.name}.${item.format}`, { type: blob.type || 'audio/ogg' }));
-    } catch (e) {
-      setNote(`Could not load "${item.name}": ${(e as Error).message}`);
+      toast(`${file.name} could not be decoded (WAV, MP3, OGG, Opus, FLAC and M4A/AAC work)`, 'error');
     }
   };
 
   const readSf2File = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.sf2')) {
-      setNote('Choose a SoundFont 2 (.sf2) file');
-      return;
-    }
-    if (file.size > 512 * 1024 * 1024) {
-      setNote('SoundFont is larger than the 512 MB import limit');
-      return;
-    }
-    setNote(`Reading ${file.name}…`);
+    if (!file.name.toLowerCase().endsWith('.sf2')) return toast('Choose a SoundFont 2 (.sf2) file', 'error');
+    if (file.size > 512 * 1024 * 1024) return toast('SoundFont is larger than the 512 MB import limit', 'error');
     try {
       const parsed = parseSf2(await file.arrayBuffer());
       if (!parsed) throw new Error('No playable presets or valid sample zones were found');
       setSf2(parsed);
       setSf2Name(file.name);
-      setNote(`${parsed.presets.length} playable presets`);
     } catch (e) {
       setSf2(null);
-      setSf2Name('');
-      setNote(`Could not import ${file.name}: ${(e as Error).message}`);
+      toast(`Could not import ${file.name}: ${(e as Error).message}`, 'error');
     }
   };
 
   const chooseSf2Preset = (preset: Sf2Preset) => {
     if (!sf2) return;
     try {
-      const materialized = materializeSf2Preset(sf2, preset, sf2Name);
-      const deviceId = mode === 'replace' && track
-        ? track.deviceId
-        : audioEngine.createDevice('nn19', `${preset.name} (SF2)`).id;
-      setMultiSample(deviceId, materialized);
+      const zones = materializeSf2Preset(sf2, preset, sf2Name);
+      const id = replace && track ? track.deviceId : audioEngine.runStructuralEdit('Add part', () => audioEngine.createDevice('nn19', `${preset.name} (SF2)`)).id;
+      setMultiSample(id, zones);
       audioEngine.changed();
-      onChosen(deviceId);
-      onClose();
+      done(id);
     } catch (e) {
-      setNote(`Could not load "${preset.name}": ${(e as Error).message}`);
-    }
-  };
-
-  const addSample = async (item: SampleItem) => {
-    try {
-      const res = await fetch(vstLibrary.previewUrl(item.id));
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const asset = await audioStore.importFile(await res.blob(), item.name);
-      audioEngine.addAudioClip(asset.id, Math.floor(audioEngine.getPlayheadPosition() / audioEngine.stepsPerBar));
-      setNote(`"${item.name}" is on an audio track at the playhead`);
-    } catch (e) {
-      setNote(`Could not add "${item.name}": ${(e as Error).message}`);
+      toast(`Could not load "${preset.name}": ${(e as Error).message}`, 'error');
     }
   };
 
@@ -335,219 +321,83 @@ export const PatchBrowser: React.FC<Props> = ({ track, partNo, onClose, onChosen
       aria-labelledby="patch-browser-title"
       data-testid="patch-browser"
     >
-      <div className="us-metal us-metal-frame w-[860px] max-w-[94vw] h-[560px] max-h-[86vh] flex flex-col p-3 gap-2" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-3">
-          <h2 id="patch-browser-title" className="font-label font-extrabold text-[22px] text-ink tracking-wide">LOAD</h2>
-          <div className="flex rounded-[5px] overflow-hidden border border-[#8f959c]">
+      <div
+        className={`load-dialog w-[1040px] max-w-[95vw] h-[680px] max-h-[90vh] flex flex-col p-3 gap-2.5 ${dropOver ? 'ring-2 ring-[#d69b50]' : ''}`}
+        onPointerDown={(e) => e.stopPropagation()}
+        onDragOver={(e) => {
+          if (!e.dataTransfer.types.includes('Files')) return;
+          e.preventDefault();
+          setDropOver(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDropOver(false);
+        }}
+        onDrop={(e) => {
+          if (!e.dataTransfer.types.includes('Files')) return;
+          e.preventDefault();
+          setDropOver(false);
+          const f = e.dataTransfer.files[0];
+          if (f) void (f.name.toLowerCase().endsWith('.sf2') ? readSf2File(f) : applyAudioFile(f));
+        }}
+      >
+        <input ref={audioPicker} type="file" accept="audio/*,.wav,.mp3,.ogg,.opus,.flac,.m4a,.aac,.aif,.aiff" className="hidden" data-testid="load-audio-input" onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          if (f) void applyAudioFile(f);
+        }} />
+        <input ref={sf2Picker} type="file" accept=".sf2,application/octet-stream" className="hidden" data-testid="load-sf2-input" onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          if (f) void readSf2File(f);
+        }} />
+        <header className="flex items-center gap-3">
+          <h2 id="patch-browser-title" className="font-label font-extrabold text-[22px] text-[#f2e8d6] tracking-wide">LOAD</h2>
+          <div className="load-seg" role="group" aria-label="Load into">
             {track && (
-              <button type="button" onClick={() => setMode('replace')} className={`px-3 h-[28px] font-label font-bold text-[13px] ${mode === 'replace' ? 'bg-[#4b5159] text-white' : 'bg-[#e9ebee] text-[#4b5159]'}`}>
+              <button type="button" aria-pressed={mode === 'replace'} onClick={() => setMode('replace')}>
                 Replace part {partNo}
               </button>
             )}
-            <button type="button" onClick={() => setMode('add')} className={`px-3 h-[28px] font-label font-bold text-[13px] ${mode === 'add' ? 'bg-[#4b5159] text-white' : 'bg-[#e9ebee] text-[#4b5159]'}`}>
+            <button type="button" aria-pressed={mode === 'add'} onClick={() => setMode('add')}>
               Add as new part
             </button>
           </div>
-          <label className="flex-1 flex items-center gap-1 us-btn-light rounded px-2 h-[28px]">
-            <Search className="w-4 h-4 text-[#5b616a]" />
-            <input
-              ref={searchRef}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(event) => {
-                // Preserve the dialog's Tab/Escape handling, but do not let letters typed into
-                // the search field trigger the DAW's global musical/transport shortcuts.
-                if (event.key !== 'Tab' && event.key !== 'Escape') event.stopPropagation();
-              }}
-              placeholder="Search instruments…"
-              className="flex-1 bg-transparent outline-none text-[13px] text-ink"
-            />
-          </label>
-          <button type="button" onClick={onClose} className="us-btn rounded w-8 h-8 grid place-items-center" aria-label="Close">
+          <span className="flex-1 font-label text-[13px] text-[#a39683] truncate">
+            {replace ? `Part ${partNo} keeps its notes, mixer and effects.` : 'Each choice becomes a new part.'}
+          </span>
+          <button type="button" className="bw-act bw-act--secondary" onClick={() => audioPicker.current?.click()} title="Any audio file becomes the sound, played across the keys from its own pitch (or drop a file on this window)">
+            <FileAudio className="w-3.5 h-3.5" /> Audio file…
+          </button>
+          <button type="button" className="bw-act bw-act--secondary" onClick={() => sf2Picker.current?.click()} title="Load a preset from a SoundFont 2 (.sf2) file">
+            <Layers className="w-3.5 h-3.5" /> SoundFont…
+          </button>
+          <button type="button" onClick={onClose} className="bw-icon-btn" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
-        </div>
-        <div className="flex items-center gap-1">
-          {SOURCES.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSource(s.id)}
-              aria-pressed={source === s.id}
-              className={`px-3 h-[26px] rounded-[5px] font-label font-bold text-[13px] ${source === s.id ? 'bg-[#4b5159] text-white' : 'us-btn-light text-[#2c3137]'}`}
-            >
-              {s.label}
-            </button>
-          ))}
-          {source === 'built-in' && (
-            <button
-              type="button"
-              onClick={() => {
-                const next = !recordedOnly;
-                setRecordedOnly(next);
-                if (next) {
-                  const firstRecorded = CATEGORIES.find((category) => category.items.some((item) => isRecordedInstrument(item.type)));
-                  if (firstRecorded) setCat(firstRecorded.label);
-                }
-              }}
-              aria-pressed={recordedOnly}
-              title="Show recorded sample packs only; synthesized and modeled instruments are hidden."
-              className={`px-3 h-[26px] rounded-[5px] font-label font-bold text-[13px] ${recordedOnly ? 'bg-[#4b5159] text-white' : 'us-btn-light text-[#2c3137]'}`}
-            >
-              Recorded audio only
-            </button>
-          )}
-          {note && <span className="ml-2 font-label text-[13px] text-ink" role="status">{note}</span>}
-        </div>
-        {source === 'audio' ? (
-          <div
-            className={`flex-1 min-h-0 us-lcd grid place-items-center p-6 ${dropOver ? 'ring-2 ring-sel' : ''}`}
-            onDragOver={(e) => {
-              if (!e.dataTransfer.types.includes('Files')) return;
-              e.preventDefault();
-              setDropOver(true);
-            }}
-            onDragLeave={() => setDropOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDropOver(false);
-              const f = e.dataTransfer.files[0];
-              if (f) void applyAudioFile(f);
-            }}
-            data-testid="patch-audio-file"
-          >
-            <input
-              ref={audioPicker}
-              type="file"
-              accept="audio/*,.wav,.mp3,.ogg,.opus,.flac,.m4a,.aac"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                e.target.value = '';
-                if (f) void applyAudioFile(f);
-              }}
-            />
-            <div className="flex flex-col items-center gap-3 text-center max-w-[520px]">
-              <div className="font-lcd text-[22px] leading-none">PLAY ANY AUDIO FILE</div>
-              <div className="font-label text-[13px] leading-snug">
-                {mode === 'replace' && track
-                  ? `The file becomes the sound of part ${partNo}, played across the keyboard from its own pitch. Its notes, mixer channel and effects stay.`
-                  : 'The file becomes the sound of a new part, played across the keyboard from its own pitch.'}{' '}
-                WAV, MP3, OGG, Opus, FLAC and M4A / AAC.
-              </div>
-              <button type="button" className="us-btn rounded-[6px] h-[34px] px-4 flex items-center gap-2 font-label font-bold text-[13px]" onClick={() => audioPicker.current?.click()}>
-                <Upload className="w-4 h-4" /> Choose audio file…
+        </header>
+
+        {sf2 ? (
+          <div className="flex-1 min-h-0 flex flex-col gap-2" data-testid="patch-soundfont">
+            <div className="flex items-center gap-2">
+              <button type="button" className="bw-act bw-act--secondary" onClick={() => setSf2(null)}>
+                <ArrowLeft className="w-3.5 h-3.5" /> Browser
               </button>
-              <div className="font-label text-[13px] opacity-75">or drop it here</div>
+              <span className="font-label font-bold text-[13px] text-[#e1bc7e] truncate">{sf2Name}</span>
+              <span className="font-label text-[11px] text-[#a39683]">{sf2.presets.length} presets · stored with the project when you load one</span>
             </div>
-          </div>
-        ) : source === 'soundfont' ? (
-          <div className="flex-1 min-h-0 us-lcd p-3 flex flex-col gap-2" data-testid="patch-soundfont">
-            <input
-              ref={sf2Picker}
-              type="file"
-              accept=".sf2,application/octet-stream"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = '';
-                if (file) void readSf2File(file);
-              }}
-            />
-            <div className="flex items-center gap-3">
-              <div className="font-lcd text-[18px]">SOUNDFONT 2 PRESETS</div>
-              <button type="button" className="us-btn rounded-[6px] h-[30px] px-3 flex items-center gap-2 font-label font-bold text-[13px]" onClick={() => sf2Picker.current?.click()}>
-                <Upload className="w-4 h-4" /> Choose .sf2 file…
-              </button>
-              <span className="font-label text-[13px] truncate" title={sf2Name}>{sf2Name || 'Imported preset samples are stored with the project.'}</span>
+            <div className="bw-list p-1 grid grid-cols-2 gap-1 content-start">
+              {sf2.presets.map((preset, index) => (
+                <button key={`${preset.bank}:${preset.program}:${index}`} type="button" onClick={() => chooseSf2Preset(preset)} className="bw-row text-left rounded-[5px]" data-testid="soundfont-preset">
+                  <span className="flex-1 min-w-0">
+                    <span className="bw-name">{preset.name}</span>
+                    <span className="bw-detail">Bank {preset.bank} · Program {preset.program} · {preset.zones.length} sample zones</span>
+                  </span>
+                </button>
+              ))}
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto us-lcd-box p-2">
-              {sf2 ? (
-                <div className="grid grid-cols-2 gap-1.5">
-                  {sf2.presets.map((preset, index) => (
-                    <button
-                      key={`${preset.bank}:${preset.program}:${index}`}
-                      type="button"
-                      onClick={() => chooseSf2Preset(preset)}
-                      className="text-left us-lcd-box px-2 py-1 hover:bg-[#0e2d33] hover:text-[#a8d6d9]"
-                      data-testid="soundfont-preset"
-                    >
-                      <div className="font-lcd text-[18px] leading-[20px] truncate">{preset.name}</div>
-                      <div className="font-label text-[13px] leading-tight opacity-80">Bank {preset.bank} · Program {preset.program} · {preset.zones.length} sample zones</div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-full grid place-items-center font-label text-[13px] text-center">Choose a local SF2 file to inspect its real preset and sample-zone map. Imported presets are embedded in the project as audio assets.</div>
-              )}
-            </div>
-          </div>
-        ) : source !== 'built-in' ? (
-          <div className="flex-1 min-h-0 overflow-y-auto us-bezel p-1 text-[#d5dae0]">
-            <LibraryQuickList
-              kinds={source === 'samples' ? ['sample'] : source === 'effects' ? ['plugin'] : ['preset', 'instrument']}
-              filter={source === 'effects' ? isEffectPlugin : undefined}
-              query={q}
-              onMount={mount}
-              onAddToSong={source === 'samples' ? (it) => void addSample(it) : undefined}
-              onUseAsSound={source === 'samples' ? (it) => void sampleAsSound(it) : undefined}
-              onError={setNote}
-            />
           </div>
         ) : (
-        <div className="flex-1 min-h-0 flex gap-2">
-          <div className="w-[230px] overflow-y-auto us-bezel">
-            <div className="flex flex-col gap-[2px] p-1">
-              {visibleCategories.map((c) => (
-                <button
-                  key={c.label}
-                  type="button"
-                  onClick={() => {
-                    setCat(c.label);
-                    setQ('');
-                  }}
-                  className={`text-left px-2 py-1 rounded font-label font-semibold text-[13px] ${cat === c.label && !q ? 'us-sel-row' : 'text-[#c9ced4] hover:bg-white/10'}`}
-                >
-                  {c.label} <span className="opacity-60 text-[13px]">({c.items.length})</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex-1 min-h-0 overflow-y-auto us-lcd p-2">
-            <div className="grid grid-cols-2 gap-1.5">
-              {items.map((i) => (
-                <button
-                  key={`${i.cat}:${i.type}:${i.name}`}
-                  type="button"
-                  onClick={() => choose(i.type, i.name)}
-                  className="text-left us-lcd-box px-2 py-1 hover:bg-[#0e2d33] hover:text-[#a8d6d9] group"
-                  title={(() => {
-                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
-                    return pack ? `${i.desc}\nAttribution: ${pack.author}\nLicense: ${pack.spdx}\nSource: ${pack.source}` : i.desc;
-                  })()}
-                  data-testid="patch-item"
-                >
-                  {(() => {
-                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
-                    if (!pack) return null;
-                    const privatePack = !isRedistributable(pack.spdx);
-                    return <div className={`font-label text-[11px] font-bold ${privatePack ? 'text-amber-300' : 'text-emerald-300'}`}>
-                      {privatePack ? `RECORDED · ${pack.spdx} · CHECK RIGHTS` : `RECORDED · ${pack.spdx}`}
-                    </div>;
-                  })()}
-                  <div className="font-lcd text-[18px] leading-[20px] truncate">{i.name}</div>
-                  {(() => {
-                    const pack = PACK_BY_DEVICE_TYPE.get(i.type);
-                    return <div className="font-label text-[13px] leading-tight opacity-80 line-clamp-2">
-                      {pack ? `${i.desc} Attribution: ${pack.author}.` : i.desc}
-                    </div>;
-                  })()}
-                </button>
-              ))}
-              {items.length === 0 && <div className="font-lcd text-[18px]">Nothing found.</div>}
-            </div>
-          </div>
-        </div>
+          <Browser host="load" layout="wide" sections={LOAD_SECTIONS} actionsFor={actionsFor} className="flex-1" autoFocus />
         )}
       </div>
     </div>

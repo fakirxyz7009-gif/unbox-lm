@@ -137,6 +137,35 @@ test('armed instrument records hardware MIDI note lengths into a piano-roll clip
   }
 });
 
+test('MIDI take remains busy while stop finalizes, then commits before the recorder becomes idle', async () => {
+  const fixture = createFixture();
+  const restoreWindow = mockWindow();
+  try {
+    const recorder = new RecordController(fixture.host);
+    assert.equal(await recorder.start(), true);
+    fixture.setPosition(1);
+    fixture.setTime(fixture.getTransportOrigin() + 0.125);
+    recorder.noteOn('device-piano', 60, 0.8);
+    fixture.setPosition(3);
+    fixture.setTime(fixture.getTransportOrigin() + 0.375);
+    recorder.noteOff('device-piano', 60);
+
+    const finishing = recorder.stop();
+    assert.equal(recorder.state, 'finalizing');
+    assert.equal(recorder.busy, true);
+    assert.equal(fixture.host.isRecording, false);
+    assert.equal(fixture.track.arrangementClips?.length, 0, 'the note must not be exposed as a completed take early');
+
+    await finishing;
+    assert.equal(recorder.state, 'idle');
+    assert.equal(recorder.busy, false);
+    assert.equal(fixture.track.arrangementClips?.[0]?.kind, 'notes');
+    assert.equal(fixture.track.arrangementClips?.[0]?.notes?.[0]?.note, 60);
+  } finally {
+    restoreWindow();
+  }
+});
+
 test('record start requests MIDI access for an armed instrument and keeps recording if access is unavailable', async () => {
   const fixture = createFixture();
   const restoreWindow = mockWindow();

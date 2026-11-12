@@ -41,6 +41,11 @@ test('project preflight rejects malformed device and iterated collection shapes'
   assert.equal(isImportableProject({ ...validProject, rackGroups: [{ macros: [{ targets: {} }] }] }), false);
 });
 
+test('project preflight rejects Combiners with more than eight front-panel macros', () => {
+  const macros = Array.from({ length: 9 }, (_, index) => ({ id: `macro-${index}`, targets: [] }));
+  assert.equal(isImportableProject({ ...validProject, rackGroups: [{ deviceIds: ['piano-1'], macros }] }), false);
+});
+
 test('project preflight requires VST devices to carry a matching rebuild snapshot', () => {
   const snapshot = {
     itemId: 'plugin-1', kind: 'plugin', name: 'Reverb', format: 'VST3', role: 'effect', category: 'reverb',

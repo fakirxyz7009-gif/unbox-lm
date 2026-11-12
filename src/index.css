@@ -114,7 +114,6 @@
   box-shadow: 
     inset 0 1px 0 rgba(227, 190, 133, 0.28),
     inset 0 -2px 8px rgba(0, 0, 0, 0.95),
-    0 20px 50px rgba(0, 0, 0, 0.9),
     0 0 0 1px rgba(182, 136, 76, 0.36);
   position: relative;
 }
@@ -216,7 +215,7 @@
       #5a4d3e 2px,
       #3c3227 3px
     );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.8);
 }
 
 .faceplate-dark-charcoal {
@@ -228,7 +227,7 @@
       #18120c 2px,
       #2b2116 4px
     );
-  box-shadow: inset 0 1px 0 rgba(214, 190, 151, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(214, 190, 151, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.8);
 }
 
 /* Realistic Physical Heavy-Duty Bat Toggle Switch */
@@ -294,6 +293,8 @@
 /* Authentic Real Studio Faceplate Colorways: Crisp White, Light Grey Metal, Rich Wood, Dark Green Accents */
 
 /* 1. Precision Anodized Light Grey Metal (Rupert Neve Designs / SSL Origin / Grace Design style) */
+/* Faceplates keep their edge highlights; their outer blur shadow (like the rack units') made every
+   meter update re-composite the unit around it. */
 .faceplate-light-grey-metal, .faceplate-brushed-grey {
   background: 
     linear-gradient(180deg, #f3eee2 0%, #e3d9c7 30%, #cec0a9 70%, #b7a78d 100%),
@@ -304,7 +305,7 @@
       rgba(0, 0, 0, 0.04) 2px,
       transparent 3px
     );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
   border-top: 1px solid rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid rgba(0, 0, 0, 0.4);
   color: #2b2117;
@@ -313,7 +314,7 @@
 /* 2. Studio Crisp White / Porcelain Enamel (Vintage Teletronix / EMT / German Broadcast style) */
 .faceplate-crisp-white, .faceplate-studio-white {
   background: linear-gradient(180deg, #fffdf7 0%, #f7f0e2 40%, #ece2d0 75%, #ddd0bb 100%);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   border-top: 1px solid #ffffff;
   border-bottom: 1px solid #c6b69b;
   color: #2b2117;
@@ -322,7 +323,7 @@
 /* 3. Vintage Turquoise & Cyan Retro Studio Faceplate */
 .faceplate-forest-green {
   background: linear-gradient(180deg, #8cb3b8 0%, #769fa5 45%, #689298 75%, #567e84 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.5);
   border-top: 1px solid rgba(255, 255, 255, 0.6);
   border-bottom: 1px solid #335960;
   color: #112328;
@@ -331,7 +332,7 @@
 /* 4. Studio Blue (Elysia / Focusrite style) */
 .faceplate-studio-blue {
   background: linear-gradient(180deg, #302519 0%, #1c1711 40%, #272015 70%, #100d09 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.9), 0 4px 14px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.9);
   border-top: 1px solid rgba(230, 198, 147, 0.2);
   border-bottom: 1px solid rgba(0, 0, 0, 0.8);
   color: #f8fafc;
@@ -340,7 +341,7 @@
 /* 5. Vibrant Terracotta Copper Faceplate */
 .faceplate-slate-black {
   background: linear-gradient(180deg, #7c3f1e 0%, #5c2f16 45%, #482310 75%, #351a0b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.8);
   border-top: 1px solid rgba(255, 180, 100, 0.4);
   border-bottom: 1px solid rgba(0, 0, 0, 0.7);
   color: #fffbeb;
@@ -470,6 +471,12 @@
   background: radial-gradient(circle, rgba(255, 140, 0, 0.85) 0%, rgba(255, 69, 0, 0.45) 40%, rgba(200, 30, 0, 0.1) 70%, transparent 100%);
   filter: drop-shadow(0 0 14px rgba(255, 120, 0, 0.8));
   animation: tube-flicker 4s ease-in-out infinite alternate;
+  /* its own layer: the glow and its drop shadow are drawn once, the flicker only fades and scales
+     that texture (otherwise the filter was re-rendered every frame, playing or not) */
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tube-glow { animation: none; }
 }
 
 @keyframes tube-flicker {
@@ -654,7 +661,8 @@
 /* Right column: mixer channel list */
 .rack-chans {
   margin-bottom: 6px; padding: 4px 6px 6px; border-radius: 4px;
-  background: linear-gradient(180deg, #2b2116, #17120d); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(232, 205, 162, 0.08);
+  background: linear-gradient(180deg, #2b2116, #17120d);
+  border: 1px solid rgba(0, 0, 0, 0.9); border-top-color: rgba(232, 205, 162, 0.2);
 }
 .rack-chans-head {
   display: flex; justify-content: space-between; padding: 3px 2px 2px;
@@ -699,11 +707,25 @@
   .rack-flip, .rack-flip--in { transition: none; animation: none; transform: none; opacity: 1; }
 }
 
+/* Depth comes from the edges (light top, dark bottom), not a drop shadow: an outer shadow on every
+   unit spread their paint over the neighbours and the live meters' layers, and recompositing that
+   every frame took over half the rack's GPU time while playing. Each unit is its own compositor
+   layer, so Chrome re-layerizes one unit's content, not the whole rack, when a meter in it moves
+   (layerization fell from ~7 to ~2.7 ms a frame). Nothing inside a unit is position: fixed. */
 .rack-unit {
   position: relative; display: flex; align-items: stretch; margin-bottom: 6px;
-  border: 1px solid rgba(124, 91, 51, 0.72); border-radius: 5px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 232, 191, 0.08);
+  border: 1px solid rgba(124, 91, 51, 0.72); border-top-color: rgba(255, 232, 191, 0.24); border-bottom-color: rgba(0, 0, 0, 0.9);
+  border-radius: 5px;
+  will-change: transform;
 }
 .rack-unit--selected { outline: 2px solid rgba(218, 171, 101, 0.92); outline-offset: 1px; }
+.rack-unit--combiner-selected { outline: 2px solid rgba(74, 222, 128, 0.92); outline-offset: 3px; }
+.rack-combine-unit {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 19px; padding: 0 4px;
+  border-radius: 3px; border: 1px solid rgba(110, 231, 183, 0.48); background: rgba(6, 78, 59, 0.38);
+  color: #d1fae5; font: 800 11px/1 var(--font-label); letter-spacing: 0.06em;
+}
+.rack-combine-unit:hover, .rack-combine-unit--selected { background: rgba(16, 185, 129, 0.3); border-color: #6ee7b7; color: #ecfdf5; }
 .rack-unit--off .rack-face { filter: grayscale(0.35) brightness(0.7); }
 .rack-ear {
   width: 16px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
@@ -795,7 +817,7 @@
 .patch-cables { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 30; }
 .cable { --cable: #ef4444; }
 .cable path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.cable-hit { stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.cable-hit { stroke: transparent; stroke-width: 10; pointer-events: stroke; cursor: pointer; }
 .cable-shadow { stroke: rgba(0, 0, 0, 0.45); stroke-width: 9; transform: translate(2px, 6px); }
 .cable-body { stroke: var(--cable); stroke-width: 6.5; }
 .cable-shine { stroke: rgba(255, 255, 255, 0.38); stroke-width: 1.6; transform: translate(-1px, -1.5px); }
@@ -842,24 +864,6 @@
   width: 300px; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0;
   background: linear-gradient(180deg, #17120c, #0b0907); border-right: 1px solid #60462a; color: #ded1ba; font-size: 13px;
 }
-.lib-chip {
-  padding: 2px 7px; border-radius: 999px; font-size: 11px; background: rgba(70, 53, 31, 0.66); color: #e3d3b8; border: 1px solid rgba(199, 156, 97, 0.18);
-}
-.lib-chip--on { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; font-weight: 700; border-color: #e8c98f; }
-.lib-row { padding: 5px 6px; border-radius: 5px; background: rgba(30, 23, 15, 0.82); border: 1px solid rgba(199, 156, 97, 0.12); }
-.lib-row:hover { border-color: rgba(199, 156, 97, 0.48); background: rgba(55, 40, 23, 0.82); }
-.lib-act {
-  display: inline-flex; align-items: center; gap: 2px; padding: 2px 5px; border-radius: 3px;
-  font-size: 11px; font-weight: 700; background: rgba(73, 59, 42, 0.8); color: #f0e2c8;
-}
-.lib-act:hover { background: #765b36; }
-.lib-act--mount { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; }
-.lib-act--mount:hover { background: linear-gradient(180deg, #f0d39d, #cb9654); }
-.lib-flag {
-  font: 700 11px/1 var(--font-label); padding: 2px 4px; border-radius: 3px;
-  color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.4);
-}
-
 /* ===================================================================== THE UNBOX APP skin
    (components layer: Tailwind utilities on the same element still win) */
 @layer components {
@@ -1359,7 +1363,7 @@
   z-index: 30;
   border-bottom: 1px solid #5c432a;
   background: linear-gradient(180deg, #2b2016 0%, #1a130d 100%);
-  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.2), 0 2px 8px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.2);
 }
 
 .unbox-brand-button {
@@ -1471,7 +1475,7 @@
   position: relative;
   z-index: 20;
   border-top: 1px solid #755535;
-  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.1), 0 -2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(240, 208, 157, 0.1);
 }
 
 .unbox-meter-bank {
@@ -1567,7 +1571,7 @@
 .unbox-live-keyboard {
   background: linear-gradient(180deg, #100d09, #070605);
   border-color: #674b2d;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(237, 206, 156, 0.08);
+  box-shadow: inset 0 1px 0 rgba(237, 206, 156, 0.08);
 }
 .unbox-live-keyboard [class*="text-cyan-"] { color: #e0bf83 !important; }
 .unbox-live-keyboard [class*="border-cyan-"] { border-color: rgba(199, 156, 97, 0.52) !important; }
@@ -1680,3 +1684,307 @@
   );
 }
 
+
+/* ===================================================================== Browser (src/browser/Browser.tsx)
+   One browser for the rack panel, LOAD and the piano roll's Sounds dock. */
+@layer components {
+  .bw {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    color: #e8dcc7;
+    font: 400 13px/1.35 var(--font-label);
+  }
+  .bw--panel { padding: 8px; }
+  .bw--wide { flex-direction: row; gap: 10px; }
+
+  .bw-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 6px 0 9px;
+    border-radius: 6px;
+    background: #0b0907;
+    border: 1px solid #3d2e1d;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+  }
+  .bw-search:focus-within { border-color: var(--color-sel); }
+  .bw-search input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    outline: none;
+    color: #f2e8d6;
+    font-size: 13px;
+  }
+  .bw-search input::placeholder { color: #8a7d69; }
+
+  /* section tabs (panel) */
+  /* tabs size to their label and wrap, so no label is cut */
+  .bw-tabs { display: flex; flex-wrap: wrap; gap: 3px; }
+  .bw-tab {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 4px;
+    padding: 4px 5px;
+    border-radius: 5px;
+    text-align: left;
+    background: rgba(60, 45, 28, 0.45);
+    border: 1px solid rgba(199, 156, 97, 0.14);
+    color: #cdbfa8;
+  }
+  .bw-tab .bw-tablabel { grid-column: 1 / 3; grid-row: 2; font: 600 11px/1.15 var(--font-label); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bw-tab .bw-count { justify-self: end; }
+  .bw-tab:hover { border-color: rgba(214, 155, 80, 0.5); color: #f2e8d6; }
+  .bw-tab[aria-selected='true'] { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; border-color: #e8c98f; }
+
+  /* section rail (wide) */
+  .bw-rail { width: 196px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+  .bw-railtab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 9px;
+    border-radius: 6px;
+    color: #d8ccb6;
+    font: 600 13px/1 var(--font-label);
+    border: 1px solid transparent;
+  }
+  .bw-railtab .bw-tablabel { flex: 1; text-align: left; }
+  .bw-railtab:hover { background: rgba(70, 52, 30, 0.45); }
+  .bw-railtab[aria-selected='true'] { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; border-color: #e8c98f; }
+  .bw-railgroups {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-top: 6px;
+    border-top: 1px solid #3d2e1d;
+  }
+  .bw-railgroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    padding: 2px 9px;
+    border-radius: 5px;
+    text-align: left;
+    color: #bfb29c;
+    font-size: 13px;
+  }
+  .bw-railgroup span:first-child { flex: 1; }
+  /* long group names wrap instead of being cut */
+  .bw-railname { min-width: 0; padding: 3px 0; line-height: 1.25; overflow-wrap: anywhere; }
+  .bw-railgroup:hover { background: rgba(70, 52, 30, 0.45); color: #f2e8d6; }
+  .bw-railgroup[aria-pressed='true'] { background: rgba(214, 155, 80, 0.18); color: #f7deb0; }
+
+  .bw-count { font: 600 11px/1 var(--font-label); font-variant-numeric: tabular-nums; opacity: 0.75; }
+
+  .bw-select {
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 5px;
+    background: #0b0907;
+    border: 1px solid #3d2e1d;
+    color: #e8dcc7;
+    font-size: 13px;
+    outline: none;
+  }
+  .bw-select:focus { border-color: var(--color-sel); }
+  .bw-input {
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: #0b0907;
+    border: 1px solid #3d2e1d;
+    color: #e8dcc7;
+    font-size: 11px;
+    outline: none;
+  }
+  .bw-input:focus { border-color: var(--color-sel); }
+  .bw-chip {
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font: 600 11px/1 var(--font-label);
+    background: rgba(70, 53, 31, 0.66);
+    color: #e3d3b8;
+    border: 1px solid rgba(199, 156, 97, 0.22);
+  }
+  .bw-chip:hover { border-color: rgba(214, 155, 80, 0.6); }
+  .bw-chip[aria-pressed='true'] { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; border-color: #e8c98f; }
+
+  .bw-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    outline: none;
+    border-radius: 6px;
+    background: rgba(9, 7, 5, 0.55);
+    border: 1px solid #2c2216;
+    padding-bottom: 4px;
+  }
+  .bw-list:focus-visible { box-shadow: 0 0 0 2px var(--color-sel); }
+  .bw-group {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px 4px;
+    font: 700 11px/1.2 var(--font-label);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e1bc7e;
+    background: #120e0a;
+    border-bottom: 1px solid #241b12;
+  }
+  .bw-group span:first-child { flex: 1; min-width: 0; }
+  .bw-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 3px 6px 3px 10px;
+    border-bottom: 1px solid rgba(61, 46, 29, 0.35);
+    border-left: 2px solid transparent;
+    cursor: default;
+  }
+  .bw-row:hover { background: rgba(70, 52, 30, 0.38); }
+  .bw-row[aria-selected='true'] { background: rgba(214, 155, 80, 0.15); border-left-color: var(--color-sel); }
+  .bw-row--blocked { opacity: 0.5; }
+  .bw-row[draggable='true'] { cursor: grab; }
+  .bw-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .bw-name, .bw-detail { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bw-name { font-weight: 600; color: #f2e8d6; }
+  .bw-detail { font-size: 11px; color: #a39683; }
+  .bw-badge {
+    flex-shrink: 0;
+    font: 700 11px/1 var(--font-label);
+    padding: 3px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    border: 1px solid currentColor;
+    cursor: help;
+  }
+  .bw-badge--gold { color: #e1bc7e; }
+  .bw-badge--green { color: #b9e07a; }
+  .bw-badge--amber { color: #e6c17a; }
+  .bw-badge--grey { color: #9aa3ad; }
+  .bw-badge--red { color: #f08f8f; }
+  .bw-badge--violet { color: #c6b4ff; }
+  .bw-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    color: #cdbfa8;
+  }
+  .bw-icon-btn:hover:not(:disabled) { background: rgba(214, 155, 80, 0.18); color: #f7deb0; }
+  .bw-icon-btn[aria-pressed='true'] { color: var(--color-sel-2); background: rgba(214, 155, 80, 0.18); }
+  .bw-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+    height: 26px;
+    min-width: 52px;
+    padding: 0 9px;
+    border-radius: 5px;
+    font: 700 11px/1 var(--font-label);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #e3bc79, #bb8544);
+    color: #21160c;
+    border: 1px solid #6d4b22;
+  }
+  .bw-act:hover:not(:disabled) { background: linear-gradient(180deg, #f0d39d, #cb9654); }
+  .bw-act:disabled { opacity: 0.5; }
+  .bw-act--secondary { background: rgba(73, 59, 42, 0.85); color: #f0e2c8; border-color: #2a2016; }
+  .bw-act--secondary:hover:not(:disabled) { background: #765b36; }
+  .bw-acts { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .bw-play { margin-left: -6px; margin-right: -4px; }
+  .bw-play[aria-pressed='true'] { background: rgba(214, 155, 80, 0.22); }
+  /* extra actions show on the row you point at or have selected, so the list stays calm */
+  .bw-row .bw-act--extra { display: none; }
+  .bw-row:hover .bw-act--extra, .bw-row[aria-selected='true'] .bw-act--extra { display: inline-flex; }
+  /* narrow panel: names get the full width; the buttons appear over the right end of the row you
+     point at, have selected or are loading */
+  .bw--panel .bw-row { position: relative; }
+  .bw--panel .bw-acts {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 0 6px 0 22px;
+    background: linear-gradient(90deg, rgba(30, 23, 15, 0), #21190f 18px);
+    opacity: 0;
+    transition: opacity 80ms;
+  }
+  .bw--panel .bw-row:hover .bw-acts,
+  .bw--panel .bw-row[aria-selected='true'] .bw-acts,
+  .bw--panel .bw-row--busy .bw-acts { opacity: 1; }
+
+  .bw-foot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    font-size: 11px;
+    color: #a39683;
+  }
+  .bw-empty { padding: 18px 14px; color: #c8bba5; font-size: 13px; line-height: 1.45; }
+  .bw-empty code, .bw-sub code { color: #f7deb0; }
+  .bw-note {
+    font-size: 11px;
+    line-height: 1.35;
+    color: #d9c99b;
+    background: #17120e;
+    border: 1px solid #534324;
+    border-radius: 5px;
+    padding: 4px 8px;
+  }
+  .bw-sub {
+    font-size: 11px;
+    line-height: 1.35;
+    background: #120e0a;
+    border: 1px solid #3d2e1d;
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
+/* LOAD dialog shell (src/workstation/PatchBrowser.tsx) */
+@layer components {
+  .load-dialog {
+    border-radius: 10px;
+    background: linear-gradient(180deg, #221a12, #120e0a);
+    border: 1px solid #5a4329;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 233, 196, 0.08);
+  }
+  .load-seg { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #5a4329; }
+  .load-seg button {
+    height: 30px;
+    padding: 0 12px;
+    font: 700 13px/1 var(--font-label);
+    color: #d8ccb6;
+    background: rgba(60, 45, 28, 0.55);
+  }
+  .load-seg button + button { border-left: 1px solid #5a4329; }
+  .load-seg button[aria-pressed='true'] { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; }
+}

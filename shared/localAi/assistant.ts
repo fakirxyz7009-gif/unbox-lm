@@ -18,6 +18,25 @@ export const ASSISTANT_LIMITS = {
   maxReplyChars: 1200,
 } as const;
 
+/**
+ * This assistant is deliberately restricted to symbolic control data. Keep this check in shared
+ * code so browser-only rule suggestions and the optional local-model route enforce the exact
+ * same no-audio-generation boundary. It is not an attempt to classify imported user files.
+ */
+const AUDIO_REQUEST_TARGET = /\b(?:audio|sound(?:scape)?|waveform|wav|wave|mp3|ogg|voice|vocals?|sing(?:ing|er)?|stems?|recordings?|samples?)\b/i;
+const AUDIO_REQUEST_OPERATION = /\b(?:generate|create|make|render|synthesi[sz]e|replace|clone|imitate|convert)\b/i;
+const EXPLICIT_AUDIO_REQUEST = /\b(?:audio|sound|voice)\s*(?:generation|synthesis|creation|replacement|clone)|\b(?:text[ -]?to[ -]?speech|tts|voice[ -]?(?:conversion|clone))\b/i;
+
+/** Returns the user-facing rejection for a requested generated/replaced sound, if any. */
+export function audioGenerationRequestRejection(message: string): string | null {
+  const request = message.trim();
+  if (!request) return null;
+  if (EXPLICIT_AUDIO_REQUEST.test(request) || (AUDIO_REQUEST_TARGET.test(request) && AUDIO_REQUEST_OPERATION.test(request))) {
+    return 'Audio generation and audio replacement are disabled. This assistant only proposes MIDI, device and automation controls; use a recorded pack or your own verified recording for sound.';
+  }
+  return null;
+}
+
 export const TRANSFORM_OPS = ['reverse', 'flip', 'transpose', 'double', 'halve', 'legato', 'humanize', 'crescendo'] as const;
 export type TransformOp = (typeof TRANSFORM_OPS)[number];
 
@@ -149,6 +168,7 @@ export function assistantInstructions(): string {
     '- {"type":"write_notes","scope":"pattern"|"clip","replace":false,"notes":[{"step":0,"note":60,"length":2,"velocity":0.8}]}  (step counts grid units from the start, 4 per beat in 16ths for patterns; note is a MIDI number 0 to 127; replace true clears the old notes first)',
     '- {"type":"set_track_mute","track":"<track name from the song>","muted":true}',
     'Never invent a track name: use only names listed in the song state. Keep generated notes inside the pattern length given in the state.',
+    'Never generate, render, replace, clone, synthesize or return audio, waveforms, recordings, stems, samples, voices or sounds. This assistant only proposes symbolic MIDI, device and automation controls.',
     'What the app offers, for questions: a piano roll with a left toolbar (select, draw, erase, mute, split, glue, stretch, zoom and edits: reverse Shift+R, flip Shift+F, humanize Shift+H, legato Shift+L, rotate Ctrl+Left/Right, transpose arrow keys, double and halve length, crescendo, split at playhead, mute Ctrl+M, duplicate Ctrl+D, delete). Samples & Stems (Alt+S): import a link (needs yt-dlp and ffmpeg on this computer), separate a sample into drums, bass, other and vocals with the local Demucs model (needs demucs), or place samples on the timeline. Export page: stems as a zip with a MIDI file per instrument (drum pattern included) and a manifest. Shortcuts: Shift+? or Alt+H lists them.',
   ].join('\n');
 }

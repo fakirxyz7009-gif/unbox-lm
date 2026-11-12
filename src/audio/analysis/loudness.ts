@@ -56,13 +56,14 @@ function filterInPlace(x: Float64Array, f: Biquad): void {
   let y1 = 0;
   let y2 = 0;
   for (let i = 0; i < x.length; i++) {
-    const x0 = x[i];
+    const rawX0 = x[i];
+    const x0 = Number.isFinite(rawX0) ? rawX0 : 0;
     const y0 = f.b0 * x0 + f.b1 * x1 + f.b2 * x2 - f.a1 * y1 - f.a2 * y2;
     x2 = x1;
     x1 = x0;
     y2 = y1;
-    y1 = y0;
-    x[i] = y0;
+    y1 = Number.isFinite(y0) ? y0 : 0;
+    x[i] = y1;
   }
 }
 
@@ -183,16 +184,17 @@ export function measureLoudness(channels: Float32Array[], sampleRate: number): L
   const stGated = stAbs.filter((v) => v > stMean - 20).sort((a, b) => a - b);
   const pct = (p: number) => stGated[Math.min(stGated.length - 1, Math.max(0, Math.round((p / 100) * (stGated.length - 1))))];
   const lra = stGated.length > 1 ? pct(95) - pct(10) : 0;
-  const tp = Math.max(...channels.slice(0, 2).map(truePeak));
+  const tp = channels.length ? Math.max(0, ...channels.slice(0, 2).map(truePeak)) : 0;
+  const tpDb = db(tp);
   return {
     integrated,
     momentaryMax,
     shortTermMax,
     lra,
-    truePeakDb: db(tp),
+    truePeakDb: tpDb,
     samplePeakDb: db(samplePeak),
     rmsDb: db(Math.sqrt(rmsSum / Math.max(1, len * Math.min(2, channels.length)))),
-    plr: db(tp) - integrated,
+    plr: Number.isFinite(tpDb) && Number.isFinite(integrated) ? tpDb - integrated : 0,
     shortTerm: Float32Array.from(st),
   };
 }

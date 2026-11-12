@@ -122,12 +122,16 @@ export class InputManager {
       a.getFloatTimeDomainData(b);
       let p = 0;
       let s = 0;
+      let count = 0;
       for (let i = 0; i < b.length; i++) {
-        const v = Math.abs(b[i]);
+        const raw = b[i];
+        if (!Number.isFinite(raw)) continue;
+        const v = Math.abs(raw);
         if (v > p) p = v;
-        s += b[i] * b[i];
+        s += raw * raw;
+        count++;
       }
-      return [p, Math.sqrt(s / b.length)];
+      return [p, count > 0 ? Math.sqrt(s / count) : 0];
     };
     const [peakL, rmsL] = read(this.analyserL);
     const [peakR, rmsR] = read(this.analyserR);

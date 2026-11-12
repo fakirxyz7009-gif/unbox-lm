@@ -59,9 +59,8 @@ interface Props {
   setPianoTool: (tool: PianoRollTool) => void;
   defaultNoteLength: number;
   setDefaultNoteLength: (len: number) => void;
-  handleBatchNoteLengthTransform: (
-    action: 'dec' | 'inc' | 'halve' | 'double' | 'legato' | 'staccato' | 'chop16'
-  ) => void;
+  /** Every note of the pattern: -1 / +1 step, legato to the next note, chop into 16ths. */
+  handleBatchNoteLengthTransform: (action: 'dec' | 'inc' | 'legato' | 'chop16') => void;
   handleAudioAction: (
     action: 'split' | 'chop16' | 'chop8' | 'chop4' | 'chopToKeys'
   ) => Promise<void> | void;

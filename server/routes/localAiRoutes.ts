@@ -7,6 +7,7 @@
 import { Router, type Request, type Response } from 'express';
 import {
   ASSISTANT_LIMITS,
+  audioGenerationRequestRejection,
   assistantInstructions,
   assistantStateText,
   checkAssistantReply,
@@ -91,6 +92,8 @@ export function createLocalAiRouter(): Router {
     if (message.length > ASSISTANT_LIMITS.maxMessageChars) {
       return res.status(400).json({ error: `Keep the request under ${ASSISTANT_LIMITS.maxMessageChars} characters.` });
     }
+    const audioRequestRejection = audioGenerationRequestRejection(message);
+    if (audioRequestRejection) return res.status(400).json({ error: audioRequestRejection });
     const context = readContext(body.context);
     if ('error' in context) return res.status(400).json({ error: context.error });
 

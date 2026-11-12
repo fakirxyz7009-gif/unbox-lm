@@ -24,9 +24,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { INSTRUMENT_SUB_VOICES, type SubVoiceOption } from '../shared/instruments/subVoices.ts';
+import { INSTRUMENT_SUB_VOICES } from '../shared/instruments/subVoices.ts';
 import type {
   MultiSampleManifest,
   DeviceSampleManifest,
@@ -60,7 +59,7 @@ const VELOCITY_LAYERS = [
   { layerIndex: 3, name: 'Hard (f)', minVel: 106, maxVel: 127, isMiddleLayer: false },
 ];
 
-// 2 Round-robin variations for humanized acoustic nuance
+// Two deterministic synthesis variants per zone. They are not human takes.
 const ROUND_ROBINS = [1, 2];
 
 // Precomputed Sine Table for high-speed synthesis (65,536 entries)
@@ -128,9 +127,9 @@ function createStereoWavBuffer(left: Float32Array, right: Float32Array, sampleRa
 }
 
 /**
- * High-fidelity physical acoustic synthesizer:
- * Models authentic string inharmonicity, soundboard modes, bow rosin friction,
- * formant filter resonances, and tube saturation.
+ * High-fidelity physical-acoustic synthesizer model. It approximates string
+ * inharmonicity, soundboard modes, bow friction, formants and tube saturation;
+ * it does not contain a recorded performance.
  */
 function synthesizeAcousticStereo(
   rootMidi: number,
@@ -156,10 +155,8 @@ function synthesizeAcousticStereo(
   const isTape = lowerName.includes('tape') || lowerName.includes('mellotron');
   const isStrings = lowerName.includes('violin') || lowerName.includes('cello') || lowerName.includes('viola') || lowerName.includes('bass');
   const isTheremin = lowerName.includes('theremin');
-  const isOndes = lowerName.includes('ondes');
   const isStylus = lowerName.includes('stylus');
   const isNoteBender = lowerName.includes('notebender') || lowerName.includes('otamatone');
-  const isWorld = lowerName.includes('sitar') || lowerName.includes('bansuri') || lowerName.includes('harp') || lowerName.includes('oud');
   const isWinds = lowerName.includes('flute') || lowerName.includes('wind') || lowerName.includes('brass');
 
   // Velocity parameters
@@ -355,11 +352,11 @@ export async function generate30GbLibrary(options?: {
 
   console.log(`\n Catalog Architecture:`);
   console.log(`   Instruments:       ${instrumentEntries.length} physical acoustic & electrophonic models`);
-  console.log(`   Sub-Voices:        ${totalSubVoices} authentic articulations & mic perspectives`);
+  console.log(`   Sub-Voices:        ${totalSubVoices} synthetic timbre and perspective models`);
   console.log(`   Velocity Layers:   ${VELOCITY_LAYERS.length} (Soft, Medium-Soft, Medium-Hard, Hard)`);
   console.log(`   Pitch Roots:       ${CHROMATIC_ROOTS.length} chromatic intervals (A0 to C8)`);
-  console.log(`   Round-Robins:      ${ROUND_ROBINS.length} humanized takes per zone`);
-  console.log(`   Total Multi-Files: ${totalSamplesPlanned.toLocaleString()} WAV recordings`);
+  console.log(`   Variants:          ${ROUND_ROBINS.length} deterministic synthesis variants per zone`);
+  console.log(`   Total Multi-Files: ${totalSamplesPlanned.toLocaleString()} synthesized WAV files`);
   console.log(`   Sample Duration:   ${durationSec}s per note (${(actualBytesPerSample / 1024).toFixed(1)} KB each)`);
   console.log(`   Projected Size:    ${(projectedTotalBytes / (1024 ** 3)).toFixed(2)} GB`);
 
@@ -391,6 +388,10 @@ export async function generate30GbLibrary(options?: {
     version: 1,
     generatedAt: new Date().toISOString(),
     sampleBaseUrl: '/samples/',
+    provenance: {
+      sourceKind: 'synthesized',
+      generator: 'scripts/generate-30gb-library.ts physical-acoustic model',
+    },
     devices: {},
   };
 

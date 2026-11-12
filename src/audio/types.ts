@@ -262,6 +262,9 @@ export interface RackMacro {
   targets: RackMacroTarget[];
 }
 
+/** A Combiner exposes at most eight front-panel macro controls. */
+export const MAX_RACK_MACROS = 8;
+
 /** Combinator-style group of rack units (created by the AI Combinator or the user). */
 export interface RackGroup {
   id: string;

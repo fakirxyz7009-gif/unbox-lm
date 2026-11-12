@@ -52,12 +52,27 @@ test('separation status reports whether demucs runs, and unknown stems are refus
   }
 });
 
+test('trained separation rejects an otherwise valid local WAV without explicit consent', async () => {
+  const { server, base } = await listen();
+  try {
+    const denied = await fetch(`${base}/api/separate/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'audio/wav' },
+      body: new Uint8Array(songWav(0.05)),
+    });
+    assert.equal(denied.status, 403);
+    assert.match((await denied.json() as { error: string }).error, /explicit consent/i);
+  } finally {
+    server.close();
+  }
+});
+
 test('a short song is split into four WAV stems by the local demucs model', { timeout: 420_000 }, async (t) => {
   if (!(await demucsAvailable())) return t.skip('demucs is not installed on this computer');
   const { server, base } = await listen();
   try {
     const wav = songWav(3);
-    const created = await fetch(`${base}/api/separate/jobs`, {
+    const created = await fetch(`${base}/api/separate/jobs?consent=trained-model-separation`, {
       method: 'POST',
       headers: { 'Content-Type': 'audio/wav' },
       body: new Uint8Array(wav),
@@ -83,7 +98,7 @@ test('the six-stem model also writes guitar and piano', { timeout: 420_000 }, as
   if (!(await demucsAvailable())) return t.skip('demucs is not installed on this computer');
   const { server, base } = await listen();
   try {
-    const created = await fetch(`${base}/api/separate/jobs?model=htdemucs_6s`, {
+    const created = await fetch(`${base}/api/separate/jobs?model=htdemucs_6s&consent=trained-model-separation`, {
       method: 'POST',
       headers: { 'Content-Type': 'audio/wav' },
       body: new Uint8Array(songWav(3)),

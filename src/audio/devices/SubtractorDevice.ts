@@ -196,10 +196,11 @@ export class SubtractorDevice extends BaseDevice {
     const attack = Math.max(0.004, this.params.attack);
     const decay = Math.max(0.02, this.params.decay);
     const sustain = Math.max(0.08, Math.min(1, this.params.sustain));
+    const maxCutoff = Math.min(18000, this.ctx.sampleRate ? this.ctx.sampleRate * 0.49 : 18000);
 
     filter.frequency.cancelScheduledValues(startTime);
     filter.frequency.setValueAtTime(Math.max(60, baseCutoff * 0.65), startTime);
-    filter.frequency.exponentialRampToValueAtTime(Math.min(18000, baseCutoff * 2.6), startTime + attack);
+    filter.frequency.exponentialRampToValueAtTime(Math.min(maxCutoff, baseCutoff * 2.6), startTime + attack);
     filter.frequency.exponentialRampToValueAtTime(Math.max(80, baseCutoff * Math.max(0.35, sustain)), startTime + attack + decay);
 
     const vca = this.ctx.createGain();

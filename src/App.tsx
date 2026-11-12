@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Activity, useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { audioEngine } from './audio/AudioEngine.ts';
 import type { BaseDevice } from './audio/BaseDevice.ts';
@@ -21,6 +21,9 @@ import { getUi, setUi, type SeqTool } from './shell/uiStore.ts';
 import { WorkstationTab } from './workstation/WorkstationTab.tsx';
 import { installMidiControls } from './workstation/midiControls.ts';
 import { StemBrowserModal } from './components/StemBrowserModal.tsx';
+import { stemLibrary } from './audio/stemLibraryClient.ts';
+import { OPEN_STEM_TOOLS_EVENT } from './shell/stemTools.ts';
+import { SHARE_BUILD } from '../shared/buildMode.ts';
 import { AutomateMenu } from './components/AutomateMenu.tsx';
 
 /** Letter keys while computer keys are commands (Reason-style tools). */
@@ -30,6 +33,15 @@ export default function App() {
   const [tab, setTab] = useState<WorkspaceTab>('workstation');
   /** A full-screen page (Projects, Instruments, …) over the tabs. */
   const [page, setPage] = useState<PageId | null>(null);
+  useEffect(() => {
+    // the stem library (the D:\audio stems folders) is indexed by the server at start-up
+    if (!SHARE_BUILD) void stemLibrary.load();
+  }, []);
+  useEffect(() => {
+    const open = () => setIsStemBrowserOpen(true);
+    window.addEventListener(OPEN_STEM_TOOLS_EVENT, open);
+    return () => window.removeEventListener(OPEN_STEM_TOOLS_EVENT, open);
+  }, []);
   useEffect(() => {
     void projectManager.init();
   }, []);
@@ -236,14 +248,22 @@ export default function App() {
 
   // Global keyboard shortcuts
   useEffect(() => {
-    const CONTROL_SELECTOR = 'button, a[href], [role="button"], [role="slider"], [role="checkbox"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"], summary';
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandSearchOpen((v) => !v);
         return;
       }
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable ||
+        Boolean(target?.closest('[contenteditable="true"]'))
+      ) {
+        return;
+      }
       const k = e.key.toLowerCase();
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && k === 'e') {
         e.preventDefault();
@@ -296,15 +316,18 @@ export default function App() {
         handleTriggerShortcutAction(fkeys[e.key]);
         return;
       }
-      // Space and Tab belong to a focused control (a button, a slider, a menu item) so the keyboard can operate it;
-      // the shortcuts take them only when no control has the focus.
-      const onControl = e.target instanceof Element && !!e.target.closest(CONTROL_SELECTOR);
-      if (e.code === 'Space' && !onControl) {
+      // Spacebar always toggles playback in DAW workflow unless typing text (which returns early above).
+      // Blur any focused button or slider so spacebar does not re-trigger that control.
+      if (e.code === 'Space') {
         e.preventDefault();
+        if (target && target !== document.body && typeof target.blur === 'function') {
+          target.blur();
+        }
         handleTriggerShortcutAction('play_stop');
         return;
       }
-      if (e.code === 'Tab' && !onControl) {
+      // Tab always flips the rack front/rear (Reason workflow)
+      if (e.code === 'Tab') {
         e.preventDefault();
         handleTriggerShortcutAction('flip_rack');
         return;
@@ -408,8 +431,7 @@ export default function App() {
     />
   );
 
-  const content =
-    tab === 'workstation' ? (
+  const workstationEl = (
       <WorkstationTab
         tracks={tracks}
         selectedId={selectedPart}
@@ -421,7 +443,8 @@ export default function App() {
         onEditPattern={() => openEditor('piano_roll')}
         onMessage={showToast}
       />
-    ) : tab === 'rack' ? (
+  );
+  const rackTabEl = (
       <div className="flex-1 min-h-0 flex flex-col studio-wood-cabinet relative overflow-hidden">
         {isParallelView ? (
           <div className="flex-1 min-h-0 flex flex-col" data-testid="split-view">
@@ -433,7 +456,8 @@ export default function App() {
         )}
         {keyboardDock}
       </div>
-    ) : (
+  );
+  const mixerEl = (
       <MixerTab
         request={externalSeqTab}
         selectedPart={selectedPart}
@@ -456,7 +480,36 @@ export default function App() {
           />
         )}
       />
-    );
+  );
+  // A tab stays alive (hidden) once visited: switching back shows it instead of rebuilding it
+  // (the rack took ~0.4 s to rebuild). A hidden tab's effects, frame loops and store subscriptions
+  // are paused, so it costs nothing while you work elsewhere.
+  const visitedTabs = useRef(new Set<WorkspaceTab>());
+  visitedTabs.current.add(tab);
+  // Once the app is idle after start-up, the other tabs are built hidden in the background, so the
+  // first switch to the rack shows it instead of building ~4000 elements then (it took ~1.5 s).
+  const [prebuilt, setPrebuilt] = useState(false);
+  useEffect(() => {
+    const go = () => setPrebuilt(true);
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(go, { timeout: 6000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(go, 3000);
+    return () => window.clearTimeout(id);
+  }, []);
+  if (prebuilt) {
+    visitedTabs.current.add('rack');
+    visitedTabs.current.add('mixer');
+  }
+  const tabEls: Record<WorkspaceTab, React.ReactNode> = { workstation: workstationEl, rack: rackTabEl, mixer: mixerEl };
+  const content = (['workstation', 'rack', 'mixer'] as const)
+    .filter((id) => visitedTabs.current.has(id))
+    .map((id) => (
+      <Activity key={id} mode={id === tab ? 'visible' : 'hidden'}>
+        {tabEls[id]}
+      </Activity>
+    ));
 
   return (
     <AppShell
@@ -543,7 +596,7 @@ export default function App() {
         onTriggerGlobalAction={handleTriggerShortcutAction}
         appCommands={[
           ...SECTIONS.map((sec) => ({ id: `go_${sec.id}`, category: 'GO TO', title: sec.label, subtitle: 'Open this section', shortcut: '', run: () => goSection(sec.id) })),
-          { id: 'open_browser', category: 'INSERT', title: 'Samples & Stems', subtitle: 'Every sample in the project, plus the experimental four-band split', shortcut: 'Alt+S', run: () => setIsStemBrowserOpen(true) },
+          { id: 'open_browser', category: 'INSERT', title: 'Samples & Stems', subtitle: 'Every sample in the project, and stem separation', shortcut: 'Alt+S', run: () => setIsStemBrowserOpen(true) },
           { id: 'view_clip_editor_full', category: 'VIEW', title: 'Clip Editor: Full Screen', subtitle: 'Open Clip Editor in full screen mode (hide mixer)', shortcut: 'F10', run: () => handleTriggerShortcutAction('toggle_clip_fullscreen') },
           { id: 'view_clip_editor_split', category: 'VIEW', title: 'Mixer & Clip Editor: Split View', subtitle: 'Show mixer console and clip editor split', shortcut: '', run: () => { goTab('mixer'); setUi({ mixerLayout: 'split' }); } },
           { id: 'view_mixer_full', category: 'VIEW', title: 'Mixer: Full Screen', subtitle: 'Open Mixer console in full screen mode', shortcut: '', run: () => { goTab('mixer'); setUi({ mixerLayout: 'mixer' }); } },

@@ -2,7 +2,7 @@
 // Serves the built web app (../dist) plus the /api routes (AI + D:\vsr library) from
 // api-server.cjs (built by `npm run build:api`). Without that bundle it falls back to a
 // static-only server.
-const { app, BrowserWindow, session, shell } = require('electron');
+const { app, BrowserWindow, session, shell, powerSaveBlocker } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -152,6 +152,13 @@ async function createWindow() {
     },
   });
   mainWindow = win;
+  try {
+    if (powerSaveBlocker && typeof powerSaveBlocker.start === 'function') {
+      powerSaveBlocker.start('prevent-app-suspension');
+    }
+  } catch {
+    // Non-fatal if powerSaveBlocker is unavailable in test harness
+  }
   win.on('closed', () => { mainWindow = null; });
   win.webContents.on('render-process-gone', (_event, details) => {
     recordStartupFailure(app.getPath('userData'), 'renderer-process-gone', new Error(`${details.reason}: exit code ${details.exitCode}`));

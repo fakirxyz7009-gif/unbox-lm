@@ -563,8 +563,24 @@ export const PatchCableLayer: React.FC<PatchCableLayerProps> = ({
   const onCablePointerDown = (e: React.PointerEvent) => {
     // Plugs sit on top of their jacks: a press near a jack grabs the plug, not the cable.
     const p = registry.toLocal(e.clientX, e.clientY);
-    const jack = registry.nearest(p, 16, () => true);
-    if (jack) controller.onJackPointerDown(e, jack);
+    const jack = registry.nearest(p, 28, () => true);
+    if (jack) {
+      controller.onJackPointerDown(e, jack);
+      return;
+    }
+    // If single click is not near a jack, let the underlying rack controls receive interaction
+    if (e.detail === 1) {
+      const target = e.currentTarget as HTMLElement | null;
+      if (target) {
+        const prev = target.style.pointerEvents;
+        target.style.pointerEvents = 'none';
+        const under = document.elementFromPoint(e.clientX, e.clientY);
+        target.style.pointerEvents = prev;
+        if (under && under !== target && under !== document.body && !under.closest('.patch-cables')) {
+          under.dispatchEvent(new PointerEvent('pointerdown', e.nativeEvent));
+        }
+      }
+    }
   };
 
   return (

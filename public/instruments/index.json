@@ -832,6 +832,78 @@
       "oneShot": true,
       "release": 0.3,
       "bytes": 432312
+    },
+    {
+      "id": "vsco-glockenspiel",
+      "name": "VSCO Glockenspiel",
+      "kind": "melodic",
+      "category": "percussion",
+      "description": "Recorded orchestral glockenspiel from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 4,
+      "bytes": 400651
+    },
+    {
+      "id": "vsco-xylophone",
+      "name": "VSCO Xylophone",
+      "kind": "melodic",
+      "category": "percussion",
+      "description": "Recorded orchestral xylophone from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 4,
+      "bytes": 115570
+    },
+    {
+      "id": "vsco-tubular-bells",
+      "name": "VSCO Tubular Bells",
+      "kind": "melodic",
+      "category": "percussion",
+      "description": "Recorded orchestral tubular bells (chimes) from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 4,
+      "bytes": 396522
+    },
+    {
+      "id": "vsco-timpani",
+      "name": "VSCO Timpani",
+      "kind": "melodic",
+      "category": "percussion",
+      "description": "Recorded orchestral timpani, tuned by key, from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 4,
+      "bytes": 1743408
+    },
+    {
+      "id": "vsco-piccolo",
+      "name": "VSCO Piccolo",
+      "kind": "melodic",
+      "category": "winds",
+      "description": "Recorded piccolo sustain from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 0.5,
+      "bytes": 512012
+    },
+    {
+      "id": "vsco-violin-section",
+      "name": "VSCO Violin Section",
+      "kind": "melodic",
+      "category": "strings",
+      "description": "Recorded violin section sustain with vibrato from the CC0 VSCO 2 Community Edition.",
+      "spdx": "CC0-1.0",
+      "author": "Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote",
+      "source": "https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891",
+      "release": 0.8,
+      "bytes": 2750277
     }
   ]
 }

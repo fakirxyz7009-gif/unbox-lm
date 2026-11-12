@@ -67,8 +67,13 @@ export function audioClipStart(
 /** Clip gain envelope value at `t` seconds into a clip of length `len` with polarity and curve shape support. */
 export function fadeGainAt(c: ArrangementClip, t: number, len: number): number {
   const g = (c.invertPhase ? -1 : 1) * Math.pow(10, (c.gainDb ?? 0) / 20);
-  const fi = Math.max(0, c.fadeIn ?? 0);
-  const fo = Math.max(0, c.fadeOut ?? 0);
+  let fi = Math.max(0, c.fadeIn ?? 0);
+  let fo = Math.max(0, c.fadeOut ?? 0);
+  if (fi + fo > len && len > 0) {
+    const scale = len / (fi + fo);
+    fi *= scale;
+    fo *= scale;
+  }
   let kIn = 1;
   let kOut = 1;
 

@@ -131,5 +131,7 @@
 2399	2576	8148597280095364	unbox-vst3-midi-process-stream-host.exe	a974798696a7afa3
 92	1082	8148685610782241	CMakeFiles/unbox-vst3-host-smoke.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/common/memorystream.cpp.obj	5103a18027819f05
 102	2806	8148701395959010	CMakeFiles/unbox-vst3-shared-memory-host.dir/C_/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/public.sdk/source/vst/hosting/module_win32.cpp.obj	de039d6120de0221
-92	2852	8148708189079453	CMakeFiles/unbox-vst3-shared-memory-host.dir/shared_memory_stream_host.cpp.obj	4a2b848a477783d5
-2854	3035	8148708216687107	unbox-vst3-shared-memory-host.exe	f8ca1f131ee901bd
+129	3542	8161386711678706	CMakeFiles/unbox-vst3-shared-memory-host.dir/shared_memory_stream_host.cpp.obj	4a2b848a477783d5
+3545	3869	8161386745817106	unbox-vst3-shared-memory-host.exe	f8ca1f131ee901bd
+85	2766	8161388769160556	CMakeFiles/unbox-vst3-shared-memory-host.dir/shared_memory_stream_host.cpp.obj	4a2b848a477783d5
+2767	2938	8161388795977699	unbox-vst3-shared-memory-host.exe	f8ca1f131ee901bd

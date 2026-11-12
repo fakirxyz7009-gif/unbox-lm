@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { useOnScreen } from '../../ui/skin/useOnScreen.ts';
+import { meterDue } from '../../nexa/useEngine.ts';
 
 interface StereoGoniometerProps {
   analyser?: AnalyserNode;
@@ -7,6 +9,7 @@ interface StereoGoniometerProps {
 
 export const StereoGoniometer: React.FC<StereoGoniometerProps> = ({ analyser, panSpread }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onScreen = useOnScreen(canvasRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -18,7 +21,12 @@ export const StereoGoniometer: React.FC<StereoGoniometerProps> = ({ analyser, pa
     let t = 0;
     const buffer = new Uint8Array(analyser ? analyser.fftSize : 128);
 
-    const render = () => {
+    const render = (now: number) => {
+      // off screen (a scrolled-away rack unit), or drawn less than ~33 ms ago: nothing to draw
+      if (!onScreen.current || !meterDue(now)) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       t += 0.05;
       const w = canvas.width;
       const h = canvas.height;

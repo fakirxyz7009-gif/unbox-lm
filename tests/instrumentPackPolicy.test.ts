@@ -22,13 +22,13 @@ test('share builds keep redistributable recordings and exclude custom-license pa
   const sharePacks = redistributablePacks(INSTRUMENT_PACKS);
   const privatePacks = INSTRUMENT_PACKS.filter((pack) => !isRedistributable(pack.spdx)).map((pack) => pack.id).sort();
 
-  assert.equal(sharePacks.length, 42);
+  assert.equal(sharePacks.length, 48);
   assert.ok(sharePacks.every((pack) => isRedistributable(pack.spdx)));
   assert.deepEqual(privatePacks, ['chamkila-harmonium', 'chamkila-vocal', 'dholak-folk', 'tumbi-folk']);
 });
 
 test('every recorded instrument pack keeps contributor, source, and license metadata', () => {
-  assert.equal(INSTRUMENT_PACKS.length, 46);
+  assert.equal(INSTRUMENT_PACKS.length, 52);
   assert.ok(INSTRUMENT_PACKS.every((pack) => pack.author.trim() && pack.source.trim() && pack.spdx.trim()));
   const creditsPath = fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url));
   const credits = readFileSync(creditsPath, 'utf8');
@@ -51,16 +51,15 @@ test('every recorded instrument pack keeps contributor, source, and license meta
   assert.match(devicesPage, /Attribution: \$\{pack\.author\}/);
   assert.doesNotMatch(devicesPage, /Recorded by \$\{pack\.author\}/);
 
-  const patchBrowserPath = fileURLToPath(new URL('../src/workstation/PatchBrowser.tsx', import.meta.url));
-  const patchBrowser = readFileSync(patchBrowserPath, 'utf8');
-  assert.match(patchBrowser, /SHIPPED_PACKS/);
-  assert.match(patchBrowser, /Attribution: \$\{pack\.author\}/);
-  assert.match(patchBrowser, /Source: \$\{pack\.source\}/);
-
-  const rackLibraryPath = fileURLToPath(new URL('../src/rack/LibraryBrowser.tsx', import.meta.url));
-  const rackLibrary = readFileSync(rackLibraryPath, 'utf8');
-  assert.doesNotMatch(rackLibrary, /getSubVoicesForDevice/);
-  assert.doesNotMatch(rackLibrary, /Real Recorded Audio/);
+  // One browser (rack panel, LOAD, piano roll) builds every pack row in src/browser/entries.ts.
+  const browserEntriesPath = fileURLToPath(new URL('../src/browser/entries.ts', import.meta.url));
+  const browserEntries = readFileSync(browserEntriesPath, 'utf8');
+  assert.match(browserEntries, /SHIPPED_PACKS/);
+  assert.match(browserEntries, /Attribution: \$\{pack\.author\}/);
+  assert.match(browserEntries, /Source: \$\{pack\.source\}/);
+  assert.doesNotMatch(browserEntries, /Recorded by \$\{pack\.author\}/);
+  assert.doesNotMatch(browserEntries, /getSubVoicesForDevice/);
+  assert.doesNotMatch(browserEntries, /Real Recorded Audio/);
 });
 
 test('Ganjo ships pinned CC0 guitar-banjo recordings with complete key and round-robin maps', () => {
@@ -265,7 +264,8 @@ test('FreePats Wooden Recorder ships performer-credited CC0 recordings and loope
   const fetchScriptPath = fileURLToPath(new URL('../scripts/instruments/fetch-freepats-recorder.mjs', import.meta.url));
   const fetchScript = readFileSync(fetchScriptPath, 'utf8');
   assert.match(fetchScript, /24975F5F168F4D98B9E2EF0ED77C32A800A1DA3203EC9AE26614F35F670DF693/);
-  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_recorder');
+  // the pack is offered under its own credited name (a family entry such as "Recorder" may open it too)
+  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_recorder' && item.name === 'FreePats Wooden Recorder');
   const spec = DEVICE_SPECS.find((item) => item.type === 'rec_freepats_recorder');
   assert.equal(device?.name, 'FreePats Wooden Recorder');
   assert.equal(spec?.engineConfig?.pack, 'freepats-recorder');
@@ -308,7 +308,8 @@ test('FreePats Bagpipe ships performer-credited CC0 recordings, two drones, and 
   const fetchScriptPath = fileURLToPath(new URL('../scripts/instruments/fetch-freepats-bagpipe.mjs', import.meta.url));
   const fetchScript = readFileSync(fetchScriptPath, 'utf8');
   assert.match(fetchScript, /260B9D95BB73DA7502FAD8603CB7409C249046D1EAFB9BF7FDF3D3FC56102633/);
-  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_bagpipe');
+  // the pack is offered under its own credited name (a family entry such as "Recorder" may open it too)
+  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_bagpipe' && item.name === 'FreePats Bagpipe in G');
   const spec = DEVICE_SPECS.find((item) => item.type === 'rec_freepats_bagpipe');
   assert.equal(device?.name, 'FreePats Bagpipe in G');
   assert.equal(spec?.engineConfig?.pack, 'freepats-bagpipe');
@@ -466,7 +467,8 @@ test('Chemnitzer Concertina ships CC0 attack layers and release-trigger samples'
   assert.equal(entry.author, 'Josh Tomiak');
   assert.equal(entry.source, 'https://tomiakchemnitzer.com/digital-instrument/');
   assert.match(entry.description, /three attack velocity layers and release samples/i);
-  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_tomiak_chemnitzer_chemnitzer');
+  // the pack is offered under its own credited name (a family entry such as "Recorder" may open it too)
+  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_tomiak_chemnitzer_chemnitzer' && item.name === 'Chemnitzer Concertina');
   assert.equal(device?.name, 'Chemnitzer Concertina');
   assert.match(device?.desc ?? '', /Recorded Chemnitzer concertina/i);
 
@@ -693,7 +695,8 @@ test('FreePats Ocarina ships pinned CC0 performances with looping coverage for M
   assert.deepEqual(zoneSamples, encodedSamples);
   assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/freepats-ocarina/${file}`, import.meta.url))).size, 0), entry.bytes);
 
-  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_ocarina');
+  // the pack is offered under its own credited name (a family entry such as "Recorder" may open it too)
+  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_ocarina' && item.name === 'FreePats Ocarina');
   assert.equal(device?.name, 'FreePats Ocarina');
   const spec = DEVICE_SPECS.find((item) => item.type === 'rec_freepats_ocarina');
   assert.equal(spec?.engine, 'multisample');

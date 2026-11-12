@@ -41,6 +41,12 @@ interface RackUnitFrameProps {
   dragKey?: string;
   /** Navigator colour class: instrument / effect / utility. */
   nav: 'instrument' | 'effect' | 'utility';
+  /** Explicit Rack selection mode used to create a new multi-device Combiner. */
+  combineMode?: boolean;
+  combineSelected?: boolean;
+  /** Members of an existing Combiner are intentionally not selectable for a second frame. */
+  combineSelectable?: boolean;
+  onToggleCombine?: (id: string) => void;
 }
 
 function Ear({ units, side }: { units: number; side: 'left' | 'right' }) {
@@ -76,7 +82,22 @@ export function RackGrip({ dragKey, name }: { dragKey: string; name: string }) {
   );
 }
 
-const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({ device, face, selected, folded, plugged, controller, registry, actions, dragKey, nav }) => {
+const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
+  device,
+  face,
+  selected,
+  folded,
+  plugged,
+  controller,
+  registry,
+  actions,
+  dragKey,
+  nav,
+  combineMode = false,
+  combineSelected = false,
+  combineSelectable = false,
+  onToggleCombine,
+}) => {
   const [, tick] = useReducer((n: number) => n + 1, 0);
   const frontRef = useRef<HTMLDivElement>(null);
   const showFolded = folded && face === 'front';
@@ -110,6 +131,22 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({ device, face, selecte
     e.stopPropagation();
     actions.remove(device);
   };
+  const toggleCombine = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleCombine?.(device.id);
+  };
+  const combineButton = combineMode && combineSelectable ? (
+    <button
+      type="button"
+      onClick={toggleCombine}
+      aria-pressed={combineSelected}
+      className={`rack-combine-unit ${combineSelected ? 'rack-combine-unit--selected' : ''}`}
+      title={combineSelected ? `Remove ${device.name} from the new Combiner` : `Add ${device.name} to the new Combiner`}
+      aria-label={combineSelected ? `Remove ${device.name} from the new Combiner` : `Add ${device.name} to the new Combiner`}
+    >
+      {combineSelected ? 'IN' : 'ADD'}
+    </button>
+  ) : null;
   const foldKey = dragKey ?? device.id;
   const foldButton = (
     <button
@@ -133,7 +170,7 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({ device, face, selecte
       data-unit-id={device.id}
       data-rack-item={dragKey}
       data-nav={nav}
-      className={`rack-unit ${selected ? 'rack-unit--selected' : ''} ${device.isPowered ? '' : 'rack-unit--off'} ${showFolded ? 'rack-unit--folded' : ''}`}
+      className={`rack-unit ${selected ? 'rack-unit--selected' : ''} ${combineSelected ? 'rack-unit--combiner-selected' : ''} ${device.isPowered ? '' : 'rack-unit--off'} ${showFolded ? 'rack-unit--folded' : ''}`}
       style={face === 'rear' ? { minHeight } : undefined}
       onClick={() => actions.select(device.id)}
       aria-label={`${device.name} rack unit, ${face} panel${showFolded ? ', folded' : ''}`}
@@ -143,6 +180,7 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({ device, face, selecte
         <div className={`rack-face rack-strip flex-1 min-w-0 ${faceplateClass(device.type)}`}>
           {dragKey && <RackGrip dragKey={dragKey} name={device.name} />}
           {foldButton}
+          {combineButton}
           <button type="button" onClick={togglePower} className="rack-strip-power" title={device.isPowered ? 'Power off' : 'Power on'} aria-pressed={device.isPowered}>
             <span className={`led-indicator ${device.isPowered ? 'active-blue' : ''}`} />
           </button>
@@ -159,6 +197,7 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({ device, face, selecte
           <header className="flex items-center gap-1.5 px-2 pt-1.5 pb-1 border-b border-black/25">
             {dragKey && <RackGrip dragKey={dragKey} name={device.name} />}
             {foldButton}
+            {combineButton}
             <button
               type="button"
               onClick={togglePower}

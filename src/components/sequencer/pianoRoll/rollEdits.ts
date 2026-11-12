@@ -120,6 +120,61 @@ export function scaleLengths(notes: RollNote[], keys: Set<string>, factor: numbe
   return done(others, targets.map((n) => ({ ...n, length: round3(Math.max(minLength, n.length * factor)) })));
 }
 
+/**
+ * Adds `delta` steps to each note's length (the console's -1 / +1 step). A note never gets shorter
+ * than `minLength` (or its own length, if already shorter) nor longer than up to `end`.
+ */
+export function nudgeLengths(notes: RollNote[], keys: Set<string>, delta: number, minLength: number, end: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('resize');
+  let changed = 0;
+  const moved = targets.map((n) => {
+    const length = round3(clamp(n.length + delta, Math.min(minLength, n.length), Math.max(n.length, end - n.step)));
+    if (Math.abs(length - n.length) < EPS) return n;
+    changed++;
+    return { ...n, length };
+  });
+  if (!changed) return { error: delta < 0 ? 'The notes are already as short as they go' : 'The notes already reach the end of the pattern' };
+  return done(others, moved);
+}
+
+/** Extends (or trims) each note to the next note start of any pitch, the last one to `end` (monophonic legato). */
+export function legatoToNext(notes: RollNote[], keys: Set<string>, end: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('extend');
+  const starts = [...new Set(notes.map((n) => n.step))].sort((a, b) => a - b);
+  let changed = 0;
+  const moved = targets.map((n) => {
+    const next = starts.find((s) => s > n.step + EPS) ?? end;
+    const length = round3(next - n.step);
+    if (length <= EPS || Math.abs(length - n.length) < EPS) return n;
+    changed++;
+    return { ...n, length };
+  });
+  if (!changed) return { error: 'Every note already reaches the next one' };
+  return done(others, moved);
+}
+
+/** Cuts each note into `unit`-long repeats (the last keeps the remainder); repeats are a little softer. */
+export function chopNotes(notes: RollNote[], keys: Set<string>, unit: number): EditOutcome {
+  const { targets, others } = targetsOf(notes, keys);
+  if (!targets.length) return noTargets('chop');
+  const touched: RollNote[] = [];
+  let changed = 0;
+  for (const n of targets) {
+    if (n.length <= unit + EPS) {
+      touched.push(n);
+      continue;
+    }
+    changed++;
+    for (let at = 0; at < n.length - EPS; at += unit) {
+      touched.push({ ...n, step: round3(n.step + at), length: round3(Math.min(unit, n.length - at)), velocity: at === 0 ? n.velocity : Math.max(MIN_VELOCITY, n.velocity * 0.85) });
+    }
+  }
+  if (!changed) return { error: 'Every note is already one step or shorter' };
+  return done(others, touched);
+}
+
 /** Extends each note up to the next note of the same pitch (FL "Quick legato"). */
 export function legatoNotes(notes: RollNote[], keys: Set<string>): EditOutcome {
   const { targets, others } = targetsOf(notes, keys);

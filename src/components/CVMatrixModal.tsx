@@ -2,7 +2,7 @@ import React, { useRef, useSyncExternalStore } from 'react';
 import { BaseDevice } from '../audio/BaseDevice.ts';
 import { useEscapeKey } from '../shell/useEscapeKey.ts';
 import { CVEngine } from '../audio/CVEngine.ts';
-import { useFrame } from '../nexa/useEngine.ts';
+import { useMeterFrame } from '../nexa/useEngine.ts';
 import { setWidth } from '../ui/skin/dom.ts';
 import {
   X,
@@ -24,7 +24,7 @@ function CVMeter({ cvEngine, entryId }: { cvEngine: CVEngine; entryId: string })
   const meterRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
   const shown = useRef('');
-  useFrame(() => {
+  useMeterFrame(() => {
     const value = cvEngine.liveMeterValues.get(entryId) ?? 0;
     setWidth(fillRef.current, (value + 1) * 50);
     const text = value.toFixed(2);

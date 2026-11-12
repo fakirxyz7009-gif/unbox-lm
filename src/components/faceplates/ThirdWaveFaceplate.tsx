@@ -175,7 +175,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
       </div>
 
       {/* ================= HIGH CONTRAST HARDWARE BACKLIT LCD SCREEN ================= */}
-      <div className="relative z-10 bg-[#030c16] border-2 border-cyan-700/80 rounded-md p-2.5 shadow-[inset_0_2px_15px_rgba(0,0,0,0.9)] mb-3 backdrop-blur-md">
+      <div className="relative z-10 bg-[#030c16] border-2 border-cyan-700/80 rounded-md p-2.5 shadow-[inset_0_2px_15px_rgba(0,0,0,0.9)] mb-3">
         {/* LCD Header Navigation */}
         <div className="flex items-center justify-between border-b border-cyan-900/60 pb-1.5 mb-2">
           <div className="flex items-center space-x-2 text-[11px] font-mono">
@@ -447,7 +447,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
       </div>
 
       {/* ================= SECTION 1: OSCILLATORS & THE WAVE SURFER ================= */}
-      <div className="relative z-10 bg-black/40 border border-cyan-900/60 rounded-md p-2.5 mb-2.5 shadow-inner backdrop-blur-sm">
+      <div className="relative z-10 bg-black/40 border border-cyan-900/60 rounded-md p-2.5 mb-2.5 shadow-inner">
         <div className="flex items-center justify-between border-b border-cyan-900/40 pb-1.5 mb-2">
           <div className="flex items-center space-x-2">
             <Waves className="w-3.5 h-3.5 text-cyan-400" />
@@ -651,7 +651,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
       </div>
 
       {/* ================= SECTION 2: DUAL FILTERS IN SERIES ================= */}
-      <div className="relative z-10 bg-black/40 border border-cyan-900/60 rounded-md p-2.5 mb-2.5 shadow-inner backdrop-blur-sm">
+      <div className="relative z-10 bg-black/40 border border-cyan-900/60 rounded-md p-2.5 mb-2.5 shadow-inner">
         <div className="flex items-center space-x-2 border-b border-cyan-900/40 pb-1.5 mb-2">
           <Activity className="w-3.5 h-3.5 text-cyan-400" />
           <span className="text-[11px] font-mono font-bold text-cyan-300 tracking-wider">
@@ -787,7 +787,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
       {/* ================= SECTION 3: ENVELOPES & 4 LFOs ================= */}
       <div className="relative z-10 grid grid-cols-12 gap-2.5 mb-2.5">
         {/* Filter & Amp Envelopes */}
-        <div className="col-span-8 bg-black/40 border border-cyan-900/60 rounded-md p-2 shadow-inner backdrop-blur-sm">
+        <div className="col-span-8 bg-black/40 border border-cyan-900/60 rounded-md p-2 shadow-inner">
           <div className="flex items-center space-x-2 border-b border-cyan-900/40 pb-1 mb-2">
             <Sliders className="w-3.5 h-3.5 text-cyan-400" />
             <span className="text-[11px] font-mono font-bold text-cyan-300 tracking-wider">
@@ -899,7 +899,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
         </div>
 
         {/* 4 LFOs Section */}
-        <div className="col-span-4 bg-black/40 border border-cyan-900/60 rounded-md p-2 shadow-inner backdrop-blur-sm">
+        <div className="col-span-4 bg-black/40 border border-cyan-900/60 rounded-md p-2 shadow-inner">
           <div className="flex items-center justify-between border-b border-cyan-900/40 pb-1 mb-2">
             <span className="text-[11px] font-mono font-bold text-cyan-300">4 LFOs</span>
             <div className="flex space-x-1">
@@ -959,7 +959,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
       </div>
 
       {/* ================= SECTION 4: DUAL EFFECTS & MASTER SPREAD ================= */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 bg-black/45 border border-cyan-900/60 rounded-md p-2 shadow-inner backdrop-blur-sm">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 bg-black/45 border border-cyan-900/60 rounded-md p-2 shadow-inner">
         {/* FX 1 */}
         <div className="flex items-center space-x-2 bg-black/50 p-1.5 rounded border border-cyan-900/40">
           <div className="flex flex-col space-y-0.5">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStepTick } from '../../nexa/useEngine.ts';
+import { useDeviceAutomation, useStepTick } from '../../nexa/useEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
 import { audioEngine } from '../../audio/AudioEngine.ts';
 import { scheduleAudition } from '../../audio/audition.ts';
@@ -10,6 +10,8 @@ import { MimicDevice } from '../../audio/devices/MimicDevice.ts';
 import { MatrixDevice } from '../../audio/devices/MatrixDevice.ts';
 import { PulsarDevice } from '../../audio/devices/PulsarDevice.ts';
 import { MClassMasterSuite } from '../../audio/devices/MClassMasterSuite.ts';
+import { RV7000Device } from '../../audio/devices/RV7000Device.ts';
+import { audioStore } from '../../audio/clips/audioStore.ts';
 import { Knob } from '../Knob.tsx';
 import { VacuumTube } from '../VacuumTube.tsx';
 import { DeviceVisualizer } from '../visualizers/DeviceVisualizer.tsx';
@@ -20,6 +22,74 @@ interface DeviceFaceplateProps {
   device: BaseDevice;
   onUpdate: () => void;
 }
+
+/** Local-only convolution source controls. Project audio includes imported clips and captured takes. */
+const Rv7000ImpulseControls: React.FC<{ device: RV7000Device; onUpdate: () => void }> = ({ device, onUpdate }) => {
+  React.useSyncExternalStore(
+    (notify) => audioStore.subscribe(notify),
+    () => audioStore.getRevision(),
+    () => 0,
+  );
+  const [error, setError] = React.useState('');
+  const customImpulseId = typeof device.params.impulseAssetId === 'string' ? device.params.impulseAssetId : '';
+  const assets = audioStore.all();
+
+  const useAsset = (assetId: string) => {
+    const asset = audioStore.get(assetId);
+    if (!asset) return;
+    device.setCustomImpulse(asset.id, asset.buffer);
+    setError('');
+    audioEngine.changed();
+    onUpdate();
+  };
+
+  return (
+    <>
+      <label className="px-2 py-0.5 rounded text-[11px] font-mono font-bold border cursor-pointer bg-neutral-900 text-cyan-300 border-cyan-900/70 hover:bg-cyan-950/60" title="Import a local impulse-response audio file into this project">
+        {customImpulseId ? 'CUSTOM IR' : 'LOAD IR'}
+        <input
+          type="file"
+          accept="audio/*,.wav,.aif,.aiff,.flac,.mp3,.ogg,.m4a"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            event.currentTarget.value = '';
+            if (!file) return;
+            void audioStore.importFile(file)
+              .then((asset) => useAsset(asset.id))
+              .catch(() => setError('IR FILE COULD NOT DECODE'));
+          }}
+        />
+      </label>
+      <select
+        aria-label="Use project audio as the custom impulse response"
+        value=""
+        disabled={!assets.length}
+        onChange={(event) => useAsset(event.currentTarget.value)}
+        className="max-w-36 px-1.5 py-0.5 rounded text-[11px] font-mono font-bold border bg-neutral-900 text-sky-200 border-sky-900/70 disabled:text-neutral-600"
+        title="Use a captured or imported project-audio asset as this reverb's impulse response"
+      >
+        <option value="">{assets.length ? 'PROJECT AUDIO…' : 'NO PROJECT AUDIO'}</option>
+        {assets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name}</option>)}
+      </select>
+      {customImpulseId && (
+        <button
+          onClick={() => {
+            device.clearCustomImpulse();
+            setError('');
+            audioEngine.changed();
+            onUpdate();
+          }}
+          className="px-2 py-0.5 rounded text-[11px] font-mono font-bold border bg-neutral-900 text-neutral-300 border-neutral-700 hover:bg-neutral-800"
+          title="Use the deterministic built-in reverb response again"
+        >
+          RESET IR
+        </button>
+      )}
+      {error && <span role="status" className="text-[11px] font-mono text-red-300">{error}</span>}
+    </>
+  );
+};
 
 /**
  * Interactive SVG Real-Time Filter Frequency Response Curve (LP24 / BP12 / HP12 / Notch)
@@ -248,7 +318,7 @@ export const HardwareStepRibbon: React.FC<{
                 }
                 onUpdate();
               }}
-              className={`h-4 rounded-xs border transition-all flex items-center justify-center text-[11px] font-mono font-bold ${
+              className={`h-4 rounded-xs border flex items-center justify-center text-[11px] font-mono font-bold ${
                 isPlayhead
                   ? 'bg-white text-black border-white shadow-[0_0_10px_#ffffff] scale-105'
                   : hasStep
@@ -380,6 +450,7 @@ export const TaalRagaPhraseSelector: React.FC<{
 export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpdate }) => {
   // the matrix sequencer lights its playing step
   useStepTick(audioEngine.isPlaying && device.type === 'matrix');
+  useDeviceAutomation(device.id);
   const p = device.params;
 
   const setP = (key: string, val: any) => {
@@ -1285,6 +1356,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             >
               GATE MATRIX: {p.gateEnable ? 'ON' : 'OFF'}
             </button>
+            <Rv7000ImpulseControls device={device as RV7000Device} onUpdate={onUpdate} />
           </div>
 
           <Knob label="DECAY" value={p.decay ?? 2.8} min={0.3} max={10} step={0.1} unit="s" size="md" variant="yellow" onChange={(v) => setP('decay', v)} />

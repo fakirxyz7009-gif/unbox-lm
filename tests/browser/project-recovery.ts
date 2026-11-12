@@ -51,8 +51,62 @@ async function run(): Promise<void> {
   audioEngine.setBpm(91);
   audioEngine.commitEdit();
   await projectManager.save();
-  const baseBefore = await dbGet<ProjectRecord>('projects', baseId);
+  let baseBefore = await dbGet<ProjectRecord>('projects', baseId);
   expect(!!baseBefore, 'The base project was not saved');
+
+  // A recorder stop has a short asynchronous finalization window. Project and graph operations
+  // must fail closed in that window instead of serializing or disposing a take before it lands.
+  const takeDevice = audioEngine.createDevice('subtractor', 'Finalization guard instrument');
+  const takeTrack = audioEngine.tracks.find((track) => track.deviceId === takeDevice.id);
+  expect(!!takeTrack, 'Could not create a MIDI track for the finalization guard');
+  takeTrack!.armed = true;
+  const beforeFinalization = audioEngine.exportProjectJSON();
+  expect(await audioEngine.recorder.start(), 'Could not begin the MIDI-only finalization guard take');
+  const finalizing = audioEngine.recorder.stop();
+  expect(audioEngine.recorder.state === 'finalizing' && audioEngine.recorder.busy,
+    'Stopping a MIDI take did not enter the protected finalizing state');
+  // Start every async action in this same task. Awaiting the first rejected promise would let the
+  // intentionally tiny MIDI-only finalization finish before the following operation begins.
+  const saveDuringFinalization = projectManager.save();
+  const openDuringFinalization = projectManager.open(baseId);
+  const createDuringFinalization = projectManager.create('empty', 'Blocked finalization project');
+  expect(!audioEngine.undo(), 'Undo was allowed while a take was finalizing');
+  expect(!audioEngine.importProjectJSON(beforeFinalization), 'Direct project import was allowed while a take was finalizing');
+  expect(!audioEngine.resetProject(), 'Direct project reset was allowed while a take was finalizing');
+  expect(!audioEngine.removeDevice(takeDevice.id), 'Device removal was allowed while a take was finalizing');
+  expect(audioEngine.devices.has(takeDevice.id), 'A finalizing take lost its device target');
+  expect(!(await saveDuringFinalization), 'Saving was allowed while a take was finalizing');
+  expect(!(await openDuringFinalization), 'Opening a project was allowed while a take was finalizing');
+  expect(!(await createDuringFinalization), 'Creating a project was allowed while a take was finalizing');
+  await finalizing;
+  expect(!audioEngine.recorder.busy && audioEngine.devices.has(takeDevice.id),
+    'The finalizing MIDI take did not return the recorder and target device to a safe state');
+  expect(await projectManager.save(), 'Could not save after the take finished finalizing');
+  baseBefore = await dbGet<ProjectRecord>('projects', baseId);
+  expect(!!baseBefore, 'The project was not saved after finalization completed');
+
+  // Recovery should be durable soon after a structural edit, rather than leaving
+  // the user exposed until the normal multi-second full-autosave interval.
+  projectManager.autosave = true;
+  audioEngine.setBpm(97);
+  audioEngine.commitEdit();
+  projectManager.setNotes('Immediate crash-recovery snapshot.');
+  await pause(700);
+  const immediateRecoveryRow = await dbGet<{ key: string; value: string }>('settings', 'recovery');
+  expect(!!immediateRecoveryRow?.value, 'A structural edit did not promptly write a recovery snapshot');
+  const immediateRecovery = JSON.parse(immediateRecoveryRow.value) as RecoveryRecord;
+  const immediateProject = JSON.parse(immediateRecovery.json) as { bpm?: number; sections?: { project?: { notes?: string } } };
+  expect(immediateRecovery.projectId === baseId && immediateProject.bpm === 97 &&
+    immediateProject.sections?.project?.notes === 'Immediate crash-recovery snapshot.',
+  'The prompt recovery snapshot did not contain the current project edit');
+  const savedBeforeAutosave = await dbGet<ProjectRecord>('projects', baseId);
+  expect(savedBeforeAutosave?.bpm === 91,
+    'Prompt crash recovery unexpectedly performed a full project autosave');
+  projectManager.autosave = false;
+  await projectManager.discardRecovery();
+  await projectManager.save();
+  baseBefore = await dbGet<ProjectRecord>('projects', baseId);
+  expect(!!baseBefore, 'The base project was not saved after the recovery snapshot check');
 
   await projectManager.create('empty', 'Recovery Target');
   const targetId = projectManager.currentId;

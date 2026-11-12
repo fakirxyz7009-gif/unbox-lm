@@ -105,7 +105,11 @@ export function impulseResponse(
       let e = 0;
       for (let i = 0; i < len; i++) e += d[i] * d[i];
       const g = 1 / Math.sqrt(Math.max(1e-9, e / Math.max(1, sr * 0.5)));
-      for (let i = 0; i < len; i++) d[i] *= g * 0.35;
+      for (let i = 0; i < len; i++) {
+        const val = d[i] * g * 0.35;
+        // Flush denormal numbers below audible threshold (1e-15) to strict zero
+        d[i] = Math.abs(val) < 1e-15 ? 0 : val;
+      }
     }
     return buf;
   });

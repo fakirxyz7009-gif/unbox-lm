@@ -1,10 +1,13 @@
 /**
  * scripts/fetch-real-samples.ts
  *
- * Automated Open-Source Real Audio Harvester & SFZ/WAV Manifest Generator.
+ * Legacy-named synthetic test-sample generator and source-lead index.
  *
- * Fetches real, multi-sampled, velocity-layered acoustic and hardware recordings
- * from verified open-source, CC0, and Public Domain repositories:
+ * This script does not download or validate any of the source leads below. It
+ * can generate synthesized harmonic WAVs for local DSP testing, or emit an
+ * unaudited index. It must not be used to label samples as real recordings.
+ * The listed projects are research leads only; licence and attribution must be
+ * independently verified and imported through the recorded-pack pipeline.
  *  - GitHub: sgossner/VSCO-2-CE (Versilian Studios Chamber Orchestra Community Edition)
  *  - sfzinstruments: Salamander Grand Piano, Hohner Clavinet, Mellotron, Rhodes, Organs
  *  - freepats.zenvoid.org: Acoustic Pianos, Clavinets, Winds, Guitars, Percussion
@@ -16,14 +19,15 @@
  *  npx tsx scripts/fetch-real-samples.ts [options]
  *
  * Options:
- *  --all                       Download/index all instrument categories
- *  --instrument <name>         Download/index a specific instrument (e.g. "Piano", "Theremin")
- *  --device <id>               Download/index by device ID
+ *  --all                       Index all instrument templates
+ *  --instrument <name>         Index a specific instrument template
+ *  --device <id>               Index by device ID
  *  --out <directory>           Target folder (defaults to SAMPLE_LIBRARY_PATH or ./public/samples)
  *  --max-mb <number>           Maximum download size limit in MB
- *  --dry-run                   Report sources and structure without downloading
+ *  --dry-run                   Report generated structure without writing audio
  *  --index-only                Re-index existing sample files into sample-manifest.json
- *  --generate-offline-samples  Generate real acoustic harmonic WAV files for offline testing
+ *  --generate-synthetic-test-samples  Generate synthesized harmonic WAVs for offline testing
+ *  --generate-offline-samples  Deprecated alias for --generate-synthetic-test-samples
  */
 
 import fs from 'node:fs';
@@ -36,7 +40,7 @@ import type {
   SampleVelocityLayer,
   SubVoiceDefinition,
 } from '../shared/instruments/sampleManifestTypes.ts';
-import { INSTRUMENT_SUB_VOICES, type SubVoiceOption } from '../shared/instruments/subVoices.ts';
+import { INSTRUMENT_SUB_VOICES } from '../shared/instruments/subVoices.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +59,8 @@ interface RepositorySource {
   subVoiceMapping?: Record<string, string>; // subVoiceId -> folder or sfz file
 }
 
-export const REAL_SAMPLE_REPOSITORIES: Record<string, RepositorySource> = {
+/** Unverified research leads only; this script never fetches them. */
+export const SAMPLE_SOURCE_LEADS: Record<string, RepositorySource> = {
   'Piano': {
     repo: 'github:sfzinstruments/SalamanderGrandPiano',
     license: 'CC-BY-3.0 / CC0',
@@ -269,7 +274,7 @@ function createPcmWav(samples: Float32Array, sampleRate = 44100): Buffer {
 }
 
 /**
- * Generates an authentic harmonic acoustic instrument sample waveform.
+ * Generates a synthetic harmonic test waveform. It is not a recording.
  */
 function generateAcousticSample(
   rootMidi: number,
@@ -379,22 +384,35 @@ export function buildPitchZonesForRoots(
 }
 
 /**
- * Generates real multi-sampled WAV files and builds the complete sample-manifest.json.
+ * Builds a synthetic test cache or an unaudited index; neither is a recorded pack.
  */
 export async function runIngestionPipeline(options: {
   targetDir?: string;
   instruments?: string[];
+  /** Preferred explicit name for generated DSP test audio. */
+  generateSyntheticTestSamples?: boolean;
+  /** @deprecated Use generateSyntheticTestSamples. */
   generateOfflineSamples?: boolean;
   dryRun?: boolean;
   indexOnly?: boolean;
 }): Promise<MultiSampleManifest> {
   const targetDir = options.targetDir || DEFAULT_SAMPLES_DIR;
+  const generateSyntheticTestSamples = options.generateSyntheticTestSamples ?? options.generateOfflineSamples ?? false;
   fs.mkdirSync(targetDir, { recursive: true });
 
   const manifest: MultiSampleManifest = {
     version: 1,
     generatedAt: new Date().toISOString(),
     sampleBaseUrl: '/samples/',
+    provenance: generateSyntheticTestSamples
+      ? {
+        sourceKind: 'synthesized',
+        generator: 'scripts/fetch-real-samples.ts synthetic harmonic test generator',
+      }
+      : {
+        sourceKind: 'unknown',
+        generator: 'scripts/fetch-real-samples.ts unaudited index',
+      },
     devices: {},
   };
 
@@ -452,8 +470,8 @@ export async function runIngestionPipeline(options: {
         velLayer.zones = buildPitchZonesForRoots(chromaticRoots, velConfig, filePattern);
         subVoiceDef.velocityLayers.push(velLayer);
 
-        // Generate actual real physical harmonic audio WAV files if requested
-        if (options.generateOfflineSamples && !options.dryRun && !options.indexOnly) {
+        // Generate synthetic harmonic test WAVs only when explicitly requested.
+        if (generateSyntheticTestSamples && !options.dryRun && !options.indexOnly) {
           fs.mkdirSync(voiceDir, { recursive: true });
           for (const zone of velLayer.zones) {
             const fullPath = path.join(targetDir, zone.file);
@@ -492,7 +510,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const indexOnly = args.includes('--index-only');
-  const generateOffline = args.includes('--generate-offline-samples') || (!indexOnly && !dryRun);
+  const generateSynthetic = args.includes('--generate-synthetic-test-samples') || args.includes('--generate-offline-samples') || (!indexOnly && !dryRun);
 
   let targetDir = DEFAULT_SAMPLES_DIR;
   const outIdx = args.indexOf('--out');
@@ -506,15 +524,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename
     filterInstruments = [args[instIdx + 1]];
   }
 
-  console.log(`[Sample Harvester] Target directory: ${targetDir}`);
-  console.log(`[Sample Harvester] Ingestion mode: ${dryRun ? 'Dry-Run' : indexOnly ? 'Index-Only' : 'Generate & Index'}`);
+  console.log(`[Synthetic Sample Tool] Target directory: ${targetDir}`);
+  console.log(`[Synthetic Sample Tool] Mode: ${dryRun ? 'Dry-Run' : indexOnly ? 'Unaudited Index' : 'Generate Synthetic Test Audio'}`);
 
   runIngestionPipeline({
     targetDir,
     instruments: filterInstruments,
     dryRun,
     indexOnly,
-    generateOfflineSamples: generateOffline,
+    generateSyntheticTestSamples: generateSynthetic,
   })
     .then((manifest) => {
       const deviceCount = Object.keys(manifest.devices).length;
@@ -528,11 +546,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename
           }
         }
       }
-      console.log(`[Sample Harvester] Success! Indexed ${deviceCount} devices, ${totalVoices} sub-voices, and ${totalZones} pitch zones.`);
-      console.log(`[Sample Harvester] Manifest written to ${path.join(targetDir, 'sample-manifest.json')}`);
+      console.log(`[Synthetic Sample Tool] Indexed ${deviceCount} devices, ${totalVoices} sub-voices, and ${totalZones} pitch zones.`);
+      console.log(`[Synthetic Sample Tool] Manifest written to ${path.join(targetDir, 'sample-manifest.json')}`);
     })
     .catch((err) => {
-      console.error('[Sample Harvester] Error:', err);
+      console.error('[Synthetic Sample Tool] Error:', err);
       process.exit(1);
     });
 }

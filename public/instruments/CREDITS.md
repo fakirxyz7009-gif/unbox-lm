@@ -48,6 +48,7 @@ Attribution names can identify a library creator, mapper, curator, or uploader. 
 - Attribution: Chamkila Stems
 - License: Custom
 - Source: D:/audio stems/daw_instruments/Playable_Patches
+- Notes: Root measured from the recording: B4 (about 494 Hz, +1 cent). The source SFZ had pitch_keycenter=60 from the auto-generated patch.
 
 ## Punjabi Dholak
 
@@ -300,3 +301,45 @@ Attribution names can identify a library creator, mapper, curator, or uploader. 
 - License: CC0-1.0
 - Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Marimba
 - Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. The repository identifies Versilian Studios LLC as the library creator and licenses the collection CC0-1.0; it does not name the individual marimba performer. Source filename octave labels are one below measured MIDI pitch, so roots are mapped +12 semitones to F2–C7. The soft, medium and loud recordings remain separate velocity layers; a single gain is applied to the whole pack.
+
+## VSCO Glockenspiel
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Xylophone
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Tubular Bells
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Timpani
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Piccolo
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Violin Section
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.

@@ -7,7 +7,7 @@ import { REASON_SPECS } from './reason.ts';
 import { RECORDED_INSTRUMENTS, RECORDED_KITS, SAMPLED_SPECS } from './sampled.ts';
 import type { DeviceSpec, ParamDef } from './types.ts';
 
-export type { DeviceSpec, ParamDef, PadDef, SpecKind, EngineId, PanelDef, KnobStyle } from './types.ts';
+export type { DeviceSpec, ParamDef, PadDef, SpecKind, EngineId, PanelDef, KnobStyle, PanelDisplay } from './types.ts';
 
 export const DEVICE_SPECS: readonly DeviceSpec[] = [...SAMPLED_SPECS, ...REASON_SPECS, ...HARDWARE_SPECS, ...ORIGINAL_SPECS];
 

@@ -11,7 +11,7 @@ import { EFFECT_CATALOG, EFFECT_GROUPS } from '../../audio/effectCatalog.ts';
 import { dynOf, eqOf } from '../../audio/mixer/channelStrip.ts';
 import type { ChannelRef } from '../../audio/mixer/MixerController.ts';
 import type { DeviceType } from '../../audio/types.ts';
-import { useChannelAutomation, useFrame } from '../../nexa/useEngine.ts';
+import { useChannelAutomation, useMeterFrame } from '../../nexa/useEngine.ts';
 import { setWidth } from '../../ui/skin/dom.ts';
 import { Sel } from '../../studio/ui/controls.tsx';
 import { Fader } from '../../studio/ui/Fader.tsx';
@@ -90,7 +90,7 @@ function addInsert(channelId: string, pick: DeviceType | `lib:${string}`): BaseD
 /** Compact dynamics status: COMP / GATE lamps and a gain-reduction bar (animated in rAF). */
 function DynRow({ channelId, compOn, gateOn, onClick }: { channelId: string; compOn: boolean; gateOn: boolean; onClick: () => void }) {
   const bar = useRef<HTMLDivElement>(null);
-  useFrame(() => {
+  useMeterFrame(() => {
     const gr = compOn || gateOn ? audioEngine.mixer.gainReduction(channelId) : 0;
     setWidth(bar.current, (-gr / 18) * 100);
   });

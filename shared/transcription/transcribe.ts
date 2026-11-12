@@ -394,7 +394,32 @@ export function melodyNotes(frames: PitchFrame[]): TimedNote[] {
     }
   }
   if (current) notes.push(current);
-  return notes
+
+  // Consolidate rapid vocal vibrato: if a short excursion fluctuates by +-1 semitone for <= 220 ms
+  // between two segments of the same sustained pitch, merge it back into the sustained note.
+  const consolidated: typeof notes = [];
+  for (let i = 0; i < notes.length; i++) {
+    const cur = notes[i];
+    const prev = consolidated.length ? consolidated[consolidated.length - 1] : null;
+    const next = i + 1 < notes.length ? notes[i + 1] : null;
+    if (
+      prev &&
+      next &&
+      prev.note === next.note &&
+      Math.abs(cur.note - prev.note) === 1 &&
+      cur.end - cur.start <= 0.22 &&
+      cur.start - prev.end <= hop * 3 &&
+      next.start - cur.end <= hop * 3
+    ) {
+      prev.end = next.end;
+      prev.peak = Math.max(prev.peak, cur.peak, next.peak);
+      i++; // skip next since it's merged into prev
+      continue;
+    }
+    consolidated.push({ ...cur });
+  }
+
+  return consolidated
     .filter((n) => n.end - n.start >= 0.08)
     .map((n) => ({ start: n.start, end: n.end, note: n.note, velocity: clamp(0.35 + (0.65 * n.peak) / (reference || 1), 0.3, 1) }));
 }

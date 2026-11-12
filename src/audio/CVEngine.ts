@@ -87,26 +87,35 @@ export class CVEngine {
       const cvOut = sourceDev.cvOutputs.get(entry.sourcePortId);
       if (!cvOut || !cvOut.getter) continue;
 
-      const now = audioTime ?? targetDev.ctx.currentTime;
-      let rawVal = cvOut.getter(now);
-      if (entry.inverted) {
-        rawVal = -rawVal;
-      }
+      const now = Math.max(targetDev.ctx.currentTime, audioTime ?? targetDev.ctx.currentTime);
+      const raw = cvOut.getter(now);
+      const safeRaw = Number.isFinite(raw) ? (entry.inverted ? -raw : raw) : 0;
+      const safeAmount = Number.isFinite(entry.amount) ? entry.amount : 1;
+      const safeOffset = Number.isFinite(entry.offset) ? entry.offset : 0;
 
-      const targetVal = rawVal * entry.amount + entry.offset;
+      const targetVal = safeRaw * safeAmount + safeOffset;
       const prevSmoothed = this.smoothedValues.get(entry.id) ?? targetVal;
       // Anti-zipper one-pole smoothing filter
-      const smoothed = prevSmoothed + (targetVal - prevSmoothed) * 0.35;
+      const rawSmoothed = prevSmoothed + (targetVal - prevSmoothed) * 0.35;
+      const smoothed = Number.isFinite(rawSmoothed) ? rawSmoothed : targetVal;
       this.smoothedValues.set(entry.id, smoothed);
       this.liveMeterValues.set(entry.id, smoothed);
 
       const cvIn = targetDev.cvInputs.get(entry.targetParam);
       if (cvIn) {
         if (cvIn.param) {
-          cvIn.param.setTargetAtTime(smoothed, now, 0.01);
+          try {
+            cvIn.param.setTargetAtTime(smoothed, now, 0.01);
+          } catch {
+            // parameter target error or removed node
+          }
         }
         if (cvIn.setter) {
-          cvIn.setter(smoothed);
+          try {
+            cvIn.setter(smoothed);
+          } catch {
+            // custom setter error
+          }
         }
       }
     }

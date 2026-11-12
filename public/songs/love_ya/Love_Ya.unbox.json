@@ -1,0 +1,313 @@
+{
+  "format": "unbox-project",
+  "version": 4,
+  "title": "Love Ya (\uac00\uc744 \uc18d\uc5d0\uc11c\ub098)",
+  "artist": "Unbox Studio & Korean Vocalist",
+  "bpm": 67.0,
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tracks": [
+    {
+      "id": "track_vocal",
+      "name": "Lead Vocal",
+      "color": "#e11d48",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.85,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_vocal_01",
+          "kind": "audio",
+          "name": "Love Ya Lead Vocal",
+          "color": "#e11d48",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_01_vocals",
+          "audioOffset": 0.0,
+          "gainDb": 0.0,
+          "fadeIn": 0.05,
+          "fadeOut": 2.0,
+          "fadeCurve": "equal_power"
+        }
+      ]
+    },
+    {
+      "id": "track_drums",
+      "name": "R&B Drums",
+      "color": "#f97316",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.8,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_drums_01",
+          "kind": "audio",
+          "name": "Acoustic R&B Ballad Kit",
+          "color": "#f97316",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_02_drums",
+          "audioOffset": 0.0,
+          "gainDb": 0.0
+        }
+      ]
+    },
+    {
+      "id": "track_bass",
+      "name": "Sub Bass",
+      "color": "#eab308",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.82,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_bass_01",
+          "kind": "audio",
+          "name": "Neo-Soul Electric Bass",
+          "color": "#eab308",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_03_bass",
+          "audioOffset": 0.0,
+          "gainDb": 0.0
+        }
+      ]
+    },
+    {
+      "id": "track_rhodes",
+      "name": "Fender Rhodes",
+      "color": "#10b981",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.8,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_rhodes_01",
+          "kind": "audio",
+          "name": "Mark II Rhodes Chords",
+          "color": "#10b981",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_04_rhodes",
+          "audioOffset": 0.0,
+          "gainDb": 0.0
+        }
+      ]
+    },
+    {
+      "id": "track_pad",
+      "name": "Analog Pad",
+      "color": "#06b6d4",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.75,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_pad_01",
+          "kind": "audio",
+          "name": "Silky Strings & Detuned Saws",
+          "color": "#06b6d4",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_05_pad",
+          "audioOffset": 0.0,
+          "gainDb": 0.0
+        }
+      ]
+    },
+    {
+      "id": "track_guitar",
+      "name": "Acoustic Guitar",
+      "color": "#8b5cf6",
+      "kind": "audio",
+      "muted": false,
+      "solo": false,
+      "volume": 0.72,
+      "pan": 0.0,
+      "arrangementClips": [
+        {
+          "id": "clip_guitar_01",
+          "kind": "audio",
+          "name": "Nylon Pluck Arpeggios",
+          "color": "#8b5cf6",
+          "startBar": 0.0,
+          "lengthBars": 46,
+          "audioId": "audio_stem_06_guitar",
+          "audioOffset": 0.0,
+          "gainDb": 0.0
+        }
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "dev_vocal",
+      "type": "audio_track",
+      "name": "Lead Vocal Audio Track",
+      "params": {
+        "volume": 0.85,
+        "pan": 0.0,
+        "width": 1.0
+      }
+    },
+    {
+      "id": "dev_drums",
+      "type": "audio_track",
+      "name": "R&B Drums Audio Track",
+      "params": {
+        "volume": 0.8,
+        "pan": 0.0,
+        "width": 1.15
+      }
+    },
+    {
+      "id": "dev_bass",
+      "type": "audio_track",
+      "name": "Sub Bass Audio Track",
+      "params": {
+        "volume": 0.82,
+        "pan": 0.0,
+        "width": 0.0
+      }
+    },
+    {
+      "id": "dev_rhodes",
+      "type": "audio_track",
+      "name": "Fender Rhodes Audio Track",
+      "params": {
+        "volume": 0.8,
+        "pan": 0.0,
+        "width": 1.25
+      }
+    },
+    {
+      "id": "dev_pad",
+      "type": "audio_track",
+      "name": "Analog Pad Audio Track",
+      "params": {
+        "volume": 0.75,
+        "pan": 0.0,
+        "width": 1.4
+      }
+    },
+    {
+      "id": "dev_guitar",
+      "type": "audio_track",
+      "name": "Acoustic Guitar Audio Track",
+      "params": {
+        "volume": 0.72,
+        "pan": 0.0,
+        "width": 1.2
+      }
+    }
+  ],
+  "arrangementMarkers": [
+    {
+      "id": "m_intro",
+      "name": "Intro Pickup",
+      "bar": 0.0
+    },
+    {
+      "id": "m_v1",
+      "name": "Verse 1 (\ub108\uc758 \ub530\uc2a4\ud55c \uc190\uae38\uc774)",
+      "bar": 1.0
+    },
+    {
+      "id": "m_pre1",
+      "name": "Pre-Chorus (\uac00\uc744 \uc18d\uc5d0\uc11c\ub098)",
+      "bar": 9.0
+    },
+    {
+      "id": "m_chorus1",
+      "name": "Chorus 1 (Love Ya)",
+      "bar": 13.0
+    },
+    {
+      "id": "m_v2",
+      "name": "Verse 2 (\uad6c\ub984 \uc704\uc5d0 \ubd89\uc740 \ub2ec\ucc98\ub7fc)",
+      "bar": 24.0
+    },
+    {
+      "id": "m_pre2",
+      "name": "Pre-Chorus 2",
+      "bar": 32.0
+    },
+    {
+      "id": "m_chorus2",
+      "name": "Chorus 2 / Climax (Love Ya)",
+      "bar": 36.0
+    },
+    {
+      "id": "m_outro",
+      "name": "Outro (\uc6b0\ub9ac\uac00 \uac19\uc740 \uacf3\uc5d0\uc11c)",
+      "bar": 42.0
+    }
+  ],
+  "sections": {
+    "mixer": {
+      "channels": {
+        "track_vocal": {
+          "volume": 0.85,
+          "pan": 0.0,
+          "width": 1.0,
+          "eq": {
+            "on": true,
+            "hpOn": true,
+            "hpHz": 85
+          }
+        },
+        "track_drums": {
+          "volume": 0.8,
+          "pan": 0.0,
+          "width": 1.15
+        },
+        "track_bass": {
+          "volume": 0.82,
+          "pan": 0.0,
+          "width": 0.0
+        },
+        "track_rhodes": {
+          "volume": 0.8,
+          "pan": 0.0,
+          "width": 1.25
+        },
+        "track_pad": {
+          "volume": 0.75,
+          "pan": 0.0,
+          "width": 1.4
+        },
+        "track_guitar": {
+          "volume": 0.72,
+          "pan": 0.0,
+          "width": 1.2
+        }
+      }
+    },
+    "mastering": {
+      "enabled": true,
+      "imager": {
+        "on": true,
+        "width": 1.15,
+        "monoBelow": 120
+      },
+      "limiter": {
+        "on": true,
+        "gainDb": 1.5,
+        "ceiling": -1.0,
+        "release": 0.15
+      }
+    }
+  }
+}

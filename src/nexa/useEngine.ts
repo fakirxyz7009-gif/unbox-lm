@@ -29,18 +29,44 @@ export function useEngineVersion(): number {
   );
 }
 
-// ---- transport steps: only components that show the playing step subscribe ----
-let step = 0;
-let stepWired = false;
-const stepSubs = new Set<() => void>();
+// ---- transport ticks: only components that show the playing step / bar subscribe ----
+interface Tick {
+  count: number;
+  subs: Set<() => void>;
+  wire: () => void;
+}
+function tick(register: (cb: () => void) => void): Tick {
+  let wired = false;
+  const t: Tick = {
+    count: 0,
+    subs: new Set(),
+    wire: () => {
+      if (wired) return;
+      wired = true;
+      register(() => {
+        t.count++;
+        t.subs.forEach((s) => s());
+      });
+    },
+  };
+  return t;
+}
+const steps = tick((cb) => audioEngine.onStep(cb));
+const bars = tick((cb) => audioEngine.onBar(cb));
 
-function wireStep() {
-  if (stepWired) return;
-  stepWired = true;
-  audioEngine.onStep(() => {
-    step++;
-    stepSubs.forEach((s) => s());
-  });
+function useTick(t: Tick, enabled: boolean): number {
+  t.wire();
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      if (!enabled) return () => {};
+      t.subs.add(cb);
+      return () => {
+        t.subs.delete(cb);
+      };
+    },
+    [t, enabled]
+  );
+  return useSyncExternalStore(subscribe, () => (enabled ? t.count : 0), () => 0);
 }
 
 /**
@@ -48,18 +74,21 @@ function wireStep() {
  * faders). `enabled = false` subscribes to nothing, so the hook can be called unconditionally.
  */
 export function useStepTick(enabled = true): number {
-  wireStep();
-  const subscribe = useCallback(
-    (cb: () => void) => {
-      if (!enabled) return () => {};
-      stepSubs.add(cb);
-      return () => {
-        stepSubs.delete(cb);
-      };
-    },
-    [enabled]
-  );
-  return useSyncExternalStore(subscribe, () => (enabled ? step : 0), () => 0);
+  return useTick(steps, enabled);
+}
+
+/** Re-renders when the playing bar changes (readouts that change at most once per bar). */
+export function useBarTick(enabled = true): number {
+  return useTick(bars, enabled);
+}
+
+/** Knobs of this device follow its automation lanes while playing (re-render per 16th then). */
+export function useDeviceAutomation(deviceId: string | undefined): void {
+  const automated =
+    !!deviceId &&
+    audioEngine.isPlaying &&
+    audioEngine.automation.lanes.some((l) => l.mode !== 'off' && l.points.length > 0 && l.target.kind === 'device' && l.target.deviceId === deviceId);
+  useStepTick(automated);
 }
 
 /** Faders / pans of these channels follow their automation lanes while playing (re-render per 16th then). */
@@ -97,4 +126,31 @@ export function useFrame(cb: (t: number) => void) {
       frameSubs.delete(ref);
     };
   }, []);
+}
+
+// ---- shared ~30 Hz "meter frames" ----
+let meterAt = -Infinity;
+let decidedFor = -1;
+let meterNow = false;
+
+/**
+ * True on the shared meter frames (~30 a second). Meters, scopes and readouts redraw only then:
+ * it reads the same as 60, and because they all draw on the SAME frames, the frames in between
+ * paint nothing at all, so Chrome skips paint, layerization and GPU work for them. Pass the frame
+ * timestamp from requestAnimationFrame (identical for every callback of one frame).
+ */
+export function meterDue(t: number): boolean {
+  if (t !== decidedFor) {
+    decidedFor = t;
+    meterNow = t - meterAt >= 30;
+    if (meterNow) meterAt = t;
+  }
+  return meterNow;
+}
+
+/** `useFrame` on the shared meter frames (see `meterDue`). */
+export function useMeterFrame(cb: (t: number) => void) {
+  useFrame((t) => {
+    if (meterDue(t)) cb(t);
+  });
 }

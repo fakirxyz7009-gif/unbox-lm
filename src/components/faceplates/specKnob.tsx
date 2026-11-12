@@ -45,8 +45,8 @@ interface KnobProps {
   onMenu?: (e: React.MouseEvent) => void;
 }
 
-export const SpecKnob: React.FC<KnobProps> = ({ def, value, onChange, style, accent, text, size = 40, onMenu }) => {
-  const drag = useRef<{ y: number; n: number } | null>(null);
+const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, accent, text, size = 40, onMenu }) => {
+  const drag = useRef<{ lastY: number; norm: number } | null>(null);
   const [active, setActive] = useState(false);
   const n = Math.max(0, Math.min(1, toNorm(def, value)));
   const ang = -135 + n * 270;
@@ -163,20 +163,30 @@ export const SpecKnob: React.FC<KnobProps> = ({ def, value, onChange, style, acc
         onPointerDown={(e) => {
           if (e.button !== 0) return; // right-click is the menu, not a drag
           (e.currentTarget as SVGSVGElement).setPointerCapture(e.pointerId);
-          drag.current = { y: e.clientY, n };
+          drag.current = { lastY: e.clientY, norm: n };
           setActive(true);
         }}
         onPointerMove={(e) => {
-          if (!drag.current) return;
+          const d = drag.current;
+          if (!d) return;
+          const dy = d.lastY - e.clientY;
+          d.lastY = e.clientY;
           const k = e.shiftKey ? 0.0015 : 0.006;
-          set(drag.current.n + (drag.current.y - e.clientY) * k);
+          d.norm = Math.max(0, Math.min(1, d.norm + dy * k));
+          set(d.norm);
         }}
         onPointerUp={() => {
           drag.current = null;
           setActive(false);
         }}
-        onDoubleClick={() => onChange(def.default)}
-        onWheel={(e) => set(n - Math.sign(e.deltaY) * (e.shiftKey ? 0.005 : 0.02))}
+        onDoubleClick={() => {
+          if (typeof def.default === 'number') onChange(def.default);
+        }}
+        onWheel={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          set(n - Math.sign(e.deltaY) * (e.shiftKey ? 0.005 : 0.02));
+        }}
         onKeyDown={(e) => {
           const d = e.key === 'ArrowUp' || e.key === 'ArrowRight' ? 0.02 : e.key === 'ArrowDown' || e.key === 'ArrowLeft' ? -0.02 : e.key === 'PageUp' ? 0.1 : e.key === 'PageDown' ? -0.1 : 0;
           if (d) {
@@ -217,8 +227,10 @@ export const SpecKnob: React.FC<KnobProps> = ({ def, value, onChange, style, acc
   );
 };
 
+export const SpecKnob = React.memo(SpecKnobComponent);
+
 /** Select / buttons / toggle / fader for non-knob params. */
-export const SpecControl: React.FC<{ def: ParamDef; value: number; onChange: (v: number) => void; style: KnobStyle; accent: string; text: string }> = (props) => {
+const SpecControlComponent: React.FC<{ def: ParamDef; value: number; onChange: (v: number) => void; style: KnobStyle; accent: string; text: string }> = (props) => {
   const { def, value, onChange, accent, text } = props;
   const control = def.control ?? (def.options ? 'select' : 'knob');
   if (control === 'toggle') {
@@ -308,3 +320,5 @@ export const SpecControl: React.FC<{ def: ParamDef; value: number; onChange: (v:
   }
   return <SpecKnob {...props} />;
 };
+
+export const SpecControl = React.memo(SpecControlComponent);

@@ -5,6 +5,8 @@
  */
 import { audioEngine } from '../audio/AudioEngine.ts';
 import { audioStore } from '../audio/clips/audioStore.ts';
+import { deleteRecordingJournal, discardCompletedRecordingJournals, listRecordingJournals, loadRecordingJournal, type RecordingJournalChunk, type RecordingJournalManifest } from '../audio/recording/recordingJournal.ts';
+import { newSeqId } from '../audio/sequencer/model.ts';
 import { encodeWav, safeFileName } from '../audio/export/wav.ts';
 import { toast } from '../shell/toast.ts';
 import { dbAll, dbByIndex, dbDelete, dbGet, dbPut, requestPersistence } from './db.ts';
@@ -12,6 +14,7 @@ import { parseImportableProject } from './projectFormat.ts';
 import { GENRE_TEMPLATES, applyTemplate } from './templates.ts';
 import { readZip, writeZip } from './zip.ts';
 import { projectAudioIds } from '../../shared/project/audioAssets.ts';
+import { parseAudioProvenance, userFileProvenance, userRecordingProvenance, type AudioProvenance } from '../../shared/audio/provenance.ts';
 
 export interface ProjectMeta {
   title: string;
@@ -63,6 +66,34 @@ const NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const COLORS = ['#f97316', '#22d3ee', '#a78bfa', '#f43f5e', '#84cc16', '#eab308', '#38bdf8'];
 const uid = (p: string) => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
 const AUTO_VERSIONS_KEPT = 20;
+const RECOVERY_DEBOUNCE_MS = 250;
+
+interface ArchiveAudioInfo {
+  id: string;
+  name: string;
+  sourceBpm?: number;
+  detectedBpm?: number;
+  key?: string;
+  provenance?: AudioProvenance;
+}
+
+/** Reads only the portable project-audio fields from archive metadata. */
+function archiveAudioInfo(value: unknown): ArchiveAudioInfo | null {
+  if (!value || typeof value !== 'object') return null;
+  const input = value as Partial<ArchiveAudioInfo>;
+  if (typeof input.id !== 'string' || !input.id || typeof input.name !== 'string') return null;
+  const finite = (n: unknown) => typeof n === 'number' && Number.isFinite(n) ? n : undefined;
+  const key = typeof input.key === 'string' && input.key.length <= 64 ? input.key : undefined;
+  const provenance = parseAudioProvenance(input.provenance);
+  return {
+    id: input.id,
+    name: input.name.slice(0, 256),
+    ...(finite(input.sourceBpm) !== undefined ? { sourceBpm: finite(input.sourceBpm) } : {}),
+    ...(finite(input.detectedBpm) !== undefined ? { detectedBpm: finite(input.detectedBpm) } : {}),
+    ...(key ? { key } : {}),
+    ...(provenance ? { provenance } : {}),
+  };
+}
 
 class ProjectManager {
   currentId: string | null = null;
@@ -79,10 +110,13 @@ class ProjectManager {
   status = '';
   /** Unsaved work recovered from IndexedDB after a crash / closed tab. */
   recovery: RecoveryRecord | null = null;
+  /** Durable worklet chunks from an audio take that did not get a confirmed project save. */
+  recordingJournals: RecordingJournalManifest[] = [];
   private lastSavedJson = '';
   private lastVersionAt = 0;
   private lastRecoveryJson = '';
   private timer: number | null = null;
+  private recoveryTimer: number | null = null;
   private listeners = new Set<() => void>();
   /** Writes queued or running; autosave waits for them instead of stacking another. */
   private pendingWrites = 0;
@@ -95,6 +129,7 @@ class ProjectManager {
   private flushListening = false;
 
   constructor() {
+    audioEngine.setRecordingJournalInfoSource(() => ({ projectId: this.currentId, projectName: this.currentName }));
     audioEngine.registerProjectSection('project', {
       save: () => ({ meta: this.meta, notes: this.notes }),
       load: (data) => {
@@ -103,6 +138,9 @@ class ProjectManager {
         this.notes = typeof d.notes === 'string' ? d.notes : '';
       },
     });
+    // AudioEngine notifications are structural (not animation or meter frames), so this
+    // captures an edit promptly without putting persistent I/O in a real-time path.
+    audioEngine.subscribe(() => this.scheduleRecovery());
   }
 
   subscribe(cb: () => void): () => void {
@@ -113,6 +151,22 @@ class ProjectManager {
   private emit(status?: string): void {
     if (status !== undefined) this.status = status;
     this.listeners.forEach((cb) => cb());
+  }
+
+  /**
+   * Worklet capture completes asynchronously after Stop. A project snapshot, graph rebuild or
+   * deletion during that interval can omit the take which is about to be placed, so persistence
+   * and project-transition entry points fail closed until the recorder becomes idle.
+   */
+  private ensureRecorderIdle(action: string, quiet = false): boolean {
+    if (!audioEngine.recorder.busy) return true;
+    if (!quiet) {
+      const phase = audioEngine.recorder.isFinalizing ? 'the current take to finish' : 'recording to stop';
+      const message = `Wait for ${phase} before ${action}.`;
+      this.emit(message);
+      toast(message, 'info');
+    }
+    return false;
   }
 
   get dirty(): boolean {
@@ -128,6 +182,7 @@ class ProjectManager {
       // A project that cannot be opened stays as it is; this session gets a project of its own so its work is saved.
       if (!previous || !(await this.open(previous.id))) await this.saveAs('Untitled');
       await this.checkRecovery();
+      await this.refreshRecordingJournals();
     } catch (e) {
       this.emit(`Projects unavailable: ${(e as Error).message}`);
     }
@@ -145,7 +200,7 @@ class ProjectManager {
     if (this.flushListening) return;
     this.flushListening = true;
     const flush = () => {
-      if (!this.autosave || !this.dirty) return;
+      if (!this.autosave || !this.dirty || audioEngine.recorder.busy) return;
       const json = audioEngine.exportProjectJSON();
       void this.writeRecovery(json);
       void this.save();
@@ -157,7 +212,7 @@ class ProjectManager {
   }
 
   private async autosaveTick(): Promise<void> {
-    if (!this.autosave || this.pendingWrites > 0 || audioEngine.isRecording) return;
+    if (!this.autosave || this.pendingWrites > 0 || audioEngine.recorder.busy) return;
     const json = audioEngine.exportProjectJSON();
     // Nothing changed since the last save: drop any stale recovery copy.
     if (json === this.lastSavedJson) {
@@ -167,8 +222,28 @@ class ProjectManager {
       return;
     }
     await this.writeRecovery(json);
-    if (!this.currentId) return;
+    if (!this.currentId || audioEngine.recorder.busy) return;
     await this.write(json, Date.now() - this.lastVersionAt > this.versionMin * 60000 ? 'Autosave' : undefined, true);
+  }
+
+  /**
+   * Keep a crash-recovery copy shortly after an edit, rather than waiting for the
+   * full project autosave interval. This never saves the project record itself:
+   * the normal autosave policy and version cadence remain unchanged.
+   */
+  private scheduleRecovery(): void {
+    if (!this.autosave || !this.currentId || this.recoveryTimer !== null || audioEngine.recorder.busy) return;
+    this.recoveryTimer = window.setTimeout(() => {
+      this.recoveryTimer = null;
+      // Let an already-queued save finish first. Otherwise a recovery write queued
+      // after it could reintroduce a stale banner for content that was just saved.
+      if (this.pendingWrites > 0) {
+        this.scheduleRecovery();
+        return;
+      }
+      if (!this.autosave || !this.currentId || !this.dirty || audioEngine.recorder.busy) return;
+      void this.writeRecovery(audioEngine.exportProjectJSON());
+    }, RECOVERY_DEBOUNCE_MS);
   }
 
   /** Storage writes run one after another, so an older autosave can never land after a newer one. */
@@ -180,6 +255,7 @@ class ProjectManager {
 
   private writeRecovery(json: string): Promise<void> {
     return this.enqueue(async () => {
+      if (audioEngine.recorder.busy) return;
       if (json === this.lastRecoveryJson) return;
       this.lastRecoveryJson = json;
       try {
@@ -240,12 +316,14 @@ class ProjectManager {
 
   /** Replaces the open project with the recovered unsaved state and saves it. */
   async restoreRecovery(): Promise<boolean> {
+    if (!this.ensureRecorderIdle('restoring recovery')) return false;
     const rec = this.recovery;
     if (!rec) return false;
     const target = typeof rec.projectId === 'string' && rec.projectId
       ? await dbGet<ProjectRecord>('projects', rec.projectId)
       : undefined;
     this.missing = await audioStore.ensure(projectAudioIds(rec.json));
+    if (!this.ensureRecorderIdle('restoring recovery')) return false;
     let loaded = false;
     try {
       loaded = this.loadJson(rec.json);
@@ -298,6 +376,113 @@ class ProjectManager {
     this.emit('Recovery copy discarded');
   }
 
+  /** Refresh durable audio-take journals left by a browser/Electron crash or an unconfirmed save. */
+  async refreshRecordingJournals(): Promise<void> {
+    try {
+      this.recordingJournals = await listRecordingJournals();
+    } catch {
+      this.recordingJournals = [];
+    }
+    this.emit();
+  }
+
+  async discardRecordingJournal(sessionId: string): Promise<void> {
+    await deleteRecordingJournal(sessionId);
+    await this.refreshRecordingJournals();
+    this.emit('Recorded-take recovery discarded');
+  }
+
+  /** Rebuild one journalled audio take as new audio tracks in the currently open project. */
+  async recoverRecordingJournal(sessionId: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('recovering an audio take')) return false;
+    const loaded = await loadRecordingJournal(sessionId);
+    if (!loaded) return false;
+    const { manifest } = loaded;
+    // A journal belongs to the project that owned the armed track. Never silently inject it
+    // into whatever project happens to be open now: that looks like a successful recovery while
+    // putting the take in the wrong song. The banner keeps it visible and names the project to
+    // open first.
+    if (manifest.projectId && manifest.projectId !== this.currentId) {
+      const message = `Open "${manifest.projectName}" before recovering this recorded take.`;
+      this.emit(message);
+      toast(message, 'info');
+      return false;
+    }
+    const byTrack = new Map<string, RecordingJournalChunk[]>();
+    loaded.chunks.forEach((chunk) => {
+      const list = byTrack.get(chunk.trackId) ?? [];
+      list.push(chunk);
+      byTrack.set(chunk.trackId, list);
+    });
+    let recovered = 0;
+    for (const savedTrack of manifest.tracks) {
+      const chunks = byTrack.get(savedTrack.trackId) ?? [];
+      const buffer = this.rebuildJournalBuffer(manifest, chunks);
+      if (!buffer) continue;
+      const asset = audioStore.add(`Recovered take — ${savedTrack.name}`, buffer, {
+        provenance: userRecordingProvenance(`Recovered crash journal from ${savedTrack.name}`),
+      });
+      if (!(await audioStore.ensurePersisted(asset.id))) throw new Error('Recovered audio could not be persisted.');
+      const track = audioEngine.createAudioTrack(`Recovered — ${savedTrack.name}`);
+      const spb = audioEngine.stepsPerBar;
+      const secondsPer16th = 60 / Math.max(1, audioEngine.bpm) / 4;
+      const lengthBars = Math.max(1 / spb, Math.ceil(buffer.duration / secondsPer16th) / spb);
+      (track.arrangementClips ??= []).push({
+        id: newSeqId('clip'),
+        kind: 'audio',
+        startBar: Math.max(0, manifest.startPos / spb),
+        lengthBars,
+        audioId: asset.id,
+        audioOffset: 0,
+        name: `Recovered take — ${savedTrack.name}`,
+        color: track.color,
+      });
+      recovered++;
+    }
+    if (!recovered) {
+      this.emit('No usable audio was found in that recorded-take recovery');
+      return false;
+    }
+    audioEngine.commitEdit();
+    if (!(await this.save('Recovered active audio take'))) {
+      this.emit('Recovered audio is in the current session, but it could not be saved; the journal was kept');
+      return false;
+    }
+    await deleteRecordingJournal(sessionId);
+    await this.refreshRecordingJournals();
+    this.emit(`Recovered ${recovered} audio take${recovered === 1 ? '' : 's'} into new tracks`);
+    return true;
+  }
+
+  /** Assemble the durable worklet blocks without assuming that all channels/trailing batches survived. */
+  private rebuildJournalBuffer(manifest: RecordingJournalManifest, chunks: RecordingJournalChunk[]): AudioBuffer | null {
+    const valid = chunks.filter((chunk) => chunk.channels.length > 0 && chunk.channels[0] instanceof ArrayBuffer && chunk.channels[0].byteLength > 0)
+      .sort((a, b) => a.sequence - b.sequence);
+    if (!valid.length || !Number.isFinite(manifest.sampleRate) || manifest.sampleRate < 8_000) return null;
+    const first = Math.min(...valid.map((chunk) => chunk.frame));
+    const last = Math.max(...valid.map((chunk) => {
+      const frames = Math.floor((chunk.channels[0]?.byteLength ?? 0) / Float32Array.BYTES_PER_ELEMENT);
+      return chunk.frame + frames;
+    }));
+    const start = Math.max(first, manifest.startFrame ?? first);
+    const length = Math.max(0, last - start);
+    if (length < manifest.sampleRate * 0.05) return null;
+    const channelCount = Math.max(1, Math.min(2, Math.max(...valid.map((chunk) => chunk.channels.length))));
+    const buffer = audioEngine.ctx.createBuffer(channelCount, length, manifest.sampleRate);
+    for (const chunk of valid) {
+      const frameOffset = chunk.frame - start;
+      for (let channel = 0; channel < channelCount; channel++) {
+        const raw = chunk.channels[channel] ?? chunk.channels[0];
+        if (!(raw instanceof ArrayBuffer)) continue;
+        const source = new Float32Array(raw);
+        const from = Math.max(0, -frameOffset);
+        const to = Math.min(source.length, length - frameOffset);
+        if (to > from) buffer.getChannelData(channel).set(source.subarray(from, to), Math.max(0, frameOffset + from));
+      }
+    }
+    return buffer;
+  }
+
   private record(json: string, id: string, name: string, prev?: ProjectRecord): ProjectRecord {
     const tracks = audioEngine.tracks.length;
     let bars = 0;
@@ -331,13 +516,20 @@ class ProjectManager {
 
   private write(json: string, versionLabel?: string, auto = false): Promise<boolean> {
     this.pendingWrites += 1;
-    return this.enqueue(() => this.writeNow(json, versionLabel, auto)).finally(() => {
+    return this.enqueue(() => {
+      const lockName = `unbox_project_${this.currentId ?? 'untitled'}`;
+      if (typeof navigator !== 'undefined' && 'locks' in navigator && typeof navigator.locks?.request === 'function') {
+        return navigator.locks.request(lockName, () => this.writeNow(json, versionLabel, auto));
+      }
+      return this.writeNow(json, versionLabel, auto);
+    }).finally(() => {
       this.pendingWrites -= 1;
     });
   }
 
   private async writeNow(json: string, versionLabel: string | undefined, auto: boolean): Promise<boolean> {
     if (!this.currentId) return false;
+    if (!this.ensureRecorderIdle('saving this project', auto)) return false;
     if (this.currentId === this.protectedId) {
       return this.saveFailed(`saving is paused for "${this.currentName}" because some of its parts could not be loaded. Use Save as… to keep a copy.`, auto);
     }
@@ -347,6 +539,9 @@ class ProjectManager {
       this.lastSavedJson = json;
       this.lastSavedAt = Date.now();
       this.autosaveFailing = false;
+      // A completed journal is redundant only after this project record has committed. Failed
+      // cleanup is harmless: it merely leaves a recoverable duplicate for the next launch.
+      try { await discardCompletedRecordingJournals(this.currentId); } catch { /* best effort */ }
       // The project record is now the recovery copy.
       if (this.lastRecoveryJson || this.recovery) {
         this.lastRecoveryJson = '';
@@ -367,16 +562,25 @@ class ProjectManager {
 
   /** Saves the open project now (Ctrl+S). */
   async save(versionLabel?: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('saving this project')) return false;
     if (!this.currentId) return this.saveAs(this.currentName);
     return this.write(audioEngine.exportProjectJSON(), versionLabel);
   }
 
   /** Saves the current state as a new project and switches to it. */
   async saveAs(name: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('saving this project as a new copy')) return false;
+    const previous = { id: this.currentId, name: this.currentName, protectedId: this.protectedId };
     this.currentId = uid('prj');
     this.currentName = name.trim() || 'Untitled';
     const saved = await this.write(audioEngine.exportProjectJSON(), 'Created');
-    if (!saved) return false;
+    if (!saved) {
+      this.currentId = previous.id;
+      this.currentName = previous.name;
+      this.protectedId = previous.protectedId;
+      this.emit();
+      return false;
+    }
     try {
       await dbPut('settings', { key: 'lastProjectId', value: this.currentId });
     } catch (e) {
@@ -397,11 +601,13 @@ class ProjectManager {
 
   /** Loads a project. Unsaved edits to the open project are saved first (autosave on) or confirmed (autosave off). */
   async open(id: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('opening another project')) return false;
     const rec = await dbGet<ProjectRecord>('projects', id);
     if (!rec) return this.openFailed('that project no longer exists.');
     // Re-opening the project that is already open reloads its stored copy; the project list does not offer that while it is open.
     if (id !== this.currentId && !(await this.keepUnsaved(`open ${rec.name}`))) return false;
     this.missing = await audioStore.ensure(projectAudioIds(rec.json));
+    if (!this.ensureRecorderIdle('opening another project')) return false;
     let loaded = false;
     try {
       loaded = this.loadJson(rec.json);
@@ -418,6 +624,7 @@ class ProjectManager {
     if (dropped) toast(`${dropped} part(s) of "${rec.name}" could not be loaded. Saving over this project is paused; use Save as… to keep a copy.`, 'error');
     if (rec.template) await this.saveAs(this.currentName);
     else await dbPut('settings', { key: 'lastProjectId', value: rec.id });
+    await this.refreshRecordingJournals();
     this.emit(this.missing.length ? `${this.missing.length} audio file(s) missing` : `Opened ${rec.name}`);
     return true;
   }
@@ -465,35 +672,38 @@ class ProjectManager {
   }
 
   /** New project: 'default' session, 'empty', a built-in genre template id or a user template id. */
-  async create(source: string, name?: string): Promise<void> {
-    if (!(await this.keepUnsaved('start a new project'))) return;
+  async create(source: string, name?: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('starting a new project')) return false;
+    if (!(await this.keepUnsaved('start a new project'))) return false;
+    if (!this.ensureRecorderIdle('starting a new project')) return false;
     const genre = GENRE_TEMPLATES.find((t) => t.id === source);
     if (genre) {
-      audioEngine.resetProject();
+      if (!audioEngine.resetProject()) return false;
       audioEngine.createDefaultReturns();
       applyTemplate(audioEngine, genre);
       this.meta = { ...EMPTY_META, genre: genre.genre };
       this.notes = '';
     } else if (source === 'empty' || source === 'default') {
-      audioEngine.newProject(source === 'empty');
+      if (!audioEngine.newProject(source === 'empty')) return false;
       this.meta = { ...EMPTY_META };
       this.notes = '';
     } else {
       const rec = await dbGet<ProjectRecord>('projects', source);
       if (!rec) {
         this.openFailed('that project no longer exists.');
-        return;
+        return false;
       }
       await audioStore.ensure(rec.audioIds);
+      if (!this.ensureRecorderIdle('starting a new project')) return false;
       if (!this.loadJson(rec.json)) {
         this.openFailed(`"${rec.name}" is damaged or from an unsupported version.`);
-        return;
+        return false;
       }
       const dropped = this.droppedParts(rec.json);
       if (dropped) toast(`${dropped} part(s) of "${rec.name}" could not be loaded into the new project.`, 'error');
     }
     audioEngine.commitEdit();
-    await this.saveAs(name ?? (genre ? `${genre.name} idea` : 'Untitled'));
+    return this.saveAs(name ?? (genre ? `${genre.name} idea` : 'Untitled'));
   }
 
   async rename(id: string, name: string): Promise<void> {
@@ -518,16 +728,17 @@ class ProjectManager {
   }
 
   async remove(id: string): Promise<void> {
+    if (!this.ensureRecorderIdle('deleting a project')) return;
+    // Preserve the open session under a new id before deleting its old record. This means an
+    // asynchronous recording start can never leave the current engine state without a project id.
+    if (id === this.currentId && !(await this.saveAs(this.currentName))) return;
     const rec = await dbGet<ProjectRecord>('projects', id);
     const versions = await this.versions(id);
+    if (!this.ensureRecorderIdle('deleting a project')) return;
     // Audio that this project and its history used may go, once nothing else still needs it.
     const candidates = [...(rec?.audioIds ?? []), ...versions.flatMap((v) => projectAudioIds(v.json))];
     await dbDelete('projects', id);
     for (const v of versions) await dbDelete('versions', v.id);
-    if (id === this.currentId) {
-      this.currentId = null;
-      await this.saveAs(this.currentName);
-    }
     await this.dropUnusedAudio(candidates);
     this.emit();
   }
@@ -562,6 +773,7 @@ class ProjectManager {
   }
 
   async saveAsTemplate(name: string): Promise<void> {
+    if (!this.ensureRecorderIdle('saving a template')) return;
     const json = audioEngine.exportProjectJSON();
     await dbPut('projects', { ...this.record(json, uid('tpl'), name), template: true });
     this.emit('Template saved');
@@ -582,14 +794,17 @@ class ProjectManager {
   }
 
   async saveVersion(label: string): Promise<void> {
+    if (!this.ensureRecorderIdle('saving a version')) return;
     await this.save(label.trim() || new Date().toLocaleString());
   }
 
   async restoreVersion(versionId: string): Promise<boolean> {
+    if (!this.ensureRecorderIdle('restoring a version')) return false;
     const v = await dbGet<VersionRecord>('versions', versionId);
     if (!v) return false;
     if (!(await this.save('Before restore'))) return false;
     this.missing = await audioStore.ensure(projectAudioIds(v.json));
+    if (!this.ensureRecorderIdle('restoring a version')) return false;
     let ok = false;
     try {
       ok = this.loadJson(v.json);
@@ -623,16 +838,37 @@ class ProjectManager {
 
   /** `.unbox` archive: project.json + every audio file it uses (32-bit float WAV, lossless). Throws with the reason when it cannot be written. */
   async exportArchive(id = this.currentId ?? ''): Promise<{ blob: Blob; name: string }> {
+    if (id === this.currentId && !this.ensureRecorderIdle('exporting this project')) {
+      throw new Error('Finish the current recording take before exporting.');
+    }
     if (id === this.currentId && !(await this.save())) throw new Error('the project could not be saved first.');
     const rec = await dbGet<ProjectRecord>('projects', id);
     if (!rec) throw new Error('that project no longer exists.');
-    await audioStore.ensure(rec.audioIds);
+    const uniqueAudioIds = Array.from(new Set(rec.audioIds));
+    await audioStore.ensure(uniqueAudioIds);
     const entries: { name: string; data: Uint8Array | string; compress?: boolean }[] = [
       { name: 'project.json', data: rec.json, compress: true },
-      { name: 'info.json', data: JSON.stringify({ format: 'unbox-archive', version: 1, name: rec.name, savedAt: new Date().toISOString(), audio: rec.audioIds.map((a) => ({ id: a, name: audioStore.get(a)?.name ?? a })) }), compress: true },
+      {
+        name: 'info.json',
+        data: JSON.stringify({
+          format: 'unbox-archive', version: 2, name: rec.name, savedAt: new Date().toISOString(),
+          audio: uniqueAudioIds.map((id) => {
+            const asset = audioStore.get(id);
+            return {
+              id,
+              name: asset?.name ?? id,
+              ...(asset?.sourceBpm !== undefined ? { sourceBpm: asset.sourceBpm } : {}),
+              ...(asset?.detectedBpm !== undefined ? { detectedBpm: asset.detectedBpm } : {}),
+              ...(asset?.key ? { key: asset.key } : {}),
+              ...(asset?.provenance ? { provenance: asset.provenance } : {}),
+            };
+          }),
+        }),
+        compress: true,
+      },
     ];
     let absent = 0;
-    for (const aid of rec.audioIds) {
+    for (const aid of uniqueAudioIds) {
       const a = audioStore.get(aid);
       if (!a) {
         absent += 1;
@@ -652,11 +888,12 @@ class ProjectManager {
    * the user keeps the current project; throws when the file is not a usable project.
    */
   async importArchive(file: Blob, fallbackName = 'Imported project'): Promise<boolean> {
+    if (!this.ensureRecorderIdle('importing a project')) return false;
     let json: string;
     let name = fallbackName;
     // Audio is decoded here but reaches the store only once the project has proven usable, so a bad file leaves nothing behind.
-    const audio: { id: string; buffer: AudioBuffer }[] = [];
-    let assetNames: { id: string; name: string }[] = [];
+    const audio: { id: string; buffer: AudioBuffer; info?: ArchiveAudioInfo }[] = [];
+    let assetInfo = new Map<string, ArchiveAudioInfo>();
     const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
     if (head[0] === 0x50 && head[1] === 0x4b) {
       const files = await readZip(file);
@@ -664,25 +901,34 @@ class ProjectManager {
       if (!pj) throw new Error('This archive has no project.json');
       json = new TextDecoder().decode(pj);
       const info = files.get('info.json');
-      const meta = info ? (JSON.parse(new TextDecoder().decode(info)) as { name?: string; audio?: { id: string; name: string }[] }) : undefined;
+      const meta = info ? (JSON.parse(new TextDecoder().decode(info)) as { name?: string; audio?: unknown[] }) : undefined;
       name = meta?.name ?? name;
-      assetNames = meta?.audio ?? [];
+      assetInfo = new Map((meta?.audio ?? []).map(archiveAudioInfo).filter((item): item is ArchiveAudioInfo => !!item).map((item) => [item.id, item]));
       for (const [path, data] of files) {
         const m = /^audio\/(.+)\.wav$/.exec(path);
         if (!m || audioStore.get(m[1])) continue;
-        audio.push({ id: m[1], buffer: await audioEngine.ctx.decodeAudioData(data.slice().buffer) });
+        audio.push({ id: m[1], buffer: await audioEngine.ctx.decodeAudioData(data.slice().buffer), info: assetInfo.get(m[1]) });
       }
     } else {
       json = await file.text();
     }
     if (!parseImportableProject(json)) throw new Error('This file is not a valid Unbox Studio project.');
     if (!(await this.keepUnsaved('import this file'))) return false;
+    if (!this.ensureRecorderIdle('importing a project')) return false;
 
     const added = audio.map((a) => a.id);
-    audio.forEach(({ id, buffer }) => audioStore.add(id, buffer, { id }));
-    // keep the original asset names
-    assetNames.forEach((x) => audioStore.update(x.id, { name: x.name }));
+    audio.forEach(({ id, buffer, info }) => audioStore.add(info?.name ?? id, buffer, {
+      id,
+      ...(info?.sourceBpm !== undefined ? { sourceBpm: info.sourceBpm } : {}),
+      ...(info?.detectedBpm !== undefined ? { detectedBpm: info.detectedBpm } : {}),
+      ...(info?.key ? { key: info.key } : {}),
+      ...(info?.provenance ? { provenance: info.provenance } : {}),
+    }));
     this.missing = await audioStore.ensure(projectAudioIds(json));
+    if (!this.ensureRecorderIdle('importing a project')) {
+      await Promise.all(added.map((id) => audioStore.remove(id)));
+      return false;
+    }
     let loaded = false;
     try {
       loaded = this.loadJson(json);
@@ -698,7 +944,10 @@ class ProjectManager {
   /** Replaces a missing audio file with a file the user picked. */
   async relink(audioId: string, file: File): Promise<void> {
     const buf = await audioEngine.ctx.decodeAudioData(await file.arrayBuffer());
-    audioStore.add(file.name.replace(/\.[^.]+$/, ''), buf, { id: audioId });
+    audioStore.add(file.name.replace(/\.[^.]+$/, ''), buf, {
+      id: audioId,
+      provenance: userFileProvenance(file.name),
+    });
     this.missing = this.missing.filter((m) => m !== audioId);
     audioEngine.changed();
     this.emit(this.missing.length ? `${this.missing.length} audio file(s) missing` : 'All audio found');
@@ -706,11 +955,13 @@ class ProjectManager {
 
   setMeta(patch: Partial<ProjectMeta>): void {
     this.meta = { ...this.meta, ...patch };
+    this.scheduleRecovery();
     this.emit();
   }
 
   setNotes(notes: string): void {
     this.notes = notes;
+    this.scheduleRecovery();
     this.emit();
   }
 }

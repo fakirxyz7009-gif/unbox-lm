@@ -14,7 +14,7 @@ export const VacuumTube: React.FC<VacuumTubeProps> = ({
   return (
     <div className="flex flex-col items-center select-none group">
       {/* Outer glass envelope */}
-      <div className="relative w-9 h-16 rounded-t-full rounded-b-sm border border-neutral-600/60 bg-gradient-to-r from-white/10 via-white/5 to-white/2 backdrop-blur-[1px] p-0.5 shadow-lg overflow-hidden flex flex-col items-center justify-end">
+      <div className="relative w-9 h-16 rounded-t-full rounded-b-sm border border-neutral-600/60 bg-gradient-to-r from-white/10 via-white/5 to-white/2 p-0.5 shadow-lg overflow-hidden flex flex-col items-center justify-end">
         {/* Glass reflection highlight */}
         <div className="absolute top-1 left-1.5 w-1.5 h-7 rounded-full bg-gradient-to-b from-white/60 to-transparent pointer-events-none transform -rotate-6" />
 

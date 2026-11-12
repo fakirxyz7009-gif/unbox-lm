@@ -1,6 +1,6 @@
 /**
  * Light toolbar of the Workstation sequencer: tools (Q W E R T Y U when computer keys are
- * commands), Edit Mode, Snap + grid, Block / Song, add track, automation mode, zoom to fit.
+ * commands), Edit Mode, Snap + grid, Pattern / Song, add track, automation mode, zoom to fit.
  */
 import React, { useState } from 'react';
 import { ArrowLeftRight, Eraser, Hand, Headphones, Maximize2, MousePointer2, PenTool, Plus, Scissors, VolumeX, ZoomIn, ZoomOut, AudioLines } from 'lucide-react';
@@ -103,23 +103,23 @@ export const SeqToolbar: React.FC<Props> = (p) => {
         <option value="32nd">1/32</option>
       </select>
       {sep}
-      <div className="flex rounded-[4px] overflow-hidden border border-[#634a2e]" role="group" aria-label="Block or Song">
+      <div className="flex rounded-[4px] overflow-hidden border border-[#634a2e]" role="group" aria-label="Pattern or Song">
         <button
           type="button"
           onClick={() => p.onBlockMode(true)}
           aria-pressed={p.blockMode}
           className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${p.blockMode ? 'bg-[#c89655] text-[#21160c]' : 'bg-[#2b2116] text-[#b8a98c] hover:bg-[#382b1d]'}`}
-          title="Block: every part loops the pattern you are editing (B)"
+          title="Pattern: every part loops the pattern it is on, and the transport loops with them (B)"
           data-testid="mode-pattern"
         >
-          BLOCK
+          PATTERN
         </button>
         <button
           type="button"
           onClick={() => p.onBlockMode(false)}
           aria-pressed={!p.blockMode}
           className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${!p.blockMode ? 'bg-[#c89655] text-[#21160c]' : 'bg-[#2b2116] text-[#b8a98c] hover:bg-[#382b1d]'}`}
-          title="Song: play the arrangement clips (B)"
+          title="Song: plays the clips placed in the arrangement (B)"
           data-testid="mode-song"
         >
           SONG

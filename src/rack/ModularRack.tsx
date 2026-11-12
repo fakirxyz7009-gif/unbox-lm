@@ -8,20 +8,24 @@
  * container, so cables are measured and drawn in one coordinate space.
  */
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { Cable, Eye, EyeOff, FlipHorizontal2, FoldVertical, LayoutGrid, Library, Loader2, Palette, Plug, Sparkles, UnfoldVertical, Wand2, X } from 'lucide-react';
+import { Cable, Eye, EyeOff, FlipHorizontal2, FoldVertical, Layers, LayoutGrid, Library, Loader2, Palette, Plug, Sparkles, UnfoldVertical, Wand2, X } from 'lucide-react';
 import type { AudioEngine } from '../audio/AudioEngine.ts';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
 import type { AudioConnection, CVConnection, DeviceType, RackGroup } from '../audio/types.ts';
 import { Knob } from '../components/Knob.tsx';
-import { useEngineVersion, useFrame } from '../nexa/useEngine.ts';
+import { useEngineVersion, useMeterFrame } from '../nexa/useEngine.ts';
 import { applyRackPlan, requestRackPlan } from '../ai/rackCombinator.ts';
 import { vstLibrary } from '../vst/libraryClient.ts';
 import { snapshotFromItem } from '../vst/VstPluginDevice.ts';
-import type { MountableItem } from '../../shared/vst/manifestTypes.ts';
+import { isMountable, type MountableItem } from '../../shared/vst/manifestTypes.ts';
 import { getUi, setUi, useUi } from '../shell/uiStore.ts';
 import { CombinatorFrame } from './CombinatorFrame.tsx';
+import { suggestedCombinerName, toggleCombinerSelection, validCombinerSelection } from './combinerSelection.ts';
 import { JackRegistry } from './jackRegistry.ts';
-import { LibraryBrowser } from './LibraryBrowser.tsx';
+import { Browser, type BrowserAction } from '../browser/Browser.tsx';
+import type { BrowserEntry, BrowserSection } from '../browser/entries.ts';
+import { addToSong, loadAsSound } from '../browser/entryActions.ts';
+import { createSamplerPart } from '../audio/stemLibraryClient.ts';
 import { CableController, PatchCableLayer, type CableMode, type Notify } from './PatchCableLayer.tsx';
 import { channelJackKey, MASTER_ID, MASTER_PORTS, unplug, type CableKind } from './patching.ts';
 import { RackUnitFrame, type RackFace, type RackUnitActions } from './RackUnitFrame.tsx';
@@ -33,6 +37,8 @@ import { COLUMN_LABELS, orderAt, rackColumns, type RackItem } from './rackColumn
 import { isFolded, moveUnit, resetLayout, setFolded, useRackLayoutVersion, type RackCol } from './rackLayout.ts';
 import { SpecDevice } from '../audio/spec/SpecDevice.ts';
 import { setWidth } from '../ui/skin/dom.ts';
+
+const RACK_SECTIONS: BrowserSection[] = ['instruments', 'effects', 'utilities', 'stems', 'samples', 'project', 'library'];
 
 interface ModularRackProps {
   engine: AudioEngine;
@@ -64,7 +70,7 @@ const CABLE_MODE_LABEL: Record<CableMode, string> = { show: 'all', focus: 'selec
 function MasterMeter({ engine }: { engine: AudioEngine }) {
   const l = useRef<HTMLDivElement>(null);
   const r = useRef<HTMLDivElement>(null);
-  useFrame(() => {
+  useMeterFrame(() => {
     const t = engine.telemetry;
     setWidth(l.current, t.peakL * 100);
     setWidth(r.current, t.peakR * 100);
@@ -73,7 +79,7 @@ function MasterMeter({ engine }: { engine: AudioEngine }) {
     <div className="flex flex-col gap-1 w-36" aria-hidden="true">
       {[l, r].map((ref, i) => (
         <div key={i} className="h-1.5 rounded-full bg-black/70 overflow-hidden">
-          <div ref={ref} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500" style={{ width: '0%' }} />
+          <div ref={ref} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
         </div>
       ))}
     </div>
@@ -178,7 +184,7 @@ export const ModularRack: React.FC<ModularRackProps> = ({
   colsRef.current = columns;
   const unitCount = columns.reduce((n, c) => n + c.reduce((m, it) => m + (it.kind === 'group' ? it.members.length : 1), 0), 0);
 
-  /** "+ Add device": the next unit mounted from the library goes into this column. */
+  /** "+ Add device": the next unit added from the browser goes into this column. */
   const [addTarget, setAddTarget] = useState<RackCol | null>(null);
   const placeNew = (id: string) => {
     if (addTarget === null) return;
@@ -187,9 +193,65 @@ export const ModularRack: React.FC<ModularRackProps> = ({
     moveUnit(id, addTarget, last === undefined ? 0 : last + 1);
     setAddTarget(null);
   };
-
   const scrollToUnit = (id: string) =>
     requestAnimationFrame(() => document.querySelector(`[data-unit-id="${id}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }));
+
+  // ---- User-authored Combiner selection ----
+  // A RackGroup is intentionally flat: a unit cannot sit in two frames, so the explicit selection
+  // mode only exposes currently ungrouped units. This is separate from the selected MIDI target.
+  const [combinerSelectionMode, setCombinerSelectionMode] = useState(false);
+  const [combinerSelection, setCombinerSelection] = useState<string[]>([]);
+  const [combinerName, setCombinerName] = useState('');
+  const combinerNameRef = useRef<HTMLInputElement>(null);
+  const groupedDeviceIds = useMemo(() => new Set(rackGroups.flatMap((group) => group.deviceIds)), [rackGroups]);
+  const combinerEligibleIds = useMemo(
+    () => new Set(devices.filter((device) => (device.type as string) !== 'master' && !groupedDeviceIds.has(device.id)).map((device) => device.id)),
+    [devices, groupedDeviceIds]
+  );
+  const combinerSelectedIds = useMemo(
+    () => validCombinerSelection(combinerSelection, combinerEligibleIds),
+    [combinerSelection, combinerEligibleIds]
+  );
+  const combinerSelectedSet = useMemo(() => new Set(combinerSelectedIds), [combinerSelectedIds]);
+  // Keyed by the ids, not the Set: the Set is rebuilt on every render, and an effect on it ran (and
+  // re-rendered the rack) after every engine event; a Combiner macro turned with the arrow keys hit
+  // React's update-depth limit.
+  const combinerEligibleKey = [...combinerEligibleIds].join('|');
+  useEffect(() => {
+    setCombinerSelection((current) => {
+      const valid = validCombinerSelection(current, combinerEligibleIds);
+      return valid.length === current.length && valid.every((id, index) => id === current[index]) ? current : valid;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the key stands for the Set's contents
+  }, [combinerEligibleKey]);
+  useEffect(() => {
+    if (!combinerSelectionMode) return;
+    const frame = window.requestAnimationFrame(() => combinerNameRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [combinerSelectionMode]);
+  const cancelCombinerSelection = () => {
+    setCombinerSelectionMode(false);
+    setCombinerSelection([]);
+    setCombinerName('');
+  };
+  const startCombinerSelection = () => {
+    if (face !== 'front') onSetFace('front');
+    setCombinerSelection((current) => validCombinerSelection(current, combinerEligibleIds));
+    setCombinerSelectionMode(true);
+  };
+  const toggleUnitForCombiner = useCallback(
+    (id: string) => setCombinerSelection((current) => toggleCombinerSelection(current, id, combinerEligibleIds)),
+    [combinerEligibleIds]
+  );
+  const createSelectedCombiner = () => {
+    if (combinerSelectedIds.length < 2) return;
+    const names = combinerSelectedIds.map((id) => engine.devices.get(id)?.name ?? 'Unit');
+    const name = (combinerName.trim() || suggestedCombinerName(names)).slice(0, 80);
+    const group = engine.addRackGroup({ name, deviceIds: combinerSelectedIds, macros: [], source: 'user' });
+    cancelCombinerSelection();
+    onMessage(`Created ${group.name} with ${combinerSelectedIds.length} rack units`, 'success');
+    if (combinerSelectedIds[0]) scrollToUnit(combinerSelectedIds[0]);
+  };
 
   // ---- AI Combiner ----
   const [prompt, setPrompt] = useState('');
@@ -248,6 +310,34 @@ export const ModularRack: React.FC<ModularRackProps> = ({
     }
     placeNew(dev.id);
     scrollToUnit(dev.id);
+  };
+
+  /** Browser rows in the rack: devices are added (effects inserted after the selected unit), audio becomes a sampler part or a clip. */
+  const rackActions = (e: BrowserEntry): BrowserAction[] => {
+    const r = e.ref;
+    if (r.kind === 'builtin') {
+      return [{ label: 'Add', title: r.role === 'effect' ? 'Add it after the selected unit' : 'Add it to the rack', run: () => mountBuiltin(r.type, r.name) }];
+    }
+    if (r.kind === 'library' && r.item.kind !== 'sample') {
+      const item = r.item;
+      if (isMountable(item)) return [{ label: 'Add', title: 'Add as a rack unit (proxy DSP)', run: () => mountItem(item) }];
+      const target = item.kind === 'preset' ? vstLibrary.item(item.targetId) : undefined;
+      return target && isMountable(target) ? [{ label: 'Load', title: `Add ${target.name} with this preset`, run: () => mountItem(target, item.id) }] : [];
+    }
+    return [
+      {
+        label: '+ Part',
+        title: 'A new sampler part that plays this sound across the keys',
+        run: async () => {
+          const id = createSamplerPart(e.name);
+          placeNew(id);
+          onSelect(id);
+          scrollToUnit(id);
+          return loadAsSound(e, id);
+        },
+      },
+      { label: '+ Song', title: 'Put it on an audio track at the playhead', run: () => addToSong(e) },
+    ];
   };
 
   const mountBuiltin = (type: DeviceType, name: string, subVoiceId?: string) => {
@@ -362,6 +452,10 @@ export const ModularRack: React.FC<ModularRackProps> = ({
       actions={actions}
       dragKey={dragKey}
       nav={navOf(dev)}
+      combineMode={combinerSelectionMode}
+      combineSelected={combinerSelectedSet.has(dev.id)}
+      combineSelectable={combinerEligibleIds.has(dev.id)}
+      onToggleCombine={toggleUnitForCombiner}
     />
   );
 
@@ -457,12 +551,16 @@ export const ModularRack: React.FC<ModularRackProps> = ({
 
   return (
     <div className="modular-rack h-full flex min-h-0">
-      {ui.rackLibrary && <LibraryBrowser onMountItem={mountItem} onMountBuiltin={mountBuiltin} onMessage={onMessage} />}
+      {ui.rackLibrary && (
+        <aside className="library-panel" aria-label="Browser">
+          <Browser host="rack" layout="panel" sections={RACK_SECTIONS} actionsFor={rackActions} />
+        </aside>
+      )}
 
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="rack-toolbar">
-          <button type="button" className="rack-tool" onClick={() => setUi({ rackLibrary: !ui.rackLibrary })} aria-pressed={ui.rackLibrary} title="Show / hide the library">
-            <Library className="w-3.5 h-3.5" /> Library
+          <button type="button" className="rack-tool" onClick={() => setUi({ rackLibrary: !ui.rackLibrary })} aria-pressed={ui.rackLibrary} title="Show / hide the browser: instruments, effects, sounds and plugins">
+            <Library className="w-3.5 h-3.5" /> Browser
           </button>
           <div className="rack-seg" role="group" aria-label="Rack side">
             {(['front', 'rear'] as RackFace[]).map((f) => (
@@ -521,6 +619,45 @@ export const ModularRack: React.FC<ModularRackProps> = ({
           >
             <Plug className="w-3.5 h-3.5" /> Auto-patch
           </button>
+          {!combinerSelectionMode ? (
+            <button
+              type="button"
+              className="rack-tool"
+              onClick={startCombinerSelection}
+              aria-label="Select rack units to create a Combiner"
+              title="Choose two or more ungrouped rack units, then place them in a Combiner with assignable macros"
+              disabled={combinerEligibleIds.size < 2}
+            >
+              <Layers className="w-3.5 h-3.5" /> Combine units
+            </button>
+          ) : (
+            <div id="rack-combiner-selection" className="flex items-center gap-1 rounded border border-emerald-400/45 bg-emerald-950/25 px-1.5 py-0.5" role="group" aria-label="New Combiner selection">
+              <input
+                ref={combinerNameRef}
+                value={combinerName}
+                onChange={(event) => setCombinerName(event.target.value)}
+                maxLength={80}
+                placeholder="Combiner name (optional)"
+                aria-label="New Combiner name"
+                className="h-5 w-40 rounded border border-emerald-300/35 bg-black/35 px-1.5 text-[11px] text-emerald-50 outline-none placeholder:text-emerald-100/45 focus:border-emerald-200"
+              />
+              <span className="whitespace-nowrap text-[11px] font-bold text-emerald-100" role="status" aria-live="polite">
+                {combinerSelectedIds.length} selected
+              </span>
+              <button
+                type="button"
+                className="rack-tool h-5 px-1.5 text-[11px]"
+                onClick={createSelectedCombiner}
+                disabled={combinerSelectedIds.length < 2}
+                title="Create a Combiner around the selected rack units"
+              >
+                <Layers className="w-3 h-3" /> Create
+              </button>
+              <button type="button" className="rack-tool h-5 px-1.5 text-[11px]" onClick={cancelCombinerSelection} title="Cancel Combiner selection">
+                Cancel
+              </button>
+            </div>
+          )}
           {addTarget !== null && (
             <span className="rack-chip" role="status">
               Next unit → {COLUMN_LABELS[addTarget]}
@@ -591,7 +728,7 @@ export const ModularRack: React.FC<ModularRackProps> = ({
                   1,
                   hardwareInterface,
                   unitCount === 0 && (
-                    <div className="rack-empty">The rack is empty. Click “Add device”, open the library, or describe an instrument or effect setup in the AI Combiner box above.</div>
+                    <div className="rack-empty">The rack is empty. Click “Add device”, open the browser, or describe an instrument or effect setup in the AI Combiner box above.</div>
                   )
                 )}
                 <div className="rack-rail us-wood" aria-hidden="true" />

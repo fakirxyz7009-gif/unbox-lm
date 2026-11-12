@@ -6,11 +6,13 @@ const { spawnSync } = require('node:child_process');
 const { createServer } = require('vite');
 const { chromium } = require('playwright-core');
 
-const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow']);
+const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'shortcut-help-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'recording-journal-recovery', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'stereo-tremolo-response', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow', 'rv7000-impulse-controls', 'link-import-provenance']);
 const probe = process.argv[2] ?? 'multisample-engine';
 if (!probes.has(probe)) throw new Error(`Unknown browser probe: ${probe}`);
 
-const root = path.resolve(__dirname, '..');
+// The real spelling of the folder: a shell can report the drive as "c:", and Vite then serves the
+// project's modules at other URLs than the /src/… ones the app probes look up.
+const root = fs.realpathSync.native(path.resolve(__dirname, '..'));
 const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const headed = process.argv.includes('--headed');
 
@@ -110,7 +112,10 @@ async function main() {
     appType: 'mpa',
     resolve: { alias: { '@': path.join(root, 'src') } },
     optimizeDeps: { noDiscovery: true, include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom/client'] },
-    server: { host: '127.0.0.1', port, strictPort: true, hmr: false },
+    // Disposable Chrome/Electron profiles and package artifacts live in .tmp. A user can keep one
+    // open while a headless probe starts; do not let Vite's source watcher touch locked Cookies or
+    // profile databases there.
+    server: { host: '127.0.0.1', port, strictPort: true, hmr: false, watch: { ignored: ['**/.tmp/**', '**/release/**'] } },
   });
   if (probe === 'export-roundtrip') {
     const artifactMiddleware = (req, res, next) => {
@@ -173,8 +178,8 @@ async function main() {
     page.on('response', (response) => {
       if (response.status() < 400) return;
       const url = new URL(response.url());
-      // The UI probes serve no API: the app's VST and local-assistant status requests fall back when it is absent.
-      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'export-page-ui') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/local-ai/status')) return;
+      // The UI probes serve no API: the app's VST, stem-library and local-assistant requests fall back when it is absent.
+      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'export-page-ui' || probe === 'sf2-import' || probe === 'patch-browser-accessibility') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/stems/library' || url.pathname === '/api/local-ai/status')) return;
       // The app-level selection probe runs without the local API server; the app falls back when it is absent.
       if (probe === 'instrument-selection-app' && response.status() === 404 && url.pathname.startsWith('/api/')) return;
       if (url.pathname !== '/favicon.ico') errors.push(`HTTP ${response.status()} ${url.pathname}`);
@@ -220,8 +225,8 @@ async function main() {
     if (headed) await page.bringToFront();
     if (probe === 'sf2-import') {
       const assert = require('node:assert/strict');
-      await page.getByRole('button', { name: 'SoundFont', exact: true }).click();
-      const input = page.locator('[data-testid="patch-soundfont"] input[type="file"]');
+      // LOAD › "SoundFont…" opens this file input
+      const input = page.getByTestId('load-sf2-input');
       await input.setInputFiles({ name: 'Test-Piano.sf2', mimeType: 'application/octet-stream', buffer: makeSf2Fixture() });
       const preset = page.getByTestId('soundfont-preset');
       await preset.waitFor({ state: 'visible', timeout: 15_000 });
@@ -394,24 +399,56 @@ async function main() {
         return cable(guitar, 'out_l', effect.id, 'in_l') && cable(guitar, 'out_r', effect.id, 'in_r') &&
           cable(effect, 'out_l', 'master', 'master_l') && cable(effect, 'out_r', 'master', 'master_r');
       }, null, { timeout });
+      const rackIds = () => page.evaluate(() => {
+        const engine = window.__unboxRackProbe?.engine;
+        const guitar = engine && [...engine.devices.values()].find((device) => device.name === 'Acoustic Guitar');
+        const effect = engine && [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        return guitar && effect ? { guitarId: guitar.id, effectId: effect.id } : null;
+      });
+      /** Exact cable edges involved in the guitar → delay → master chain. */
+      const seriesCables = () => page.evaluate(() => {
+        const engine = window.__unboxRackProbe?.engine;
+        if (!engine) return [];
+        const guitar = [...engine.devices.values()].find((device) => device.name === 'Acoustic Guitar');
+        const effect = [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        if (!guitar || !effect) return [];
+        return engine.audioConnections
+          .filter((connection) =>
+            (connection.sourceDeviceId === guitar.id && connection.targetDeviceId === effect.id) ||
+            (connection.sourceDeviceId === effect.id && connection.targetDeviceId === 'master')
+          )
+          .map((connection) => `${connection.sourceDeviceId}:${connection.sourcePortId}>${connection.targetDeviceId}:${connection.targetPortId}`)
+          .sort();
+      });
+      // Cable SVG hit paths sit over the rear-panel jacks.  Go through the actual pointer route
+      // instead of locator.click(), which would otherwise target the overlay.
+      const clickJack = async (key) => {
+        const jack = page.locator(`[data-jack-key="${key}"]`);
+        await jack.scrollIntoViewIfNeeded();
+        const box = await jack.boundingBox();
+        assert(box, `Rear-panel jack ${key} is not visible`);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      };
 
       await page.waitForSelector('[data-testid="tab-rack"]', { timeout: 60_000 });
       await attachEngineProbe();
       await page.waitForFunction(() => !!window.__unboxRackProbe?.projects.currentId, null, { timeout: 30_000 });
       await page.getByTestId('tab-rack').click();
       await page.locator('[data-testid="rack-scroller"]').waitFor({ state: 'visible', timeout: 10_000 });
-      if (!(await page.getByRole('button', { name: 'Built-in devices', exact: true }).count())) {
-        await page.getByRole('button', { name: 'Library', exact: true }).click();
+      // the rack's browser panel (src/browser): sections are tabs, one search over all of them
+      if (!(await page.getByTestId('browser').count())) {
+        await page.getByRole('button', { name: 'Browser', exact: true }).click();
       }
-      await page.getByRole('button', { name: 'Built-in devices', exact: true }).click();
-      const search = page.getByRole('textbox', { name: 'Search' });
+      const search = page.getByRole('textbox', { name: 'Search the browser' });
+      await page.getByTestId('bw-tab-instruments').click();
       await search.fill('Acoustic Guitar');
-      const guitarRow = page.locator('.lib-row').filter({ hasText: 'Recorded steel-string acoustic guitar' });
+      const guitarRow = page.locator('.bw-row').filter({ hasText: 'Recorded steel-string acoustic guitar' });
       await guitarRow.first().getByRole('button', { name: 'Add' }).first().click();
       await page.waitForFunction(() => [...window.__unboxRackProbe.engine.devices.values()].some((device) => device.name === 'Acoustic Guitar'), null, { timeout: 15_000 });
 
       await search.fill('Repeater Stereo Delay');
-      const effectRow = page.locator('.lib-row').filter({ hasText: 'Repeater Stereo Delay' });
+      await page.getByTestId('bw-tab-effects').click();
+      const effectRow = page.locator('.bw-row').filter({ hasText: 'Repeater Stereo Delay' });
       await effectRow.getByRole('button', { name: 'Add' }).click();
       await page.waitForFunction(() => [...window.__unboxRackProbe.engine.devices.values()].some((device) => device.name === 'Repeater Stereo Delay'), null, { timeout: 15_000 });
       await waitForSeriesRoute();
@@ -441,6 +478,256 @@ async function main() {
       await page.getByRole('menuitem', { name: /^Redo/ }).click();
       await waitForSeriesRoute();
 
+      // Rear patchbay acceptance: a cancelled cable move must restore its precise old route,
+      // while moving onto an occupied input must replace exactly the one cable the UI describes.
+      const ids = await rackIds();
+      assert(ids, 'Could not identify the rack devices for the rear-panel acceptance test');
+      const routeBeforeRearPatching = await seriesCables();
+      await page.getByRole('group', { name: 'Rack side' }).getByRole('button', { name: 'Rear' }).click();
+      await page.locator(`[data-jack-key="${ids.guitarId}:out_l"]`).waitFor({ state: 'visible', timeout: 10_000 });
+      await clickJack(`${ids.effectId}:in_l`);
+      await page.keyboard.press('Escape');
+      await page.getByRole('status').filter({ hasText: 'Patch cancelled' }).waitFor({ state: 'visible', timeout: 10_000 });
+      assert.deepEqual(await seriesCables(), routeBeforeRearPatching, 'Cancelling a rear-panel cable move did not restore the exact prior series route');
+
+      // Grab the left input plug, put it on the occupied right input, then restore the stereo
+      // route exclusively through the rear-panel UI.  This exercises the one-cable-per-input
+      // replacement rule, not an engine-only disconnect/reconnect shortcut.
+      await clickJack(`${ids.effectId}:in_l`);
+      await clickJack(`${ids.effectId}:in_r`);
+      await page.getByRole('status').filter({ hasText: 'replaced a cable' }).waitFor({ state: 'visible', timeout: 10_000 });
+      const replacedRoute = await seriesCables();
+      assert(replacedRoute.includes(`${ids.guitarId}:out_l>${ids.effectId}:in_r`), 'Rear-panel move did not put the left guitar output on the occupied right delay input');
+      assert(!replacedRoute.includes(`${ids.guitarId}:out_r>${ids.effectId}:in_r`), 'Rear-panel move left the displaced right-input cable in place');
+      assert(!replacedRoute.includes(`${ids.guitarId}:out_l>${ids.effectId}:in_l`), 'Rear-panel move left the old left-input cable in place');
+      await clickJack(`${ids.effectId}:in_r`);
+      await clickJack(`${ids.effectId}:in_l`);
+      await clickJack(`${ids.guitarId}:out_r`);
+      await clickJack(`${ids.effectId}:in_r`);
+      await waitForSeriesRoute();
+      assert.deepEqual(await seriesCables(), routeBeforeRearPatching, 'Rear-panel restoration did not return to the original stereo series route');
+
+      // Build a Combiner through the Rack's explicit multi-unit selection flow, then author its
+      // mapping through the real front-panel macro editor. This is deliberately a UI path: it
+      // proves that a user can make a general instrument + effect frame instead of only editing
+      // a fixture made through the engine API.
+      await page.getByRole('group', { name: 'Rack side' }).getByRole('button', { name: 'Front' }).click();
+      await page.getByRole('button', { name: 'Select rack units to create a Combiner' }).click();
+      const combinerSelection = page.getByRole('group', { name: 'New Combiner selection' });
+      await combinerSelection.getByRole('textbox', { name: 'New Combiner name' }).fill('Local Macro Acceptance');
+      await page.getByRole('button', { name: 'Add Acoustic Guitar to the new Combiner' }).click();
+      await page.getByRole('button', { name: 'Add Repeater Stereo Delay to the new Combiner' }).click();
+      await combinerSelection.getByRole('button', { name: 'Create' }).click();
+      const combiner = page.locator('section[aria-label="Combiner Local Macro Acceptance"]');
+      await combiner.waitFor({ state: 'visible', timeout: 10_000 });
+      const groupInfo = await page.evaluate(() => {
+        const engine = window.__unboxRackProbe?.engine;
+        if (!engine) throw new Error('Rack engine unavailable');
+        const guitar = [...engine.devices.values()].find((device) => device.name === 'Acoustic Guitar');
+        const effect = [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        if (!guitar || !effect) throw new Error('Rack fixture devices unavailable');
+        effect.setParam('time', 0.07);
+        effect.setParam('feedback', 0);
+        effect.setParam('pingPong', false);
+        effect.setParam('mix', 0);
+        const group = engine.rackGroups.find((entry) => entry.name === 'Local Macro Acceptance');
+        if (!group || !group.deviceIds.includes(guitar.id) || !group.deviceIds.includes(effect.id)) {
+          throw new Error('Rack selection UI did not create the expected Combiner membership');
+        }
+        return { groupId: group.id, guitarId: guitar.id, effectId: effect.id };
+      });
+      const measureDelayTail = () => page.evaluate(async () => {
+        const engine = window.__unboxRackProbe?.engine;
+        const effect = engine && [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        const guitar = engine && [...engine.devices.values()].find((device) => device.name === 'Acoustic Guitar');
+        if (!engine || !effect || !guitar) throw new Error('Delay fixture unavailable for macro DSP measurement');
+        await engine.resumeContext();
+        const output = effect.audioOutputs.get('out_l');
+        const input = effect.audioInputs.get('in_l');
+        if (!output || !input) throw new Error('Delay fixture has no left audio ports');
+        // An analyser's last window can miss a short live delay on a busy browser.  Capture the
+        // actual audio-clock interval after the dry pulse instead; the muted sink merely keeps
+        // ScriptProcessor pulled and never reaches the listener.
+        const capture = engine.ctx.createScriptProcessor(512, 1, 1);
+        const silentSink = engine.ctx.createGain();
+        silentSink.gain.value = 0;
+        const samples = [];
+        const oscillator = engine.ctx.createOscillator();
+        const gain = engine.ctx.createGain();
+        gain.gain.value = 0.22;
+        oscillator.frequency.value = 440;
+        oscillator.connect(gain).connect(input);
+        output.connect(capture);
+        capture.connect(silentSink).connect(engine.ctx.destination);
+        // Isolate this direct test tone from the earlier recorded-guitar audition.  These are
+        // transient Web Audio trim gains, never device parameters or saved project data.
+        const guitarOutputs = ['out_l', 'out_r'].map((port) => guitar.audioOutputs.get(port)).filter(Boolean);
+        const previousGains = guitarOutputs.map((node) => node.gain.value);
+        guitarOutputs.forEach((node) => node.gain.setValueAtTime(0, engine.ctx.currentTime));
+        // Existing echo feedback and any recorded-guitar release are already silent before the
+        // direct pulse enters.  The interval begins safely after the 40 ms dry pulse.
+        await new Promise((resolve) => window.setTimeout(resolve, 180));
+        const start = engine.ctx.currentTime + 0.04;
+        const tailStart = start + 0.08;
+        const tailEnd = start + 0.13;
+        capture.onaudioprocess = (event) => {
+          const block = event.inputBuffer.getChannelData(0);
+          const blockStart = event.playbackTime;
+          for (let index = 0; index < block.length; index += 1) {
+            const at = blockStart + index / engine.ctx.sampleRate;
+            if (at >= tailStart && at <= tailEnd) samples.push(block[index]);
+          }
+        };
+        oscillator.start(start);
+        oscillator.stop(start + 0.04);
+        try {
+          // Let the 70 ms delayed copy pass through the audio-clock capture interval.
+          await new Promise((resolve) => window.setTimeout(resolve, 285));
+          if (samples.length === 0) throw new Error('Delay macro capture received no post-dry audio frames');
+          return Math.sqrt(samples.reduce((sum, sample) => sum + sample * sample, 0) / samples.length);
+        } finally {
+          oscillator.disconnect();
+          gain.disconnect();
+          capture.onaudioprocess = null;
+          capture.disconnect();
+          silentSink.disconnect();
+          guitarOutputs.forEach((node, index) => node.gain.setValueAtTime(previousGains[index], engine.ctx.currentTime));
+        }
+      });
+      await combiner.getByRole('button', { name: 'Edit macros for Local Macro Acceptance' }).click();
+      await combiner.getByTestId('combiner-new-macro-label').fill('Wet Mix');
+      await combiner.getByTestId('combiner-new-macro-device').selectOption(groupInfo.effectId);
+      await combiner.getByTestId('combiner-new-macro-param').selectOption('mix');
+      await combiner.getByTestId('combiner-add-macro').click();
+      await page.waitForFunction((fixture) => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        const macro = group?.macros.find((entry) => entry.label === 'Wet Mix');
+        return !!macro && macro.targets.length === 1 && macro.targets[0].deviceId === fixture.effectId && macro.targets[0].param === 'mix';
+      }, groupInfo, { timeout: 10_000 });
+      const wetMix = combiner.getByRole('slider', { name: 'Wet Mix' });
+      await wetMix.waitFor({ state: 'visible', timeout: 10_000 });
+      // Allow the initial zero-mix AudioParam ramp to settle before measuring its dry-only tail.
+      await page.waitForTimeout(80);
+      const dryTail = await measureDelayTail();
+      await wetMix.focus();
+      for (let press = 0; press < 100; press += 1) await page.keyboard.press('ArrowRight');
+      const macroState = await page.evaluate((fixture) => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        const effect = engine?.devices.get(fixture.effectId);
+        return { macro: group?.macros.find((macro) => macro.label === 'Wet Mix')?.value, mix: effect?.params.mix };
+      }, groupInfo);
+      assert(Math.abs((macroState.macro ?? -1) - 0.5) < 0.011, `Front-panel Wet Mix did not reach 50% (macro=${macroState.macro})`);
+      assert(Math.abs((macroState.mix ?? -1) - 0.5) < 0.011, `Front-panel Wet Mix did not drive the delay mix (mix=${macroState.mix})`);
+      await page.waitForTimeout(80);
+      const wetTail = await measureDelayTail();
+      assert(wetTail > Math.max(1e-4, dryTail * 6), `Combiner macro did not create a measurable delayed tail (dry=${dryTail}, wet=${wetTail})`);
+
+      // Exercise the authoring controls themselves: rename, inverted range, target switches,
+      // add/remove a second target, plus add/delete/undo/redo a macro.  End by restoring the
+      // normal Wet Mix mapping so the project-recall assertion below remains meaningful.
+      const macroEditor = combiner.getByTestId('combiner-macro-editor');
+      const macroName = macroEditor.getByRole('textbox', { name: 'Wet Mix macro name' });
+      await macroName.fill('Wet Mix Reverse');
+      await macroName.press('Enter');
+      await page.waitForFunction((fixture) => {
+        const group = window.__unboxRackProbe?.engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        return group?.macros.some((macro) => macro.label === 'Wet Mix Reverse');
+      }, groupInfo, { timeout: 10_000 });
+      const inverseMin = macroEditor.getByRole('spinbutton', { name: 'Wet Mix Reverse target 1 minimum' });
+      const inverseMax = macroEditor.getByRole('spinbutton', { name: 'Wet Mix Reverse target 1 maximum' });
+      await inverseMin.fill('1');
+      await inverseMin.press('Tab');
+      await inverseMax.fill('0');
+      await inverseMax.press('Tab');
+      const reverseMix = combiner.getByRole('slider', { name: 'Wet Mix Reverse' });
+      await reverseMix.focus();
+      for (let press = 0; press < 100; press += 1) await page.keyboard.press('ArrowLeft');
+      const invertedState = await page.evaluate((fixture) => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        const macro = group?.macros.find((entry) => entry.label === 'Wet Mix Reverse');
+        const effect = engine?.devices.get(fixture.effectId);
+        return { macro: macro?.value, target: macro?.targets[0], mix: effect?.params.mix };
+      }, groupInfo);
+      assert(Math.abs((invertedState.macro ?? -1)) < 0.011, `Reverse macro did not reach 0% (${invertedState.macro})`);
+      assert.equal(invertedState.target?.min, 1, 'Macro editor did not retain the inverted minimum');
+      assert.equal(invertedState.target?.max, 0, 'Macro editor did not retain the inverted maximum');
+      assert(Math.abs((invertedState.mix ?? -1) - 1) < 0.011, `Inverted macro at 0% did not drive delay mix to 1 (${invertedState.mix})`);
+
+      const targetDevice = macroEditor.getByRole('combobox', { name: 'Wet Mix Reverse target 1 device' });
+      await targetDevice.selectOption(groupInfo.guitarId);
+      await page.waitForFunction((fixture) => {
+        const group = window.__unboxRackProbe?.engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        return group?.macros.find((macro) => macro.label === 'Wet Mix Reverse')?.targets[0]?.deviceId === fixture.guitarId;
+      }, groupInfo, { timeout: 10_000 });
+      await targetDevice.selectOption(groupInfo.effectId);
+      const targetParam = macroEditor.getByRole('combobox', { name: 'Wet Mix Reverse target 1 parameter' });
+      await targetParam.selectOption('mix');
+      await page.waitForFunction((fixture) => {
+        const group = window.__unboxRackProbe?.engine?.rackGroups.find((entry) => entry.id === fixture.groupId);
+        const target = group?.macros.find((macro) => macro.label === 'Wet Mix Reverse')?.targets[0];
+        return target?.deviceId === fixture.effectId && target.param === 'mix';
+      }, groupInfo, { timeout: 10_000 });
+      await macroEditor.getByRole('button', { name: 'Add target' }).click();
+      await page.waitForFunction((fixture) => window.__unboxRackProbe?.engine?.rackGroups
+        .find((entry) => entry.id === fixture.groupId)?.macros.find((macro) => macro.label === 'Wet Mix Reverse')?.targets.length === 2,
+      groupInfo, { timeout: 10_000 });
+      await macroEditor.getByRole('button', { name: 'Remove Wet Mix Reverse target 2' }).click();
+      await page.waitForFunction((fixture) => window.__unboxRackProbe?.engine?.rackGroups
+        .find((entry) => entry.id === fixture.groupId)?.macros.find((macro) => macro.label === 'Wet Mix Reverse')?.targets.length === 1,
+      groupInfo, { timeout: 10_000 });
+
+      await combiner.getByTestId('combiner-new-macro-label').fill('Throwaway');
+      await combiner.getByTestId('combiner-new-macro-device').selectOption(groupInfo.effectId);
+      await combiner.getByTestId('combiner-new-macro-param').selectOption('mix');
+      await combiner.getByTestId('combiner-add-macro').click();
+      await macroEditor.getByRole('button', { name: 'Delete Throwaway macro' }).click();
+      await page.waitForFunction((fixture) => !window.__unboxRackProbe?.engine?.rackGroups
+        .find((entry) => entry.id === fixture.groupId)?.macros.some((macro) => macro.label === 'Throwaway'),
+      groupInfo, { timeout: 10_000 });
+      await page.getByTestId('main-menu').click();
+      await page.getByRole('menuitem', { name: /^Undo/ }).click();
+      await page.waitForFunction(() => window.__unboxRackProbe?.engine?.rackGroups
+        .some((group) => group.macros.some((macro) => macro.label === 'Throwaway')), null, { timeout: 15_000 });
+      await page.getByTestId('main-menu').click();
+      await page.getByRole('menuitem', { name: /^Redo/ }).click();
+      await page.waitForFunction(() => !window.__unboxRackProbe?.engine?.rackGroups
+        .some((group) => group.macros.some((macro) => macro.label === 'Throwaway')), null, { timeout: 15_000 });
+
+      const restoredMacroName = macroEditor.getByRole('textbox', { name: 'Wet Mix Reverse macro name' });
+      await restoredMacroName.fill('Wet Mix');
+      await restoredMacroName.press('Enter');
+      const normalMin = macroEditor.getByRole('spinbutton', { name: 'Wet Mix target 1 minimum' });
+      const normalMax = macroEditor.getByRole('spinbutton', { name: 'Wet Mix target 1 maximum' });
+      await normalMin.fill('0');
+      await normalMin.press('Tab');
+      await normalMax.fill('1');
+      await normalMax.press('Tab');
+      const normalMix = combiner.getByRole('slider', { name: 'Wet Mix' });
+      await normalMix.focus();
+      for (let press = 0; press < 100; press += 1) await page.keyboard.press('ArrowRight');
+      const restoredAuthoringState = await page.evaluate(() => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.name === 'Local Macro Acceptance');
+        const macro = group?.macros.find((entry) => entry.label === 'Wet Mix');
+        const effect = engine && [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        return { macro: macro?.value, target: macro?.targets[0], effectId: effect?.id, mix: effect?.params.mix };
+      });
+      assert(Math.abs((restoredAuthoringState.macro ?? -1) - 0.5) < 0.011, `Restored authoring macro did not reach 50% (${restoredAuthoringState.macro})`);
+      assert.equal(restoredAuthoringState.target?.deviceId, restoredAuthoringState.effectId, 'Target-device editor did not restore the delay target');
+      assert.equal(restoredAuthoringState.target?.param, 'mix', 'Target-parameter editor did not restore delay mix');
+      assert.equal(restoredAuthoringState.target?.min, 0, 'Normal minimum did not restore after inversion');
+      assert.equal(restoredAuthoringState.target?.max, 1, 'Normal maximum did not restore after inversion');
+      assert(Math.abs((restoredAuthoringState.mix ?? -1) - 0.5) < 0.011, `Restored authoring macro did not drive mix to 50% (${restoredAuthoringState.mix})`);
+      if (process.env.UNBOX_CAPTURE_RACK_UI === '1') {
+        const screenshot = path.join(root, '.tmp', 'rack-combiner-macro-editor.png');
+        fs.mkdirSync(path.dirname(screenshot), { recursive: true });
+        await macroEditor.screenshot({ path: screenshot });
+        console.log(`UI screenshot: ${screenshot}`);
+      }
+
       await page.getByTestId('main-menu').click();
       await page.getByRole('menuitem', { name: /^Save\s/ }).click();
       await page.waitForFunction(() => !!window.__unboxRackProbe?.projects.currentId && !window.__unboxRackProbe.projects.dirty, null, { timeout: 30_000 });
@@ -452,8 +739,36 @@ async function main() {
       await waitForSeriesRoute(30_000);
       current = await state();
       assert(hasSeriesRoute(current), 'Saved/reopened project lost the guitar-to-delay-to-master cable graph');
+      const restoredGroup = await page.evaluate(() => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.name === 'Local Macro Acceptance');
+        const macro = group?.macros.find((entry) => entry.label === 'Wet Mix');
+        const effect = engine && [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        return {
+          groupId: group?.id,
+          macro: macro?.value,
+          targetIsDelay: !!macro && macro.targets.length === 1 && macro.targets[0].deviceId === effect?.id && macro.targets[0].param === 'mix',
+          mix: effect?.params.mix,
+        };
+      });
+      assert(restoredGroup.groupId, 'Saved/reopened project lost the local Combiner frame');
+      assert(Math.abs((restoredGroup.macro ?? -1) - 0.5) < 0.011, `Saved/reopened project lost the Wet Mix macro value (${restoredGroup.macro})`);
+      assert.equal(restoredGroup.targetIsDelay, true, 'Saved/reopened project did not remap the Wet Mix target to the restored delay');
+      assert(Math.abs((restoredGroup.mix ?? -1) - 0.5) < 0.011, `Saved/reopened project lost the delay mix driven by Wet Mix (${restoredGroup.mix})`);
+      const restoredCombiner = page.locator('section[aria-label="Combiner Local Macro Acceptance"]');
+      const restoredWetMix = restoredCombiner.getByRole('slider', { name: 'Wet Mix' });
+      await restoredWetMix.focus();
+      await page.keyboard.press('ArrowRight');
+      const replayedMacro = await page.evaluate((groupId) => {
+        const engine = window.__unboxRackProbe?.engine;
+        const group = engine?.rackGroups.find((entry) => entry.id === groupId);
+        const effect = engine && [...engine.devices.values()].find((device) => device.name === 'Repeater Stereo Delay');
+        return { macro: group?.macros.find((entry) => entry.label === 'Wet Mix')?.value, mix: effect?.params.mix };
+      }, restoredGroup.groupId);
+      assert(Math.abs((replayedMacro.macro ?? -1) - 0.505) < 0.011, `Restored Wet Mix did not remain interactive (${replayedMacro.macro})`);
+      assert(Math.abs((replayedMacro.mix ?? -1) - 0.505) < 0.011, `Restored Wet Mix did not replay its delay mapping (${replayedMacro.mix})`);
       if (current.dirty !== null) assert.equal(current.dirty, false, 'Reopened project should match the saved project state');
-      console.log(`PASS · Real Rack UI added a CC0 recorded acoustic guitar and stereo delay, measured routed guitar output at ${recordedPeak.toFixed(4)} peak, exercised Ctrl+Z/Ctrl+Shift+Z, saved from the File menu, and preserved both devices and cables through reload.`);
+      console.log(`PASS · Real Rack UI added a CC0 recorded acoustic guitar and stereo delay, measured routed guitar output at ${recordedPeak.toFixed(4)} peak, exercised Ctrl+Z/Ctrl+Shift+Z, rear-panel cancel/replacement/restore, a real Wet Mix macro (${dryTail.toExponential(2)} → ${wetTail.toExponential(2)} delayed-tail RMS), then saved and reopened the stereo graph plus mapped Combiner macro.`);
     }
     if (probe === 'physical-midi-recording' || probe === 'physical-midi-ui-recording') {
       const permission = await page.evaluate(async () => {
@@ -475,12 +790,27 @@ async function main() {
     }
     let result = '';
     if (probe !== 'export-page-ui' && probe !== 'rack-ui-workflow') {
+      // The catalog sweep now mounts more than a hundred devices, including
+      // recorded packs that correctly wait for their middle velocity layer.
+      // Keep its assertions intact but give that exhaustive acceptance enough
+      // wall time on a cold Windows disk.
+      const resultTimeout = probe === 'device-soak' ? 720_000
+        : probe === 'physical-midi-recording' ? 160_000
+          : probe === 'device-audio-smoke' ? 480_000
+            : 300_000;
       try {
         await page.waitForFunction(() => {
           const status = document.querySelector('#result')?.getAttribute('data-status');
           return status === 'passed' || status === 'failed';
-        }, null, { timeout: probe === 'device-soak' ? 720_000 : probe === 'physical-midi-recording' ? 160_000 : 300_000 });
+        }, null, { timeout: resultTimeout });
       } catch (error) {
+        if (probe === 'device-audio-smoke') {
+          const state = await page.evaluate(() => ({
+            status: document.querySelector('#result')?.getAttribute('data-status') ?? null,
+            message: document.querySelector('#result')?.textContent ?? null,
+          }));
+          throw new Error(`${error.message}; device sweep state=${JSON.stringify(state)}`);
+        }
         if (probe !== 'physical-midi-recording' && probe !== 'physical-midi-ui-recording') throw error;
         const pageState = await page.evaluate(() => ({
           url: location.href,

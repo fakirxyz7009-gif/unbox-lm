@@ -14,6 +14,13 @@ export interface MidiPortInfo {
   error?: string;
 }
 
+/**
+ * Permission and device discovery are separate Web MIDI states. This copy is
+ * shared by the workstation and Settings surfaces so a granted permission with
+ * zero ports gives the musician an actionable hardware diagnosis.
+ */
+export const MIDI_NO_INPUT_GUIDANCE = 'MIDI access is allowed, but no input is visible. Use a direct USB data cable (not charge-only), reconnect the controller, then confirm it appears in your system MIDI/USB devices.';
+
 type ControlListener = (cc: number, value: number, channel: number) => void;
 
 function inputOpenError(error: unknown): string {
@@ -47,7 +54,32 @@ export class MidiInput {
   private readonly controls = new Set<ControlListener>();
   private readonly monitors = new Set<(data: Uint8Array, port: string) => void>();
 
-  constructor(private readonly onMessage: (data: Uint8Array) => void) {}
+  constructor(private readonly onMessage: (data: Uint8Array) => void) {
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('blur', () => this.releaseAll());
+    }
+  }
+
+  /** Releases all currently held notes and active sustain pedals across all inputs (e.g. on window blur or reset). */
+  releaseAll(): void {
+    for (const [, notes] of this.activeNotes) {
+      for (const [key, note] of notes) {
+        const channel = Number(key.slice(0, key.indexOf(':')));
+        this.onMessage(new Uint8Array([0x80 | channel, note, 0]));
+      }
+    }
+    this.activeNotes.clear();
+    for (const [, channels] of this.activeSustain) {
+      for (const channel of channels) {
+        this.onMessage(new Uint8Array([0xb0 | channel, 64, 0]));
+      }
+    }
+    this.activeSustain.clear();
+    if (this.held.size > 0) {
+      this.held.clear();
+      this.version++;
+    }
+  }
 
   /** Status / port list changes (not per message). */
   subscribe(fn: () => void): () => void {
@@ -111,6 +143,20 @@ export class MidiInput {
         this.pending = null;
       });
     return this.pending;
+  }
+
+  /**
+   * Re-read the existing MIDIAccess port collections after a controller is
+   * connected or reconnected. Hot-plug normally calls bind through
+   * `onstatechange`, but an explicit UI retry should never be a no-op once
+   * permission has already been granted.
+   */
+  refresh(): Promise<boolean> {
+    if (this.access && this.status === 'ready') {
+      this.bind();
+      return Promise.resolve(true);
+    }
+    return this.enable();
   }
 
   private setStatus(s: MidiStatus): void {
@@ -237,10 +283,12 @@ export class MidiInput {
       this.version++;
       if (heldByAnotherInput) return;
     } else if (cmd === 0xe0) {
-      this.pitch = (((b << 7) | a) - 8192) / 8192;
+      const raw = (((b << 7) | a) - 8192) / 8192;
+      this.pitch = Math.max(-1, Math.min(1, Number.isFinite(raw) ? raw : 0));
       this.version++;
     } else if (cmd === 0xb0 && a === 1) {
-      this.mod = b / 127;
+      const rawMod = b / 127;
+      this.mod = Math.max(0, Math.min(1, Number.isFinite(rawMod) ? rawMod : 0));
       this.version++;
     } else if (cmd === 0xb0) {
       if (a === 64) {

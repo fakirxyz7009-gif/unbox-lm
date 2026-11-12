@@ -46,7 +46,9 @@ export default defineConfig(({ mode }) => {
               return 'vendor-runtime';
             }
             // Basic Pitch's wrapper loads only when an AI transcription runs, so it gets a chunk of its own.
-            if (id.includes('src/audio/ai/basicPitch') || id.includes('src\\audio\\ai\\basicPitch')) {
+            // Only the model code: the small worker client (basicPitchClient.ts) is imported at start-up, and
+            // matching it too made the start page preload this chunk and all of TensorFlow (~1 MB).
+            if (/src[\\/]audio[\\/]ai[\\/]basicPitch(Notes)?\.ts/.test(id)) {
               return 'app-ai';
             }
             if (id.includes('src/audio') || id.includes('src\\audio')) {
@@ -63,11 +65,12 @@ export default defineConfig(({ mode }) => {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       hmr: process.env.DISABLE_HMR !== 'true',
       // The in-app library and generated data are rewritten by the scanner while the server runs;
-      // watching them is useless and Windows locks half-written files (EBUSY crash).
+      // watching them is useless and Windows locks half-written files (EBUSY crash). `.tmp/` holds
+      // build temp files and the test browsers' profiles (scripts/local-temp.mjs), which stay locked.
       watch:
         process.env.DISABLE_HMR === 'true'
           ? null
-          : { ignored: ['**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release/**', '**/dist/**'] },
+          : { ignored: ['**/.tmp/**', '**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release/**', '**/dist/**'] },
     },
   };
 });

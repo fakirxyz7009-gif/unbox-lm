@@ -8,11 +8,19 @@ async function run(): Promise<void> {
   const ctx = new AudioContext();
   const source = ctx.createConstantSource();
   let capture: WorkletCapture | null = null;
+  const observed: { frame: number; channels: Float32Array[] }[] = [];
   try {
     if (!(await ensureRecorderWorklet(ctx))) throw new Error('Recorder AudioWorklet did not load.');
     await ctx.resume();
     source.offset.value = 0.25;
-    capture = new WorkletCapture(ctx, source, 1);
+    capture = new WorkletCapture(ctx, source, 1, {
+      onChunk: (chunk) => observed.push({
+        frame: chunk.frame,
+        // The journal observer must receive usable copies/typed arrays before
+        // the normal take is assembled, including the final partial block.
+        channels: chunk.channels.map((channel) => channel.slice()),
+      }),
+    });
     source.start();
     // The capture start promise resolves from the audio worklet itself, so the
     // stop boundary is not gated by a wall-clock settle delay.
@@ -25,11 +33,26 @@ async function run(): Promise<void> {
     const actualEndFrame = data.frame + frames;
     const max = data.channels[0]?.reduce((peak, value) => Math.max(peak, Math.abs(value)), 0) ?? 0;
     if (!frames || max < 0.1) throw new Error(`Recorder captured no live signal (frames ${frames}, peak ${max}).`);
+    if (!observed.length) throw new Error('Recorder journal observer received no worklet blocks.');
+    const observedFrames = observed.reduce((total, chunk) => total + (chunk.channels[0]?.length ?? 0), 0);
+    const firstObserved = observed[0];
+    const lastObserved = observed[observed.length - 1];
+    const observedEndFrame = lastObserved.frame + (lastObserved.channels[0]?.length ?? 0);
+    if (firstObserved.frame !== data.frame || observedEndFrame !== actualEndFrame || observedFrames !== frames) {
+      throw new Error(
+        `Journal observer blocks do not match take (start ${firstObserved.frame}/${data.frame}, end ${observedEndFrame}/${actualEndFrame}, frames ${observedFrames}/${frames}).`,
+      );
+    }
+    const observedPeak = observed.reduce(
+      (peak, chunk) => Math.max(peak, chunk.channels[0]?.reduce((blockPeak, value) => Math.max(blockPeak, Math.abs(value)), 0) ?? 0),
+      0,
+    );
+    if (observedPeak < 0.1) throw new Error(`Recorder journal observer received silent blocks (peak ${observedPeak}).`);
     if (Math.abs(actualEndFrame - expectedFrame) > 1) {
       throw new Error(`Recorder ended at frame ${actualEndFrame}, expected exact punch frame ${expectedFrame}.`);
     }
     resultNode.dataset.status = 'passed';
-    resultNode.textContent = `PASS · recorder cut live audio at exact frame ${actualEndFrame} (${frames} frames, peak ${max.toFixed(2)}).`;
+    resultNode.textContent = `PASS · recorder cut live audio at exact frame ${actualEndFrame} (${frames} frames, peak ${max.toFixed(2)}); journal observer received ${observed.length} matching blocks.`;
   } finally {
     try { source.stop(); } catch {}
     if (capture) await capture.stop();

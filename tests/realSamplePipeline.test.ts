@@ -15,14 +15,10 @@ import assert from 'node:assert/strict';
 import {
   getSubVoicesForDevice,
   getDefaultSubVoice,
-  INSTRUMENT_SUB_VOICES,
 } from '../shared/instruments/subVoices.ts';
 import { buildPitchZonesForRoots } from '../scripts/fetch-real-samples.ts';
 import { RealMultiSampler } from '../src/audio/realSampler/RealMultiSampler.ts';
-import type {
-  MultiSampleManifest,
-  SubVoiceDefinition,
-} from '../shared/instruments/sampleManifestTypes.ts';
+import type { SubVoiceDefinition } from '../shared/instruments/sampleManifestTypes.ts';
 
 test('Sub-Voice Catalog: every electrophonic and keyboard device defines tailored voices', () => {
   const electrophonicDevices = [

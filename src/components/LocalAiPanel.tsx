@@ -11,7 +11,7 @@
  * Every action goes through the DAW engine's undo stack.
  */
 import { useEffect, useState } from 'react';
-import { Bot, RefreshCw, Cpu, Zap, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Cpu, Zap, CheckCircle2 } from 'lucide-react';
 import type { AudioEngine } from '../audio/AudioEngine.ts';
 import { useClipFocus } from '../shell/clipFocus.ts';
 import { askLocalAi, fetchLocalAiStatus, type LocalAiReply, type LocalAiStatus } from '../ai/localAiClient.ts';
@@ -107,59 +107,62 @@ export function LocalAiPanel({ audioEngine }: Props) {
         <Cpu className="h-4 w-4 text-cyan-400" />
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-white flex items-center gap-2">
-            <span>On-device AI</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-              100% ON-DEVICE
+            <span>On-device assistant</span>
+            <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+              CONTROL ONLY
             </span>
           </div>
           <div className="text-[11px] text-neutral-400">
-            GPU/CPU Hardware Execution · 0ms Cloud Latency · Zero Remote Transmission
+            Keyword rules on this computer, or a local Ollama model when one is running · nothing is sent out · no audio generation
           </div>
         </div>
         <button
           type="button"
           onClick={() => void refresh()}
           className="rounded p-1 text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
-          aria-label="Re-scan hardware"
-          title="Re-scan physical hardware & daemons"
+          aria-label="Look for a local model"
+          title="Look for a running Ollama server and its models"
         >
           <RefreshCw className="h-3.5 w-3.5" />
         </button>
       </div>
 
-      {/* Hardware Telemetry Card */}
+      {/* What answers: the rules, or a local model when Ollama runs */}
       <div className="p-2.5 rounded bg-black/40 border border-neutral-800 text-[11px] space-y-1">
         <div className="flex justify-between items-center text-neutral-300">
-          <span className="text-neutral-500">Physical GPU:</span>
-          <span className="font-mono text-cyan-300 font-bold">{hwState.gpu.vendor}</span>
+          <span className="text-neutral-500">Answers with:</span>
+          <span className="font-mono text-cyan-300 font-bold">{selectedBackend === 'ollama' && status?.online ? `Ollama · ${model || 'model'}` : 'Keyword rules'}</span>
         </div>
         <div className="flex justify-between items-center text-neutral-300">
-          <span className="text-neutral-500">Acceleration Backend:</span>
-          <span className="font-mono text-neutral-300">{hwState.gpu.backend}</span>
+          <span className="text-neutral-500">Local model (Ollama):</span>
+          <span className="font-mono text-neutral-300">
+            {status === undefined ? 'checking…' : status?.online ? `running, ${status.models.length} model${status.models.length === 1 ? '' : 's'}` : 'not running'}
+          </span>
         </div>
-        <div className="flex justify-between items-center text-neutral-300">
-          <span className="text-neutral-500">Inference Latency:</span>
-          <span className="font-mono text-emerald-400">{hwState.lastLatencyMs ? `${hwState.lastLatencyMs} ms` : 'Ultra-Low (Direct Memory)'}</span>
-        </div>
+        {hwState.lastLatencyMs > 0 && (
+          <div className="flex justify-between items-center text-neutral-300">
+            <span className="text-neutral-500">Last answer took:</span>
+            <span className="font-mono text-emerald-400">{hwState.lastLatencyMs} ms</span>
+          </div>
+        )}
       </div>
 
-      {/* Hardware Backend Selector */}
+      {/* Engine: the rules always; a local model only when Ollama is running */}
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-[11px] text-neutral-400">
-          Execution Backend
+          Engine
           <select
-            value={selectedBackend}
+            value={selectedBackend === 'ollama' && status?.online ? 'ollama' : 'rules'}
             onChange={(e) => {
-              const b = e.target.value as HardwareAiBackend;
+              const b: HardwareAiBackend = e.target.value === 'ollama' ? 'ollama' : 'local_neural_cpu';
               setSelectedBackend(b);
               localHardwareAi.setBackend(b);
             }}
             className="us-field h-[26px] text-[12px] bg-neutral-900 border border-neutral-700"
-            aria-label="Execution Backend"
+            aria-label="Engine"
           >
-            <option value="webgpu">WebGPU Physical GPU</option>
-            <option value="local_neural_cpu">Neural DSP CPU (Zero Latency)</option>
-            {status?.online && <option value="ollama">Ollama Daemon (Local CUDA)</option>}
+            <option value="rules">Keyword rules (always available)</option>
+            {status?.online && <option value="ollama">Local model (Ollama)</option>}
           </select>
         </label>
 
@@ -201,7 +204,10 @@ export function LocalAiPanel({ audioEngine }: Props) {
       <p className="text-[11px] text-neutral-500">
         {focus
           ? 'Clip actions target the note clip open in the Clip Editor.'
-          : 'Pattern actions target the active track pattern. Musical operations are executed 100% on local hardware.'}
+          : 'Pattern actions target the active track pattern. Everything runs on this computer.'}
+      </p>
+      <p className="text-[11px] text-emerald-300" data-testid="ai-audio-policy">
+        This assistant only proposes MIDI, device and automation changes. It never creates, renders or replaces audio; playback stays with local DSP and the selected recorded packs.
       </p>
 
       {/* Prompt Input */}
@@ -221,7 +227,7 @@ export function LocalAiPanel({ audioEngine }: Props) {
       <div className="flex items-center gap-2">
         <Btn on={!busy && !!message.trim()} disabled={busy || !message.trim()} onClick={() => void ask()}>
           <Zap className="h-3 w-3 inline mr-1 text-cyan-400" />
-          {busy ? 'Processing on local hardware…' : 'Execute on Local AI'}
+          {busy ? 'Working…' : 'Suggest changes'}
         </Btn>
         <span className="text-[11px] text-neutral-500">Ctrl+Enter to run</span>
       </div>
@@ -234,9 +240,9 @@ export function LocalAiPanel({ audioEngine }: Props) {
           <div className="flex items-center justify-between text-cyan-300">
             <span className="font-bold flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-              Inference Complete
+              Suggestion ready
             </span>
-            <span className="font-mono text-[10px] text-neutral-400">{reply.model}</span>
+            <span className="font-mono text-[11px] text-neutral-400">{reply.model}</span>
           </div>
 
           {reply.reply && <p className="text-neutral-200">{reply.reply}</p>}

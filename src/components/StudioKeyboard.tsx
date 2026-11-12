@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStepTick } from '../nexa/useEngine.ts';
+import { useMeterFrame } from '../nexa/useEngine.ts';
 import { BaseDevice } from '../audio/BaseDevice.ts';
 import { audioEngine } from '../audio/AudioEngine.ts';
 import { SequencerTrack } from '../audio/types.ts';
@@ -45,14 +45,24 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
     }
   }, [activeDeviceId, playableInstruments.length]);
 
-  // Find sequencer note currently playing on the active track so the keyboard lights up in sync
-  useStepTick(isPlaying);
-  const currentStep = audioEngine.currentStep;
+  // The key of the note the active track's step plays lights up in sync. It is set on the key
+  // element from the shared frame loop: re-rendering the whole keyboard per 16th cost every bar.
   const activeTrack = currentSynth ? tracks.find((t) => t.deviceId === currentSynth.id) : null;
-  const sequencerPlayingNote =
-    isPlaying && activeTrack && activeTrack.steps[currentStep % (activeTrack.steps.length || 16)]
-      ? activeTrack.steps[currentStep % (activeTrack.steps.length || 16)]!.note
-      : null;
+  const keyEls = useRef(new Map<number, HTMLButtonElement>());
+  const litNote = useRef<number | null>(null);
+  const keyRef = (midi: number) => (el: HTMLButtonElement | null) => {
+    if (el) keyEls.current.set(midi, el);
+    else keyEls.current.delete(midi);
+  };
+  useMeterFrame(() => {
+    const steps = activeTrack?.steps;
+    const hit = isPlaying && steps ? steps[audioEngine.currentStep % (steps.length || 16)] : null;
+    const note = hit ? hit.note : null;
+    if (note === litNote.current) return;
+    if (litNote.current !== null) keyEls.current.get(litNote.current)?.removeAttribute('data-seq');
+    if (note !== null) keyEls.current.get(note)?.setAttribute('data-seq', 'on');
+    litNote.current = note;
+  });
 
   const cycleInstrument = (dir: -1 | 1) => {
     if (playableInstruments.length === 0) return;
@@ -344,18 +354,19 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
         {/* White Keys */}
         {whiteKeys.map((k) => {
           const midi = rootNote + k.offset;
-          const isPressed = activeNotes.has(midi) || sequencerPlayingNote === midi;
+          const isPressed = activeNotes.has(midi);
 
           return (
             <button
               key={midi}
+              ref={keyRef(midi)}
               onMouseDown={() => playNote(midi)}
               onMouseUp={() => stopNote(midi)}
               onMouseLeave={() => stopNote(midi)}
               className={`flex-1 h-full rounded-b-sm border-r border-neutral-400/40 relative flex flex-col justify-end items-center pb-1 transition-all duration-75 ${
                 isPressed
                   ? 'bg-amber-300 shadow-[0_0_12px_#d6a358] translate-y-0.5'
-                  : 'bg-gradient-to-b from-neutral-200 to-white hover:bg-neutral-100 shadow'
+                  : 'bg-gradient-to-b from-neutral-200 to-white hover:bg-neutral-100 shadow data-[seq=on]:bg-none data-[seq=on]:bg-amber-300 data-[seq=on]:shadow-[0_0_12px_#d6a358]'
               }`}
             >
               <span className="text-[11px] font-bold font-mono text-neutral-800">{k.label}</span>
@@ -369,11 +380,12 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
         {/* Black Keys */}
         {blackKeys.map((bk) => {
           const midi = rootNote + bk.offset;
-          const isPressed = activeNotes.has(midi) || sequencerPlayingNote === midi;
+          const isPressed = activeNotes.has(midi);
 
           return (
             <button
               key={midi}
+              ref={keyRef(midi)}
               onMouseDown={(e) => {
                 e.stopPropagation();
                 playNote(midi);
@@ -386,7 +398,7 @@ export const StudioKeyboard: React.FC<StudioKeyboardProps> = ({
               className={`absolute top-0 w-[4.6%] h-[60%] rounded-b-sm z-10 flex flex-col justify-end items-center pb-1 transition-all duration-75 ${bk.pos} ${
                 isPressed
                   ? 'bg-amber-500 shadow-[0_0_12px_#d6a358]'
-                  : 'bg-gradient-to-b from-neutral-800 via-neutral-900 to-black hover:bg-neutral-800 shadow-lg border-x border-b border-black'
+                  : 'bg-gradient-to-b from-neutral-800 via-neutral-900 to-black hover:bg-neutral-800 shadow-lg border-x border-b border-black data-[seq=on]:bg-none data-[seq=on]:bg-amber-500 data-[seq=on]:shadow-[0_0_12px_#d6a358]'
               }`}
             >
               {bk.keyHint && (

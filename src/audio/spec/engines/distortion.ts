@@ -269,9 +269,22 @@ function amp(host: SpecHost, bass: boolean): SpecEngine {
   cab.normalize = true;
   const cabDry = ctx.createGain();
   const cabWet = ctx.createGain();
+  // A compact, deterministic close-mic model after the cabinet response. These are tonal
+  // approximations (not claims of measured microphone/cabinet captures): the dynamic has a
+  // forward upper-mid bump, ribbon rolls highs more gently, and condenser keeps more air.
+  const micHp = ctx.createBiquadFilter();
+  micHp.type = 'highpass';
+  const micBody = ctx.createBiquadFilter();
+  micBody.type = 'lowshelf';
+  micBody.frequency.value = 150;
+  const micPresence = ctx.createBiquadFilter();
+  micPresence.type = 'peaking';
+  micPresence.Q.value = 1.1;
+  const micLp = ctx.createBiquadFilter();
+  micLp.type = 'lowpass';
   const vol = ctx.createGain();
   host.ins[0].connect(pre).connect(drive).connect(tube).connect(bassEq).connect(mid).connect(treble).connect(presence);
-  presence.connect(cab).connect(cabWet).connect(vol);
+  presence.connect(cab).connect(cabWet).connect(micHp).connect(micBody).connect(micPresence).connect(micLp).connect(vol);
   presence.connect(cabDry).connect(vol);
   vol.connect(host.outs[0]);
   let cabName = '';
@@ -292,6 +305,19 @@ function amp(host: SpecHost, bass: boolean): SpecEngine {
       cabName = c;
       if (c !== 'Off') cab.buffer = cabinetImpulse(ctx, c);
     }
+    const mic = host.opt('mic') || 'Dynamic 57';
+    const position = clamp(host.p('micPosition', 0.2), 0, 1); // 0 = cap/on-axis, 1 = edge/off-axis
+    const distance = clamp(host.p('micDistance', 0.2), 0, 1); // 0 = close, 1 = farther away
+    const model = mic === 'Ribbon 121'
+      ? { hp: 45, lp: 11_500, edgeLp: 6_800, presenceHz: 3_200, presenceDb: -1.5, bodyDb: 2.8 }
+      : mic === 'Condenser'
+        ? { hp: 55, lp: 15_500, edgeLp: 8_500, presenceHz: 7_200, presenceDb: 2.2, bodyDb: 1.4 }
+        : { hp: 75, lp: 7_800, edgeLp: 4_100, presenceHz: 4_300, presenceDb: 5.2, bodyDb: 4.4 };
+    S(micHp.frequency, model.hp + distance * 35);
+    S(micBody.gain, model.bodyDb * (1 - distance));
+    S(micPresence.frequency, model.presenceHz);
+    S(micPresence.gain, model.presenceDb * (1 - position * 0.9) * (1 - distance * 0.35));
+    S(micLp.frequency, model.lp + (model.edgeLp - model.lp) * position - distance * 650);
     S(cabWet.gain, c === 'Off' ? 0 : 1);
     S(cabDry.gain, c === 'Off' ? 1 : 0);
     const v = clamp(host.p('volume', 5), 0, 10) / 5;

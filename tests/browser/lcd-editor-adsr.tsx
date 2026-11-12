@@ -34,16 +34,18 @@ function moveAttack(): void {
   const pointer = (type: string, y: number) => slider.dispatchEvent(new PointerEvent(type, {
     bubbles: true, pointerId: 71, clientX: box.left + box.width / 2, clientY: y,
   }));
-  pointer('pointerdown', box.bottom - 4);
-  pointer('pointermove', box.top + 8);
-  pointer('pointerup', box.top + 8);
+  // drag 60 px up from where it starts: the probe page renders without the app's utility CSS, so
+  // the slider's own height cannot be relied on
+  const y = box.top + box.height / 2;
+  pointer('pointerdown', y);
+  pointer('pointermove', y - 60);
+  pointer('pointerup', y - 60);
 }
 
 async function run(): Promise<void> {
   projectManager.autosave = false;
   await projectManager.create('empty', 'LCD ADSR Regression');
   const dev = engine.createDevice('kong', 'ADSR Regression Kong');
-  const track = engine.tracks.find((item) => item.deviceId === dev.id)!;
   const note = drumLanesFor(dev)?.[0]?.note ?? 36;
   undoJournal.clear();
   mount();

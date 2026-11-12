@@ -1,12 +1,23 @@
 import { BUILTIN_DEVICES } from '../../shared/rack/builtinCatalog.ts';
 import { audioEngine } from '../../src/audio/AudioEngine.ts';
 import type { BaseDevice } from '../../src/audio/BaseDevice.ts';
+import { waitForAudioTime } from '../../src/audio/audioClockAlarm.ts';
 import { specFor } from '../../src/audio/spec/registry.ts';
 
 const result = document.querySelector<HTMLPreElement>('#result');
 if (!result) throw new Error('Missing result node');
 
 const pause = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
+/**
+ * Analyser assertions must observe the audio render timeline, not an arbitrary amount of UI
+ * thread wall time. Yield once after the silent audio-clock alarm so the browser publishes the
+ * newly completed analyser window to JavaScript.
+ */
+async function waitForAudio(ctx: AudioContext, seconds: number): Promise<void> {
+  await waitForAudioTime(ctx, ctx.currentTime + Math.max(0.001, seconds));
+  await pause(0);
+}
 
 function rmsOf(analyser: AnalyserNode): number {
   const data = new Float32Array(analyser.fftSize);
@@ -63,7 +74,9 @@ function signedCorrelation(reference: Float32Array<ArrayBuffer>, output: Float32
   return best;
 }
 
-const ACTIVE_CONTROL_ORDER = ['drive', 'gain', 'threshold', 'ratio', 'depth', 'feedback', 'cutoff', 'frequency', 'freq', 'time', 'delay', 'decay', 'resonance', 'width', 'spread', 'rate', 'tone', 'amount', 'mode', 'preset'];
+// g0 is the first of the Graphic EQ's fixed bands. It deliberately comes after
+// conventional gain controls so normal processors still use their primary gain.
+const ACTIVE_CONTROL_ORDER = ['drive', 'gain', 'g0', 'threshold', 'ratio', 'depth', 'feedback', 'cutoff', 'frequency', 'freq', 'time', 'delay', 'decay', 'resonance', 'width', 'spread', 'rate', 'tone', 'amount', 'mode', 'preset'];
 
 function changeActiveControl(device: BaseDevice, type: string): string | null {
   if ('mix' in device.params) device.setParam('mix', 1);
@@ -81,8 +94,13 @@ function changeActiveControl(device: BaseDevice, type: string): string | null {
   }
   if (defined) {
     const value = typeof current === 'number' ? current : defined.default;
-    const target = key.toLowerCase().includes('threshold') ? defined.min
-      : key.toLowerCase().includes('gain') || key.toLowerCase().includes('cutoff') || key.toLowerCase().includes('freq') ? defined.min
+    const lowered = key.toLowerCase();
+    // A zero depth is deliberately dry for tremolo/chorus-style effects. The
+    // response probe must select an audible state rather than accidentally
+    // proving that the effect can be disabled.
+    const target = lowered.includes('threshold') ? defined.min
+      : lowered.includes('depth') ? defined.max
+      : lowered.includes('gain') || lowered.includes('cutoff') || lowered.includes('freq') ? defined.min
         : defined.max;
     device.setParam(key, Math.abs(value - defined.min) > Math.abs(value - defined.max) ? defined.min : target);
     return key;
@@ -105,7 +123,7 @@ interface EffectProbeResult {
   response?: { ratio: number; control: string };
 }
 
-const SPECIAL_EFFECTS = new Set(['bvx_vocoder', 'neptune', 'alligator', 'synchronous', 'ecf42', 'pitch_correct']);
+const SPECIAL_EFFECTS = new Set(['bvx_vocoder', 'neptune', 'alligator', 'synchronous', 'ecf42', 'pitch_correct', 'stereo_tremolo']);
 
 function configureSpecialEffect(type: string, device: BaseDevice, ctx: AudioContext): string {
   if (type === 'bvx_vocoder') {
@@ -151,6 +169,14 @@ function configureSpecialEffect(type: string, device: BaseDevice, ctx: AudioCont
     device.setParam('selfTrigger', 0);
     device.cvInputs.get('cv_gate')?.setter?.(1);
     return 'BP12 mode, resonance and envelope amount max, gate CV high';
+  }
+  if (type === 'stereo_tremolo') {
+    // A tremolo is intentionally gain-only: compare its level over multiple
+    // audio windows rather than a single static waveform snapshot.
+    device.setParam('rate', 4.5);
+    device.setParam('depth', 1);
+    device.setParam('phase', 1);
+    return '4.5 Hz, full-depth stereo amplitude modulation';
   }
   return changeActiveControl(device, type) ?? 'default settings';
 }
@@ -204,7 +230,7 @@ async function probeEffect(type: string, measureResponse: boolean): Promise<Effe
 
     device.isBypassed = true;
     // Let the bypass ramp and a full analyser window settle before measuring dry fidelity.
-    await pause(250);
+    await waitForAudio(ctx, 0.3);
 
     let inputRms = references.map(rmsOf);
     let inputLevel = Math.max(...inputRms);
@@ -212,7 +238,7 @@ async function probeEffect(type: string, measureResponse: boolean): Promise<Effe
     // shared context, allow a bounded number of complete windows before treating the input as
     // genuinely silent instead of failing a downstream effect for a startup race.
     for (let attempt = 0; inputLevel < 0.03 && attempt < 4; attempt++) {
-      await pause(125);
+      await waitForAudio(ctx, 0.13);
       inputRms = references.map(rmsOf);
       inputLevel = Math.max(...inputRms);
     }
@@ -257,21 +283,36 @@ async function probeEffect(type: string, measureResponse: boolean): Promise<Effe
         }
         source.start(ctx.currentTime + 0.025);
       }
-      await pause(140);
+      await waitForAudio(ctx, 0.16);
       const control = SPECIAL_EFFECTS.has(type)
         ? configureSpecialEffect(type, device, ctx)
         : changeActiveControl(device, type) ?? 'default settings';
       device.isPowered = true;
       device.isBypassed = false;
-      await pause(type === 'neptune' ? 900 : 500);
-      const ratio = Math.max(...references.map((analyser, index) => differenceRatio(samplesOf(analyser), samplesOf(outputTaps[index]!))));
+      await waitForAudio(ctx, type === 'neptune' ? 0.9 : 0.5);
+      let ratio: number;
+      if (type === 'stereo_tremolo') {
+        // A static waveform comparison can legitimately hit the same LFO phase
+        // twice. Measure the left output's RMS across a complete modulation
+        // cycle instead; a full-depth tremolo must show a substantial change.
+        const levels: number[] = [];
+        for (let sample = 0; sample < 8; sample++) {
+          levels.push(rmsOf(outputTaps[0]!));
+          await waitForAudio(ctx, 0.055);
+        }
+        const high = Math.max(...levels);
+        const low = Math.min(...levels);
+        ratio = high > 1e-6 ? 1 - low / high : 0;
+      } else {
+        ratio = Math.max(...references.map((analyser, index) => differenceRatio(samplesOf(analyser), samplesOf(outputTaps[index]!))));
+      }
       if (ratio < 0.005) throw new Error(`active DSP did not measurably change its input after ${control ?? 'default settings'} (difference ${(ratio * 100).toFixed(3)}%)`);
       response = { ratio, control: control ?? 'default settings' };
     }
 
     device.isBypassed = true;
     device.isPowered = false;
-    await pause(650);
+    await waitForAudio(ctx, 0.65);
     const poweredOffPeak = Math.max(...outputTaps.map(peakOf));
     if (poweredOffPeak > 1e-5) {
       throw new Error(`power-off left signal at ${poweredOffPeak.toExponential(2)} peak (powered=${device.isPowered}, bypassed=${device.isBypassed})`);
@@ -411,8 +452,11 @@ async function probeUtilityBehavior(type: string): Promise<string> {
     sourceGains.push(leftGain, rightGain);
   };
   // Utility routing changes are smoothed in the graph and the analyser contains an 85 ms
-  // history. Leave enough audio time for both the new route and a clean observation window.
-  const waitForSignal = async () => pause(300);
+  // history. Advance by AudioContext time, rather than merely waiting on a busy UI thread, so
+  // the read is a complete post-change analyser window even late in the catalog sweep.
+  const waitForSignal = async () => {
+    await waitForAudio(ctx, 0.34);
+  };
   const fail = (message: string): never => { throw new Error(`${type}: ${message}`); };
 
   try {
@@ -429,7 +473,7 @@ async function probeUtilityBehavior(type: string): Promise<string> {
         const active = Math.max(rmsOf(outputs[0]![0]), rmsOf(outputs[0]![1]));
         if (active < 0.02) fail(`channel ${inputIndex} did not reach the stereo master (RMS ${active.toExponential(2)})`);
         device.setParam(muteKey, 1);
-        await pause(300);
+        await waitForSignal();
         const muted = Math.max(rmsOf(outputs[0]![0]), rmsOf(outputs[0]![1]));
         if (muted > active * 0.03) fail(`channel ${inputIndex} mute left ${(muted / active * 100).toFixed(1)}% of its signal (active ${active.toExponential(2)}, muted ${muted.toExponential(2)})`);
         device.setParam(muteKey, 0);
@@ -447,13 +491,13 @@ async function probeUtilityBehavior(type: string): Promise<string> {
       const dryLevel = rmsOf(outputs[0]![0]);
       const dryPhase = signedCorrelation(samplesOf(refs[0]!), samplesOf(outputs[0]![0]), 128);
       device.setParam('polarity', 1);
-      await pause(120);
+      await waitForSignal();
       const invertedPhase = signedCorrelation(samplesOf(refs[0]!), samplesOf(outputs[0]![0]), 128);
       device.setParam('polarity', 0);
       device.setParam('pad', 1);
       // The DI pad uses a 15 ms AudioParam smoothing time.  Wait for that ramp plus a complete
       // 4096-frame analyser window so the previous 0 dB level cannot skew a −15 dB measurement.
-      await pause(240);
+      await waitForSignal();
       const paddedLevel = rmsOf(outputs[0]![0]);
       const padRatio = paddedLevel / Math.max(1e-9, dryLevel);
       if (dryPhase < 0.5 || invertedPhase > -0.5) fail(`polarity control did not flip phase (normal ${dryPhase.toFixed(3)}, inverted ${invertedPhase.toFixed(3)})`);
@@ -467,7 +511,7 @@ async function probeUtilityBehavior(type: string): Promise<string> {
       await waitForSignal();
       const ratio = rmsOf(outputs[0]![0]) / Math.max(1e-9, rmsOf(refs[0]!));
       device.setParam('invertL', 1);
-      await pause(240);
+      await waitForSignal();
       const phase = signedCorrelation(samplesOf(refs[0]!), samplesOf(outputs[0]![0]), 128);
       if (ratio < 1.85 || ratio > 2.15) fail(`+6 dB gain measured ${ratio.toFixed(3)}×; expected about 2×`);
       if (phase > -0.95) fail(`left polarity switch did not invert the signal (correlation ${phase.toFixed(3)})`);

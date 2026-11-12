@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { useOnScreen } from '../../ui/skin/useOnScreen.ts';
+import { meterDue } from '../../nexa/useEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
 import { PulsarDevice } from '../../audio/devices/PulsarDevice.ts';
 import { MClassMasterSuite } from '../../audio/devices/MClassMasterSuite.ts';
@@ -15,6 +17,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
   height = 58,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onScreen = useOnScreen(canvasRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,7 +32,12 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
     const freqData = new Uint8Array(bufferLength);
 
     let quiet = 0;
-    const render = () => {
+    const render = (now: number) => {
+      // off screen (a scrolled-away rack unit), or drawn less than ~33 ms ago: nothing to draw
+      if (!onScreen.current || !meterDue(now)) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       analyser.getByteTimeDomainData(timeData);
       // A silent device redraws ~6 times a second (enough for knob-driven displays) instead of 60.
       let loud = false;

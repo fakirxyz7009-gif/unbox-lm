@@ -184,7 +184,7 @@ export const TrackHeader: React.FC<Props> = ({
         </span>
         {!collapsed && (
           <div className="h-[6px] rounded-sm bg-black/70 overflow-hidden">
-            <div ref={meterRef} className="h-full bg-gradient-to-r from-cyan-300 to-sky-500" style={{ width: 0 }} />
+            <div ref={meterRef} className="h-full bg-gradient-to-r from-cyan-300 to-sky-500 will-change-transform" style={{ width: 0 }} />
           </div>
         )}
       </div>

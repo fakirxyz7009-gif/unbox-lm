@@ -53,43 +53,54 @@ export const sameTarget = (a: AutoTarget, b: AutoTarget): boolean => targetKey(a
 
 /** Normalized 0..1 → value in the range. */
 export function denorm(r: TargetRange, n: number): number {
-  const x = Math.max(0, Math.min(1, n));
+  const safeN = Number.isFinite(n) ? n : 0;
+  const x = Math.max(0, Math.min(1, safeN));
   if (r.toggle) return x >= 0.5 ? 1 : 0;
-  if (r.log && r.min > 0) return r.min * Math.pow(r.max / r.min, x);
+  if (r.log && r.min > 0 && r.max > r.min) return r.min * Math.pow(r.max / r.min, x);
   return r.min + (r.max - r.min) * x;
 }
 
 /** Value → normalized 0..1. */
 export function norm(r: TargetRange, v: number): number {
-  if (r.toggle) return v ? 1 : 0;
-  if (r.log && r.min > 0) return Math.max(0, Math.min(1, Math.log(Math.max(r.min, v) / r.min) / Math.log(r.max / r.min)));
-  return Math.max(0, Math.min(1, (v - r.min) / (r.max - r.min || 1)));
+  const safeV = Number.isFinite(v) ? v : r.min;
+  if (r.toggle) return safeV ? 1 : 0;
+  if (r.log && r.min > 0 && r.max > r.min) {
+    const denom = Math.log(r.max / r.min);
+    if (denom <= 0) return 0;
+    return Math.max(0, Math.min(1, Math.log(Math.max(r.min, safeV) / r.min) / denom));
+  }
+  const span = r.max - r.min;
+  return Math.max(0, Math.min(1, span !== 0 ? (safeV - r.min) / span : 0));
 }
 
 function shape(t: number, curve: number): number {
-  if (!curve) return t;
+  if (!curve) return Math.max(0, Math.min(1, Number.isFinite(t) ? t : 0));
+  const ct = Math.max(0, Math.min(1, Number.isFinite(t) ? t : 0));
   const k = 1 + Math.abs(curve) * 4;
-  return curve > 0 ? Math.pow(t, k) : 1 - Math.pow(1 - t, k);
+  return curve > 0 ? Math.pow(ct, k) : 1 - Math.pow(Math.max(0, 1 - ct), k);
 }
 
 /** Normalized value at `pos` (null when the lane has no points). */
 export function valueAt(points: readonly AutoPoint[], pos: number): number | null {
   const n = points.length;
   if (!n) return null;
-  if (pos <= points[0].pos) return points[0].value;
-  if (pos >= points[n - 1].pos) return points[n - 1].value;
+  const safePos = Number.isFinite(pos) ? pos : 0;
+  if (safePos <= points[0].pos) return points[0].value;
+  if (safePos >= points[n - 1].pos) return points[n - 1].value;
   let lo = 0;
   let hi = n - 1;
   while (hi - lo > 1) {
     const mid = (lo + hi) >> 1;
-    if (points[mid].pos <= pos) lo = mid;
+    if (points[mid].pos <= safePos) lo = mid;
     else hi = mid;
   }
   const a = points[lo];
   const b = points[hi];
   if (a.hold || b.pos === a.pos) return a.value;
-  const t = (pos - a.pos) / (b.pos - a.pos);
-  return a.value + (b.value - a.value) * shape(t, a.curve ?? 0);
+  const t = (safePos - a.pos) / (b.pos - a.pos);
+  const shaped = shape(t, a.curve ?? 0);
+  const val = a.value + (b.value - a.value) * shaped;
+  return Number.isFinite(val) ? val : a.value;
 }
 
 /** Keeps points sorted and unique by position (last write wins). */

@@ -5,6 +5,7 @@
  */
 import { sharedAudioContext } from '../AudioEngineGraph.ts';
 import { estimateTempo } from '../../../shared/analysis/tempo.ts';
+import { parseAudioProvenance, unknownAudioProvenance, userFileProvenance, type AudioProvenance } from '../../../shared/audio/provenance.ts';
 import { dbDelete, dbGet, dbPut } from '../../project/db.ts';
 
 export interface AudioAsset {
@@ -18,6 +19,8 @@ export interface AudioAsset {
   detectedBpm?: number;
   /** Detected / entered key, e.g. "A minor". */
   key?: string;
+  /** User-provided source/rights declaration, never an independently verified license. */
+  provenance?: AudioProvenance;
   createdAt: number;
 }
 
@@ -30,6 +33,7 @@ interface StoredAudio {
   sourceBpm?: number;
   detectedBpm?: number;
   key?: string;
+  provenance?: AudioProvenance;
   createdAt: number;
 }
 
@@ -45,7 +49,8 @@ export function computePeaks(buffer: AudioBuffer): Float32Array {
     const end = Math.min(buffer.length, (b + 1) * PEAK_BIN);
     for (const d of chans) {
       for (let i = b * PEAK_BIN; i < end; i++) {
-        const v = d[i];
+        const raw = d[i];
+        const v = Number.isFinite(raw) ? raw : 0;
         if (v < lo) lo = v;
         else if (v > hi) hi = v;
       }
@@ -67,12 +72,18 @@ export function removeDcOffset(buffer: AudioBuffer): AudioBuffer {
     const src = buffer.getChannelData(ch);
     const dst = out.getChannelData(ch);
     let sum = 0;
+    let count = 0;
     for (let i = 0; i < length; i++) {
-      sum += src[i];
+      const s = src[i];
+      if (Number.isFinite(s)) {
+        sum += s;
+        count++;
+      }
     }
-    const mean = sum / Math.max(1, length);
+    const mean = count > 0 ? sum / count : 0;
     for (let i = 0; i < length; i++) {
-      dst[i] = src[i] - mean;
+      const s = src[i];
+      dst[i] = Number.isFinite(s) ? s - mean : 0;
     }
   }
   return out;
@@ -118,8 +129,11 @@ export function calculateClipRms(buffer: AudioBuffer, startSec: number, duration
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
     const d = buffer.getChannelData(ch);
     for (let i = i0; i < i1; i++) {
-      sumSq += d[i] * d[i];
-      count++;
+      const val = d[i];
+      if (Number.isFinite(val)) {
+        sumSq += val * val;
+        count++;
+      }
     }
   }
   return count > 0 ? Math.sqrt(sumSq / count) : 0;
@@ -139,8 +153,11 @@ export function detectTransientTimes(buffer: AudioBuffer): number[] {
     let count = 0;
     for (const channel of channels) {
       for (let i = start; i < end; i++) {
-        energy += channel[i] * channel[i];
-        count++;
+        const val = channel[i];
+        if (Number.isFinite(val)) {
+          energy += val * val;
+          count++;
+        }
       }
     }
     rms[frame] = count ? Math.sqrt(energy / count) : 0;
@@ -189,6 +206,7 @@ class AudioStore {
   private reversed = new Map<string, AudioBuffer>();
   private loading = new Map<string, Promise<AudioAsset | null>>();
   private listeners = new Set<() => void>();
+  private revision = 0;
   /** Ids that a project referenced but that are in neither memory nor the database. */
   readonly missing = new Set<string>();
 
@@ -198,7 +216,13 @@ class AudioStore {
   }
 
   private notify(): void {
+    this.revision++;
     this.listeners.forEach((cb) => cb());
+  }
+
+  /** Stable snapshot token for React views that list project audio assets. */
+  getRevision(): number {
+    return this.revision;
   }
 
   get(id: string | undefined): AudioAsset | undefined {
@@ -226,9 +250,14 @@ class AudioStore {
     return r;
   }
 
-  /** Adds a buffer (and saves it to the app database in the background). */
-  add(name: string, buffer: AudioBuffer, meta: { sourceBpm?: number; detectedBpm?: number; key?: string; id?: string } = {}): AudioAsset {
-    const asset: AudioAsset = { id: meta.id ?? newId(), name, buffer, peaks: computePeaks(buffer), sourceBpm: meta.sourceBpm, detectedBpm: meta.detectedBpm, key: meta.key, createdAt: Date.now() };
+  /**
+   * Adds a buffer (and saves it to the app database in the background). Every asset carries an
+   * honest origin record: an omitted/invalid declaration is explicitly `unknown`, never silently
+   * treated as user-owned or licensed.
+   */
+  add(name: string, buffer: AudioBuffer, meta: { sourceBpm?: number; detectedBpm?: number; key?: string; id?: string; provenance?: AudioProvenance } = {}): AudioAsset {
+    const provenance = parseAudioProvenance(meta.provenance) ?? unknownAudioProvenance();
+    const asset: AudioAsset = { id: meta.id ?? newId(), name, buffer, peaks: computePeaks(buffer), sourceBpm: meta.sourceBpm, detectedBpm: meta.detectedBpm, key: meta.key, provenance, createdAt: Date.now() };
     this.assets.set(asset.id, asset);
     this.missing.delete(asset.id);
     void this.persist(asset).catch((e) => console.warn('Audio could not be saved to the app database:', e));
@@ -236,22 +265,37 @@ class AudioStore {
     return asset;
   }
 
-  update(id: string, patch: Partial<Pick<AudioAsset, 'name' | 'sourceBpm' | 'detectedBpm' | 'key'>>): void {
+  update(id: string, patch: Partial<Pick<AudioAsset, 'name' | 'sourceBpm' | 'detectedBpm' | 'key' | 'provenance'>>): void {
     const a = this.assets.get(id);
     if (!a) return;
-    Object.assign(a, patch);
+    const updatesProvenance = Object.prototype.hasOwnProperty.call(patch, 'provenance');
+    const provenance = updatesProvenance ? parseAudioProvenance(patch.provenance) ?? unknownAudioProvenance() : undefined;
+    Object.assign(a, { ...patch, ...(updatesProvenance ? { provenance } : {}) });
     void this.persist(a);
     this.notify();
   }
 
+  /**
+   * Resolves only once an in-memory asset has been written to IndexedDB. Recording recovery uses
+   * this before it clears its take journal, so a project never holds the sole reference to audio
+   * that has not reached durable storage yet.
+   */
+  async ensurePersisted(id: string): Promise<boolean> {
+    const asset = this.assets.get(id);
+    if (!asset) return false;
+    await this.persist(asset);
+    return true;
+  }
+
   /** Decodes an audio file (wav, mp3, ogg, flac, m4a, aif…) into the store. */
-  async importFile(file: File | Blob, name?: string): Promise<AudioAsset> {
+  async importFile(file: File | Blob, name?: string, meta: { provenance?: AudioProvenance } = {}): Promise<AudioAsset> {
     const data = await file.arrayBuffer();
     const buffer = await sharedAudioContext.decodeAudioData(data);
     const label = name ?? ('name' in file ? (file as File).name.replace(/\.[^.]+$/, '') : 'Audio');
     const sourceBpm = bpmFromName(label);
     const detectedBpm = sourceBpm === undefined ? detectTempoBpm(buffer) ?? undefined : undefined;
-    return this.add(label, buffer, { sourceBpm, detectedBpm });
+    const fileName = 'name' in file && typeof (file as File).name === 'string' ? (file as File).name : label;
+    return this.add(label, buffer, { sourceBpm, detectedBpm, provenance: meta.provenance ?? userFileProvenance(fileName) });
   }
 
   /** Imports multiple audio files in parallel. */
@@ -289,7 +333,7 @@ class AudioStore {
     try {
       const channels: ArrayBuffer[] = [];
       for (let c = 0; c < a.buffer.numberOfChannels; c++) channels.push(a.buffer.getChannelData(c).slice().buffer);
-      const rec: StoredAudio = { id: a.id, name: a.name, sampleRate: a.buffer.sampleRate, length: a.buffer.length, channels, sourceBpm: a.sourceBpm, detectedBpm: a.detectedBpm, key: a.key, createdAt: a.createdAt };
+      const rec: StoredAudio = { id: a.id, name: a.name, sampleRate: a.buffer.sampleRate, length: a.buffer.length, channels, sourceBpm: a.sourceBpm, detectedBpm: a.detectedBpm, key: a.key, provenance: a.provenance, createdAt: a.createdAt };
       await dbPut('audio', rec);
     } catch (err) {
       console.warn(`[audioStore] Failed to persist asset "${a.name}" to IndexedDB (storage quota or serialization error):`, err);
@@ -311,7 +355,8 @@ class AudioStore {
           }
           const buffer = new AudioBuffer({ length: rec.length, numberOfChannels: rec.channels.length, sampleRate: rec.sampleRate });
           rec.channels.forEach((ch, c) => buffer.copyToChannel(new Float32Array(ch), c));
-          const asset: AudioAsset = { id: rec.id, name: rec.name, buffer, peaks: computePeaks(buffer), sourceBpm: rec.sourceBpm, detectedBpm: rec.detectedBpm, key: rec.key, createdAt: rec.createdAt };
+          const provenance = parseAudioProvenance(rec.provenance) ?? unknownAudioProvenance();
+          const asset: AudioAsset = { id: rec.id, name: rec.name, buffer, peaks: computePeaks(buffer), sourceBpm: rec.sourceBpm, detectedBpm: rec.detectedBpm, key: rec.key, provenance, createdAt: rec.createdAt };
           this.assets.set(id, asset);
           this.missing.delete(id);
           this.notify();

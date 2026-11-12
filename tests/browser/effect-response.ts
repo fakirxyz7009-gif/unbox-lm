@@ -167,6 +167,54 @@ async function probeRv7000Size(): Promise<string> {
   }
 }
 
+async function probeCabinetMicrophones(silence: GainNode): Promise<string> {
+  const ctx = audioEngine.ctx;
+  const device = await prepareDevice('softube_amp', 'Cabinet microphone response');
+  const input = device.audioInputs.get('in_l');
+  const output = device.audioOutputs.get('out_l');
+  if (!input || !output) throw new Error('Stack Guitar Amp has no left audio input/output');
+  const tone = ctx.createOscillator();
+  const level = ctx.createGain();
+  const response = ctx.createAnalyser();
+  response.fftSize = FFT_SIZE;
+  tone.frequency.value = 6_500;
+  level.gain.value = 0.025;
+  tone.connect(level).connect(input);
+  output.connect(response).connect(silence);
+  try {
+    device.setParam('cab', '4×12');
+    device.setParam('mic', 'Dynamic 57');
+    device.setParam('micPosition', 0);
+    device.setParam('micDistance', 0);
+    tone.start(ctx.currentTime + 0.025);
+    await pause(350);
+    const dynamicOnAxis = rms(response);
+    device.setParam('micPosition', 1);
+    await pause(350);
+    const dynamicEdge = rms(response);
+    device.setParam('mic', 'Ribbon 121');
+    device.setParam('micPosition', 0);
+    await pause(350);
+    const ribbonOnAxis = rms(response);
+    if (dynamicOnAxis < 1e-5 || dynamicEdge < 1e-5 || ribbonOnAxis < 1e-5) {
+      throw new Error(`Cabinet microphone response was silent (${dynamicOnAxis.toExponential(2)} / ${dynamicEdge.toExponential(2)} / ${ribbonOnAxis.toExponential(2)})`);
+    }
+    if (dynamicOnAxis < dynamicEdge * 1.25) {
+      throw new Error(`Dynamic mic position did not darken the cabinet response (${dynamicOnAxis.toExponential(2)} on-axis vs ${dynamicEdge.toExponential(2)} edge)`);
+    }
+    if (ribbonOnAxis < dynamicEdge * 1.25) {
+      throw new Error(`Microphone model did not alter the cabinet response (${ribbonOnAxis.toExponential(2)} ribbon vs ${dynamicEdge.toExponential(2)} dynamic edge)`);
+    }
+    return `Cabinet microphones: Dynamic on-axis/edge ${dynamicOnAxis.toFixed(4)}/${dynamicEdge.toFixed(4)}, Ribbon on-axis ${ribbonOnAxis.toFixed(4)}`;
+  } finally {
+    try { tone.stop(); } catch {}
+    tone.disconnect();
+    level.disconnect();
+    response.disconnect();
+    audioEngine.removeDevice(device.id, true);
+  }
+}
+
 function rv7000Impulse(device: RV7000Device): AudioBuffer {
   const convolver = Reflect.get(device, 'convolver') as unknown;
   if (!(convolver instanceof ConvolverNode) || !convolver.buffer) throw new Error('RV7000 has no impulse response');
@@ -315,6 +363,7 @@ async function run(): Promise<void> {
   try {
     for (const test of EQ_CASES) results.push(await probeEq(test, silence));
     results.push(await probeRv7000Size());
+    results.push(await probeCabinetMicrophones(silence));
     results.push(probeRv7000Determinism());
     results.push(probeCabinetImpulseDeterminism());
     results.push(await probeCompressor(silence));

@@ -2,11 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { rollKey, type RollNote } from '../src/components/sequencer/pianoRoll/rollAdapters.ts';
 import {
+  chopNotes,
   flipPitch,
   humanizeNotes,
   invertKeys,
   isEditError,
   legatoNotes,
+  legatoToNext,
+  nudgeLengths,
   reverseNotes,
   rampVelocity,
   rotateNotes,
@@ -142,4 +145,26 @@ test('a transform that lands on an untouched note replaces that note', () => {
   const r = result(transposeNotes([a, b], keysOf(a), 1));
   assert.equal(r.notes.length, 1);
   assert.equal(r.notes[0].note, 61);
+});
+
+test('nudge lengths: -1 / +1 step, never past the pattern end, never longer when shortening', () => {
+  const notes = [note(0, 60, 2), note(4, 64, 0.5), note(14, 67, 2)];
+  const shorter = result(nudgeLengths(notes, new Set(), -1, 1, 16)).notes;
+  assert.deepEqual(shorter.map((n) => n.length), [1, 0.5, 1]);
+  const longer = result(nudgeLengths(notes, new Set(), 1, 1, 16)).notes;
+  assert.deepEqual(longer.map((n) => n.length), [3, 1.5, 2]);
+  assert.ok(isEditError(nudgeLengths([note(0, 60, 1)], new Set(), -1, 1, 16)), 'a one-step note cannot get shorter');
+});
+
+test('legato to next: each note reaches the next start of any pitch, the last one the pattern end', () => {
+  const out = result(legatoToNext([note(0, 60), note(0, 64), note(3, 67), note(8, 60)], new Set(), 16)).notes;
+  assert.deepEqual(out.map((n) => [n.step, n.note, n.length]), [[0, 60, 3], [0, 64, 3], [3, 67, 5], [8, 60, 8]]);
+});
+
+test('chop cuts long notes into softer one-step repeats and leaves short ones alone', () => {
+  const out = result(chopNotes([note(0, 60, 2.5, 0.8), note(4, 62, 1)], new Set(), 1)).notes;
+  assert.deepEqual(out.map((n) => [n.step, n.length]), [[0, 1], [1, 1], [2, 0.5], [4, 1]]);
+  assert.equal(out[0].velocity, 0.8);
+  assert.ok(Math.abs(out[1].velocity - 0.68) < 1e-9);
+  assert.ok(isEditError(chopNotes([note(0, 60, 1)], new Set(), 1)));
 });

@@ -88,6 +88,7 @@ const BASE_CATEGORIES: InstrumentCategory[] = [
       { type: 'rec_meta_nylon_guitar', name: 'Guitar', desc: 'Recorded nylon-string classical guitar with velocity layers (CC0)', u: 2 },
       { type: 'rec_growlybass', name: 'Bass Guitar', desc: 'Recorded Squier Jazz Bass with three velocity layers and two round robins (CC0)', u: 2 },
       { type: 'rec_vsco_solo_violin', name: 'Violin', desc: 'Recorded solo violin sustain from VSCO 2 Community Edition (CC0)', u: 2 },
+      { type: 'rec_vsco_violin_section', name: 'Violins (Section)', desc: 'Recorded violin section sustain with vibrato from VSCO 2 Community Edition (CC0)', u: 2 },
       { type: 'rec_vsco_viola_section', name: 'Viola', desc: 'Recorded viola ensemble sustain with vibrato (CC0)', u: 2 },
       { type: 'rec_vsco_cello_section', name: 'Cello', desc: 'Recorded cello section sustain with vibrato (CC0)', u: 2 },
       { type: 'rec_vsco_cello_section', name: 'Violoncello', desc: 'Recorded cello section sustain with vibrato (CC0)', u: 2 },
@@ -283,7 +284,82 @@ const SPEC_CATEGORIES: InstrumentCategory[] = SPEC_GROUPS.map((g) => ({
   items: DEVICE_SPECS.filter((s) => s.group === g.label).map((s) => ({ type: s.type as DeviceType, name: s.name, desc: s.description, u: s.panel.units ?? 2 })),
 })).filter((c) => c.items.length > 0);
 
-export const INSTRUMENT_CATEGORIES: InstrumentCategory[] = [...BASE_CATEGORIES, ...SPEC_CATEGORIES];
+/**
+ * Entries retired from the catalogue on 2026-11-12. Every catalogue instrument was rendered offline with
+ * the same phrase and fingerprinted (spectrum, loudness envelope, brightness over time): each of these
+ * rendered the same audio as another entry. The generic world and electronic devices pick one of a few
+ * built-in banks from the name, so "Koto", "Oud" or "Euphonium" all played the sitar bank, and eleven
+ * "keyboards" one synth voice. Saved projects still load them (createDevice takes any name); they are no
+ * longer offered. The modelled devices (Continent World Instruments, Bowline Modeled Strings, the mallet
+ * device) and the recorded packs cover these instruments for real.
+ */
+const RETIRED_ENTRIES = new Set<string>([
+  'world_instrument|Mandolin', 'world_instrument|Ukulele', 'world_instrument|Harpsichord',
+  'world_instrument|Clavichord', 'world_instrument|Erhu', 'world_instrument|Koto', 'world_instrument|Kora',
+  'world_instrument|Oud', 'world_instrument|Shamisen', 'world_instrument|Baglama',
+  'world_instrument|Bouzouki', 'world_instrument|Balalaika', 'world_instrument|Charango',
+  'world_instrument|Lute', 'world_instrument|Lyre', 'world_instrument|Zither',
+  'world_instrument|Hammered Dulcimer', 'world_instrument|Appalachian Dulcimer', 'world_instrument|Dulcimer',
+  'world_instrument|Autoharp', 'world_instrument|Banjolele', 'world_instrument|Chitarrone',
+  'world_instrument|Hurdy-Gurdy', 'world_instrument|Nyckelharpa', 'world_instrument|Octobass',
+  'world_instrument|Psaltery', 'world_instrument|Rebab', 'world_instrument|Ruan',
+  'world_instrument|Harmonica', 'world_instrument|Pan Flute', 'world_instrument|Shakuhachi',
+  'world_instrument|Duduk', 'world_instrument|English Horn',
+  'world_instrument|Bass Clarinet', 'world_instrument|Euphonium', 'world_instrument|Baritone Horn',
+  'world_instrument|Melodica', 'world_instrument|Didgeridoo', 'world_instrument|Bansuri',
+  'world_instrument|Uilleann Pipes', 'world_instrument|Nay', 'world_instrument|Kenas',
+  'world_instrument|Siku', 'world_instrument|Sheng', 'world_instrument|Suona', 'world_instrument|Zurna',
+  'world_instrument|Alphorn', 'world_instrument|Sousaphone', 'world_instrument|Bugle',
+  'world_instrument|Shofar', 'world_instrument|Whistle', 'world_instrument|Fife',
+  'world_instrument|Glass Harmonica', 'world_instrument|Khaen', 'world_instrument|Xun',
+  'world_instrument|Venu', 'world_instrument|Pungi', 'world_instrument|Kazoo', "world_instrument|Jew's Harp",
+  'world_instrument|Calliope',
+  'percussion_electronic|Funk Clav Keyboard', 'percussion_electronic|Tape Strings Keyboard',
+  'percussion_electronic|Electronic Keyboard', 'percussion_electronic|Ondes Martenot',
+  'percussion_electronic|Stylus Pocket Synth', 'percussion_electronic|Note-Bender Synth',
+  'percussion_electronic|Keytar', 'percussion_electronic|Strum Chord Synth',
+  'percussion_electronic|Wind Controller Synth', 'percussion_electronic|Soundboard Synthesizer',
+  'percussion_electronic|Sampler', 'percussion_electronic|Trautonium', 'percussion_electronic|Wheel Harp',
+  'percussion_electronic|Modeling Guitar', 'percussion_electronic|Boutique Modular Guitar',
+  'percussion_electronic|Touch Sphere Pad', 'percussion_electronic|Sample Pad',
+  'percussion_electronic|Chimes', 'percussion_electronic|Cowbell',
+  'percussion_electronic|Wind Chime', 'percussion_electronic|Shekere', 'percussion_electronic|Pandeiro',
+  'percussion_electronic|Guiro', 'percussion_electronic|Tuned Steel Handpan',
+  'percussion_electronic|Steelpan', 'percussion_electronic|Doumbek', 'percussion_electronic|Mridangam',
+  'percussion_electronic|Drum Machine', 'percussion_electronic|Mbira',
+  'rec_vsco_cello_section|Violoncello', // the same pack as the entry above it
+  'rec_vsco_solo_violin|Fiddle', // the same pack as the entry above it
+]);
+
+/** Entries (`type|name`) that open the recorded pack of that very instrument instead of a generic bank. */
+const RECORDED_INSTEAD: Record<string, { type: DeviceType; desc: string }> = {
+  'world_instrument|Saxophone': { type: 'rec_bear_sax', desc: 'Recorded saxophone (Bear Sax pack, CC0)' },
+  'world_instrument|Accordion': { type: 'rec_button_accordion_hn', desc: 'Recorded button accordion (CC0)' },
+  'world_instrument|Concertina': { type: 'rec_tomiak_chemnitzer_chemnitzer', desc: 'Recorded Chemnitzer concertina (CC0)' },
+  'world_instrument|Pipe Organ': { type: 'rec_vcsl_pipe_organ', desc: 'Recorded pipe organ (VCSL, CC0)' },
+  'world_instrument|Bagpipes': { type: 'rec_freepats_bagpipe', desc: 'Recorded bagpipe in G (FreePats, CC0)' },
+  'world_instrument|Recorder': { type: 'rec_freepats_recorder', desc: 'Recorded wooden recorder (FreePats, CC0)' },
+  'world_instrument|Ocarina': { type: 'rec_freepats_ocarina', desc: 'Recorded ocarina (FreePats, CC0)' },
+  'world_instrument|Banjo': { type: 'rec_ganjo', desc: 'Recorded six-string banjo (Ganjo pack, CC0)' },
+  'world_instrument|Piccolo': { type: 'rec_vsco_piccolo', desc: 'Recorded piccolo sustain (VSCO 2 CE, CC0)' },
+  'percussion_electronic|Xylophone': { type: 'rec_vsco_xylophone', desc: 'Recorded orchestral xylophone (VSCO 2 CE, CC0)' },
+  'percussion_electronic|Glockenspiel': { type: 'rec_vsco_glockenspiel', desc: 'Recorded orchestral glockenspiel (VSCO 2 CE, CC0)' },
+  'percussion_electronic|Tubular Bells': { type: 'rec_vsco_tubular_bells', desc: 'Recorded tubular bells (VSCO 2 CE, CC0)' },
+  'percussion_electronic|Timpani': { type: 'rec_vsco_timpani', desc: 'Recorded orchestral timpani, tuned by key (VSCO 2 CE, CC0)' },
+};
+
+const curated = (cats: InstrumentCategory[]): InstrumentCategory[] =>
+  cats.map((c) => ({
+    ...c,
+    items: c.items
+      .map((it) => {
+        const rec = RECORDED_INSTEAD[`${it.type}|${it.name}`];
+        return rec ? { ...it, ...rec } : it;
+      })
+      .filter((it) => !RETIRED_ENTRIES.has(`${it.type}|${it.name}`)),
+  }));
+
+export const INSTRUMENT_CATEGORIES: InstrumentCategory[] = [...curated(BASE_CATEGORIES), ...SPEC_CATEGORIES];
 
 /** Recorded packs for compact instrument pickers such as the sequencer's Add Instrument menu. */
 export const RECORDED_INSTRUMENT_OPTIONS = INSTRUMENT_CATEGORIES

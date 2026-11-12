@@ -12,12 +12,20 @@ import type { PlaybackMode } from '../sequencer/model.ts';
 import { TICKS_PER_16TH, barToTick, newSeqId, syncTrackPatterns, divisionTicks } from '../sequencer/model.ts';
 import { AudioTrackDevice } from '../clips/AudioTrackDevice.ts';
 import { audioStore } from '../clips/audioStore.ts';
+import { userRecordingProvenance } from '../../../shared/audio/provenance.ts';
 import { InputManager } from './InputManager.ts';
 import { WorkletCapture, ensureRecorderWorklet } from './recorderWorklet.ts';
+import { ActiveRecordingJournal } from './recordingJournal.ts';
 import { toast } from '../../shell/toast.ts';
 import type { ProjectTimeMap } from '../time/ProjectTimeMap.ts';
 
 export type RecordMode = 'overdub' | 'replace' | 'takes';
+/**
+ * `finalizing` deliberately remains observable until every captured worklet buffer has been
+ * placed into the project.  Project changes must not treat a stopped transport as a finished
+ * take: the final capture message arrives asynchronously from the audio render thread.
+ */
+export type RecorderPhase = 'idle' | 'arming' | 'count-in' | 'recording' | 'finalizing';
 
 export interface RecordedMidiClipRef {
   trackId: string;
@@ -63,6 +71,8 @@ export interface RecordHost {
   /** Stereo tap of the master output (before the monitor section). */
   readonly masterTap: AudioNode;
   createAudioTrack(name?: string): SequencerTrack;
+  /** Optional project identity supplied by ProjectManager for a durable recording journal. */
+  recordingJournalInfo?(): { projectId: string | null; projectName: string };
   /** Request Web MIDI access from the Record gesture for armed instrument tracks. */
   enableMidiInput(): Promise<boolean>;
   commitEdit(): void;
@@ -89,7 +99,7 @@ export class RecordController {
   readonly settings: RecordSettings = {
     countInBars: 0, preRollBars: 0, postRollBars: 0, punch: false, punchInBar: 0, punchOutBar: 4, mode: 'overdub', midiQuantize: 0, offsetMs: 0,
   };
-  state: 'idle' | 'count-in' | 'recording' = 'idle';
+  state: RecorderPhase = 'idle';
   /** Last error to show (permission, no armed track…). */
   message: string | null = null;
   private jobs: AudioJob[] = [];
@@ -105,7 +115,14 @@ export class RecordController {
   private readonly patternTargets = new Map<string, string>();
   private midiClipListeners = new Set<(clip: RecordedMidiClipRef) => void>();
   private masterJob: { capture: WorkletCapture; track: SequencerTrack } | null = null;
+  private masterStarting = false;
+  private masterFinalizing = false;
+  private startToken = 0;
+  private startPromise: Promise<boolean> | null = null;
+  private stopPromise: Promise<void> | null = null;
   private takeCounter = 0;
+  /** Present only while armed audio is writing a durable best-effort crash journal. */
+  private journal: ActiveRecordingJournal | null = null;
 
   constructor(private host: RecordHost) {
     this.input = new InputManager(host.ctx);
@@ -121,6 +138,60 @@ export class RecordController {
   get roundTripLatency(): number {
     const ctx = this.host.ctx as AudioContext & { outputLatency?: number };
     return (ctx.baseLatency || 0) + (ctx.outputLatency || 0) + this.input.inputLatency + this.settings.offsetMs / 1000;
+  }
+
+  /**
+   * True for every period in which a project save/rebuild could omit or detach a take.  This is
+   * intentionally broader than `host.isRecording`: it covers microphone/worklet preparation,
+   * final audio placement and master-capture finalization too.
+   */
+  get busy(): boolean {
+    return this.state !== 'idle' || this.masterStarting || this.masterFinalizing || !!this.masterJob;
+  }
+
+  get isFinalizing(): boolean {
+    return this.state === 'finalizing' || this.masterFinalizing;
+  }
+
+  /** Start a journal before worklet capture so the first audio block is eligible for recovery. */
+  private async startAudioJournal(tracks: SequencerTrack[], startPos: number): Promise<void> {
+    const h = this.host;
+    const context = h.recordingJournalInfo?.() ?? { projectId: null, projectName: 'Untitled' };
+    const journal = new ActiveRecordingJournal({
+      projectId: context.projectId,
+      projectName: context.projectName,
+      sampleRate: h.ctx.sampleRate,
+      startPos,
+      bpm: h.bpm,
+      stepsPerBar: h.stepsPerBar,
+      tracks: tracks.map((track) => {
+        const physical = !this.hasCables(h.devices.get(track.deviceId));
+        return {
+          trackId: track.id,
+          name: track.name,
+          physical,
+          // Match `placeAudio()` exactly. This can be negative when the user has applied a
+          // manual advance, so it deliberately is not clamped to zero.
+          latencyCompensationFrames: physical ? Math.round(this.roundTripLatency * h.ctx.sampleRate) : 0,
+        };
+      }),
+    });
+    try {
+      await journal.start();
+      this.journal = journal;
+    } catch (error) {
+      // Recording itself remains usable if IndexedDB is unavailable, but the status must not
+      // pretend an active take has crash recovery in that browser/profile.
+      this.message = `Active-take recovery is unavailable: ${(error as Error).message}`;
+      this.journal = null;
+    }
+  }
+
+  private async discardAudioJournal(): Promise<void> {
+    const journal = this.journal;
+    this.journal = null;
+    if (!journal) return;
+    try { await journal.discard(); } catch { /* a cancelled arm must not get stuck on storage */ }
   }
 
   private armedAudio(): SequencerTrack[] {
@@ -174,88 +245,157 @@ export class RecordController {
 
   /** Record button: start, or stop when already recording. */
   async toggle(): Promise<void> {
-    if (this.state !== 'idle') await this.stop();
-    else await this.start();
+    if (this.state === 'idle') {
+      await this.start();
+      return;
+    }
+    if (this.state === 'count-in' || this.state === 'recording' || this.state === 'arming') {
+      await this.stop();
+      return;
+    }
+    this.message = 'Finishing the current take…';
+    this.host.changed();
   }
 
   async start(): Promise<boolean> {
-    const h = this.host;
-    this.message = null;
-    const audio = this.armedAudio();
-    const midi = this.armedMidi();
-    if (!audio.length && !midi.length) {
-      this.message = 'Arm a track first (● REC on an audio or instrument track).';
-      h.changed();
+    if (this.state !== 'idle') {
+      this.message = this.state === 'finalizing' ? 'Finishing the current take…' : 'Recording is already being prepared or is active.';
+      this.host.changed();
       return false;
     }
-    if (midi.length) {
-      const reportUnavailable = (): void => {
-        this.message = 'MIDI input is unavailable. Check MIDI permission and connection; the on-screen keyboard can still record.';
-        h.changed();
-      };
-      // Permission prompts can remain unresolved until the user responds. Start the
-      // take immediately so MIDI access never blocks transport or keyboard capture.
-      try {
-        void h.enableMidiInput().then((available) => {
-          if (!available) reportUnavailable();
-        }, reportUnavailable);
-      } catch {
-        reportUnavailable();
-      }
+    const token = ++this.startToken;
+    const task = this.startInner(token);
+    this.startPromise = task;
+    try {
+      return await task;
+    } finally {
+      if (this.startPromise === task) this.startPromise = null;
     }
-    // A take must keep the destination it started with, even if the user changes modes before Stop.
-    this.recordingPlaybackMode = h.playbackMode;
-    this.patternTargets.clear();
-    if (this.recordingPlaybackMode === 'pattern_loop') {
-      for (const track of midi) this.patternTargets.set(track.deviceId, syncTrackPatterns(track, h.activePatternIndex).id);
-    }
-    if (audio.length) {
-      if (!(await ensureRecorderWorklet(h.ctx))) {
-        this.message = 'This browser cannot record (AudioWorklet unavailable).';
-        h.changed();
-        return false;
-      }
-      await this.syncInputs();
-      if (audio.some((t) => !this.hasCables(h.devices.get(t.deviceId))) && !this.input.isOpen) {
-        h.changed();
-        return false;
-      }
-    }
+  }
+
+  private isCurrentStart(token: number): boolean {
+    return this.startToken === token && this.state === 'arming';
+  }
+
+  /** Disposes captures created while an asynchronous arm was cancelled before transport began. */
+  private async discardArmingJobs(): Promise<void> {
+    const jobs = this.jobs.splice(0);
+    await Promise.all(jobs.map(async (job) => {
+      try { await job.capture.stop(); } catch { /* A failed worklet cannot hold a project transition. */ }
+    }));
+    await this.discardAudioJournal();
+  }
+
+  private async startInner(token: number): Promise<boolean> {
+    const h = this.host;
+    let started = false;
+    this.message = null;
+    this.state = 'arming';
+    h.changed();
+    const audio = this.armedAudio();
+    const midi = this.armedMidi();
     const spb = h.stepsPerBar;
     const s = this.settings;
-    this.takeCounter++;
-    this.jobs = audio.map((track) => {
-      const dev = h.devices.get(track.deviceId) as AudioTrackDevice;
-      return { track, capture: new WorkletCapture(h.ctx, dev.recordTap, 2), physical: !this.hasCables(dev) };
-    });
-    // Wait for each worklet's own render-thread acknowledgement before a
-    // count-in, punch edge, or physical note can be scheduled against it.
-    await Promise.all(this.jobs.map((j) => j.capture.start()));
-    this.midiPending.clear();
-    this.midiNotes.clear();
+    try {
+      if (!audio.length && !midi.length) {
+        this.message = 'Arm a track first (● REC on an audio or instrument track).';
+        return false;
+      }
+      if (midi.length) {
+        const reportUnavailable = (): void => {
+          this.message = 'MIDI input is unavailable. Check MIDI permission and connection; the on-screen keyboard can still record.';
+          h.changed();
+        };
+        // Permission prompts can remain unresolved until the user responds. Start the
+        // take immediately so MIDI access never blocks transport or keyboard capture.
+        try {
+          void h.enableMidiInput().then((available) => {
+            if (!available) reportUnavailable();
+          }, reportUnavailable);
+        } catch {
+          reportUnavailable();
+        }
+      }
+      // A take must keep the destination it started with, even if the user changes modes before Stop.
+      this.recordingPlaybackMode = h.playbackMode;
+      this.patternTargets.clear();
+      if (this.recordingPlaybackMode === 'pattern_loop') {
+        for (const track of midi) this.patternTargets.set(track.deviceId, syncTrackPatterns(track, h.activePatternIndex).id);
+      }
+      if (audio.length) {
+        const plannedStartPos = h.isPlaying
+          ? (s.punch ? Math.max(Math.ceil(h.getPlayheadPosition()), Math.round(s.punchInBar * spb)) : Math.ceil(h.getPlayheadPosition()))
+          : (s.punch ? Math.round(s.punchInBar * spb) : h.songPosition);
+        if (!(await ensureRecorderWorklet(h.ctx)) || !this.isCurrentStart(token)) {
+          if (this.isCurrentStart(token)) this.message = 'This browser cannot record (AudioWorklet unavailable).';
+          return false;
+        }
+        await this.syncInputs();
+        if (!this.isCurrentStart(token)) return false;
+        if (audio.some((t) => !this.hasCables(h.devices.get(t.deviceId))) && !this.input.isOpen) return false;
+        // This begins only after physical input setup has supplied its latency measurement, but
+        // still before a recorder worklet can receive a sample.
+        await this.startAudioJournal(audio, plannedStartPos);
+        if (!this.isCurrentStart(token)) return false;
+      }
+      if (!this.isCurrentStart(token)) return false;
+      this.takeCounter++;
+      this.jobs = audio.map((track) => {
+        const dev = h.devices.get(track.deviceId) as AudioTrackDevice;
+        return {
+          track,
+          capture: new WorkletCapture(h.ctx, dev.recordTap, 2, {
+            onChunk: ({ frame, channels }) => this.journal?.append(track.id, frame, channels),
+          }),
+          physical: !this.hasCables(dev),
+        };
+      });
+      // Wait for each worklet's own render-thread acknowledgement before a
+      // count-in, punch edge, or physical note can be scheduled against it.
+      await Promise.all(this.jobs.map((j) => j.capture.start()));
+      if (!this.isCurrentStart(token)) {
+        await this.discardArmingJobs();
+        return false;
+      }
+      this.midiPending.clear();
+      this.midiNotes.clear();
 
-    if (h.isPlaying) {
-      this.startPos = s.punch ? Math.max(Math.ceil(h.getPlayheadPosition()), Math.round(s.punchInBar * spb)) : Math.ceil(h.getPlayheadPosition());
-      this.startTime = h.timeOfSongPosition(this.startPos) ?? h.ctx.currentTime;
-    } else {
-      this.startPos = s.punch ? Math.round(s.punchInBar * spb) : h.songPosition;
-      const transportStart = Math.max(0, this.startPos - Math.round(s.preRollBars * spb));
-      const beat = 60 / h.bpm;
-      const beatsPerBar = Math.max(1, Math.round(spb / 4));
-      const countBeats = Math.round(s.countInBars * beatsPerBar);
-      const t0 = h.ctx.currentTime + 0.12 + countBeats * beat;
-      for (let b = 0; b < countBeats; b++) h.clickAt(t0 - (countBeats - b) * beat, b % beatsPerBar === 0);
-      h.seekToSongPosition(transportStart);
-      if (countBeats) this.state = 'count-in';
-      await h.startTransport(t0);
-      this.startTime = h.timeOfSongPosition(this.startPos) ?? t0;
+      if (h.isPlaying) {
+        this.startPos = s.punch ? Math.max(Math.ceil(h.getPlayheadPosition()), Math.round(s.punchInBar * spb)) : Math.ceil(h.getPlayheadPosition());
+        this.startTime = h.timeOfSongPosition(this.startPos) ?? h.ctx.currentTime;
+      } else {
+        this.startPos = s.punch ? Math.round(s.punchInBar * spb) : h.songPosition;
+        const transportStart = Math.max(0, this.startPos - Math.round(s.preRollBars * spb));
+        const beat = 60 / h.bpm;
+        const beatsPerBar = Math.max(1, Math.round(spb / 4));
+        const countBeats = Math.round(s.countInBars * beatsPerBar);
+        const t0 = h.ctx.currentTime + 0.12 + countBeats * beat;
+        for (let b = 0; b < countBeats; b++) h.clickAt(t0 - (countBeats - b) * beat, b % beatsPerBar === 0);
+        h.seekToSongPosition(transportStart);
+        if (countBeats) this.state = 'count-in';
+        await h.startTransport(t0);
+        if (this.startToken !== token || (this.state !== 'arming' && this.state !== 'count-in')) return false;
+        this.startTime = h.timeOfSongPosition(this.startPos) ?? t0;
+      }
+      if (this.state !== 'count-in') this.state = 'recording';
+      this.journal?.updateStart(this.startPos, Math.round(this.startTime * h.ctx.sampleRate));
+      h.isRecording = true;
+      this.scheduleCountInState();
+      this.schedulePunchOut();
+      h.changed();
+      started = true;
+      return true;
+    } catch (error) {
+      if (this.isCurrentStart(token)) this.message = `Could not prepare recording: ${(error as Error).message}`;
+      return false;
+    } finally {
+      if (!started && this.startToken === token && (this.state === 'arming' || this.state === 'count-in')) {
+        await this.discardArmingJobs();
+        this.state = 'idle';
+        h.isRecording = false;
+        h.changed();
+      }
     }
-    if (this.state !== 'count-in') this.state = 'recording';
-    h.isRecording = true;
-    this.scheduleCountInState();
-    this.schedulePunchOut();
-    h.changed();
-    return true;
   }
 
   /**
@@ -334,7 +474,37 @@ export class RecordController {
 
   /** Stops recording; `auto` = reached punch-out (transport keeps going for the post-roll). */
   async stop(auto = false): Promise<void> {
+    if (this.stopPromise) return this.stopPromise;
     if (this.state === 'idle') return;
+    const task = this.state === 'arming' ? this.cancelArming() : this.finishStop(auto);
+    this.stopPromise = task;
+    try {
+      await task;
+    } finally {
+      if (this.stopPromise === task) this.stopPromise = null;
+    }
+  }
+
+  /** Cancel an in-flight AudioWorklet/input preparation without letting it become a live take. */
+  private async cancelArming(): Promise<void> {
+    const h = this.host;
+    this.startToken++;
+    this.state = 'finalizing';
+    h.isRecording = false;
+    h.changed();
+    try {
+      await this.startPromise;
+    } catch {
+      // start() reports preparation errors through `message`; cancellation itself stays safe.
+    } finally {
+      await this.discardArmingJobs();
+      this.state = 'idle';
+      h.isRecording = false;
+      h.changed();
+    }
+  }
+
+  private async finishStop(auto: boolean): Promise<void> {
     const h = this.host;
     this.clearCountInAlarm();
     const scheduledPunch = this.punchAlarm;
@@ -353,21 +523,42 @@ export class RecordController {
     if (s.punch) endPos = Math.min(endPos, Math.round(s.punchOutBar * spb));
     if (auto && scheduledPunch) endPos = scheduledPunch.endPos;
     const endTime = s.punch && auto ? scheduledPunch?.endTime ?? h.timeOfSongPosition(endPos) ?? now : now;
-    this.state = 'idle';
+    this.state = 'finalizing';
     h.isRecording = false;
+    h.changed();
 
     const loop = h.loopEnabled && h.playbackMode === 'song_arrangement' ? h.getLoopRange() : null;
-    const results = await Promise.all(this.jobs.map(async (j) => ({ j, data: await j.capture.stop() })));
+    const jobs = this.jobs;
     this.jobs = [];
-    for (const { j, data } of results) this.placeAudio(j, data, endTime, loop);
-    this.finishMidi(endPos);
+    const journal = this.journal;
+    try {
+      const results = await Promise.all(jobs.map(async (j) => ({ j, data: await j.capture.stop() })));
+      await journal?.finish(endPos, Math.round(endTime * h.ctx.sampleRate));
+      const placedAudioIds: string[] = [];
+      for (const { j, data } of results) placedAudioIds.push(...await this.placeAudio(j, data, endTime, loop));
+      this.finishMidi(endPos);
 
-    if (auto && s.postRollBars > 0) {
-      const stopAt = endTime + s.postRollBars * spb * (60 / h.bpm / 4);
-      this.scheduleTransportStop(stopAt);
+      if (auto && s.postRollBars > 0) {
+        const stopAt = endTime + s.postRollBars * spb * (60 / h.bpm / 4);
+        this.scheduleTransportStop(stopAt);
+      }
+      h.commitEdit();
+      // Keep a completed journal until ProjectManager has made the containing project durable.
+      // If the app dies in that tiny gap, startup can still recover the captured audio.
+      await journal?.markCompleted(placedAudioIds);
+    } catch (error) {
+      this.message = `Could not finish recording: ${(error as Error).message}`;
+      toast(this.message, 'error');
+      // Avoid leaving in-memory MIDI state attached to a later unrelated take after an error.
+      this.midiPending.clear();
+      this.midiNotes.clear();
+      this.patternTargets.clear();
+    } finally {
+      this.journal = null;
+      this.state = 'idle';
+      h.isRecording = false;
+      h.changed();
     }
-    h.commitEdit();
-    h.changed();
   }
 
   /** Keep post-roll on the audio clock as well; no wall-clock timer controls transport. */
@@ -385,13 +576,13 @@ export class RecordController {
     alarm.stop(Math.max(h.ctx.currentTime + 0.002, time));
   }
 
-  private placeAudio(j: AudioJob, data: { frame: number; channels: Float32Array[] }, endTime: number, loop: { start: number; end: number } | null): void {
+  private async placeAudio(j: AudioJob, data: { frame: number; channels: Float32Array[] }, endTime: number, loop: { start: number; end: number } | null): Promise<string[]> {
     const h = this.host;
     const sr = h.ctx.sampleRate;
     const spb = h.stepsPerBar;
     const comp = j.physical ? this.roundTripLatency : 0;
     const len = data.channels[0]?.length ?? 0;
-    if (!len) return;
+    if (!len) return [];
     const slice = (t0: number, t1: number): AudioBuffer | null => {
       const i0 = Math.round((t0 + comp) * sr) - data.frame;
       const i1 = Math.round((t1 + comp) * sr) - data.frame;
@@ -408,6 +599,18 @@ export class RecordController {
           out[k] = i >= 0 && i < ch.length ? ch[i] : 0;
         }
       });
+      // Micro-fade take boundaries to eliminate punch-in/out and loop transition clicks
+      const fadeSamples = Math.min(Math.round(sr * 0.003), Math.floor(n / 4));
+      if (fadeSamples > 0) {
+        for (let c = 0; c < buf.numberOfChannels; c++) {
+          const out = buf.getChannelData(c);
+          for (let k = 0; k < fadeSamples; k++) {
+            const fi = 0.5 * (1 - Math.cos((Math.PI * k) / fadeSamples));
+            out[k] *= fi;
+            out[n - 1 - k] *= fi;
+          }
+        }
+      }
       return buf;
     };
     const posSec = h.timeMap
@@ -429,19 +632,22 @@ export class RecordController {
         ? Math.max(0, h.timeMap.sixteenthToSeconds(this.startPos) - h.timeMap.sixteenthToSeconds(loopStart))
         : (this.startPos - loopStart) * posSec;
       const takes: { id: string; audioId: string; name: string }[] = [];
-      const push = (t0: number, t1: number, padStart: number) => {
+    const push = async (t0: number, t1: number, padStart: number) => {
         const b = slice(t0 - padStart, t1);
         if (!b) return;
         if (padStart > 0) {
           const pad = Math.round(padStart * sr);
           for (let c = 0; c < b.numberOfChannels; c++) b.getChannelData(c).fill(0, 0, Math.min(pad, b.length));
         }
-        const a = audioStore.add(`${name}.${takes.length + 1}`, b);
+        const a = audioStore.add(`${name}.${takes.length + 1}`, b, {
+          provenance: userRecordingProvenance(`Input take on ${j.track.name}`),
+        });
+        if (!(await audioStore.ensurePersisted(a.id))) throw new Error('Recorded take could not be persisted.');
         takes.push({ id: newSeqId('take'), audioId: a.id, name: `Take ${takes.length + 1}` });
       };
-      push(this.startTime, Math.min(firstEnd, endTime), padFirstSec);
-      for (let t = firstEnd; t < endTime - 0.05; t += passSec) push(t, Math.min(t + passSec, endTime), 0);
-      if (!takes.length) return;
+      await push(this.startTime, Math.min(firstEnd, endTime), padFirstSec);
+      for (let t = firstEnd; t < endTime - 0.05; t += passSec) await push(t, Math.min(t + passSec, endTime), 0);
+      if (!takes.length) return [];
       this.addClip(j.track, {
         startBar: loopStart / spb,
         lengthBars: (loopEnd - loopStart) / spb,
@@ -449,13 +655,15 @@ export class RecordController {
         takes,
         name,
       });
-      return;
+      return takes.map((take) => take.audioId);
     }
     const buf = slice(this.startTime, endTime);
-    if (!buf) return;
-    const a = audioStore.add(name, buf);
+    if (!buf) return [];
+    const a = audioStore.add(name, buf, { provenance: userRecordingProvenance(`Input take on ${j.track.name}`) });
+    if (!(await audioStore.ensurePersisted(a.id))) throw new Error('Recorded take could not be persisted.');
     const lengthPos = Math.max(1, Math.round(buf.duration / posSec));
     this.addClip(j.track, { startBar: this.startPos / spb, lengthBars: lengthPos / spb, audioId: a.id, name });
+    return [a.id];
   }
 
   private addClip(track: SequencerTrack, c: { startBar: number; lengthBars: number; audioId: string; name: string; takes?: { id: string; audioId: string; name: string }[] }): void {
@@ -625,34 +833,59 @@ export class RecordController {
   /** Starts / stops capturing the master output onto a new audio track (muted, so it doesn't double). */
   async toggleMasterRecording(): Promise<boolean> {
     const h = this.host;
-    if (this.masterJob) {
-      const job = this.masterJob;
-      this.masterJob = null;
-      const data = await job.capture.stop();
-      const len = data.channels[0]?.length ?? 0;
-      if (len > h.ctx.sampleRate * 0.05) {
-        const sr = h.ctx.sampleRate;
-        const buf = new AudioBuffer({ length: len, numberOfChannels: 2, sampleRate: sr });
-        data.channels.forEach((ch, c) => buf.getChannelData(c).set(ch));
-        const a = audioStore.add('Master recording', buf);
-        const spb = h.stepsPerBar;
-        const startPos = Math.max(0, Math.round(h.positionAtTime(data.frame / sr)));
-        job.track.arrangementClips = [
-          { id: newSeqId('clip'), kind: 'audio', startBar: startPos / spb, lengthBars: Math.max(1, Math.round(buf.duration / (60 / h.bpm / 4))) / spb, audioId: a.id, audioOffset: 0, name: 'Master recording', color: job.track.color },
-        ];
-        h.commitEdit();
-      }
+    if (this.masterStarting || this.masterFinalizing) {
+      this.message = 'Finishing or preparing the master capture…';
       h.changed();
       return false;
     }
-    if (!(await ensureRecorderWorklet(h.ctx))) return false;
-    const track = h.createAudioTrack('Master recording');
-    track.mute = true;
-    const capture = new WorkletCapture(h.ctx, h.masterTap, 2);
-    await capture.start();
-    this.masterJob = { capture, track };
+    if (this.masterJob) {
+      const job = this.masterJob;
+      this.masterJob = null;
+      this.masterFinalizing = true;
+      h.changed();
+      try {
+        const data = await job.capture.stop();
+        const len = data.channels[0]?.length ?? 0;
+        if (len > h.ctx.sampleRate * 0.05) {
+          const sr = h.ctx.sampleRate;
+          const buf = new AudioBuffer({ length: len, numberOfChannels: 2, sampleRate: sr });
+          data.channels.forEach((ch, c) => buf.getChannelData(c).set(ch));
+          const a = audioStore.add('Master recording', buf, { provenance: userRecordingProvenance('Master capture in Unbox Studio') });
+          const spb = h.stepsPerBar;
+          const startPos = Math.max(0, Math.round(h.positionAtTime(data.frame / sr)));
+          job.track.arrangementClips = [
+            { id: newSeqId('clip'), kind: 'audio', startBar: startPos / spb, lengthBars: Math.max(1, Math.round(buf.duration / (60 / h.bpm / 4))) / spb, audioId: a.id, audioOffset: 0, name: 'Master recording', color: job.track.color },
+          ];
+          h.commitEdit();
+        }
+        return false;
+      } catch (error) {
+        this.message = `Could not finish master capture: ${(error as Error).message}`;
+        toast(this.message, 'error');
+        return false;
+      } finally {
+        this.masterFinalizing = false;
+        h.changed();
+      }
+    }
+    this.masterStarting = true;
     h.changed();
-    return true;
+    try {
+      if (!(await ensureRecorderWorklet(h.ctx))) return false;
+      const track = h.createAudioTrack('Master recording');
+      track.mute = true;
+      const capture = new WorkletCapture(h.ctx, h.masterTap, 2);
+      await capture.start();
+      this.masterJob = { capture, track };
+      return true;
+    } catch (error) {
+      this.message = `Could not prepare master capture: ${(error as Error).message}`;
+      toast(this.message, 'error');
+      return false;
+    } finally {
+      this.masterStarting = false;
+      h.changed();
+    }
   }
 
   get recordingMaster(): boolean {

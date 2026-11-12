@@ -1,3 +1,5 @@
+import { MAX_RACK_MACROS } from '../audio/types.ts';
+
 /** Current version of the JSON project envelope exported by AudioEngine. */
 export const PROJECT_FORMAT_VERSION = 4;
 
@@ -36,6 +38,7 @@ function validRackGroups(value: JsonObject): boolean {
     if (group.deviceIds !== undefined && !Array.isArray(group.deviceIds)) return false;
     if (group.macros === undefined) return true;
     if (!Array.isArray(group.macros)) return false;
+    if (group.macros.length > MAX_RACK_MACROS) return false;
     return group.macros.every((macro: unknown) =>
       isObject(macro) && (macro.targets === undefined || (Array.isArray(macro.targets) && macro.targets.every(isObject)))
     );

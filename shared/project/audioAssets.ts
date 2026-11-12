@@ -35,6 +35,15 @@ export function projectAudioIds(json: string): string[] {
       }
     }
 
+    // User-provided convolution responses belong to their RV7000 device and must travel with
+    // project saves, recovery records and .unbox archives just like audio clips and samples.
+    const devices = Array.isArray(project?.devices) ? project.devices : [];
+    for (const rawDevice of devices) {
+      const device = object(rawDevice);
+      if (device?.type !== 'rv7000') continue;
+      add(object(device.params)?.impulseAssetId);
+    }
+
     // Audio files loaded into instruments, including SF2 zones.
     const sections = object(project?.sections);
     const deviceSamples = object(sections?.deviceSamples);

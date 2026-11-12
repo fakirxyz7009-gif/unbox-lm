@@ -44,6 +44,8 @@ export class RV7000Device extends BaseDevice {
       preDelay: 0.025,  // seconds (0 to 0.2)
       damping: 6500,    // Hz (500 to 18000)
       mix: 0.45,
+      /** Project-audio asset id for a user-provided impulse response; empty = built-in algorithm. */
+      impulseAssetId: '',
     };
 
     this.ports = [
@@ -119,6 +121,23 @@ export class RV7000Device extends BaseDevice {
   }
 
   /**
+   * Replaces the generated room with a decoded project-audio asset.  The caller owns decoding
+   * and persistence; keeping this device API buffer-based makes the exact response usable in an
+   * OfflineAudioContext clone without file-system access or a second decode.
+   */
+  public setCustomImpulse(assetId: string, impulse: AudioBuffer): void {
+    if (!assetId || !impulse || impulse.length < 1) return;
+    this.params.impulseAssetId = assetId;
+    this.convolver.buffer = impulse;
+  }
+
+  /** Returns to the deterministic built-in room response. The imported project asset is retained. */
+  public clearCustomImpulse(): void {
+    this.params.impulseAssetId = '';
+    this.updateImpulse();
+  }
+
+  /**
    * RV7000 owns its dry/wet graph, so its power and bypass states belong here rather than in the
    * legacy output wrapper.  Muting both branches at the device prevents a convolution tail from
    * leaking through a generic shim after the unit is powered down.
@@ -154,20 +173,38 @@ export class RV7000Device extends BaseDevice {
   }
 
   private applyParams(): void {
-    this.preDelayNode.delayTime.setValueAtTime(Math.max(0, Math.min(0.5, this.params.preDelay)), this.ctx.currentTime);
-    this.dampingFilter.frequency.setValueAtTime(Math.max(300, Math.min(18000, this.params.damping)), this.ctx.currentTime);
+    const t = this.ctx.currentTime;
+    const maxFreq = Math.min(18000, this.ctx.sampleRate ? this.ctx.sampleRate * 0.49 : 18000);
+    this.preDelayNode.delayTime.setTargetAtTime(Math.max(0, Math.min(0.5, this.params.preDelay)), t, 0.015);
+    this.dampingFilter.frequency.setTargetAtTime(Math.max(300, Math.min(maxFreq, this.params.damping)), t, 0.015);
 
     const mix = Math.max(0, Math.min(1, this.params.mix));
     const wet = this.powered && !this.bypassed ? mix : 0;
     const dry = this.powered ? (this.bypassed ? 1 : 1 - mix) : 0;
-    this.wetGain.gain.setValueAtTime(wet, this.ctx.currentTime);
-    this.dryGain.gain.setValueAtTime(dry, this.ctx.currentTime);
+    try {
+      this.wetGain.gain.cancelScheduledValues(t);
+      this.dryGain.gain.cancelScheduledValues(t);
+      this.wetGain.gain.setValueAtTime(wet, t);
+      this.dryGain.gain.setValueAtTime(dry, t);
+    } catch {
+      this.wetGain.gain.value = wet;
+      this.dryGain.gain.value = dry;
+    }
   }
 
   public setParam(key: string, value: any): void {
+    if (key === 'impulseAssetId') {
+      // Project loading restores the id before AudioEngine supplies its decoded buffer. Do not
+      // clear the last valid/built-in response while the asset is still being resolved.
+      this.params.impulseAssetId = typeof value === 'string' ? value : '';
+      if (!this.params.impulseAssetId) this.updateImpulse();
+      return;
+    }
     this.params[key] = value;
     if (key === 'decay' || key === 'preset' || key === 'size') {
-      this.updateImpulse();
+      // The imported response is the impulse; room-shape controls should not silently overwrite
+      // it. Pre-delay, damping and mix remain active after an import.
+      if (!this.params.impulseAssetId) this.updateImpulse();
     } else {
       this.applyParams();
     }

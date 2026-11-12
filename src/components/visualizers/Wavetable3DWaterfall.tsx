@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { useOnScreen } from '../../ui/skin/useOnScreen.ts';
+import { meterDue } from '../../nexa/useEngine.ts';
 
 interface Wavetable3DWaterfallProps {
   waveType: string;
@@ -18,6 +20,7 @@ export const Wavetable3DWaterfall: React.FC<Wavetable3DWaterfallProps> = ({
   analyser,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onScreen = useOnScreen(canvasRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,7 +35,12 @@ export const Wavetable3DWaterfall: React.FC<Wavetable3DWaterfallProps> = ({
 
     const timeDomainData = new Uint8Array(analyser ? analyser.fftSize : 128);
 
-    const render = () => {
+    const render = (now: number) => {
+      // off screen (a scrolled-away rack unit), or drawn less than ~33 ms ago: nothing to draw
+      if (!onScreen.current || !meterDue(now)) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       phase += 0.035;
       const width = canvas.width;
       const height = canvas.height;

@@ -1,7 +1,7 @@
 /**
  * RealMultiSampler.ts
  *
- * Memory-safe Web Audio multi-sampler engine for real recorded instruments.
+ * Memory-safe Web Audio multi-sampler engine for verified recorded instruments.
  *
  * Key Architectural Features:
  * 1. On-Demand Lazy Loading: Never preloads audio buffers at startup. Only fetches
@@ -15,13 +15,13 @@
  */
 
 import type {
-  DeviceSampleManifest,
   MultiSampleManifest,
   SamplePitchZone,
   SampleVelocityLayer,
   SubVoiceDefinition,
 } from '../../../shared/instruments/sampleManifestTypes.ts';
-import { getDefaultSubVoice, getSubVoicesForDevice } from '../../../shared/instruments/subVoices.ts';
+import { recordedManifestAdmissionError } from '../../../shared/instruments/sampleManifestTypes.ts';
+import { getDefaultSubVoice } from '../../../shared/instruments/subVoices.ts';
 
 export interface ActiveSamplerVoice {
   id: string;
@@ -46,6 +46,8 @@ export class RealMultiSampler {
   private static instance: RealMultiSampler | null = null;
 
   public manifest: MultiSampleManifest | null = null;
+  /** Why the optional /samples cache was rejected, for Settings/diagnostics. */
+  public manifestAdmissionIssue: string | null = null;
   private manifestPromise: Promise<MultiSampleManifest | null> | null = null;
 
   // AudioBuffer cache indexed by sample file path
@@ -91,11 +93,18 @@ export class RealMultiSampler {
       try {
         const res = await fetch('/samples/sample-manifest.json');
         if (res.ok) {
-          this.manifest = (await res.json()) as MultiSampleManifest;
-          return this.manifest;
+          const candidate: unknown = await res.json();
+          const admissionIssue = recordedManifestAdmissionError(candidate);
+          if (!admissionIssue) {
+            this.manifest = candidate as MultiSampleManifest;
+            return this.manifest;
+          }
+          this.manifestAdmissionIssue = admissionIssue;
+        } else {
+          this.manifestAdmissionIssue = `sample manifest request returned HTTP ${res.status}`;
         }
       } catch {
-        // Handled below with synthetic/default registry
+        this.manifestAdmissionIssue = 'sample manifest request failed';
       }
       return null;
     })();

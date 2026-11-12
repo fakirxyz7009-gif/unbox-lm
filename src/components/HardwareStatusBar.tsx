@@ -89,20 +89,16 @@ export const HardwareStatusBar: React.FC = () => {
           window.dispatchEvent(new CustomEvent('unbox:open-ai'));
         }}
         className="flex items-center gap-1.5 hover:text-[#d7dadd] cursor-pointer"
-        title={`On-device AI: ${hwState.backend.toUpperCase()} (${hwState.gpu.vendor}) · runs on this computer · no cloud request on this path`}
+        title={`On-device assistant: ${hwState.backend === 'ollama' && hwState.daemonOnline ? `local Ollama model ${hwState.selectedModel}` : 'keyword rules'} · runs on this computer · it proposes control data only and never creates, renders or replaces audio`}
         data-testid="status-local-ai"
       >
         <Cpu className="w-3 h-3 text-cyan-400" />
-        <span className="uppercase text-cyan-300">Local AI</span>
+        <span className="uppercase text-cyan-300">Local assistant</span>
         <span className="font-mono text-[#c2c6ca]">
-          {hwState.backend === 'webgpu'
-            ? `GPU (${hwState.gpu.vendor.slice(0, 16)})`
-            : hwState.backend === 'ollama'
-            ? `Ollama (${hwState.selectedModel})`
-            : 'Neural CPU'}
+          {hwState.backend === 'ollama' && hwState.daemonOnline ? `Ollama (${hwState.selectedModel})` : 'Rules'}
         </span>
         <span className="text-emerald-400 font-mono text-[9px] px-1 bg-emerald-950/60 border border-emerald-500/30 rounded">
-          ON-DEVICE
+          NO AUDIO GEN
         </span>
       </button>
 

@@ -253,7 +253,7 @@ export const WorkstationKeyboard: React.FC<Props> = ({ dev, track }) => {
           </button>
         </div>
       </div>
-      <div ref={boxRef} className="relative flex-1 min-w-0 rounded-b-[6px] overflow-hidden select-none" style={{ boxShadow: 'inset 0 6px 8px -4px rgba(0,0,0,0.7)', background: '#0d0e10' }}>
+      <div ref={boxRef} className="relative flex-1 min-w-0 rounded-b-[6px] overflow-hidden select-none will-change-transform" style={{ boxShadow: 'inset 0 6px 8px -4px rgba(0,0,0,0.7)', background: '#0d0e10' }}>
         <div ref={keysRef} className="absolute inset-0 pt-[3px]">
           {whites.map((n, i) => (
             <div key={n} {...keyProps(n)} className="us-key-white absolute top-[3px] bottom-0 rounded-b-[4px] cursor-pointer" style={{ left: `${i * wPct}%`, width: `calc(${wPct}% - 1px)` }}>

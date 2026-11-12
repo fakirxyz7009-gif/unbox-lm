@@ -2,7 +2,7 @@
  * Browser side of the local assistant (server/routes/localAiRoutes.ts). Requests go to this
  * computer only; the server returns actions that have already been checked against the contract.
  */
-import type { AssistantAction, AssistantContext } from '../../shared/localAi/assistant.ts';
+import { audioGenerationRequestRejection, type AssistantAction, type AssistantContext } from '../../shared/localAi/assistant.ts';
 
 export interface LocalAiStatus {
   online: boolean;
@@ -29,6 +29,8 @@ export async function fetchLocalAiStatus(): Promise<LocalAiStatus | null> {
 }
 
 export async function askLocalAi(params: { model: string; message: string; context: AssistantContext }): Promise<LocalAiReply> {
+  const rejection = audioGenerationRequestRejection(params.message);
+  if (rejection) throw new Error(rejection);
   const res = await fetch('/api/local-ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

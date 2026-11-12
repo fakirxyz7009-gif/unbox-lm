@@ -19,6 +19,7 @@ import { deviceSample, installSampleVoice, subscribeDeviceSamples, deviceSamples
 import { editPadSample, editPadSamples, beginPadSampleGesture, type PadSampleGesture } from '../audio/deviceSampleEdits.ts';
 import { capturePointer } from '../ui/skin/pointer.ts';
 import { renderDeviceNote } from '../audio/render/renderDeviceNote.ts';
+import { derivedAudioProvenance } from '../../shared/audio/provenance.ts';
 
 interface Props {
   track: SequencerTrack;
@@ -212,7 +213,9 @@ export const LcdAudioClipBox: React.FC<Props> = ({ track, onTouched, onForce }) 
       const buffer = await renderDeviceNote(audioEngine, dev, note);
       if (audioEngine.devices.get(dev.id) !== dev) throw new Error('The instrument changed while its note was rendering.');
       audioEngine.runStructuralEdit('Capture note audio', () => {
-        const assetObj = audioStore.add(`${activeTrack.name} - ${noteName}`, buffer);
+        const assetObj = audioStore.add(`${activeTrack.name} - ${noteName}`, buffer, {
+          provenance: derivedAudioProvenance(undefined, `Rendered note ${noteName} from ${dev.name}`, 'app-render'),
+        });
         setPadSample(dev.id, note, {
           audioId: assetObj.id, level: 1, offset: 0, duration: buffer.duration,
           pitch: 0, tune: 0, reverse: false, loop: false,

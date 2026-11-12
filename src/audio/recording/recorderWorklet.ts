@@ -110,6 +110,14 @@ export interface CapturedAudio {
   channels: Float32Array[];
 }
 
+export interface WorkletCaptureOptions {
+  /**
+   * Observes completed worklet blocks on the main thread. Implementations must return promptly;
+   * this is used to queue durable recording-journal writes, never to do I/O in the processor.
+   */
+  onChunk?: (chunk: CapturedAudio) => void;
+}
+
 /** One capture session on a source node; resolves with all samples when stopped. */
 export class WorkletCapture {
   private node: AudioWorkletNode;
@@ -122,7 +130,7 @@ export class WorkletCapture {
   private resolveStopped: (() => void) | null = null;
   private finished = false;
 
-  constructor(private ctx: AudioContext, source: AudioNode, private channels = 2) {
+  constructor(private ctx: AudioContext, source: AudioNode, private channels = 2, private options: WorkletCaptureOptions = {}) {
     this.node = new AudioWorkletNode(ctx, 'unbox-recorder', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: channels, channelCountMode: 'explicit' });
     this.node.port.onmessage = (e: MessageEvent) => {
       const d = e.data as { type: string; frame?: number; channels?: Float32Array[] };
@@ -131,7 +139,11 @@ export class WorkletCapture {
         this.resolveStarted?.();
         this.resolveStarted = null;
       }
-      if (d.type === 'data' && d.channels) this.chunks.push({ frame: d.frame ?? 0, channels: d.channels });
+      if (d.type === 'data' && d.channels) {
+        const chunk = { frame: d.frame ?? 0, channels: d.channels };
+        this.chunks.push(chunk);
+        try { this.options.onChunk?.(chunk); } catch { /* a journal observer must never interrupt capture */ }
+      }
       if (d.type === 'stopped') {
         this.finished = true;
         this.resolveStopped?.();

@@ -55,7 +55,7 @@ function arc(cx: number, cy: number, r: number, a0: number, a1: number): string 
   return `M ${x0} ${y0} A ${r} ${r} 0 ${Math.abs(a1 - a0) > 180 ? 1 : 0} 1 ${x1} ${y1}`;
 }
 
-export const RingKnob: React.FC<RingKnobProps> = ({
+const RingKnobComponent: React.FC<RingKnobProps> = ({
   value,
   min,
   max,
@@ -75,7 +75,7 @@ export const RingKnob: React.FC<RingKnobProps> = ({
   onCommit,
 }) => {
   const ringColor = color ?? (tone === 'lcd' ? '#00e5ff' : '#d6a358');
-  const drag = useRef<{ y: number; n: number } | null>(null);
+  const drag = useRef<{ lastY: number; norm: number } | null>(null);
   const n = toNorm(value, min, max, curve);
   const emit = (norm: number) => {
     let v = fromNorm(norm, min, max, curve);
@@ -111,13 +111,16 @@ export const RingKnob: React.FC<RingKnobProps> = ({
         onPointerDown={(e) => {
           if (disabled || e.button !== 0) return;
           capturePointer(e.currentTarget, e.pointerId);
-          drag.current = { y: e.clientY, n };
+          drag.current = { lastY: e.clientY, norm: n };
         }}
         onPointerMove={(e) => {
           const d = drag.current;
           if (!d) return;
-          const px = e.shiftKey ? 600 : 160;
-          emit(d.n + (d.y - e.clientY) / px);
+          const dy = d.lastY - e.clientY;
+          d.lastY = e.clientY;
+          const px = e.shiftKey ? 800 : 160;
+          d.norm = clamp(d.norm + dy / px, 0, 1);
+          emit(d.norm);
         }}
         onPointerUp={() => {
           if (drag.current) onCommit?.();
@@ -131,6 +134,8 @@ export const RingKnob: React.FC<RingKnobProps> = ({
         }}
         onWheel={(e) => {
           if (disabled) return;
+          e.preventDefault();
+          e.stopPropagation();
           emit(n + (e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? 0.005 : 0.025));
           commitSoon();
         }}
@@ -187,3 +192,5 @@ export const RingKnob: React.FC<RingKnobProps> = ({
     </div>
   );
 };
+
+export const RingKnob = React.memo(RingKnobComponent);

@@ -26,6 +26,8 @@ import {
   snapBarTo16th,
   syncTrackPatterns,
 } from './model.ts';
+import { sameSteps, transferSteps } from './patternTransfer.ts';
+import { DERIVE_KINDS, deriveSteps, type DeriveKind, type KitRoles } from './patternDerive.ts';
 import { audioClipRate, secPerBar } from '../clips/clipMath.ts';
 import { audioStore, findNearestZeroCrossing } from '../clips/audioStore.ts';
 
@@ -42,6 +44,27 @@ export interface SequencerHost {
   patternLength: number;
   arrangementMarkers: ProjectMarker[];
   commitEdit(): void;
+  /** Pad notes of the track's instrument when it is a drum kit (a copied pattern is fitted to them). */
+  padNotesOf?(track: SequencerTrack): number[] | null;
+  /** Fits a pitch to the song's scale (a kit pattern copied onto a pitched instrument). */
+  snapMidiToScale?(midi: number): number;
+  /** Song root as a pitch class (0 = C). */
+  readonly rootKey?: number;
+  /** Kick / snare / closed hat notes of the track's instrument when it is a drum kit. */
+  kitRolesOf?(track: SequencerTrack): KitRoles | null;
+}
+
+/** A pattern taken out of its track: what Copy keeps and Paste puts on any instrument. */
+export interface PatternSnapshot {
+  name: string;
+  color: string;
+  length: number;
+  division: StepDivision;
+  steps: (SequencerPattern['steps'][number])[];
+  /** Pad notes of the instrument it came from, when that was a drum kit. */
+  fromPads: number[] | null;
+  /** Name of the part it came from (shown in messages). */
+  fromTrack: string;
 }
 
 const MAX_BAR = 100000;
@@ -125,6 +148,99 @@ export class SequencerEditor {
     this.select(t, copy);
     this.done(commit);
     return copy;
+  }
+
+  /** What Copy keeps of a pattern (independent of its track from then on). */
+  snapshotPattern(trackId: string, patternId?: string): PatternSnapshot | null {
+    const t = this.track(trackId);
+    if (!t) return null;
+    const active = syncTrackPatterns(t, this.host.activePatternIndex);
+    const p = findPattern(t, patternId) || active;
+    return {
+      name: p.name,
+      color: p.color,
+      length: p.length,
+      division: p.division,
+      steps: transferSteps(p.steps),
+      fromPads: this.host.padNotesOf?.(t) ?? null,
+      fromTrack: t.name,
+    };
+  }
+
+  /**
+   * Puts a copied pattern on an instrument as a new pattern (any instrument: its notes are fitted
+   * to a kit's pads or to the scale when one side is a drum kit). With `reuse`, an identical
+   * pattern already on that track is returned instead of a second copy.
+   */
+  pastePattern(
+    toTrackId: string,
+    snap: PatternSnapshot,
+    opts: { select?: boolean; reuse?: boolean } = {},
+    commit = true
+  ): SequencerPattern | null {
+    const t = this.track(toTrackId);
+    if (!t || t.kind === 'audio') return null;
+    syncTrackPatterns(t, this.host.activePatternIndex);
+    const list = t.patternList!;
+    const steps = transferSteps(snap.steps, {
+      fromPads: snap.fromPads,
+      toPads: this.host.padNotesOf?.(t) ?? null,
+      root: this.host.rootKey,
+      fit: this.host.snapMidiToScale ? (m) => this.host.snapMidiToScale!(m) : undefined,
+    });
+    const length = clampLength(snap.length);
+    const division = isStepDivision(snap.division) ? snap.division : '1/16';
+    if (opts.reuse) {
+      const same = list.find((p) => p.length === length && p.division === division && sameSteps(p.steps, resizeSteps(steps, length)));
+      if (same) return same;
+    }
+    const taken = new Set(list.map((p) => p.name));
+    let name = snap.name || nextPatternName(t);
+    if (taken.has(name)) name = snap.fromTrack && snap.fromTrack !== t.name ? `${snap.name} (${snap.fromTrack})` : `${snap.name} copy`;
+    for (let n = 2; taken.has(name); n++) name = `${snap.name} copy ${n}`;
+    const p = makePattern({ name: name.slice(0, 64), color: snap.color || PATTERN_COLORS[list.length % PATTERN_COLORS.length], length, division, steps });
+    list.push(p);
+    if (opts.select !== false) this.select(t, p);
+    this.done(commit);
+    return p;
+  }
+
+  /**
+   * Writes a new pattern on an instrument from another part's pattern (its bass line, a harmony,
+   * its chords as an arpeggio, or its rhythm). The new pattern has the source's length and division.
+   */
+  derivePattern(toTrackId: string, fromTrackId: string, kind: DeriveKind, commit = true): SequencerPattern | null {
+    const to = this.track(toTrackId);
+    const from = this.track(fromTrackId);
+    if (!to || !from || to.kind === 'audio' || from.kind === 'audio') return null;
+    const src = syncTrackPatterns(from, this.host.activePatternIndex);
+    if (to !== from) syncTrackPatterns(to, this.host.activePatternIndex);
+    const perBar = (this.host.stepsPerBar * TICKS_PER_16TH) / divisionTicks(src.division);
+    const steps = deriveSteps(resizeSteps(src.steps, src.length), kind, {
+      fit: this.host.snapMidiToScale ? (m) => this.host.snapMidiToScale!(m) : undefined,
+      root: this.host.rootKey,
+      stepsPerBeat: (4 * TICKS_PER_16TH) / divisionTicks(src.division),
+      stepsPerBar: perBar,
+      fromKit: this.host.kitRolesOf?.(from) ?? null,
+      toKit: this.host.kitRolesOf?.(to) ?? null,
+    });
+    const list = to.patternList!;
+    const label = this.host.kitRolesOf?.(to) ? 'Rhythm' : DERIVE_KINDS.find((k) => k.id === kind)?.label ?? 'Part';
+    const taken = new Set(list.map((p) => p.name));
+    const base = `${label} from ${from.name}`.slice(0, 60);
+    let name = base;
+    for (let n = 2; taken.has(name); n++) name = `${base} ${n}`;
+    const p = makePattern({ name, color: PATTERN_COLORS[list.length % PATTERN_COLORS.length], length: src.length, division: src.division, steps });
+    list.push(p);
+    this.select(to, p);
+    this.done(commit);
+    return p;
+  }
+
+  /** Copies a pattern onto another instrument (or the same one) as a new pattern. */
+  copyPatternTo(fromTrackId: string, patternId: string, toTrackId: string, opts: { select?: boolean; reuse?: boolean } = {}, commit = true): SequencerPattern | null {
+    const snap = this.snapshotPattern(fromTrackId, patternId);
+    return snap ? this.pastePattern(toTrackId, snap, opts, commit) : null;
   }
 
   renamePattern(trackId: string, patternId: string, name: string, commit = true): void {
@@ -321,8 +437,10 @@ export class SequencerEditor {
   }
 
   /**
-   * Moves a clip to `startBar`. Note clips may move to another track; pattern clips stay on
-   * their track (patterns belong to the track's instrument). Returns the clip's track id.
+   * Moves a clip to `startBar` and, when it fits there, onto another track: note and pattern clips
+   * between instrument tracks, audio clips between audio tracks. A pattern belongs to its track,
+   * so a pattern clip takes a copy of its pattern along (an identical one already there is reused).
+   * Returns the clip's track id.
    */
   moveClip(trackId: string, clipId: string, startBar: number, toTrackId?: string, commit = true): string | null {
     const f = this.clip(trackId, clipId);
@@ -330,9 +448,16 @@ export class SequencerEditor {
     f.c.startBar = this.snap(startBar);
     let owner = f.t;
     const dest = toTrackId ? this.track(toTrackId) : undefined;
-    // Note clips move between instrument tracks, audio clips between audio tracks.
-    const fits = dest && (f.c.kind === 'audio' ? dest.kind === 'audio' : f.c.kind === 'notes' && dest.kind !== 'audio');
+    const fits = dest && (f.c.kind === 'audio' ? dest.kind === 'audio' : dest.kind !== 'audio');
     if (dest && dest !== f.t && fits) {
+      if (f.c.kind !== 'audio' && f.c.kind !== 'notes') {
+        const adopted = this.copyPatternTo(f.t.id, f.c.patternId ?? '', dest.id, { select: false, reuse: true }, false);
+        if (!adopted) {
+          this.done(commit);
+          return owner.id;
+        }
+        f.c.patternId = adopted.id;
+      }
       f.t.arrangementClips = (f.t.arrangementClips || []).filter((c) => c !== f.c);
       f.c.color = dest.color;
       (dest.arrangementClips ||= []).push(f.c);
@@ -340,6 +465,31 @@ export class SequencerEditor {
     }
     this.done(commit);
     return owner.id;
+  }
+
+  /**
+   * Pastes a copied clip at `startBar` on a track it fits (note / pattern clips on instrument tracks,
+   * audio clips on audio tracks). A pattern clip pasted on another instrument brings its pattern
+   * (`pattern`: the snapshot taken at copy time), reusing an identical one already there.
+   */
+  pasteClip(toTrackId: string, clip: ArrangementClip, startBar: number, pattern?: PatternSnapshot | null, commit = true): ArrangementClip | null {
+    const t = this.track(toTrackId);
+    if (!t) return null;
+    if (clip.kind === 'audio' ? t.kind !== 'audio' : t.kind === 'audio') return null;
+    syncTrackPatterns(t, this.host.activePatternIndex);
+    const copy = cloneClip(clip);
+    copy.id = newSeqId('clip');
+    copy.startBar = this.snap(startBar);
+    if (copy.kind !== 'audio' && copy.kind !== 'notes') {
+      // on its own track the clip keeps playing its pattern; elsewhere the pattern comes along
+      const p = findPattern(t, copy.patternId) ?? (pattern ? this.pastePattern(t.id, pattern, { select: false, reuse: true }, false) : null);
+      if (!p) return null;
+      copy.patternId = p.id;
+    }
+    if (copy.kind !== 'audio') copy.color = t.color;
+    (t.arrangementClips ||= []).push(copy);
+    this.done(commit);
+    return copy;
   }
 
   /** Drags one edge. Trimming the start keeps the content in place (offset grows). */

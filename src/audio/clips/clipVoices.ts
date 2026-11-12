@@ -98,8 +98,13 @@ export class ClipVoices {
     // the user's fades, at least EDGE on edges cut inside the recording; a clip followed by a
     // touching clip keeps full level to its end and fades out over EDGE past it (the crossfade)
     const crossOut = edges.next && (c.fadeOut ?? 0) < EDGE;
-    const fi = Math.max(c.fadeIn ?? 0, base > 0 || c.reverse || edges.prev ? EDGE : 0);
-    const fo = crossOut ? 0 : Math.max(c.fadeOut ?? 0, EDGE);
+    let fi = Math.max(c.fadeIn ?? 0, base > 0 || c.reverse || edges.prev ? EDGE : 0);
+    let fo = crossOut ? 0 : Math.max(c.fadeOut ?? 0, EDGE);
+    if (fi + fo > len && len > 0) {
+      const scale = len / (fi + fo);
+      fi *= scale;
+      fo *= scale;
+    }
     const e: ArrangementClip = { ...c, fadeIn: fi, fadeOut: fo };
     const g = (c.invertPhase ? -1 : 1) * Math.pow(10, (c.gainDb ?? 0) / 20);
     const startGain = fadeGainAt(e, st.elapsed, len);
@@ -112,24 +117,29 @@ export class ClipVoices {
     const shape = c.fadeCurve ?? 'linear';
     const scheduleFade = (startVal: number, endVal: number, t0: number, dur: number, isIn: boolean) => {
       if (dur <= 0.001) return;
-      if (shape === 'linear' || shape === 'equal_gain') {
-        gain.gain.setValueAtTime(startVal, t0);
-        gain.gain.linearRampToValueAtTime(endVal, t0 + dur);
-        return;
-      }
-      const steps = 16;
-      const curve = new Float32Array(steps + 1);
-      for (let i = 0; i <= steps; i++) {
-        const x = i / steps;
-        let factor = x;
-        if (shape === 'equal_power') {
-          factor = Math.sin(Math.PI * 0.5 * x);
-        } else if (shape === 's_curve') {
-          factor = x * x * (3 - 2 * x);
+      try {
+        if (shape === 'linear' || shape === 'equal_gain') {
+          gain.gain.setValueAtTime(startVal, t0);
+          gain.gain.linearRampToValueAtTime(endVal, t0 + dur);
+          return;
         }
-        curve[i] = isIn ? startVal + (endVal - startVal) * factor : endVal + (startVal - endVal) * (1 - factor);
+        const steps = 16;
+        const curve = new Float32Array(steps + 1);
+        for (let i = 0; i <= steps; i++) {
+          const x = i / steps;
+          let factor = x;
+          if (shape === 'equal_power') {
+            factor = Math.sin(Math.PI * 0.5 * x);
+          } else if (shape === 's_curve') {
+            factor = x * x * (3 - 2 * x);
+          }
+          curve[i] = isIn ? startVal + (endVal - startVal) * factor : endVal + (startVal - endVal) * (1 - factor);
+        }
+        gain.gain.setValueCurveAtTime(curve, t0, dur);
+      } catch {
+        // Fallback if AudioParam has conflicting scheduled events
+        gain.gain.setValueAtTime(endVal, t0 + dur);
       }
-      gain.gain.setValueCurveAtTime(curve, t0, dur);
     };
 
     // fade in / fade out as shaped ramps on the clip timeline

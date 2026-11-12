@@ -8,7 +8,7 @@ import { X } from 'lucide-react';
 import { audioEngine } from '../../audio/AudioEngine.ts';
 import { DYN_RANGE, EQ_RANGE, dynOf, eqOf } from '../../audio/mixer/channelStrip.ts';
 import type { ChannelDyn, ChannelEq } from '../../audio/types.ts';
-import { useEngineVersion, useFrame } from '../../nexa/useEngine.ts';
+import { useEngineVersion, useMeterFrame } from '../../nexa/useEngine.ts';
 import { RingKnob } from '../../ui/skin/RingKnob.tsx';
 import { LedButton } from '../../ui/skin/panel.tsx';
 import { EqCurve } from './EqCurve.tsx';
@@ -23,7 +23,7 @@ const save = () => audioEngine.changed();
 function GrMeter({ channelId }: { channelId: string }) {
   const bar = useRef<HTMLDivElement>(null);
   const txt = useRef<HTMLSpanElement>(null);
-  useFrame(() => {
+  useMeterFrame(() => {
     const gr = audioEngine.mixer.gainReduction(channelId);
     setWidth(bar.current, (-gr / 24) * 100);
     setText(txt.current, gr < -0.05 ? `${gr.toFixed(1)} dB` : '0.0 dB');

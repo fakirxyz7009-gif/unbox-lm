@@ -1,13 +1,18 @@
 /**
  * Pattern bar for one track: unlimited patterns as scrollable pills (click = edit,
- * double-click = rename) plus New / Duplicate / Rename / Colour / Delete, per-pattern length
- * and step division, and "→ Song" to place the pattern in the arrangement.
+ * double-click = rename) plus New / Duplicate / Copy / Paste / Rename / Colour / Delete, per-pattern
+ * length and step division, and "→ Song" to place the pattern in the arrangement. Copy / Paste carry a
+ * pattern to any other instrument; GENERATE writes one (a style, or from another part); PLAYS says
+ * what the transport plays (the pattern being edited, looping, or the song's clips).
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { Copy, Pencil, Plus, Trash2, ArrowRightToLine } from 'lucide-react';
+import { ClipboardCopy, ClipboardPaste, Copy, Pencil, Plus, Trash2, ArrowRightToLine } from 'lucide-react';
 import type { AudioEngine } from '../../audio/AudioEngine.ts';
 import type { SequencerTrack, StepDivision } from '../../audio/types.ts';
 import { DIVISIONS, PATTERN_LENGTH_PRESETS, songEndBar, syncTrackPatterns } from '../../audio/sequencer/model.ts';
+import { copyPattern, useCopiedPattern } from './patternClipboard.ts';
+import { PatternGenerateMenu } from './PatternGenerateMenu.tsx';
+import { toast } from '../../shell/toast.ts';
 
 interface Props {
   audioEngine: AudioEngine;
@@ -22,6 +27,7 @@ export const PatternManager: React.FC<Props> = ({ audioEngine, track, compact = 
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [customLen, setCustomLen] = useState('');
   const pillsRef = useRef<HTMLDivElement | null>(null);
+  const copied = useCopiedPattern();
 
   useEffect(() => {
     if (!confirmDelete) return;
@@ -45,6 +51,17 @@ export const PatternManager: React.FC<Props> = ({ audioEngine, track, compact = 
   const usedInSong = (track.arrangementClips || []).some((c) => c.kind !== 'notes' && c.patternId === active.id);
   const songMode = audioEngine.playbackMode === 'song_arrangement';
   const hasClips = (track.arrangementClips || []).length > 0;
+  // Song mode plays clips: say so when the pattern being edited is not what is (or would be) heard
+  const playing = songMode && audioEngine.isPlaying ? audioEngine.playheadFor(track) : null;
+  const songElsewhere = !songMode
+    ? null
+    : hasClips && !usedInSong
+      ? 'not in song'
+      : audioEngine.isPlaying && usedInSong && playing?.patternId !== active.id
+        ? playing?.patternId
+          ? `song plays ${patterns.find((p) => p.id === playing.patternId)?.name ?? 'another pattern'}`
+          : 'no clip here'
+        : null;
 
   const startRename = (id: string, name: string) => {
     setRenaming(id);
@@ -136,6 +153,34 @@ export const PatternManager: React.FC<Props> = ({ audioEngine, track, compact = 
         {!compact && 'DUP'}
       </button>
       <button
+        className={`${btn} bg-neutral-800 hover:bg-neutral-700 text-cyan-300 border-neutral-700`}
+        onClick={() => {
+          const snap = seq.snapshotPattern(track.id, active.id);
+          if (!snap) return;
+          copyPattern(snap);
+          toast(`Copied ${active.name}: pick another instrument and press PASTE`, 'info');
+        }}
+        title="Copy this pattern, to paste it on this or any other instrument"
+        data-testid="pattern-copy"
+      >
+        <ClipboardCopy className="w-3 h-3" />
+        {!compact && 'COPY'}
+      </button>
+      <button
+        className={`${btn} bg-neutral-800 hover:bg-neutral-700 text-cyan-300 border-neutral-700 disabled:opacity-40`}
+        disabled={!copied}
+        onClick={() => {
+          if (!copied) return;
+          const p = seq.pastePattern(track.id, copied);
+          if (p) toast(`${p.name} pasted on ${track.name}${copied.fromPads || audioEngine.padNotesOf(track) ? ' (notes fitted to the instrument)' : ''}`, 'success');
+        }}
+        title={copied ? `Paste "${copied.name}" from ${copied.fromTrack} here as a new pattern` : 'Copy a pattern first (COPY, on any instrument)'}
+        data-testid="pattern-paste"
+      >
+        <ClipboardPaste className="w-3 h-3" />
+        {!compact && 'PASTE'}
+      </button>
+      <button
         className={`${btn} bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700`}
         onClick={() => startRename(active.id, active.name)}
         title="Rename this pattern"
@@ -215,11 +260,6 @@ export const PatternManager: React.FC<Props> = ({ audioEngine, track, compact = 
         ))}
       </select>
 
-      {songMode && hasClips && !usedInSong && (
-        <span className="text-[11px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600/50 flex-shrink-0" title="Song mode plays clips: this pattern has none">
-          not in song
-        </span>
-      )}
       <button
         className={`${btn} bg-cyan-900/70 hover:bg-cyan-700 text-cyan-100 border-cyan-600/50`}
         onClick={addToSong}
@@ -229,6 +269,49 @@ export const PatternManager: React.FC<Props> = ({ audioEngine, track, compact = 
         <ArrowRightToLine className="w-3 h-3" />
         {!compact && 'SONG'}
       </button>
+      {track.kind !== 'audio' && <PatternGenerateMenu audioEngine={audioEngine} track={track} compact={compact} />}
+
+      {!compact && (
+        <div className="ml-auto flex items-center gap-1.5 flex-shrink-0 pl-2">
+          {songElsewhere && (
+            <span
+              className="px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600/50"
+              title="Song plays the clips of the arrangement. Press PATTERN to loop the pattern you are editing, or → SONG to place it."
+              data-testid="pattern-not-playing"
+            >
+              {songElsewhere}
+            </span>
+          )}
+          <span className="text-neutral-400 font-bold">PLAYS</span>
+          <div className="flex rounded overflow-hidden border border-neutral-600" role="group" aria-label="What the transport plays">
+            <button
+              type="button"
+              aria-pressed={!songMode}
+              onClick={() => audioEngine.setPlaybackMode('pattern_loop')}
+              className={`px-2 py-0.5 font-bold ${!songMode ? 'bg-amber-500 text-black' : 'bg-neutral-800 text-neutral-300 hover:text-white'}`}
+              title="Pattern: every part loops the pattern it is on, and the transport loops with them (B)"
+              data-testid="plays-pattern"
+            >
+              PATTERN
+            </button>
+            <button
+              type="button"
+              aria-pressed={songMode}
+              onClick={() => audioEngine.setPlaybackMode('song_arrangement')}
+              className={`px-2 py-0.5 font-bold ${songMode ? 'bg-amber-500 text-black' : 'bg-neutral-800 text-neutral-300 hover:text-white'}`}
+              title="Song: plays the clips placed in the arrangement (B)"
+              data-testid="plays-song"
+            >
+              SONG
+            </button>
+          </div>
+        </div>
+      )}
+      {compact && songElsewhere && (
+        <span className="px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600/50 flex-shrink-0" title="Song mode plays the clips of the arrangement: this pattern is not what plays">
+          {songElsewhere}
+        </span>
+      )}
     </div>
   );
 };

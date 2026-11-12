@@ -128,7 +128,9 @@ src/
                           SequencerView editors as tabs), ClipFocusEditor, AudioClipEditor (handles on the wave)
   rack/                   ModularRack (3 columns), rackColumns/rackLayout (column + order + fold per unit,
                           project section `rackLayout`), RackChannelList, RackNavigator, cables, rear panel,
-                          Combiner frame (CombinatorFrame), library browser, faceplates
+                          Combiner frame (CombinatorFrame), the browser side panel, faceplates
+  browser/                The one browser (rack side panel, Workstation LOAD, piano-roll Sounds dock):
+                          entries.ts (everything as a BrowserEntry), Browser.tsx, entryActions, preview
   vst/                    libraryClient (bundle-first manifest, audition), VstPluginDevice, proxyDsp
   ai/rackCombinator.ts    requestRackPlan() (server → in-app fallback) + applyRackPlan()
 electron/main.cjs         Starts api-server.cjs; falls back to a static-only server if it's missing
@@ -176,6 +178,22 @@ docs/reference-cpp-dsp/   C++ reference headers — NOT compiled, documentation 
 - Graph & CC lanes (`track.graphData`) are **sparse**: `null`/missing = no value, so the device's
   own knob rules. Lanes: velocity multiplier (legacy; the editor draws note velocity), pitch
   (semitones), cutoff, resonance — applied live and in exports.
+- Pattern mode loops with the patterns: `advanceStep` wraps where every playing pattern is back at
+  its start (`patternCycle16ths`, their common multiple in whole bars, ≤ 64 bars; odd polymeters run
+  on), so the timeline, transport and piano-roll playhead stay together.
+- Patterns travel between instruments (`sequencer/patternTransfer.ts` fits the notes: pitched → kit =
+  distinct pitches take the pads in order, kit → pitched = scale notes above the root, kit → kit =
+  pad N): `seq.snapshotPattern` / `pastePattern` / `copyPatternTo`; the pattern bar's COPY / PASTE
+  (`patternClipboard.ts`); clips with Ctrl+C / X / V (`arrangement/clipClipboard.ts`, pasted on the
+  selected part at the edit cursor), drag / Alt-drag to another lane (`moveClip` takes the pattern
+  along, reusing an identical copy) and the clip menu's COPY TO PART. Piano-roll notes share one
+  clipboard across instruments.
+- Generating: `generateInstrumentPattern(id, style, { asNew })` gives a new take every press
+  (`patternVary.ts`, seeded per track; never a pattern another part already plays); `asNew` keeps the
+  edited pattern. The pattern bar's GENERATE menu (`PatternGenerateMenu.tsx`) also writes a part
+  from another part (`patternDerive.ts`: bass line, harmony, arpeggio, rhythm; a kit always gets a
+  groove). Rules, not AI. Its PLAYS PATTERN | SONG switch is always visible and says when Song mode
+  plays another pattern than the one being edited.
 
 ### Mixer, recording, automation, export, mastering
 - `MixerController`: channels (tracks, rack channels, buses, returns), strips with inserts / sends
@@ -221,8 +239,32 @@ loop) or, on kits (`drumLanesFor`), one file per pad note (one-shot; other pads 
 `installExpression` (so bend / vibrato apply and the voice feeds the trimmed outputs); `renderSong`
 installs it on offline copies, so exports play the files. Assignments: project section `deviceSamples`
 (audio in the audio store; `projectAudioIds` bundles it in `.unbox` archives). UI: `rack/DeviceSampleBar`
-above every instrument panel (via `DeviceFront`; drop a file anywhere on a keys instrument) and the LOAD
-browser's "Audio file" source (+ "keys" on library samples).
+above every instrument panel (via `DeviceFront`; drop a file anywhere on a keys instrument), LOAD's
+"Audio file…" button and the browser's audio rows (stems, samples, project audio).
+
+### Stems and separation
+- Stem library (`server/stems/stemLibrary.ts`): a file loads only with a declaration — a per-file entry
+  in the folder's `unbox-stem-library.json`, or the declaration the user makes for the whole folder in
+  the browser (Stems → folder button → Declare; kept in `data/stem-declarations.json`, never written
+  into the folder). Generated audio is never eligible, and a file its own sidecar refuses stays out.
+  A declaration is the user's statement: never make one on their behalf. Defaults: Playable_Patches
+  and htdemucs under `D:\audio stems\daw_instruments`.
+- Separation: the built-in separator is `audio/ai/spectralSeparator.ts` (STFT masks: held notes vs
+  drum hits by median filters, stereo position, lows; the last stem is the remainder, so the stems sum
+  to the source exactly) run in `separatorWorker.ts`. The trained Demucs / Spleeter path
+  (`/api/separate`) needs the per-session consent and is the cleaner one.
+
+### Browser (`src/browser/`)
+ONE browser component in three hosts: the rack side panel (toolbar "Browser"), Workstation LOAD (wide
+layout) and the piano roll's Sounds dock (`components/sequencer/pianoRoll/SamplerDock.tsx`). Sections:
+instruments / effects / utilities (built-ins, classified by `roleOf`, each device once), stems (the
+stem library, hidden in share builds), samples (playable library audio), project (audio store), plugins
+(library units, PROXY badge). One search covers every section (counts on the tabs); the host supplies
+the row buttons (`actionsFor`), so the same row is "Add" in the rack and "Load" / "+ Part" in LOAD.
+Keyboard: arrows / PageUp / Home / End move, Enter = first action, Space = preview, typing searches.
+Rows drag as `BROWSER_DRAG_TYPE` (value = entry key, `entryForKey` resolves it). Previews play through
+the monitor only (`browser/preview.ts`), never into exports. Per-host section / group live in
+localStorage `unbox.browser.<host>`. License badges come from `SHIPPED_PACKS` ("Attribution: …").
 
 ### Expression (pitch bend / mod wheel)
 `installExpression(dev)` wraps an instrument's `noteOn`: oscillators and buffer sources it creates
@@ -244,6 +286,12 @@ The UI never gets an event per message: it polls `midi.version` / `midiControlCh
 transport MIDI LED). Settings · MIDI shows ports, the map with Learn / Clear, and an activity log.
 
 ### Workspace and skin (Unbox Studios look)
+- Visited tabs (and the tab behind a page) stay mounted inside React `<Activity>` (App.tsx /
+  AppShell.tsx): hidden ones keep their DOM but run no effects, frame loops or subscriptions, and
+  switching back does not rebuild them. The rack and mixer are also built hidden once the app is
+  idle after start-up (`requestIdleCallback`), so the first switch only reveals them (the very first
+  draw ever still compiles GPU shaders; the desktop app caches them). Test ids can therefore exist
+  twice (one hidden).
 - Three tabs (`shell/AppShell.tsx`): **Workstation & Sequencer** (workstation panel + light song
   sequencer), **3-Column Rack**, **Mixer & Clip Editor** (console with the channel inspector, a
   divider (uiStore `mixSplit`), and the Clip Editor: "Clip" edits the clip selected in a timeline —
@@ -322,21 +370,40 @@ through the unit's own output. Samples can be put in the song (Studio → Sample
   validated server- and client-side; keyword rules otherwise. Undo restores previous values.
 - Mix & master: numbers always come from `assistant.ts`; Gemini only writes notes about them.
 - Never trust model output; prompts ≤ 2000 chars; AI routes rate limited per IP.
+- The Co-Pilot's on-device engine (`ai/hardware/localHardwareAiEngine.ts`) is keyword rules and the
+  offline planner (the music assistant asks a local Ollama model when one runs). WebGPU is only
+  probed for the adapter name: never label anything GPU-accelerated or neural.
 
 ## DSP / UI thread separation — hard rules
 
 1. **Audio is produced only by the Web Audio graph.** Per-sample DSP goes in an AudioWorklet
    (worklets load from Blob URLs: `unbox-dynamics`, `unbox-recorder`, `unbox-meter`). Offline
    analysis of a rendered buffer (loudness, spectrum) is fine on the main thread.
-2. **Musical timing uses AudioContext time.** No `setTimeout` for notes or launches.
+2. **Musical timing uses AudioContext time.** No `setTimeout` for notes or launches. The scheduler
+   queues 200 ms ahead (`scheduleAheadTime`), so a UI stall shorter than ~175 ms never reaches the
+   audio; keep every interaction well under that. The tempo lives in the tempo map: `engine.bpm` is
+   an accessor over `timeMap.tempoMap` (a separate field once played 124 while showing 128).
 3. **Running params are scheduled, not assigned:** `setTargetAtTime` or ramps. Direct `.value =`
    only while building a graph.
 4. **Animation never goes through React state.** Meters, scopes, playheads, cables and GR meters
    update in `requestAnimationFrame` through `useFrame()` (ONE shared loop for all of them). Write
    to the DOM only on change (`ui/skin/dom.ts` `setWidth` / `setText`; canvases skip unchanged
-   frames) — an idle meter must cost nothing. The engine's global `notify()` fires once per bar
-   while playing; UI that shows the playing step uses `useStepTick()` (`engine.onStep`, per 16th)
-   and automated faders `useChannelAutomation()` — never re-render the whole app per step.
+   frames) — an idle meter must cost nothing. Playback never calls `notify()` (a whole-app
+   re-render froze the rack ~100 ms per bar): UI that shows the playing step uses `useStepTick()`
+   (`engine.onStep`, per 16th), per-bar readouts `useBarTick()` (`engine.onBar`), automated faders
+   `useChannelAutomation()` and device panels `useDeviceAutomation(id)` (automation moves knobs
+   with `setParam`, which redraws nothing by itself). An element written every frame (playhead,
+   meter fill) gets `will-change-transform`, so it repaints alone, not the big layer around it
+   (don't promote canvases or looping animations wholesale: that made Chrome stack huge "overlap"
+   layers over the rack). Meters, scopes and readouts redraw on the SHARED ~30 Hz meter frames
+   (`useMeterFrame`, or `meterDue(t)` with the rAF timestamp in their own loops), so the frames in
+   between paint nothing; they also skip frames while off screen (`ui/skin/useOnScreen.ts`). The
+   playhead and step lights stay at full rate. No infinite decorative animation on a filter /
+   backdrop-blur / transition-all element, and no outer `box-shadow` on large panels (rack units,
+   faceplates, the bars, tab containers): it spread their paint over the live layers and cost the
+   rack most of its GPU time; depth comes from borders / inset edges. Each `.rack-unit` is its own
+   compositor layer (`will-change: transform`), so a moving meter re-layerizes one unit. View state written many times a second (timeline zoom
+   / scroll) goes through `rememberUi()` (saved, no re-render).
 5. **Measure layout only when it changes** (`JackRegistry.invalidate()` coalesces); in rAF loops
    read geometry before writing styles (or use ResizeObserver values).
 6. **Heavy I/O and parsing stay on the server** (file walking, PE parsing, manifest, AI calls).
@@ -378,11 +445,12 @@ Editor · `F4`/`Alt+4` song editors above the rack · `Tab`/`Alt+F` rack front/r
 `?`/`Alt+H` shortcut help.
 KEYS (transport button, `uiStore.qwertyPiano`): on = letters play the selected part (`A W S E D F T G
 Y H U J K O L P ;`, `Z`/`X` octave); off = letters are commands: `Q W E R T Y U` sequencer tools
-(select, pencil, eraser, razor, mute, zoom, hand), `B` Block/Song, `L` loop, `C` click, `K` rack
+(select, pencil, eraser, razor, mute, zoom, hand), `B` Pattern/Song, `L` loop, `C` click, `K` rack
 cables (all / selected unit / hidden).
 Sequencer: `Enter` opens the selected clip (Edit Mode) · `Shift+1..6` editor tabs · `1..9` piano-roll
 tools · `Q` snap to scale (piano roll) · `-`/`=` pattern length · `Alt+arrows` length / transpose ·
-`Shift+L` legato · `Ctrl+D` generate.
+`Shift+L` legato · `Ctrl+D` generate (into a new pattern when the edited one has notes) ·
+`Ctrl+Shift+D` a new take in place · `Ctrl+C / X / V` clips (timeline) or notes (piano roll).
 `ShortcutHelpModal` lists only real keys — update it with any change here.
 
 ## Environment variables (`.env`, never committed)
@@ -410,6 +478,9 @@ then the user-data folder.
   A pending sequencer capture (500 ms after an edit) is recorded before any new journal entry
   (`undoJournal.beforePush`), so a knob move after an edit undoes in the right order.
 - MP3 export uses `@breezystack/lamejs` (LGPL, loaded on demand).
+- The `app-ai` / `vendor-ai` chunks (Basic Pitch + TensorFlow, ~1 MB) load only when a transcription runs.
+  The manualChunks rule matches only `basicPitch.ts` / `basicPitchNotes.ts`: a module in that chunk that
+  start-up code imports (the worker client did) makes the start page preload all of it.
 - Device names are original: never put a trademarked product / brand name in visible text (names,
   tags, option labels, faceplates, AI prompts). Sounds are synthesized, never sampled from the
   originals. Real recordings live only in the `rec_*` pack devices (licensed, credited in CREDITS.md).
@@ -419,7 +490,16 @@ then the user-data folder.
   dhol) one at a time on first use (`ensureInitialized(ctx, presetId)`), and the devices that use it
   call `warmUp()` so the bank renders while the page is idle. Building them all at once froze the page
   for ~1.2 s on the first note (MIDI and UI stalled). Keep new banks separate (`if (only === …)`).
+- Catalogue names must be what they play. The generic `world_instrument` / `percussion_electronic` devices
+  pick one of a few built-in banks from the name (anything unknown = sitar), so names that only alias a
+  bank are retired in `instrumentCatalog.ts` (`RETIRED_ENTRIES`, measured with an offline fingerprint
+  render of every entry) or point at a recorded pack of that instrument (`RECORDED_INSTEAD`). Retired
+  names still load in saved projects. Add an instrument as a pack or a modelled device, not as a name.
+- Measure UI stalls on the production build (`unbox-prod-3124`): the dev build's React and heap make a
+  structural edit look many times slower (Effects page Insert: ~700 ms in dev, 32–48 ms in production).
 - `catalog.ts` is generated: after building / removing a pack, restart the dev server if the new
   device doesn't appear (it is imported by shared code that the server also loads).
+- The dev server's file watcher ignores `.tmp/` (vite.config.ts `server.watch.ignored`): build temp files and the
+  test browsers' profiles live there and stay locked, and watching them crashed `npm run dev` with EBUSY.
 - Tailwind scans only `index.html`, `src/` and `shared/` (see the `@source` lines in `src/index.css`). Keep it that way: the automatic scan walks `release/` (5+ GB) and stalls `npm run dev` for tens of seconds on the first stylesheet.
 - If the project folder ever gets a Low integrity label again (the Codex sandbox set one on the dev machine), Electron builds (`release/*.exe`, `npm run electron`, `run-app.bat`) exit with 0x80000003 or silently when started from inside it. Check with `icacls <folder>` and reset with `icacls <folder> /setintegritylevel (OI)(CI)M /T`.

@@ -79,15 +79,33 @@ export function getUi(): UiState {
   return state;
 }
 
-export function setUi(patch: Partial<UiState>): void {
-  state = { ...state, ...patch };
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+
+function persist(): void {
+  clearTimeout(saveTimer);
+  saveTimer = undefined;
   try {
     const { qwertyPiano, split, rackLibrary, cableColors, mixSplit, mixerLayout, timelineBarPx, timelineLaneH, timelineScrollX, timelineScrollY, editCursorBar } = state;
     localStorage.setItem(KEY, JSON.stringify({ qwertyPiano, split, rackLibrary, cableColors, mixSplit, mixerLayout, timelineBarPx, timelineLaneH, timelineScrollX, timelineScrollY, editCursorBar }));
   } catch {
     // storage blocked: keep it for this session
   }
+}
+
+export function setUi(patch: Partial<UiState>): void {
+  state = { ...state, ...patch };
+  persist();
   subs.forEach((s) => s());
+}
+
+/**
+ * Remembers the timeline's zoom, row height and scroll for its next mount without re-rendering
+ * anyone (nothing shows them live, and a scroll or zoom gesture writes many times a second); the
+ * save is batched.
+ */
+export function rememberUi(patch: Partial<Pick<UiState, 'timelineBarPx' | 'timelineLaneH' | 'timelineScrollX' | 'timelineScrollY'>>): void {
+  state = { ...state, ...patch };
+  if (saveTimer === undefined) saveTimer = setTimeout(persist, 400);
 }
 
 export function useUi(): UiState {

@@ -11,12 +11,27 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { Upload, Play } from 'lucide-react';
 import { audioEngine } from '../../audio/AudioEngine.ts';
 import type { SpecDevice } from '../../audio/spec/SpecDevice.ts';
-import { paramDef, type DeviceSpec, type ParamDef } from '../../../shared/rack/devices/index.ts';
+import { paramDef, type DeviceSpec, type PanelDisplay, type ParamDef } from '../../../shared/rack/devices/index.ts';
 import { SHIPPED_PACKS } from '../../../shared/instruments/packs.ts';
 import { packStatus } from '../../audio/spec/engines/multisample.ts';
 import { automateMenuAt } from '../AutomateMenu.tsx';
 import { SpecControl, SpecKnob } from './specKnob.tsx';
 import { setText, setWidth } from '../../ui/skin/dom.ts';
+import { meterDue, useDeviceAutomation } from '../../nexa/useEngine.ts';
+import {
+  isHeroDisplay,
+  HeaderBadge,
+  DualQuantumHero,
+  TripleVuHero,
+  DualVuHero,
+  DistressorLedsHero,
+  MatrixGridHero,
+  IndustrialStepHero,
+  TouchscreenPadsHero,
+  WestcoastGoldHero,
+  VectorscopeHero,
+  CurveModHero,
+} from './SpecHeroDisplays.tsx';
 
 interface Props {
   device: SpecDevice;
@@ -31,6 +46,9 @@ const FINISH: Record<string, (c: string) => string> = {
   white: (c) => `linear-gradient(180deg, ${c}, #cfcfcf)`,
   gloss: (c) => `linear-gradient(180deg, rgba(255,255,255,0.15), transparent 40%), ${c}`,
   retro: (c) => `repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 6px), linear-gradient(180deg, ${c}, #140c06)`,
+  gold: (c) => `radial-gradient(ellipse at 50% 15%, rgba(255,215,0,0.15), transparent 70%), linear-gradient(180deg, ${c}, #0a0a0d)`,
+  blue: (c) => `repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px), linear-gradient(180deg, ${c}, #0b1524)`,
+  grey: (c) => `repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px), linear-gradient(180deg, ${c}, #17181c)`,
 };
 const background = (spec: DeviceSpec) => (FINISH[spec.panel.finish] ?? ((c: string) => `linear-gradient(180deg, ${c}, rgba(0,0,0,0.85))`))(spec.panel.color);
 
@@ -38,11 +56,17 @@ const WOOD = 'linear-gradient(90deg, #4a2a12, #7a4a24 40%, #5a3418)';
 
 export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
   const [, force] = useReducer((x: number) => x + 1, 0);
+  useDeviceAutomation(device.id);
   const spec = device.spec;
   const accent = spec.panel.accent;
   const text = spec.panel.text ?? '#f2f2f2';
   const knob = spec.panel.knob ?? 'cap';
   useEffect(() => device.subscribe(force), [device]);
+
+  const handlersRef = useRef<Map<string, (v: number) => void>>(new Map());
+  useEffect(() => {
+    handlersRef.current.clear();
+  }, [device]);
 
   const val = (k: string) => {
     const v = device.params[k];
@@ -52,13 +76,24 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
     device.setParam(k, v);
     force();
   };
+  const getChangeHandler = (k: string) => {
+    let fn = handlersRef.current.get(k);
+    if (!fn) {
+      fn = (v: number) => {
+        set(k, v);
+      };
+      handlersRef.current.set(k, fn);
+    }
+    return fn;
+  };
+
   const ctl = (def: ParamDef, size = 38) =>
     def.control === undefined && !def.options ? (
       <SpecKnob
         key={def.key}
         def={def}
         value={val(def.key)}
-        onChange={(v) => set(def.key, v)}
+        onChange={getChangeHandler(def.key)}
         style={knob}
         accent={accent}
         text={text}
@@ -66,7 +101,7 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
         onMenu={(e) => automateMenuAt(e, `${device.name} · ${def.label}`, { kind: 'device', deviceId: device.id, param: def.key })}
       />
     ) : (
-      <SpecControl key={def.key} def={def} value={val(def.key)} onChange={(v) => set(def.key, v)} style={knob} accent={accent} text={text} />
+      <SpecControl key={def.key} def={def} value={val(def.key)} onChange={getChangeHandler(def.key)} style={knob} accent={accent} text={text} />
     );
 
   const body = (() => {
@@ -127,12 +162,21 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
         )}
         {spec.kind === 'player' && <PlayerTarget device={device} onChanged={onUpdate} accent={accent} text={text} />}
         <div className="flex-1" />
-        <Display device={device} accent={accent} text={text} set={set} val={val} />
+        {isHeroDisplay(spec.panel.display) ? (
+          <HeaderBadge kind={spec.panel.display!} accent={accent} />
+        ) : (
+          <Display device={device} accent={accent} text={text} set={set} val={val} />
+        )}
         {spec.kind === 'instrument' && spec.engine !== 'drums' && spec.engine !== 'groove' && !spec.pads?.length && (
           <TestNote device={device} accent={accent} />
         )}
         {(spec.engine === 'sampler' || spec.engine === 'granular' || spec.engine === 'loops') && <SampleLoader device={device} accent={accent} text={text} />}
       </div>
+      {isHeroDisplay(spec.panel.display) && spec.panel.display && (
+        <div className={`px-3 pt-1 pb-2 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>
+          {renderHeroDisplay(spec.panel.display, device, val, set)}
+        </div>
+      )}
       <div className={`flex-1 min-h-0 px-3 pb-2 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>{body}</div>
     </div>
   );
@@ -162,6 +206,40 @@ const Sections: React.FC<{ spec: DeviceSpec; ctl: Ctl; text: string; exclude: Se
   );
 };
 
+// ------------------------------------------------------------------ hero displays
+
+const renderHeroDisplay = (
+  kind: PanelDisplay,
+  device: SpecDevice,
+  val: (k: string) => number,
+  set: (k: string, v: number) => void
+) => {
+  switch (kind) {
+    case 'dual_quantum':
+      return <DualQuantumHero device={device} val={val} set={set} />;
+    case 'triple_vu':
+      return <TripleVuHero device={device} />;
+    case 'dual_vu':
+      return <DualVuHero device={device} />;
+    case 'distressor_leds':
+      return <DistressorLedsHero device={device} val={val} set={set} />;
+    case 'matrix_grid':
+      return <MatrixGridHero device={device} />;
+    case 'industrial_step':
+      return <IndustrialStepHero device={device} />;
+    case 'touchscreen_pads':
+      return <TouchscreenPadsHero device={device} />;
+    case 'westcoast_gold':
+      return <WestcoastGoldHero device={device} set={set} />;
+    case 'vectorscope':
+      return <VectorscopeHero device={device} />;
+    case 'curve_mod':
+      return <CurveModHero device={device} />;
+    default:
+      return null;
+  }
+};
+
 // ------------------------------------------------------------------ displays
 
 const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set: (k: string, v: number) => void; val: (k: string) => number }> = ({ device, accent, text, set, val }) => {
@@ -180,7 +258,12 @@ const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set:
     let lastAngle = '';
     let lastStep = -2;
     let quiet = 0;
-    const tick = () => {
+    const tick = (t: number) => {
+      // meters and scopes redraw on the shared ~30 Hz meter frames (see meterDue)
+      if (!meterDue(t)) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       const m = device.meter();
       if (kind === 'scope' && canvas.current) {
         const c = canvas.current.getContext('2d');
@@ -245,7 +328,7 @@ const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set:
     return (
       <div className="w-36 flex flex-col gap-0.5">
         <div className="h-2 rounded bg-black/70 overflow-hidden border border-black/60">
-          <div ref={bar} className="h-full" style={{ width: '0%', background: kind === 'gr' ? '#ffb02e' : accent, marginLeft: kind === 'gr' ? 'auto' : undefined }} />
+          <div ref={bar} className="h-full will-change-transform" style={{ width: '0%', background: kind === 'gr' ? '#ffb02e' : accent, marginLeft: kind === 'gr' ? 'auto' : undefined }} />
         </div>
         <span ref={label} className="text-[11px] font-mono" style={{ color: text }}>
           {kind === 'gr' ? 'GR 0.0 dB' : 'LEVEL'}
@@ -254,13 +337,14 @@ const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set:
     );
   if (kind === 'vu')
     return (
-      <svg width={80} height={44} className="rounded border border-black/60" style={{ background: '#f3e6b8' }} aria-label="VU meter">
-        <path d="M 8 30 A 34 34 0 0 1 72 30" stroke="#333" fill="none" strokeWidth={1} />
-        <path d="M 58 16 A 34 34 0 0 1 72 30" stroke="#c0392b" fill="none" strokeWidth={2} />
-        <text x={40} y={42} fontSize={6} textAnchor="middle" fill="#333">
+      <svg width={86} height={46} className="rounded border border-[#54432d] shadow-inner" style={{ background: 'linear-gradient(180deg, #faf0d2 0%, #ebd49d 70%, #d8be82 100%)' }} aria-label="VU meter">
+        <path d="M 10 32 A 36 36 0 0 1 76 32" stroke="#3d3020" fill="none" strokeWidth={1.2} />
+        <path d="M 60 14 A 36 36 0 0 1 76 32" stroke="#dc2626" fill="none" strokeWidth={2.4} />
+        <text x={43} y={43} fontSize={6.5} textAnchor="middle" fill="#3d3020" fontFamily="monospace" fontWeight="bold">
           VU
         </text>
-        <line ref={needle} x1={40} y1={34} x2={40} y2={6} stroke="#111" strokeWidth={1} transform="rotate(-50 40 34)" />
+        <line ref={needle} x1={43} y1={36} x2={43} y2={6} stroke="#1c1917" strokeWidth={1.4} strokeLinecap="round" transform="rotate(-50 43 36)" />
+        <circle cx={43} cy={36} r={3} fill="#292524" />
       </svg>
     );
   if (kind === 'steps')

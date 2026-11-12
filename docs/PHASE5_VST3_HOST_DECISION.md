@@ -2,7 +2,7 @@
 
 **Status:** Project-owned Windows x64 effect and MIDI-instrument offline host smokes pass, including a versioned effect-component state round-trip and malformed-state rejection. Real-time transport and DAW integration remain open. Native hosting is not implemented in Unbox.
 **Date:** 2026-10-26
-**Last updated:** 2026-10-29
+**Last updated:** 2026-11-11
 
 ## Context
 
@@ -23,7 +23,7 @@ Steinberg's current VST3 SDK provides the hosting API and hosting examples under
 ## Implementation gates
 
 1. **Complete:** Add the official SDK and its MIT notice; build project-owned effect and instrument VST3s, process the effect at varied sample rates/block sizes, pass ordered MIDI note-on/off events to the instrument and check sample-level output, then validate both bundles with Steinberg's validator.
-2. **Open:** Prototype and measure the live audio boundary options using the project-owned fixtures; record the chosen transport and its supported block sizes before implementation. A Windows native-process shared-memory ring now has paced measurements for the project-owned delay and MIDI synth, but it does not exercise Electron, an audio device, or Unbox's callback and therefore does not select the production transport.
+2. **Open:** Prototype and measure the live audio boundary options using the project-owned fixtures; record the chosen transport and its supported block sizes before implementation. The Windows native-process shared-memory ring has sample-exact offline measurements, but its paced four-slot run can exhaust the ring under ordinary Windows scheduling. It does not exercise Electron, an audio device, or Unbox's callback and does not select the production transport.
 3. Implement the utility-process supervisor, path validation, lifecycle, protocol versioning, chosen transport and bounded underflow/overflow behavior.
 4. Integrate the audio adapter and verify deterministic block/frame ordering, MIDI events, parameters, suspend/resume and project save/restore.
 5. Add plugin-reported plus bridge latency to live and offline PDC; implement buses/sidechain, editor-window ownership, missing-plugin recovery and process restart.
@@ -96,8 +96,21 @@ Steinberg's current VST3 SDK provides the hosting API and hosting examples under
 - The shared-memory candidate then completed two 2,400-block paced runs at the same format with zero one-block response deadline misses: effect worker completion p99 0.0521 ms (max 0.5322 ms), MIDI-synth p99 0.0410 ms (max 1.1024 ms). The synth run delivered 300 timestamped note-ons plus 300 note-offs with phrase-varying offsets and checked every stereo output sample.
 - These measurements leave the transport decision **open**. They do not exercise Electron's utility process, an AudioWorklet/audio-device callback, DAW project state, editor hosting, PDC, sidechains, plugin crash recovery, or any third-party binary. Native VST3 hosting remains unimplemented in Unbox.
 
+## Follow-up — 2026-11-11 shared-memory fixture revalidation
+
+- The project-owned delay and MIDI-synth fixtures still pass their standalone host smoke and Steinberg validator (47 passed, 0 failed checks each). The delay also passes the sample-exact offline 2,400-block shared-memory burst with bounded four-slot backpressure.
+- The paced delay acceptance is **not stable**. Two full `npm run test:vst3-shared-memory` revalidations exhausted the ring before the MIDI run. A direct three-run paced delay check included two completed runs, then failed at sequence 1,375 with all four slots pending and the reused slot still `processing` after 5.5497 ms producer lateness. One of the earlier completed runs also recorded 11 one-block response deadline misses.
+- The host now reports sequence, slot state, pending depth and schedule lateness on saturation, and treats **every** one-block response deadline miss as a paced-test failure. A final direct delay run after that repair completed 2,400 blocks with zero deadline misses, zero starts more than 1 ms late, 0.9474 ms maximum scheduling lateness and 0.1094 ms p99 completion latency. That is a single clean run, not a stability signoff. The bounded ring deliberately remains a hard failure; this is a measured reason not to adopt the bridge, not a condition to hide by increasing its capacity or silently waiting in a render callback. This fixture is a native-process experiment only: it does not execute an Electron utility process, AudioWorklet, audio-device callback, Unbox project graph, editor, PDC, crash recovery, or any third-party plugin. The production native-host decision remains **open**.
+
 ## Follow-up — 2026-10-29 Electron utility-process capability boundary
 
 - The repaired Electron fixture launch now reaches `app.whenReady()` and starts a real `utilityProcess`. The worker reports a present `process.parentPort`, but on this host it exits cleanly before receiving even a versioned control message, including when held open with an explicit timer. Thus the control-plane handshake is **unverified**, not successful.
 - Before that early exit, Electron rejects a small `SharedArrayBuffer` payload with `An object could not be cloned.` `npm run test:vst3-boundary` records this as an explicit `SKIP` capability result when both limitations occur. Any different failure remains a test failure; a future Electron capability change requires a new bounded real-time measurement rather than auto-enabling a transport.
 - Therefore Electron `utilityProcess` is not a selectable lifecycle/control or shared-memory audio bridge on this host. It is not an audio transport result and does not advance native VST3 hosting beyond its open implementation gates.
+
+## Follow-up — 2026-11-11 per-block MIDI-allocation repair and repeat stability gate
+
+- The native shared-memory MIDI worker constructed Steinberg's `EventList` inside every 128-frame process iteration. That helper allocates its backing store, so this was allocator work on the worker's audio cadence. The list is now allocated once with the protocol's fixed eight-event capacity and cleared per block.
+- A fresh full fixture run passed: both project-owned bundles completed their 47 Steinberg validator checks; delay and MIDI offline bursts were sample exact; and one 2,400-block paced run for each fixture had zero one-block response deadline misses. A direct five-run MIDI-only check also completed with zero misses.
+- A single passing run is insufficient evidence for a live bridge. `npm run test:vst3-shared-memory-stability` now rebuilds the fixtures, runs the ordinary offline checks, then requires five paced delay and five paced MIDI passes. In its first run after the allocation repair, delay passed **5/5**, but MIDI failed on paced run **2/5** with two one-block deadline misses at sequences **2100** and **2101**. The host now includes the missed sequence numbers in its failure report.
+- The bounded ring and deadline remain hard failures; no queue capacity, deadline, or audio callback behavior was relaxed. This only removes a legitimate per-block allocation and makes instability reproducible. The native-process experiment still has no Electron utility process, browser AudioWorklet, audio device, DAW graph, native-project state, editor, PDC, sidechain, crash isolation, or third-party-plugin evidence. Phase 5 remains unimplemented in Unbox.

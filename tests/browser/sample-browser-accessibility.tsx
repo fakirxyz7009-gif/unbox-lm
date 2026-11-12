@@ -33,13 +33,13 @@ function Harness() {
 
 async function run(): Promise<void> {
   stage = 'initialising';
-  // The probe has no Express API. Return the real route's disabled state so status probing does
-  // not make an unrelated network error part of this keyboard regression.
+  // The probe has no Express API. Expose an available trained model so this proves that availability
+  // alone cannot silently select it; the user must explicitly acknowledge it first.
   const originalFetch = window.fetch.bind(window);
   window.fetch = async (input, init) => {
     const requestUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     if (new URL(requestUrl, location.href).pathname === '/api/separate/status') {
-      return new Response(JSON.stringify({ demucs: false }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ demucs: true, spleeter: false }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
     if (new URL(requestUrl, location.href).pathname === '/api/import/status') {
       return new Response(JSON.stringify({ ytDlp: false, ffmpeg: false }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -56,6 +56,16 @@ async function run(): Promise<void> {
   const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
   await until(() => document.activeElement === document.querySelector<HTMLInputElement>('[placeholder="Search samples"]'), 'Opening the dialog did not focus the sample search field');
   expect(dialog.getAttribute('aria-modal') === 'true' && dialog.getAttribute('aria-labelledby') === 'sample-browser-title', 'Sample browser dialog lost its accessible modal name');
+  stage = 'trained-model consent';
+  const consent = document.querySelector<HTMLInputElement>('[data-testid="trained-separation-consent"] input');
+  const modelMode = document.querySelector<HTMLButtonElement>('[data-testid="trained-separation-mode"]');
+  expect(consent && modelMode, 'Source separation did not expose the trained-model acknowledgement gate');
+  expect(modelMode.disabled && modelMode.getAttribute('aria-disabled') === 'true', 'An available trained model was selectable before explicit acknowledgement');
+  expect(!document.querySelector('[data-testid="trained-separation-options"]'), 'An available trained model replaced the fast local separator on dialog open');
+  consent!.click();
+  await until(() => !modelMode!.disabled, 'Acknowledging trained-model use did not unlock its explicit mode control');
+  modelMode!.click();
+  await until(() => !!document.querySelector('[data-testid="trained-separation-options"]'), 'The acknowledged trained model mode did not become selectable');
   const entries = focusables(dialog);
   expect(entries.length > 1, 'Sample browser did not expose a keyboard focus order');
   const first = entries[0];
@@ -76,7 +86,7 @@ async function run(): Promise<void> {
   await until(() => !document.querySelector('[role="dialog"]'), 'Escape did not close the sample browser dialog');
   await until(() => document.activeElement === opener, 'Closing the dialog did not restore focus to its opener');
   result.dataset.status = 'passed';
-  result.textContent = 'PASS · Samples & Stems has an accessible modal name, starts at search, wraps Tab and Shift+Tab, closes with Escape, and returns focus to its opener.';
+  result.textContent = 'PASS · Samples & Stems defaults to heuristic separation, gates trained-model selection behind explicit acknowledgement, and keeps accessible modal focus behaviour.';
 }
 
 void run().catch((error: unknown) => {

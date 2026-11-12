@@ -1,7 +1,8 @@
 /**
  * Stem separation with Deezer Spleeter (https://github.com/deezer/spleeter) and Meta Demucs,
  * run locally on this computer. Extracts Vocals, Drums, Bass and Other (htdemucs), or those plus Guitar
- * and Piano (htdemucs_6s). No external cloud calls; 100% offline local AI execution.
+ * and Piano (htdemucs_6s). It is non-generative source analysis, not verified human audio; the route
+ * requires an explicit UI consent token before any model is run. No external cloud calls.
  */
 import { execFile, spawn } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -168,6 +169,9 @@ export function createSeparationRouter(): Router {
 
   // Only audio/wav is accepted: that type needs a CORS preflight, so a page on another site cannot post here.
   router.post('/jobs', startLimit, express.raw({ type: 'audio/wav', limit: MAX_UPLOAD_BYTES }), guardAsync(async (req, res) => {
+    if (req.query.consent !== 'trained-model-separation') {
+      return res.status(403).json({ error: 'Explicit consent is required before a trained separation model can process audio.' });
+    }
     const body = req.body as unknown;
     if (!Buffer.isBuffer(body) || body.length < 44) return res.status(400).json({ error: 'Send the audio as a WAV file.' });
 
@@ -204,11 +208,19 @@ export function createSeparationRouter(): Router {
 
     // The song is not needed once it is split, so its copy is removed now rather than when the job expires.
     fs.rmSync(path.join(dir, 'in'), { recursive: true, force: true });
-    if ('error' in run) return res.status(run.status).json({ error: run.error });
+    if ('error' in run) {
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch {}
+      return res.status(run.status).json({ error: run.error });
+    }
 
     // The stems the model wrote, in the model's order; the client downloads exactly these.
     const stems = expected.filter((stem) => fs.existsSync(stemPath(dir, stem)));
     if (stems.length !== expected.length) {
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch {}
       return res.status(422).json({ error: `AI model did not produce all ${expected.length} stems.` });
     }
     res.json({ id, stems });

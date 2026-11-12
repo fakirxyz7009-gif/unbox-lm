@@ -4,7 +4,7 @@
  * the bar is musically useful instead of "almost silent".
  */
 import React, { useRef } from 'react';
-import { useFrame } from '../../nexa/useEngine.ts';
+import { useMeterFrame } from '../../nexa/useEngine.ts';
 import { gainToDb, meterPos } from '../../studio/ui/levels.ts';
 import { capturePointer } from './pointer.ts';
 import { setWidth } from './dom.ts';
@@ -33,7 +33,7 @@ export const LevelBar: React.FC<Props> = ({ value, onChange, meter, segments = 2
   const peakAt = useRef(0);
   const drag = useRef(false);
   const pos = gainToBar(value);
-  useFrame(() => {
+  useMeterFrame(() => {
     if (!meter) return;
     const v = meter();
     setWidth(meterRef.current, Math.round(meterPos(gainToDb(v), -48, 3.5) * 100));
@@ -88,8 +88,8 @@ export const LevelBar: React.FC<Props> = ({ value, onChange, meter, segments = 2
           />
         ))}
       </div>
-      {meter && <div ref={meterRef} className="absolute left-[3px] bottom-[1px] h-[2px] bg-emerald-300/90 rounded-full" style={{ width: 0 }} />}
-      {meter && <div ref={peakRef} className="absolute bottom-[1px] w-[2px] h-[3px] bg-white/80 rounded-sm" style={{ left: '0%' }} title="Peak hold" />}
+      {meter && <div ref={meterRef} className="absolute left-[3px] bottom-[1px] h-[2px] bg-emerald-300/90 rounded-full will-change-transform" style={{ width: 0 }} />}
+      {meter && <div ref={peakRef} className="absolute bottom-[1px] w-[2px] h-[3px] bg-white/80 rounded-sm will-change-transform" style={{ left: '0%' }} title="Peak hold" />}
       <div
         className="absolute top-[-2px] bottom-[-2px] w-[11px] -ml-[5px] rounded-[2px]"
           style={{ left: `${pos * 100}%`, background: 'linear-gradient(180deg,#f1d49d,#d49b50 55%,#8f5d26)', boxShadow: '0 1px 2px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.6)' }}

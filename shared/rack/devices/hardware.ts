@@ -135,7 +135,7 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     description: 'Paraphonic analog: 2 VCOs + sub + noise, 4-pole ladder filter with Multidrive, dual ADSR, LFO. Duo mode plays two voices.',
     tags: ['bass', 'lead', 'analog', 'ladder', 'fat', 'mono'],
     params: polyParams({ filters: ['Ladder 24', 'Ladder 18', 'Ladder 12', 'Ladder 6'], cutoff: 900, resonance: 0.3, voiceMode: 1, glide: 0.02, env: [0.003, 0.4, 0.6, 0.25], fenv: [0.003, 0.35, 0.15, 0.3, 0.55] }),
-    panel: { finish: 'wood', color: '#141414', accent: '#e8e2d0', text: '#f5f1e6', knob: 'moog', logo: 'SUBTERRA', tagline: 'paraphonic analog synthesizer', units: 3 },
+    panel: { finish: 'wood', color: '#141414', accent: '#e8e2d0', text: '#f5f1e6', knob: 'moog', logo: 'SUBTERRA 37', tagline: 'paraphonic analog synthesizer', display: 'vu', units: 3 },
     macro: { label: 'Cutoff', param: 'cutoff', min: 150, max: 6000 },
   }),
   synth({
@@ -157,12 +157,12 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     macro: { label: 'Cutoff', param: 'cutoff', min: 300, max: 9000 },
   }),
   synth({
-    type: 'matrixbrute', name: 'Gridbeast', short: 'GRIDBEAST', category: 'bass', engine: 'poly',
+    type: 'matrixbrute', name: 'Gridbeast Matrix Synth', short: 'GRIDBEAST', category: 'bass', engine: 'poly',
     engineConfig: { maxVoices: 1, brute: true },
-    description: 'Monophonic analog powerhouse: 3 VCOs with Brute Factor, Steiner + ladder filters, cross mod, deep mod matrix (LFO / envelopes).',
-    tags: ['mono', 'bass', 'lead', 'aggressive', 'analog'],
+    description: 'Monophonic analog powerhouse: 3 VCOs with Brute Factor, Steiner + ladder filters, cross mod, deep 16x16 mod matrix (LFO / envelopes).',
+    tags: ['mono', 'bass', 'lead', 'aggressive', 'analog', 'matrix'],
     params: polyParams({ oscs: 3, filters: ['Steiner LP', 'Ladder 24', 'Steiner BP', 'Steiner HP', 'Notch'], xmod: true, cutoff: 1200, resonance: 0.35, voiceMode: 1, glide: 0.03 }),
-    panel: { finish: 'grey', color: '#2a2c30', accent: '#ff7a1a', text: '#f0f0f0', knob: 'metal', logo: 'GRIDBEAST', tagline: 'analog mono synth with mod matrix', display: 'steps', units: 4 },
+    panel: { finish: 'wood', color: '#24262b', accent: '#ff7a1a', text: '#f0f0f0', knob: 'metal', logo: 'GRIDBEAST', tagline: '16x16 illuminated analog matrix synthesizer', display: 'matrix_grid', units: 4 },
     macro: { label: 'Cutoff', param: 'cutoff', min: 150, max: 8000 },
   }),
   synth({
@@ -193,12 +193,12 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     macro: { label: 'Cutoff', param: 'cutoff', min: 300, max: 12000 },
   }),
   synth({
-    type: 'waldorf_iridium', name: 'Prism Wavetable', short: 'PRISM', category: 'synth', engine: 'wavetable',
+    type: 'waldorf_iridium', name: 'Quantum Core Synth', short: 'QUANTUM CORE', category: 'synth', engine: 'wavetable',
     engineConfig: { maxVoices: 8 },
-    description: 'Digital wavetable synth: two wavetable oscillators with index modulation, multimode digital filters, unison and evolving pads.',
-    tags: ['wavetable', 'digital', 'pads', 'evolving', 'ambient'],
+    description: 'Digital wavetable synth: two wavetable oscillators with dual-screen scope & spectrum visualization, index modulation, multimode digital filters.',
+    tags: ['wavetable', 'digital', 'pads', 'evolving', 'ambient', 'quantum'],
     params: wavetableParams({ motion: true }),
-    panel: { finish: 'black', color: '#151517', accent: '#c7a14a', text: '#e8e3d6', knob: 'metal', logo: 'PRISM', tagline: 'digital wavetable synthesizer', display: 'scope', units: 3 },
+    panel: { finish: 'black', color: '#0d131a', accent: '#00e5ff', text: '#e8f4f8', knob: 'metal', logo: 'QUANTUM CORE', tagline: 'UNBOX STUDIOS / SYNTHESIS', display: 'dual_quantum', units: 4 },
     macro: { label: 'Wavetable', param: 'posA', min: 0, max: 1 },
   }),
   synth({
@@ -211,12 +211,12 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     macro: { label: 'Cutoff', param: 'cutoff', min: 150, max: 7000 },
   }),
   synth({
-    type: 'make_noise_shared', name: 'Westside Modular System', short: 'WESTSIDE', category: 'synth', engine: 'westcoast',
+    type: 'make_noise_shared', name: 'Black & Gold Modular System', short: 'BLACK & GOLD', category: 'synth', engine: 'westcoast',
     engineConfig: { maxVoices: 1 },
-    description: 'West-Coast modular: complex oscillator (FM / AM), timbre wavefolder, low-pass gate, Maths-style function generator, echo/spring.',
-    tags: ['modular', 'west coast', 'buchla', 'experimental', 'percussive', 'fm'],
+    description: 'West-Coast modular: complex oscillator (FM / AM), timbre wavefolder, low-pass gate, Maths-style function generator, metallic gold touchplates and traces.',
+    tags: ['modular', 'west coast', 'buchla', 'experimental', 'percussive', 'fm', 'gold'],
     params: westcoastParams(),
-    panel: { finish: 'black', color: '#0f0f0f', accent: '#dcdcdc', text: '#f4f4f4', knob: 'pot', logo: 'westside', tagline: 'west-coast modular', display: 'scope', units: 4 },
+    panel: { finish: 'gold', color: '#090a0d', accent: '#ffd700', text: '#f4f4f4', knob: 'pot', logo: 'BLACK & GOLD', tagline: 'west-coast modular synthesizer', display: 'westcoast_gold', units: 4 },
     macro: { label: 'Timbre', param: 'fold', min: 0, max: 1 },
   }),
 
@@ -242,7 +242,7 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     description: 'Flagship production center: 16 pads, sample kits per pad, synth track, note repeat, 12-bit vintage emulation, master filter / comp.',
     tags: ['flagship', 'sampler', 'hip hop', 'beats'],
     params: grooveParams(GROOVE_PADS, KITS_MPC, { synth: true }), pads: GROOVE_PADS,
-    panel: { finish: 'grey', color: '#232425', accent: '#d61f2c', text: '#f2f2f2', knob: 'metal', logo: 'BEATCENTER', tagline: 'studio production center', display: 'pads', pads: 16, units: 4 },
+    panel: { finish: 'grey', color: '#232425', accent: '#ef4444', text: '#f2f2f2', knob: 'metal', logo: 'BEATCENTER XL', tagline: 'studio production workstation', display: 'touchscreen_pads', pads: 16, units: 4 },
     macro: { label: 'Vintage', param: 'lofi', min: 0, max: 1 },
   }),
   groove({
@@ -343,12 +343,12 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
     panel: { finish: 'grey', color: '#30302e', accent: '#ff8a00', text: '#f2f2f2', knob: 'cap', logo: 'BOOMTOWN', tagline: 'analog rhythm designer', display: 'steps', pads: 16, units: 3 },
   }),
   drums({
-    type: 'perkons', name: 'Ironworks HD-4', short: 'IRONWORKS HD-4', engine: 'drums', engineConfig: { character: 'perkons', perVoiceDrive: true },
+    type: 'perkons', name: 'Ironworks HD-4 Industrial Drum', short: 'IRONWORKS HD-4', engine: 'drums', engineConfig: { character: 'perkons', perVoiceDrive: true },
     description: '4-voice hybrid drum machine: each voice with drive, analog filter and mod; brutal industrial kicks to metallic perc.',
     tags: ['industrial', 'techno', 'distorted', 'drum machine'],
     params: drumParams([P('Voice 1 Kick', 36, 'kickAnalog', { decay: 0.55 }), P('Voice 2 Snare', 38, 'snareAnalog'), P('Voice 3 Metal', 42, 'metal'), P('Voice 4 FM Perc', 45, 'fmPerc')]),
     pads: [P('Voice 1 Kick', 36, 'kickAnalog', { decay: 0.55 }), P('Voice 2 Snare', 38, 'snareAnalog'), P('Voice 3 Metal', 42, 'metal'), P('Voice 4 FM Perc', 45, 'fmPerc')],
-    panel: { finish: 'black', color: '#0e0e0e', accent: '#ffffff', text: '#f5f5f5', knob: 'pot', logo: 'IRONWORKS', tagline: '4-voice hybrid drums', display: 'steps', pads: 4, units: 3 },
+    panel: { finish: 'black', color: '#0e0e0e', accent: '#ff4400', text: '#f5f5f5', knob: 'pot', logo: 'IRONWORKS HD-4', tagline: '4-voice hybrid industrial drum machine', display: 'industrial_step', pads: 4, units: 4 },
     macro: { label: 'Drive', param: 'drive', min: 0, max: 1 },
   }),
   drums({
@@ -417,8 +417,8 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
   outboard({
     type: 'distressor', name: 'Punisher Compressor', short: 'PUNISHER', category: 'dynamics', engine: 'dynamics',
     engineConfig: { model: 'distressor', ratioValues: [1, 2, 3, 4, 6, 10, 20, 40] },
-    description: 'Hybrid compressor: input-driven, ratios 1:1 to Nuke, Dist 2 / Dist 3 harmonic modes, HP / band detector.',
-    tags: ['compressor', 'drums', 'vocals', 'aggressive', 'saturation'],
+    description: 'Hybrid compressor: input-driven, ratios 1:1 to Nuke, Dist 2 / Dist 3 harmonic modes, HP / band detector, 16-LED gain reduction ladder.',
+    tags: ['compressor', 'drums', 'vocals', 'aggressive', 'saturation', 'distressor'],
     params: [
       knob('input', 'Input', 0, 10, 4, { section: 'Distressor', cv: true }),
       knob('attackKnob', 'Attack', 0, 10, 5, { section: 'Distressor' }),
@@ -431,14 +431,14 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
       pct('mix', 'Mix', 1, { section: 'Mode', cv: true }),
     ],
     ports: { sidechain: true, cvOut: ['gr_out'] },
-    panel: { finish: 'black', color: '#1a1a1a', accent: '#c8c8c8', text: '#f0f0f0', knob: 'metal', logo: 'PUNISHER', tagline: 'colour compressor', display: 'gr', units: 1 },
+    panel: { finish: 'black', color: '#161618', accent: '#ef4444', text: '#f0f0f0', knob: 'metal', logo: 'PUNISHER', tagline: 'harmonic colour compressor', display: 'distressor_leds', units: 2 },
     macro: { label: 'Input', param: 'input', min: 1, max: 9 },
   }),
   outboard({
     type: 'la2a', name: 'Silkopto Leveling Amp', short: 'SILKOPTO', category: 'dynamics', engine: 'dynamics',
     engineConfig: { model: 'opto', tube: 0.25 },
-    description: 'Tube optical leveling amplifier: Peak Reduction and Gain, program-dependent opto release, Compress / Limit.',
-    tags: ['opto', 'vocals', 'bass', 'smooth', 'tube', 'leveling'],
+    description: 'Tube optical leveling amplifier: Peak Reduction and Gain, program-dependent opto release, glowing illuminated analog VU meter, Compress / Limit.',
+    tags: ['opto', 'vocals', 'bass', 'smooth', 'tube', 'leveling', 'la2a'],
     params: [
       knob('peakReduction', 'Peak Reduction', 0, 100, 45, { section: 'Leveling Amplifier', cv: true }),
       knob('gain', 'Gain', 0, 100, 45, { section: 'Leveling Amplifier' }),
@@ -448,7 +448,7 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
       pct('mix', 'Mix', 1, { section: 'Leveling Amplifier' }),
     ],
     ports: { sidechain: true, cvOut: ['gr_out'] },
-    panel: { finish: 'grey', color: '#8f9399', accent: '#1a1a1a', text: '#111', knob: 'vintage', logo: 'SILKOPTO', tagline: 'optical leveling amplifier', display: 'vu', units: 2 },
+    panel: { finish: 'cream', color: '#e8e2cf', accent: '#b91c1c', text: '#1c1917', knob: 'vintage', logo: 'SILKOPTO', tagline: 'teletronix-style optical leveling amplifier', display: 'vu', units: 2 },
     macro: { label: 'Peak Red.', param: 'peakReduction', min: 20, max: 80 },
   }),
   outboard({
@@ -492,8 +492,8 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
   outboard({
     type: 'portico2_mbp', name: 'Masterbuss MB-2', short: 'MASTERBUSS', category: 'dynamics', engine: 'dynamics',
     engineConfig: { model: 'vca', silk: true, width: true },
-    description: 'Master bus processor: compressor / limiter, Red / Blue transformer colour, stereo field width, parallel blend.',
-    tags: ['mastering', 'bus', 'width', 'glue'],
+    description: 'Master bus processor: compressor / limiter, Red / Blue transformer colour, stereo field width, parallel blend, dual vertical LED ladders.',
+    tags: ['mastering', 'bus', 'width', 'glue', 'neve', 'portico'],
     params: [
       ...compParams({ threshold: [-30, 10, -6], knee: true, sidechain: true }),
       sel('silk', 'Colour', ['Off', 'Red', 'Blue'], 1, { section: 'Colour' }),
@@ -502,7 +502,7 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
       db('ceiling', 'Limiter', -12, 0, -0.3, { section: 'Output' }),
     ],
     ports: { sidechain: true, cvOut: ['gr_out'] },
-    panel: { finish: 'blue', color: '#1f3b63', accent: '#e6e6e6', text: '#f2f2f2', knob: 'metal', logo: 'MASTERBUSS', tagline: 'master buss processor', display: 'gr', units: 2 },
+    panel: { finish: 'blue', color: '#1a3356', accent: '#38bdf8', text: '#f2f2f2', knob: 'metal', logo: 'MASTERBUSS', tagline: 'Rupert Neve style master buss processor', display: 'dual_vu', units: 2 },
     macro: { label: 'Texture', param: 'texture', min: 0, max: 1 },
   }),
   outboard({
@@ -541,8 +541,8 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
   outboard({
     type: 'manley_varimu', name: 'Vari-Gain Tube Limiter', short: 'VARI-GAIN', category: 'dynamics', engine: 'dynamics',
     engineConfig: { model: 'varimu', attackValues: [25, 35, 50, 70, 100], releaseValues: [200, 400, 600, 1000, 2000, 8000], tube: 0.4 },
-    description: 'Tube vari-mu mastering compressor: gain-reduction ratio grows with level (1.5:1 compress → 4:1 limit), smooth glue.',
-    tags: ['vari-mu', 'tube', 'mastering', 'glue', 'smooth'],
+    description: 'Tube vari-mu mastering compressor: dual backlit analog meters, gain-reduction ratio grows with level (1.5:1 compress → 4:1 limit), smooth glue.',
+    tags: ['vari-mu', 'tube', 'mastering', 'glue', 'smooth', 'manley'],
     params: [
       db('threshold', 'Threshold', -30, 0, -10, { section: 'Variable Mu', cv: true }),
       db('input', 'Input', -12, 12, 0, { section: 'Variable Mu' }),
@@ -555,7 +555,7 @@ export const HARDWARE_SPECS: DeviceSpec[] = [
       pct('mix', 'Mix', 1, { section: 'Output' }),
     ],
     ports: { sidechain: true, cvOut: ['gr_out'] },
-    panel: { finish: 'grey', color: '#5a5f66', accent: '#ffd36e', text: '#f4f4f4', knob: 'vintage', logo: 'VARI-GAIN', tagline: 'stereo variable-mu limiter', display: 'vu', units: 2 },
+    panel: { finish: 'grey', color: '#44484f', accent: '#f59e0b', text: '#f4f4f4', knob: 'vintage', logo: 'VARI-GAIN', tagline: 'stereo variable-mu tube limiter', display: 'dual_vu', units: 2 },
     macro: { label: 'Threshold', param: 'threshold', min: -4, max: -20 },
   }),
   outboard({

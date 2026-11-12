@@ -63,9 +63,10 @@ export function reverseRope(rope: Rope): Rope {
 
 /** One simulation step with both ends pinned. Returns the largest point movement in px. */
 export function stepRope(rope: Rope, ax: number, ay: number, bx: number, by: number, dt: number): number {
+  const safeDt = Math.max(0.005, Math.min(0.033, Number.isFinite(dt) ? dt : 0.016));
   const { n, x, y, px, py } = rope;
-  const g = GRAVITY * dt * dt;
-  const side = rope.bias * dt * dt;
+  const g = GRAVITY * safeDt * safeDt;
+  const side = rope.bias * safeDt * safeDt;
   let moved = 0;
   for (let i = 1; i < n - 1; i++) {
     const vx = (x[i] - px[i]) * DAMPING;

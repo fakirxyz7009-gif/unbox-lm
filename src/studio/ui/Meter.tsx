@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useFrame } from '../../nexa/useEngine.ts';
+import { useMeterFrame } from '../../nexa/useEngine.ts';
 import { gainToDb, meterPos } from './levels.ts';
 
 export interface LevelReading {
@@ -30,7 +30,7 @@ export function StereoMeter({ read, height = 150, width = 16, readout = true }: 
   const clipRef = useRef<HTMLButtonElement>(null);
   const st = useRef({ pl: -120, pr: -120, hl: -120, hr: -120, holdT: 0, clip: false, shown: '', drawn: '' });
 
-  useFrame((now) => {
+  useMeterFrame((now) => {
     const c = canvas.current;
     if (!c) return;
     const g = c.getContext('2d');

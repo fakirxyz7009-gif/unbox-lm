@@ -1,28 +1,25 @@
 /**
  * localHardwareAiEngine.ts
  *
- * Local Hardware-Run AI Engine for Unbox Studio DAW.
+ * The Co-Pilot's on-device engine. Everything here runs on this computer, as keyword rules and the
+ * offline rack planner; the music assistant asks a local Ollama model instead when one is running.
+ * WebGPU is only probed, to show the graphics adapter: no model or shader runs on it, so the UI
+ * must not claim GPU or neural processing.
  *
- * Runs 100% locally on the user's physical hardware:
- *  1. Physical GPU Acceleration (WebGPU: Direct3D12, Vulkan, Metal via navigator.gpu)
- *  2. Local Neural Daemons (Ollama CUDA/ROCm, LM Studio, llama.cpp, LocalAI)
- *  3. On-Device Zero-Latency Neural DSP Rule Engine (CPU/WASM)
- *
- * Provides local hardware inference for:
+ * Provides:
  *  - Rack Building (AI Combinator)
  *  - Device Preset Crafting
  *  - Sequencer Note Generation & Pattern Transforms
  *  - Acoustic Mix & Master Analysis
  */
 
-import type { AudioEngine } from '../../audio/AudioEngine.ts';
 import type { BaseDevice } from '../../audio/BaseDevice.ts';
 import type { RackPatchPlan } from '../../../shared/rack/patchPlan.ts';
 import { planLocally } from '../../../shared/rack/localPlanner.ts';
 import { vstLibrary } from '../../vst/libraryClient.ts';
-import { localPreset, validatePreset, type CraftedPreset, type PresetParam } from '../../../shared/rack/presetCraft.ts';
+import { localPreset, validatePreset, type CraftedPreset } from '../../../shared/rack/presetCraft.ts';
 import { deviceParams } from '../../audio/deviceParams.ts';
-import type { AssistantAction, AssistantContext, AssistantNote } from '../../../shared/localAi/assistant.ts';
+import { audioGenerationRequestRejection, type AssistantAction, type AssistantContext, type AssistantNote } from '../../../shared/localAi/assistant.ts';
 import { askLocalAi, fetchLocalAiStatus } from '../localAiClient.ts';
 import type { MixAnalysis, MasterTarget } from '../../audio/mastering/assistant.ts';
 import type { AutoPoint } from '../../audio/automation/model.ts';
@@ -125,7 +122,7 @@ class LocalHardwareAiEngine {
             architecture: info.architecture || 'Hardware Accelerated',
             device: info.device || 'Dedicated Graphics Adapter',
             description: info.description || `${info.vendor ?? 'GPU'} Shader Processor`,
-            backend: 'WebGPU Physical Acceleration',
+            backend: 'WebGPU adapter (probed only)',
             maxBufferSizeMb,
           };
           this.state.backend = 'webgpu';
@@ -218,12 +215,8 @@ class LocalHardwareAiEngine {
     this.state.totalInferences++;
     this.notify();
 
-    const hardwareLabel =
-      this.state.backend === 'webgpu'
-        ? `Local WebGPU (${this.state.gpu.vendor})`
-        : this.state.backend === 'ollama' && this.state.daemonOnline
-        ? `Local Ollama (${this.state.selectedModel})`
-        : 'Local Hardware Neural Engine';
+    // the offline planner answers whatever the backend: say so
+    const hardwareLabel = 'Local planner (rules)';
 
     return {
       plan: local.plan,
@@ -265,12 +258,7 @@ class LocalHardwareAiEngine {
     this.state.totalInferences++;
     this.notify();
 
-    const hardwareLabel =
-      this.state.backend === 'webgpu'
-        ? `WebGPU Hardware (${this.state.gpu.vendor})`
-        : this.state.backend === 'ollama' && this.state.daemonOnline
-        ? `Local Daemon (${this.state.selectedModel})`
-        : 'Local Hardware Engine';
+    const hardwareLabel = 'Local keyword rules';
 
     return {
       preset: validated,
@@ -293,6 +281,16 @@ class LocalHardwareAiEngine {
     source: string;
     latencyMs: number;
   }> {
+    const audioRequestRejection = audioGenerationRequestRejection(message);
+    if (audioRequestRejection) {
+      return {
+        reply: audioRequestRejection,
+        actions: [],
+        rejected: [audioRequestRejection],
+        source: 'Local control-only policy',
+        latencyMs: 0,
+      };
+    }
     const start = performance.now();
 
     // If local Ollama daemon is online and chosen, use it
@@ -315,11 +313,11 @@ class LocalHardwareAiEngine {
           latencyMs: latency,
         };
       } catch {
-        // Fall back to local neural rule engine
+        // Fall back to the keyword rules
       }
     }
 
-    // High-speed deterministic local neural musical engine
+    // Keyword rules (deterministic)
     const lower = message.toLowerCase();
     const actions: AssistantAction[] = [];
     let textReply = 'Applied local hardware pattern generation.';
@@ -478,7 +476,7 @@ class LocalHardwareAiEngine {
       reply: textReply,
       actions,
       rejected: [],
-      source: `Local Hardware (${this.state.gpu.vendor})`,
+      source: 'Local rules',
       latencyMs: latency,
     };
   }
@@ -507,7 +505,7 @@ class LocalHardwareAiEngine {
     return {
       summary: rep.summary,
       tips: rep.tips,
-      source: `Local Hardware AI (${this.state.gpu.vendor})`,
+      source: 'Local rules (measured mix)',
       latencyMs: latency,
     };
   }

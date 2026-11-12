@@ -115,6 +115,9 @@ interface Size {
   h: number;
 }
 
+/** Notes last copied in any piano roll (Ctrl+C / Ctrl+X). */
+const noteClipboard: { current: RollNote[] } = { current: [] };
+
 export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const {
     notes,
@@ -146,6 +149,10 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
 
   const [zx, setZx] = useState(props.zoomX);
   const [zy, setZy] = useState(props.zoomY);
+  const zxRef = useRef(zx);
+  zxRef.current = zx;
+  const zyRef = useRef(zy);
+  zyRef.current = zy;
   useEffect(() => setZx(props.zoomX), [props.zoomX]);
   useEffect(() => setZy(props.zoomY), [props.zoomY]);
 
@@ -165,7 +172,8 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
   const workRef = useRef<RollNote[] | null>(null);
   const dragRef = useRef<Drag | null>(null);
   const hoverUnitRef = useRef<number>(0);
-  const clipboardRef = useRef<RollNote[]>([]);
+  // one clipboard for every roll, so notes copied on one instrument paste on another
+  const clipboardRef = noteClipboard;
   const drawPending = useRef(false);
   // Selection size and the short status line are React state: they change on clicks and edits, not per frame.
   const [selCount, setSelCount] = useState(0);
@@ -517,26 +525,29 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
       if (!e.ctrlKey && !e.altKey && !e.metaKey) return;
       e.preventDefault();
       const rect = sc.getBoundingClientRect();
-      const f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      const delta = Math.max(-80, Math.min(80, e.deltaY));
+      const f = Math.exp(-delta * 0.003);
       if (e.altKey) {
+        const curZy = zyRef.current;
         const py = e.clientY - rect.top;
-        const row = (sc.scrollTop + py) / zy;
-        const nz = Math.max(6, Math.min(40, zy * f));
+        const row = (sc.scrollTop + py) / curZy;
+        const nz = Math.max(6, Math.min(40, curZy * f));
         setZy(nz);
-        propsRef.current.onZoomChange?.(zx, nz);
+        propsRef.current.onZoomChange?.(zxRef.current, nz);
         requestAnimationFrame(() => (sc.scrollTop = row * nz - py));
       } else {
+        const curZx = zxRef.current;
         const px = e.clientX - rect.left;
-        const unit = (sc.scrollLeft + px) / zx;
-        const nz = Math.max(2, Math.min(120, zx * f));
+        const unit = (sc.scrollLeft + px) / curZx;
+        const nz = Math.max(2, Math.min(120, curZx * f));
         setZx(nz);
-        propsRef.current.onZoomChange?.(nz, zy);
+        propsRef.current.onZoomChange?.(nz, zyRef.current);
         requestAnimationFrame(() => (sc.scrollLeft = unit * nz - px));
       }
     };
     sc.addEventListener('wheel', onWheel, { passive: false });
     return () => sc.removeEventListener('wheel', onWheel);
-  }, [zx, zy]);
+  }, []);
 
   // ------------------------------------------------------------------ helpers
 
@@ -851,7 +862,7 @@ export const PianoRoll: React.FC<PianoRollProps> = (props) => {
     } else if (drag.kind === 'draw') {
       const endU = Math.max(drag.startStep + minLen, snap > 0 ? Math.ceil(u / snap - 1e-6) * snap : u);
       const len = Math.max(minLen, Math.max(defaultLength, endU - drag.startStep));
-      const created = drag.created.map((n) => ({ ...n, length: u > drag.startStep + defaultLength ? endU - drag.startStep : len }));
+      const created = drag.created.map((n) => ({ ...n, length: Math.max(minLen, u > drag.startStep + defaultLength ? endU - drag.startStep : len) }));
       workRef.current = withoutCollisions(base, created);
     } else if (drag.kind === 'marquee') {
       drag.u1 = u;
