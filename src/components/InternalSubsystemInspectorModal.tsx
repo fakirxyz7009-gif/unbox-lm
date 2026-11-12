@@ -24,6 +24,7 @@ import {
   Download,
   Play,
 } from 'lucide-react';
+import { ModalFrame } from './ModalFrame.tsx';
 
 interface InternalSubsystemInspectorModalProps {
   isOpen: boolean;
@@ -751,7 +752,11 @@ export const InternalSubsystemInspectorModal: React.FC<InternalSubsystemInspecto
   const dependencies = audioEngine.collectSampleDependencies();
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 font-mono">
+    <ModalFrame
+      label="Internal subsystems inspector"
+      onClose={onClose}
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 font-mono"
+    >
       <div className="w-full max-w-6xl h-[88vh] bg-[#070a10] border-2 border-cyan-500/60 rounded-xl shadow-[0_0_50px_rgba(6,182,212,0.25)] flex flex-col overflow-hidden">
         {/* Top Header */}
         <div className="h-12 bg-gradient-to-r from-[#06090f] via-[#0c1424] to-[#06090f] border-b border-cyan-500/30 px-4 flex items-center justify-between flex-shrink-0">
@@ -791,6 +796,7 @@ export const InternalSubsystemInspectorModal: React.FC<InternalSubsystemInspecto
 
             <button
               onClick={onClose}
+              aria-label="Close inspector"
               className="p-1.5 rounded bg-neutral-900 hover:bg-red-900/60 text-neutral-400 hover:text-white border border-neutral-700 ml-1"
             >
               <X className="w-4 h-4" />
@@ -1522,6 +1528,6 @@ export const InternalSubsystemInspectorModal: React.FC<InternalSubsystemInspecto
           </div>
         )}
       </div>
-    </div>
+    </ModalFrame>
   );
 };

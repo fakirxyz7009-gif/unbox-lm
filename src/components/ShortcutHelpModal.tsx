@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Keyboard, Zap, Music, Sliders, Layers, Cpu, Sparkles } from 'lucide-react';
+import { ModalFrame } from './ModalFrame.tsx';
 
 interface ShortcutHelpModalProps {
   isOpen: boolean;
@@ -101,7 +102,11 @@ export const ShortcutHelpModal: React.FC<ShortcutHelpModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
+    <ModalFrame
+      label="Keyboard shortcuts"
+      onClose={onClose}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 select-none animate-in fade-in duration-150"
+    >
       <div className="w-full max-w-6xl max-h-[90vh] bg-[#080b11] border border-cyan-500/50 rounded-xl shadow-[0_0_60px_rgba(6,182,212,0.25)] flex flex-col overflow-hidden font-mono">
         {/* Header */}
         <div className="px-5 py-3.5 bg-gradient-to-r from-[#0b1322] via-[#0f172a] to-[#081c24] border-b border-cyan-500/30 flex items-center justify-between">
@@ -126,6 +131,7 @@ export const ShortcutHelpModal: React.FC<ShortcutHelpModalProps> = ({
 
           <button
             onClick={onClose}
+            aria-label="Close keyboard shortcuts"
             className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700 hover:border-red-500/50 text-xs font-bold flex items-center space-x-1.5 transition-all"
           >
             <span>ESC</span>
@@ -185,6 +191,6 @@ export const ShortcutHelpModal: React.FC<ShortcutHelpModalProps> = ({
           </span>
         </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 };

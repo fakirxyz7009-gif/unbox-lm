@@ -3,6 +3,7 @@ import { BaseDevice } from '../audio/BaseDevice.ts';
 import { CVEngine } from '../audio/CVEngine.ts';
 import { CVMatrixEntry } from '../audio/types.ts';
 import { X, Plus, Trash2, Sliders, ArrowRight, Zap, RefreshCw } from 'lucide-react';
+import { ModalFrame } from './ModalFrame.tsx';
 
 interface CVMatrixModalProps {
   isOpen: boolean;
@@ -74,7 +75,11 @@ export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+    <ModalFrame
+      label="Control Voltage Modulation Matrix"
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+    >
       <div className="relative w-full max-w-4xl max-h-[85vh] flex flex-col bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl overflow-hidden text-neutral-100 font-sans">
         {/* Header Bar */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-800 bg-neutral-950">
@@ -93,6 +98,7 @@ export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close CV matrix"
             className="p-1.5 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -263,6 +269,6 @@ export const CVMatrixModal: React.FC<CVMatrixModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 };

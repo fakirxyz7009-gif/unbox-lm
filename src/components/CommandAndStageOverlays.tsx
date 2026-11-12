@@ -23,6 +23,7 @@ import {
   Volume2,
   Grid,
 } from 'lucide-react';
+import { ModalFrame } from './ModalFrame.tsx';
 
 export type VisualizerThemeProfile = 'Synthwave' | 'Neon' | 'Galaxy' | 'Inferno' | 'Timeline';
 
@@ -421,9 +422,11 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
     <>
       {/* 1. GLOBAL COMMAND SEARCH BAR (Ctrl + K) */}
       {isCommandSearchOpen && (
-        <div
+        <ModalFrame
+          label="Command search"
+          onClose={onCloseCommandSearch}
+          closeOnBackdrop
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center pt-20 p-4"
-          onClick={onCloseCommandSearch}
         >
           <div
             className="w-full max-w-2xl bg-[#080d18] border-2 border-cyan-500/50 rounded-xl shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden font-mono"
@@ -434,6 +437,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
               <input
                 type="text"
                 autoFocus
+                aria-label="Search commands"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -460,7 +464,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
               <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[10px] text-cyan-300 font-bold">
                 CTRL + K
               </span>
-              <button onClick={onCloseCommandSearch} className="text-slate-400 hover:text-white">
+              <button onClick={onCloseCommandSearch} aria-label="Close command search" className="text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -496,7 +500,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
               ))}
             </div>
           </div>
-        </div>
+        </ModalFrame>
       )}
 
       {/* 2. SMART PIE MENU (Contextual Circular Pop-Up Wheel Menu) */}
@@ -571,7 +575,11 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
 
       {/* 3. STAGE MODE FULL-SCREEN LAYOUT (Borderless Visualization of Active Modules, Scenes, Macros & Video Visualizer) */}
       {isStageModeOpen && (
-        <div className="fixed inset-0 z-50 bg-[#04070e] text-white font-mono flex flex-col overflow-hidden">
+        <ModalFrame
+          label="Stage mode"
+          onClose={onCloseStageMode}
+          className="fixed inset-0 z-50 bg-[#04070e] text-white font-mono flex flex-col overflow-hidden"
+        >
           {/* Minimal Borderless Stage Header */}
           <div className="h-12 bg-[#070b14]/90 border-b border-cyan-500/30 px-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -739,14 +747,16 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
               </div>
             </div>
           </div>
-        </div>
+        </ModalFrame>
       )}
 
       {/* 4. BATCH STEM EXPORTER WINDOW (Multi-Format Stems & Clip Gain Maps) */}
       {isBatchExporterOpen && (
-        <div
+        <ModalFrame
+          label="Batch stem exporter"
+          onClose={onCloseBatchExporter}
+          closeOnBackdrop
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={onCloseBatchExporter}
         >
           <div
             className="w-full max-w-4xl bg-[#080d18] border-2 border-cyan-500/50 rounded-xl shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden font-mono flex flex-col max-h-[88vh]"
@@ -764,7 +774,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
                   </p>
                 </div>
               </div>
-              <button onClick={onCloseBatchExporter} className="text-slate-400 hover:text-white">
+              <button onClick={onCloseBatchExporter} aria-label="Close batch stem exporter" className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -927,7 +937,7 @@ export const CommandAndStageOverlays: React.FC<CommandAndStageOverlaysProps> = (
               </div>
             </div>
           </div>
-        </div>
+        </ModalFrame>
       )}
     </>
   );

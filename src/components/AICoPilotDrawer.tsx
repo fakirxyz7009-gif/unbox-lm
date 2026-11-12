@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BaseDevice } from '../audio/BaseDevice.ts';
 import { AudioEngine } from '../audio/AudioEngine.ts';
 import { Sparkles, Bot, Sliders, Disc, Wand2, CheckCircle2, ChevronRight, X, Play, Zap } from 'lucide-react';
+import { ModalFrame } from './ModalFrame.tsx';
 
 interface AICoPilotDrawerProps {
   isOpen: boolean;
@@ -181,7 +182,11 @@ export const AICoPilotDrawer: React.FC<AICoPilotDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-neutral-950/95 border-l border-neutral-800 shadow-2xl flex flex-col backdrop-blur-md animate-in slide-in-from-right duration-200 select-none">
+    <ModalFrame
+      label="AI Co-Pilot"
+      onClose={onClose}
+      className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-neutral-950/95 border-l border-neutral-800 shadow-2xl flex flex-col backdrop-blur-md animate-in slide-in-from-right duration-200 select-none"
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 bg-neutral-900/80">
         <div className="flex items-center space-x-2.5">
@@ -200,6 +205,7 @@ export const AICoPilotDrawer: React.FC<AICoPilotDrawerProps> = ({
         </div>
         <button
           onClick={onClose}
+          aria-label="Close AI Co-Pilot"
           className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
         >
           <X className="w-5 h-5" />
@@ -506,6 +512,6 @@ export const AICoPilotDrawer: React.FC<AICoPilotDrawerProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </ModalFrame>
   );
 };
