@@ -8,6 +8,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import App from './App.tsx';
 import { AppErrorBoundary } from './shell/AppErrorBoundary.tsx';
+import { DialogHost } from './shell/dialogs.tsx';
 import { toast } from './shell/toast.ts';
 import './index.css';
 
@@ -26,7 +27,10 @@ window.addEventListener('error', (event) => reportUncaught(event.error ?? event.
 window.addEventListener('unhandledrejection', (event) => reportUncaught(event.reason));
 
 createRoot(document.getElementById('root')!).render(
-  <AppErrorBoundary>
-    <App />
-  </AppErrorBoundary>
+  <>
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
+    <DialogHost />
+  </>
 );
