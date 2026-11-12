@@ -1,0 +1,19 @@
+{
+  "id": "vcsl-pipe-organ",
+  "name": "VCSL Pipe Organ",
+  "kind": "melodic",
+  "category": "organ",
+  "description": "Real pipe-organ recordings by Simon Dalzell for Versilian Studios. One Man 3 Open registration sampled across C1–C6 at minor-third intervals, with sustain loops for held notes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Simon Dalzell (recordist); Versilian Studios LLC (VCSL)",
+    "source": "https://github.com/sgossner/VCSL/tree/master/Aerophones/Edge-blown%20Aerophones/Pipe%20Organ",
+    "notes": "Organ sampled by Simon Dalzell of Ivy Audio, Winter 2015–16. VCSL Info.txt grants redistribution permission; the VCSL repository is CC0-1.0. Uses the Loud / Rode Man3Open registration recordings."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-pipe-organ/Loud",
+  "keyRange": [24, 84],
+  "notes": "Rode_Man3Open_*.wav",
+  "loop": "auto",
+  "length": 6,
+  "release": 0.15
+}

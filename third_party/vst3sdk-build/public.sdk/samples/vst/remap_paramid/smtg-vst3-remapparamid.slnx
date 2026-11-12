@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Folder Name="/Hosting-Examples/">
+		<Project Path="../../vst-hosting/validator/validator.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="b39f2499-0157-3c5a-a28d-35056d5e8fdf">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_common.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_hosting.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Libraries/">
+		<Project Path="../../../../base.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="960abf0d-1428-3417-9e3f-88b52b248572">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="../../../../pluginterfaces.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7dd78c31-eb51-3fd6-b91d-65404419c364">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="../../../../sdk.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="eae4b0d0-25dc-3935-a79f-e3401b69daa2">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_common.vcxproj"/>
+		</Project>
+		<Project Path="../../../../sdk_common.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="e66855cf-0c2b-3570-b972-d6b3cc6b392a">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+		</Project>
+		<Project Path="../../../../sdk_hosting.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2a2ead06-dff7-3215-a8c7-dc5b3260174e">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_common.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/PlugIn-Examples/">
+		<Project Path="remap-paramid.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a97c2628-ae28-362b-b01b-17e3a6f2f001">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+			<BuildDependency Project="../../../../sdk.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_common.vcxproj"/>
+			<BuildDependency Project="../../vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Predefined/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="60d4af3c-0de3-3f90-bd78-ff47a9983062" DefaultStartup="true">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="remap-paramid.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+		</Project>
+		<Project Path="../../../../ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="82485ded-3cba-315a-9ea5-49720497e78b"/>
+	</Folder>
+	<Folder Name="/Utilities/">
+		<Project Path="../../vst-utilities/moduleinfotool/moduleinfotool.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0ebf0fa3-d78d-350b-a889-83dd46ac14bf">
+			<BuildDependency Project="../../../../ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="../../../../base.vcxproj"/>
+			<BuildDependency Project="../../../../pluginterfaces.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_common.vcxproj"/>
+			<BuildDependency Project="../../../../sdk_hosting.vcxproj"/>
+		</Project>
+	</Folder>
+</Solution>

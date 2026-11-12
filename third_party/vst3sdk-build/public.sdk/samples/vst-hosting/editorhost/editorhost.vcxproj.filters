@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\editorhost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\usediids.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\win32\platform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\win32\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\source\vst\hosting\plugprovider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\editorhost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\appinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\iapplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\iplatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\iwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\source\platform\win32\window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\public.sdk\samples\vst-hosting\editorhost\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{B2A82F04-6C29-31ED-9A6F-D25E02997D84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3FAB6F9C-E912-35DA-A4CB-B265BA5AFA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

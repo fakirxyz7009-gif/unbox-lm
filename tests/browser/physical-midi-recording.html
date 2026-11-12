@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unbox physical MIDI recording probe</title>
+  </head>
+  <body>
+    <h1>Unbox physical MIDI recording probe</h1>
+    <button id="connect" type="button">Connect MIDI and arm the recorded piano</button>
+    <pre id="result" data-status="idle">Waiting for the test runner to connect MIDI…</pre>
+    <script>
+      const result = document.querySelector('#result');
+      if (typeof navigator.requestMIDIAccess === 'function' && result) {
+        const requestAccess = navigator.requestMIDIAccess.bind(navigator);
+        Object.defineProperty(navigator, 'requestMIDIAccess', {
+          configurable: true,
+          value: (options) => {
+            const policy = document.permissionsPolicy || document.featurePolicy;
+            let midiPolicy = 'unavailable';
+            try {
+              if (policy && typeof policy.allowsFeature === 'function') midiPolicy = String(policy.allowsFeature('midi'));
+            } catch (error) {
+              midiPolicy = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+            }
+            const context = JSON.stringify({
+              secureContext: window.isSecureContext,
+              userActivation: navigator.userActivation?.isActive ?? null,
+              focused: document.hasFocus(),
+              midiPolicy,
+            });
+            result.dataset.midiContext = context;
+            return requestAccess(options).catch((error) => {
+            result.dataset.midiError = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+            result.dataset.midiContext = context;
+            throw error;
+            });
+          },
+        });
+      }
+    </script>
+    <script type="module">
+      const result = document.querySelector('#result');
+      if (result) {
+        result.dataset.status = 'loading';
+        result.textContent = 'Loading the DAW audio engine…';
+      }
+      console.info('PHYSICAL_MIDI_HTML_START');
+      try {
+        await import('./physical-midi-recording.ts');
+        if (result && result.dataset.status === 'loading') {
+          result.dataset.status = 'ready';
+          result.textContent = 'DAW audio engine ready. Waiting for MIDI connection…';
+        }
+        console.info('PHYSICAL_MIDI_MODULE_READY');
+      } catch (error) {
+        if (result) {
+          result.dataset.status = 'failed';
+          result.textContent = `MODULE FAIL · ${error instanceof Error ? error.stack ?? error.message : String(error)}`;
+        }
+      }
+    </script>
+  </body>
+</html>

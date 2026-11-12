@@ -1,0 +1,221 @@
+import { BaseDevice } from '../BaseDevice.ts';
+import { seededRandom } from '../spec/dsp.ts';
+
+export class RV7000Device extends BaseDevice {
+  private inputL: GainNode;
+  private inputR: GainNode;
+  private outputL: GainNode;
+  private outputR: GainNode;
+
+  private convolver: ConvolverNode;
+  private preDelayNode: DelayNode;
+  private dampingFilter: BiquadFilterNode;
+  private dryGain: GainNode;
+  private wetGain: GainNode;
+  private powered = true;
+  private bypassed = false;
+
+  constructor(ctx: AudioContext, id: string = 'rv7000_1', name: string = 'Cathedral Flagship Reverb') {
+    super(ctx, id, name, 'rv7000', 2);
+
+    this.inputL = ctx.createGain();
+    this.inputR = ctx.createGain();
+    this.outputL = ctx.createGain();
+    this.outputR = ctx.createGain();
+
+    this.dryGain = ctx.createGain();
+    this.wetGain = ctx.createGain();
+
+    this.preDelayNode = ctx.createDelay(1.0);
+    this.convolver = ctx.createConvolver();
+    this.dampingFilter = ctx.createBiquadFilter();
+    this.dampingFilter.type = 'lowpass';
+
+    this.audioInputs.set('in_l', this.inputL);
+    this.audioInputs.set('in_r', this.inputR);
+    this.audioOutputs.set('out_l', this.outputL);
+    this.audioOutputs.set('out_r', this.outputR);
+    this.outputL.connect(this.analyser);
+
+    this.params = {
+      preset: 'Hall',   // Hall, Plate, Room, Spring, Space
+      decay: 3.2,       // seconds (0.2 to 12)
+      size: 0.75,       // 0.1 to 1.0
+      preDelay: 0.025,  // seconds (0 to 0.2)
+      damping: 6500,    // Hz (500 to 18000)
+      mix: 0.45,
+      /** Project-audio asset id for a user-provided impulse response; empty = built-in algorithm. */
+      impulseAssetId: '',
+    };
+
+    this.ports = [
+      { id: 'in_l', name: 'Audio In L', type: 'audio_in', channel: 'left' },
+      { id: 'in_r', name: 'Audio In R', type: 'audio_in', channel: 'right' },
+      { id: 'out_l', name: 'Audio Out L', type: 'audio_out', channel: 'left' },
+      { id: 'out_r', name: 'Audio Out R', type: 'audio_out', channel: 'right' },
+      { id: 'cv_decay', name: 'Decay CV In', type: 'cv_in' },
+      { id: 'cv_mix', name: 'Mix CV In', type: 'cv_in' },
+    ];
+
+    // Stereo all the way: merge L/R, true-stereo convolution (2-channel IR), split back.
+    const merge = ctx.createChannelMerger(2);
+    this.inputL.connect(merge, 0, 0);
+    this.inputR.connect(merge, 0, 1);
+    const split = ctx.createChannelSplitter(2);
+    merge.connect(this.dryGain).connect(split);
+    // reverb input is the mono sum; the 2-channel impulse spreads it into a decorrelated stereo tail
+    const monoSum = ctx.createGain();
+    monoSum.channelCount = 1;
+    monoSum.channelCountMode = 'explicit';
+    merge.connect(monoSum).connect(this.preDelayNode);
+    this.preDelayNode.connect(this.convolver);
+    this.convolver.connect(this.dampingFilter);
+    this.dampingFilter.connect(this.wetGain).connect(split);
+    split.connect(this.outputL, 0);
+    split.connect(this.outputR, 1);
+
+    this.installPowerSwitches();
+    this.updateImpulse();
+    this.applyParams();
+
+    this.cvInputs.set('cv_decay', {
+      setter: (amount: number) => {
+        this.params.decay = Math.max(0.2, Math.min(10, this.params.decay + amount * 2));
+        this.updateImpulse();
+      },
+    });
+
+    this.cvInputs.set('cv_mix', {
+      setter: (amount: number) => {
+        this.setParam('mix', Math.max(0, Math.min(1, this.params.mix + amount * 0.4)));
+      },
+    });
+  }
+
+  private updateImpulse(): void {
+    const rate = this.ctx.sampleRate;
+    const size = Math.max(0.1, Math.min(1, Number(this.params.size) || 0.1));
+    // Keep the default size neutral while scaling the room response shorter or longer.
+    const decayTime = Math.max(0.2, Math.min(12, this.params.decay * (0.4 + size * 0.8)));
+    const length = Math.max(1, Math.floor(rate * decayTime));
+    const impulse = this.ctx.createBuffer(2, length, rate);
+
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+
+    const preset = this.params.preset;
+
+    const density = preset === 'Plate' ? 1.4 : preset === 'Spring' ? 0.6 : 1.0;
+    const leftRandom = seededRandom(`rv7000:${preset}:${decayTime}:${rate}:left`);
+    const rightRandom = seededRandom(`rv7000:${preset}:${decayTime}:${rate}:right`);
+
+    for (let i = 0; i < length; i++) {
+      const t = i / rate;
+      const env = Math.pow(1 - i / length, density) * Math.exp(-t * (3.5 / decayTime));
+      // Subtle stereo decorrelation
+      left[i] = (leftRandom() * 2 - 1) * env;
+      right[i] = (rightRandom() * 2 - 1) * env * 0.95;
+    }
+
+    this.convolver.buffer = impulse;
+  }
+
+  /**
+   * Replaces the generated room with a decoded project-audio asset.  The caller owns decoding
+   * and persistence; keeping this device API buffer-based makes the exact response usable in an
+   * OfflineAudioContext clone without file-system access or a second decode.
+   */
+  public setCustomImpulse(assetId: string, impulse: AudioBuffer): void {
+    if (!assetId || !impulse || impulse.length < 1) return;
+    this.params.impulseAssetId = assetId;
+    this.convolver.buffer = impulse;
+  }
+
+  /** Returns to the deterministic built-in room response. The imported project asset is retained. */
+  public clearCustomImpulse(): void {
+    this.params.impulseAssetId = '';
+    this.updateImpulse();
+  }
+
+  /**
+   * RV7000 owns its dry/wet graph, so its power and bypass states belong here rather than in the
+   * legacy output wrapper.  Muting both branches at the device prevents a convolution tail from
+   * leaking through a generic shim after the unit is powered down.
+   */
+  private installPowerSwitches(): void {
+    Object.defineProperty(this, 'isPowered', {
+      configurable: true,
+      get: () => this.powered,
+      set: (value: boolean) => {
+        this.powered = !!value;
+        this.applyParams();
+      },
+    });
+    Object.defineProperty(this, 'isBypassed', {
+      configurable: true,
+      get: () => this.bypassed,
+      set: (value: boolean) => {
+        this.bypassed = !!value;
+        this.applyParams();
+      },
+    });
+  }
+
+  /** Keep offline mix and stem renders on the same impulse response as the live device. */
+  public override cloneForOfflineContext(ctx: BaseAudioContext): BaseDevice {
+    const copy = new RV7000Device(ctx as AudioContext, this.id, this.name);
+    copy.params = { ...this.params };
+    copy.convolver.buffer = this.convolver.buffer;
+    copy.isPowered = this.isPowered;
+    copy.isBypassed = this.isBypassed;
+    copy.applyParams();
+    return copy;
+  }
+
+  private applyParams(): void {
+    const t = this.ctx.currentTime;
+    const maxFreq = Math.min(18000, this.ctx.sampleRate ? this.ctx.sampleRate * 0.49 : 18000);
+    this.preDelayNode.delayTime.setTargetAtTime(Math.max(0, Math.min(0.5, this.params.preDelay)), t, 0.015);
+    this.dampingFilter.frequency.setTargetAtTime(Math.max(300, Math.min(maxFreq, this.params.damping)), t, 0.015);
+
+    const mix = Math.max(0, Math.min(1, this.params.mix));
+    const wet = this.powered && !this.bypassed ? mix : 0;
+    const dry = this.powered ? (this.bypassed ? 1 : 1 - mix) : 0;
+    try {
+      this.wetGain.gain.cancelScheduledValues(t);
+      this.dryGain.gain.cancelScheduledValues(t);
+      this.wetGain.gain.setValueAtTime(wet, t);
+      this.dryGain.gain.setValueAtTime(dry, t);
+    } catch {
+      this.wetGain.gain.value = wet;
+      this.dryGain.gain.value = dry;
+    }
+  }
+
+  public setParam(key: string, value: any): void {
+    if (key === 'impulseAssetId') {
+      // Project loading restores the id before AudioEngine supplies its decoded buffer. Do not
+      // clear the last valid/built-in response while the asset is still being resolved.
+      this.params.impulseAssetId = typeof value === 'string' ? value : '';
+      if (!this.params.impulseAssetId) this.updateImpulse();
+      return;
+    }
+    this.params[key] = value;
+    if (key === 'decay' || key === 'preset' || key === 'size') {
+      // The imported response is the impulse; room-shape controls should not silently overwrite
+      // it. Pre-delay, damping and mix remain active after an import.
+      if (!this.params.impulseAssetId) this.updateImpulse();
+    } else {
+      this.applyParams();
+    }
+  }
+
+  public override dispose(): void {
+    this.convolver.buffer = null;
+    [this.inputL, this.inputR, this.outputL, this.outputR, this.dryGain, this.wetGain,
+      this.preDelayNode, this.convolver, this.dampingFilter].forEach((node) => {
+      try { node.disconnect(); } catch {}
+    });
+    super.dispose();
+  }
+}

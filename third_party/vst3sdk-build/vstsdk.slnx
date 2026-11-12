@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Folder Name="/Hosting-Examples/">
+		<Project Path="public.sdk/samples/vst-hosting/editorhost/editorhost.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2d25768f-3df4-3ac3-be1b-070908091cab">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="sdk_hosting.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst-hosting/validator/validator.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="b39f2499-0157-3c5a-a28d-35056d5e8fdf">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="sdk_hosting.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Libraries/">
+		<Project Path="base.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="960abf0d-1428-3417-9e3f-88b52b248572">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="cmake_VST_modules.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7c87d660-eb9e-36ed-b4f5-61f5ad4e8fe8">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+		</Project>
+		<Project Path="cmake_modules.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="91cc81c3-9f32-39fa-a070-dac502358f3d">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+		</Project>
+		<Project Path="pluginterfaces.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7dd78c31-eb51-3fd6-b91d-65404419c364">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="sdk.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="eae4b0d0-25dc-3935-a79f-e3401b69daa2">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+		</Project>
+		<Project Path="sdk_common.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="e66855cf-0c2b-3570-b972-d6b3cc6b392a">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+		</Project>
+		<Project Path="sdk_hosting.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2a2ead06-dff7-3215-a8c7-dc5b3260174e">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/PlugIn-Examples/">
+		<Project Path="public.sdk/samples/vst/adelay/adelay.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="74ab2261-4ce2-3734-b9bf-af416db60e7d">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/again_sampleaccurate/again-sample-accurate.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="01e11e6e-e10c-382f-a133-29c1969193d2">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="sdk_hosting.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/channelcontext/channel-context.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="4954bb50-090c-37ea-96b8-fa8e3641287b">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/legacymidiccout/legacy-midicc-out.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="49bb9534-ece1-34fe-bdd8-9640bf7d6c84">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/mda-vst3/mda-vst3.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="752f2168-0e53-323b-98e8-4634078ac288">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/multiple_programchanges/multiple-program-changes.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ef17a682-4e54-3f44-a81d-54ff2bcea4fd">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/prefetchablesupport/prefetchable.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="174fd870-7e2b-32b2-b9df-3920a3124a84">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/programchange/program-change.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0d9111df-5dd5-3176-ba0d-d6b401c7941f">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/remap_paramid/remap-paramid.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a97c2628-ae28-362b-b01b-17e3a6f2f001">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/syncdelay/sync-delay.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="908600aa-c1fe-3fe7-a91c-8feaf54015f5">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+		<Project Path="public.sdk/samples/vst/utf16name/utf16-name.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="f1739ef5-52a2-394c-9ad0-1dfdf85ad34d">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Predefined/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="60d4af3c-0de3-3f90-bd78-ff47a9983062" DefaultStartup="true">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/adelay/adelay.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/again_sampleaccurate/again-sample-accurate.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/channelcontext/channel-context.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/editorhost/editorhost.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/legacymidiccout/legacy-midicc-out.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/mda-vst3/mda-vst3.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/multiple_programchanges/multiple-program-changes.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/prefetchablesupport/prefetchable.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/programchange/program-change.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/remap_paramid/remap-paramid.vcxproj"/>
+			<BuildDependency Project="sdk.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="sdk_hosting.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/syncdelay/sync-delay.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst/utf16name/utf16-name.vcxproj"/>
+			<BuildDependency Project="public.sdk/samples/vst-hosting/validator/validator.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+		</Project>
+		<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="82485ded-3cba-315a-9ea5-49720497e78b"/>
+	</Folder>
+	<Folder Name="/Utilities/">
+		<Project Path="public.sdk/samples/vst-utilities/moduleinfotool/moduleinfotool.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0ebf0fa3-d78d-350b-a889-83dd46ac14bf">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="base.vcxproj"/>
+			<BuildDependency Project="pluginterfaces.vcxproj"/>
+			<BuildDependency Project="sdk_common.vcxproj"/>
+			<BuildDependency Project="sdk_hosting.vcxproj"/>
+		</Project>
+	</Folder>
+</Solution>

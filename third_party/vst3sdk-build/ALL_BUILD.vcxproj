@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{60D4AF3C-0DE3-3F90-BD78-FF47A9983062}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk -BC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build --check-stamp-file C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCXXInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeGenericSystem.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeLanguageInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeParseArguments.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakePrintHelpers.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeRCInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CheckLanguage.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CheckSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\WindowsPaths.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeCCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeCXXCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeRCCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeSystem.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AAXSupport.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddCommonOptions.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddSMTGLibrary.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddVST3Library.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddVST3Options.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Bundle.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CodeSign.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_ConfigureCmakeGenerator.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CoreAudioSupport.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CustomModuleTarget.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_DetectPlatform.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_ExportedSymbols.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_FindJack.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Global.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PlatformIOS.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PlatformToolset.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Platform_Windows.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PrefixHeader.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_SetDebugExecutable.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_SetupVST3LibraryDefaultPath.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_UniversalBinary.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_VST3_SDK.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_VstGuiSupport.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk -BC:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build --check-stamp-file C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCXXInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeGenericSystem.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeLanguageInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeParseArguments.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakePrintHelpers.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeRCInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CheckLanguage.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\CheckSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Compiler\MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Linker\MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\Windows.cmake;C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-4.3\Modules\Platform\WindowsPaths.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeCCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeCXXCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeRCCompiler.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\4.3.1-msvc1\CMakeSystem.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AAXSupport.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddCommonOptions.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddSMTGLibrary.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddVST3Library.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_AddVST3Options.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Bundle.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CodeSign.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_ConfigureCmakeGenerator.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CoreAudioSupport.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_CustomModuleTarget.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_DetectPlatform.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_ExportedSymbols.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_FindJack.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Global.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PlatformIOS.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PlatformToolset.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_Platform_Windows.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_PrefixHeader.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_SetDebugExecutable.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_SetupVST3LibraryDefaultPath.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_UniversalBinary.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_VST3_SDK.cmake;C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk\cmake\modules\SMTG_VstGuiSupport.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\ZERO_CHECK.vcxproj">
+      <Project>{82485DED-3CBA-315A-9EA5-49720497E78B}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\adelay\adelay.vcxproj">
+      <Project>{74AB2261-4CE2-3734-B9BF-AF416DB60E7D}</Project>
+      <Name>adelay</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\again_sampleaccurate\again-sample-accurate.vcxproj">
+      <Project>{01E11E6E-E10C-382F-A133-29C1969193D2}</Project>
+      <Name>again-sample-accurate</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\base.vcxproj">
+      <Project>{960ABF0D-1428-3417-9E3F-88B52B248572}</Project>
+      <Name>base</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\channelcontext\channel-context.vcxproj">
+      <Project>{4954BB50-090C-37EA-96B8-FA8E3641287B}</Project>
+      <Name>channel-context</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst-hosting\editorhost\editorhost.vcxproj">
+      <Project>{2D25768F-3DF4-3AC3-BE1B-070908091CAB}</Project>
+      <Name>editorhost</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\legacymidiccout\legacy-midicc-out.vcxproj">
+      <Project>{49BB9534-ECE1-34FE-BDD8-9640BF7D6C84}</Project>
+      <Name>legacy-midicc-out</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\mda-vst3\mda-vst3.vcxproj">
+      <Project>{752F2168-0E53-323B-98E8-4634078AC288}</Project>
+      <Name>mda-vst3</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst-utilities\moduleinfotool\moduleinfotool.vcxproj">
+      <Project>{0EBF0FA3-D78D-350B-A889-83DD46AC14BF}</Project>
+      <Name>moduleinfotool</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\multiple_programchanges\multiple-program-changes.vcxproj">
+      <Project>{EF17A682-4E54-3F44-A81D-54FF2BCEA4FD}</Project>
+      <Name>multiple-program-changes</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\pluginterfaces.vcxproj">
+      <Project>{7DD78C31-EB51-3FD6-B91D-65404419C364}</Project>
+      <Name>pluginterfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\prefetchablesupport\prefetchable.vcxproj">
+      <Project>{174FD870-7E2B-32B2-B9DF-3920A3124A84}</Project>
+      <Name>prefetchable</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\programchange\program-change.vcxproj">
+      <Project>{0D9111DF-5DD5-3176-BA0D-D6B401C7941F}</Project>
+      <Name>program-change</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\remap_paramid\remap-paramid.vcxproj">
+      <Project>{A97C2628-AE28-362B-B01B-17E3A6F2F001}</Project>
+      <Name>remap-paramid</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\sdk.vcxproj">
+      <Project>{EAE4B0D0-25DC-3935-A79F-E3401B69DAA2}</Project>
+      <Name>sdk</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\sdk_common.vcxproj">
+      <Project>{E66855CF-0C2B-3570-B972-D6B3CC6B392A}</Project>
+      <Name>sdk_common</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\sdk_hosting.vcxproj">
+      <Project>{2A2EAD06-DFF7-3215-A8C7-DC5B3260174E}</Project>
+      <Name>sdk_hosting</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\syncdelay\sync-delay.vcxproj">
+      <Project>{908600AA-C1FE-3FE7-A91C-8FEAF54015F5}</Project>
+      <Name>sync-delay</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst\utf16name\utf16-name.vcxproj">
+      <Project>{F1739EF5-52A2-394C-9AD0-1DFDF85AD34D}</Project>
+      <Name>utf16-name</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Owner\Desktop\unbox-lm-main\third_party\vst3sdk-build\public.sdk\samples\vst-hosting\validator\validator.vcxproj">
+      <Project>{B39F2499-0157-3C5A-A28D-35056D5E8FDF}</Project>
+      <Name>validator</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,198 @@
+{
+  "revision": "c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e",
+  "sourceDir": "Idiophones/Struck Idiophones/Marimba",
+  "files": [
+    {
+      "source": "LICENSE",
+      "file": "LICENSE",
+      "bytes": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "source": "README.md",
+      "file": "README.md",
+      "bytes": 4365,
+      "sha256": "6f7214a188f106c917d6503748485413c3e47cf56bce69f82beb9d16aa0894a9"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F1_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F1_soft_01.wav",
+      "bytes": 796046,
+      "sha256": "eadaeb8bd491b3161197478119be60771e0e1d8620d4848e39595976f9c9c998"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F1_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F1_med_01.wav",
+      "bytes": 1027292,
+      "sha256": "484de6300831ebb267a867a4c435567bacfb77aed953f317fde5b1c312bafac4"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F1_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F1_loud_01.wav",
+      "bytes": 972392,
+      "sha256": "c5cb5ce59540b0a23628a919e90153a6cee9bb35325b056e0710c12b64f0b193"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C2_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C2_soft_01.wav",
+      "bytes": 1697402,
+      "sha256": "5fd3c75ab7eafebc24a693793e2c4404922dfad37d8dd9bf80e8ca483500ed80"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C2_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C2_med_01.wav",
+      "bytes": 1785050,
+      "sha256": "fd9c329513ed9d54c36174bbe45add471a80ffad411c686428bbf0bbc0121438"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C2_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C2_loud_01.wav",
+      "bytes": 2236004,
+      "sha256": "bfad3b0e57d04c31e6079aba11fb0a6c5c84627fd4bc46e4e0923663586c460c"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G2_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G2_soft_01.wav",
+      "bytes": 1699184,
+      "sha256": "bb41b6fce6b5cf73086480754f83a4b33ae61a7e6f19c7e7ee3b01d0171e7f63"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G2_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G2_med_01.wav",
+      "bytes": 1513244,
+      "sha256": "e9c2d33b9f50f0689b349dc9aee20a5b621961cf8294abb5ac4ba5a4674bd7c2"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G2_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G2_loud_01.wav",
+      "bytes": 1855448,
+      "sha256": "3bd173f56481e537c3489a94d1e4dd59c304f9f98679c7c90890fc9f5795c25d"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B2_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B2_soft_01.wav",
+      "bytes": 1406594,
+      "sha256": "10e4a47853920c93423fd72f224e46bf1bce60319d5e7ae501d1b8431ec7d78a"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B2_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B2_med_01.wav",
+      "bytes": 1495616,
+      "sha256": "4d0ffc47858d0c4545191eef3240d470c40df1c090841c0fb2ae2f47900794ee"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B2_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B2_loud_01.wav",
+      "bytes": 1585778,
+      "sha256": "a329138008daae1c03652822d7079c0e1e9941071b8c22195e1985f0c685fdeb"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F3_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F3_soft_01.wav",
+      "bytes": 1455272,
+      "sha256": "6eb7ccf5fa10b1bdaf10f0cc7a50d8c42ef086636a9e88c6527fb3af58e5ee1f"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F3_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F3_med_01.wav",
+      "bytes": 1382924,
+      "sha256": "a493b31ac2e588ed961c522a66b790acc584b59a08918bd7193d6e6fa8df4756"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F3_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F3_loud_01.wav",
+      "bytes": 1589876,
+      "sha256": "379e749add43b12959fae06cc272f1871899cc05460faf41ead77b93e5d01843"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C4_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C4_soft_01.wav",
+      "bytes": 915446,
+      "sha256": "4d03d005166e8b366e6a983b7a4a89e0847e1d58a6d34dda35ddf74289cace94"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C4_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C4_med_01.wav",
+      "bytes": 655244,
+      "sha256": "3e88c006eef05e8f7891f8f6027042006199a4ec3b53a0ad7308f9782a52d4df"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C4_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C4_loud_01.wav",
+      "bytes": 1016564,
+      "sha256": "4af539d47a452d7fad26e171b1c8adcca272cee97191f040d192680462c880b8"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G4_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G4_soft_01.wav",
+      "bytes": 860570,
+      "sha256": "d3e23f018b091a60d91c3c93b38b605d02a9e26c7cf5830ffb866cfe84130cd0"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G4_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G4_med_01.wav",
+      "bytes": 580262,
+      "sha256": "278e738d8214cdc192e63c3350b1e464a72c86dc135ddf0c5ce035569be66c71"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_G4_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_G4_loud_01.wav",
+      "bytes": 800102,
+      "sha256": "36f39f9f24789001add2b4c440defb7641178b0e8449c5cb7f1960bccaf0aaaf"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B4_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B4_soft_01.wav",
+      "bytes": 492602,
+      "sha256": "278f5123442162e7946fa68a48ed650e3838b1ddcd3e2173d3ea69f30079c534"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B4_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B4_med_01.wav",
+      "bytes": 433802,
+      "sha256": "d676b76e3850d85333c85b1fc77d20f4524ff2e9e6f03551f52c5b22fbe8ab30"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_B4_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_B4_loud_01.wav",
+      "bytes": 694454,
+      "sha256": "d04aed26222822d14435fa61b88cdcce95606a5e94bb5e7167d266875343a39c"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F5_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F5_soft_01.wav",
+      "bytes": 373694,
+      "sha256": "f98ea1bd715aee0091ec8eaf61c9fc3c96440f403e9d32ec33f194fb70d9938c"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F5_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F5_med_01.wav",
+      "bytes": 566924,
+      "sha256": "430da3d4f0a323838b7495d9cc5a98bc3829e2f11be11335af526a48ea88b8e6"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_F5_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_F5_loud_01.wav",
+      "bytes": 551306,
+      "sha256": "a434c15978b2ea4b8921feeb3fd1f177447324d06c177801e0e46c12a97abc86"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C6_soft_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C6_soft_01.wav",
+      "bytes": 663584,
+      "sha256": "55d5793308bb10feaf3c1e341c0e4e4dbf8ce7fbea805e118b55177389ec3a09"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C6_med_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C6_med_01.wav",
+      "bytes": 451844,
+      "sha256": "d93fc6f7b399ac28d1ecf91987e9eb55b34024c6033b7f0e3aaf35f49d51a2f2"
+    },
+    {
+      "source": "Idiophones/Struck Idiophones/Marimba/Marimba_hit_Outrigger_C6_loud_01.wav",
+      "file": "samples/Marimba_hit_Outrigger_C6_loud_01.wav",
+      "bytes": 472142,
+      "sha256": "2e42b1b6f6923f32e3daadc12b063e94d15af20fa410ddcb267eb906fd6e0e89"
+    }
+  ]
+}

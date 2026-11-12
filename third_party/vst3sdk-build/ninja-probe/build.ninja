@@ -1,0 +1,7 @@
+rule cc
+  command = cl.exe /nologo /c $in /Fo$out
+rule link
+  command = link.exe /nologo $in /OUT:$out
+build main.obj: cc main.c
+build main.exe: link main.obj
+default main.exe

@@ -1,0 +1,64 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCXXInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeGenericSystem.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeParseArguments.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakePrintHelpers.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeRCInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CheckLanguage.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CheckSourceCompiles.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Compiler/MSVC-C.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Compiler/MSVC.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/FindPackageMessage.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CMakeCLinkerInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CMakeCXXLinkerInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CMakeCommonLinkerInformation.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CheckSourceCompiles.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Linker/MSVC-C.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Linker/MSVC-CXX.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Linker/MSVC.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Linker/Windows-MSVC-C.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Linker/Windows-MSVC-CXX.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Linker/Windows-MSVC.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-Initialize.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows.cmake
+C:/Program Files/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/WindowsPaths.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/4.3.1-msvc1/CMakeCCompiler.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/4.3.1-msvc1/CMakeCXXCompiler.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/4.3.1-msvc1/CMakeRCCompiler.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk-build/CMakeFiles/4.3.1-msvc1/CMakeSystem.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/CMakeLists.txt
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_AAXSupport.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_AddCommonOptions.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_AddSMTGLibrary.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_AddVST3Library.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_AddVST3Options.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_Bundle.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_CodeSign.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_ConfigureCmakeGenerator.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_CoreAudioSupport.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_CustomModuleTarget.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_DetectPlatform.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_ExportedSymbols.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_FindJack.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_Global.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_PlatformIOS.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_PlatformToolset.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_Platform_Windows.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_PrefixHeader.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_SetDebugExecutable.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_SetupVST3LibraryDefaultPath.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_UniversalBinary.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_VST3_SDK.cmake
+C:/Users/Owner/Desktop/unbox-lm-main/third_party/vst3sdk/cmake/modules/SMTG_VstGuiSupport.cmake

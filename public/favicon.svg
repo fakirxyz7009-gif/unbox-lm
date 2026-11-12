@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cabinet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b3822" />
+      <stop offset="0.22" stop-color="#291d12" />
+      <stop offset="1" stop-color="#120f0c" />
+    </linearGradient>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4b27e" />
+      <stop offset="0.5" stop-color="#8b673d" />
+      <stop offset="1" stop-color="#3e2b19" />
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16191b" />
+      <stop offset="1" stop-color="#060809" />
+    </linearGradient>
+    <radialGradient id="dial" cx="34%" cy="28%" r="72%">
+      <stop offset="0" stop-color="#e9d3a9" />
+      <stop offset="0.3" stop-color="#aa8755" />
+      <stop offset="1" stop-color="#3a2a19" />
+    </radialGradient>
+    <filter id="signal-glow" x="-30%" y="-40%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <rect x="14" y="44" width="484" height="424" rx="62" fill="#080706" />
+  <rect x="20" y="38" width="472" height="424" rx="58" fill="url(#cabinet)" stroke="#080706" stroke-width="8" />
+  <rect x="30" y="48" width="452" height="404" rx="49" fill="none" stroke="#e1c18e" stroke-opacity=".52" stroke-width="3" />
+  <rect x="48" y="72" width="320" height="356" rx="58" fill="url(#bezel)" stroke="#d6ba8e" stroke-width="5" />
+  <rect x="67" y="90" width="282" height="320" rx="74" fill="url(#glass)" stroke="#090a0b" stroke-width="8" />
+  <path d="M91 254h37l15-48 25 111 28-78 21 32h50l18-26 18 9h23" fill="none" stroke="#e5dec9" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#signal-glow)" />
+  <path d="M84 281h245" stroke="#d4cdb9" stroke-opacity=".2" stroke-width="2" />
+  <rect x="378" y="74" width="91" height="59" rx="18" fill="#18120d" stroke="#745532" stroke-width="3" />
+  <path d="M388 90h71M388 101h71M388 112h71M388 123h71" stroke="#ad8956" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" />
+  <circle cx="409" cy="188" r="30" fill="url(#dial)" stroke="#d5b783" stroke-width="4" />
+  <circle cx="409" cy="188" r="21" fill="none" stroke="#392818" stroke-width="3" />
+  <path d="M411 189l15-13" stroke="#21180f" stroke-width="7" stroke-linecap="round" />
+  <circle cx="449" cy="165" r="10" fill="url(#dial)" stroke="#c4a06a" stroke-width="2" />
+  <circle cx="449" cy="210" r="10" fill="url(#dial)" stroke="#c4a06a" stroke-width="2" />
+  <circle cx="409" cy="270" r="25" fill="url(#dial)" stroke="#d5b783" stroke-width="4" />
+  <path d="M409 270l-13-12" stroke="#21180f" stroke-width="6" stroke-linecap="round" />
+  <rect x="380" y="321" width="87" height="101" rx="13" fill="#17110c" stroke="#745532" stroke-width="3" />
+  <path d="M389 335h69M389 346h69M389 357h69M389 368h69M389 379h69M389 390h69M389 401h69M389 412h69" stroke="#b48e5a" stroke-opacity=".72" stroke-width="4" stroke-linecap="round" />
+</svg>

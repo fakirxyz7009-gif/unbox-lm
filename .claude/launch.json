@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "unbox-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "unbox-dev-3123",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set PORT=3123&& npx tsx server.ts"
+      ],
+      "port": 3123
+    },
+    {
+      "name": "unbox-prod-3124",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set PORT=3124&& set NODE_ENV=production&& npx tsx server.ts"
+      ],
+      "port": 3124
+    }
+  ]
+}

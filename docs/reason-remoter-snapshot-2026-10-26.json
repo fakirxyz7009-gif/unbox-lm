@@ -1,0 +1,6774 @@
+{
+  "source": "https://www.reasonremoter.uk/rack-extension-list/",
+  "capturedOn": "2026-10-26",
+  "totalsLastCheckedOn": "2026-10-28",
+  "checkedReportedTotals": {
+    "rackExtensions": 964,
+    "developers": 131,
+    "categories": {
+      "Instruments": 253,
+      "Effects": 438,
+      "Utilities": 205
+    }
+  },
+  "reportedTotals": {
+    "rackExtensions": 964,
+    "developers": 131,
+    "categories": {
+      "Instruments": 253,
+      "Effects": 438,
+      "Utilities": 205
+    }
+  },
+  "extractedRows": 964,
+  "products": [
+    {
+      "name": "EW Saturation",
+      "developer": "4ever Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-08-20"
+    },
+    {
+      "name": "Distillery Beat Looper",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2017-04-05"
+    },
+    {
+      "name": "Elements A-Filter",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-10-18"
+    },
+    {
+      "name": "Elements Chorus",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "Elements Distort",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2016-10-31"
+    },
+    {
+      "name": "Elements Filter",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "Elements G-Delay",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2017-07-03"
+    },
+    {
+      "name": "Elements Lo-Fi",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2016-10-31"
+    },
+    {
+      "name": "Elements Phaser",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "Elements S-Delay",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "Elements Splitter",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "Elements T-Delay",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2016-11-09"
+    },
+    {
+      "name": "Mutagen Multiband Distortion",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.5.0",
+      "released": "2014-06-09"
+    },
+    {
+      "name": "Pandemic Multiband Autopan",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.5.1",
+      "released": "2014-06-18"
+    },
+    {
+      "name": "Relapse Multiband Delay",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2014-09-22"
+    },
+    {
+      "name": "Spectre Spectral Delay",
+      "developer": "AirRaid Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-06-15"
+    },
+    {
+      "name": "Auto-Tune Reason",
+      "developer": "Antares Audio Technologies LLC",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-07-07"
+    },
+    {
+      "name": "RoughRider",
+      "developer": "Audio Damage, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2012-07-10"
+    },
+    {
+      "name": "Strontium-90",
+      "developer": "Audio Poison",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2014-06-12"
+    },
+    {
+      "name": "Filter X1",
+      "developer": "BASSGRID",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-05-20"
+    },
+    {
+      "name": "Mutation Collider",
+      "developer": "BASSGRID",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-03-22"
+    },
+    {
+      "name": "Terminal Master Effect",
+      "developer": "BASSGRID",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-10-28"
+    },
+    {
+      "name": "Natural Selection Pedal Board",
+      "developer": "Bassment DSP",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-04-22"
+    },
+    {
+      "name": "SA16-Chorus",
+      "developer": "Bassment DSP",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-02-09"
+    },
+    {
+      "name": "The Lotus Compressor",
+      "developer": "Bassment DSP",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2015-09-08"
+    },
+    {
+      "name": "Bezier Dynamics",
+      "developer": "Bcase",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-18"
+    },
+    {
+      "name": "Double Tracking Effect",
+      "developer": "Bcase",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-06-18"
+    },
+    {
+      "name": "One Bit Converter",
+      "developer": "Bcase",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-18"
+    },
+    {
+      "name": "Parafilter III Sequencer",
+      "developer": "BHK Samples",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2021-07-02"
+    },
+    {
+      "name": "Blamco Filter",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-11-20"
+    },
+    {
+      "name": "Blamco Mid-Range Equalizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-11-20"
+    },
+    {
+      "name": "Blamco Program Equalizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-11-20"
+    },
+    {
+      "name": "DC-1 Distortion",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.4.0",
+      "released": "2017-05-02"
+    },
+    {
+      "name": "DC-9 Overdrive",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2017-05-02"
+    },
+    {
+      "name": "F-16 Analog Filter",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2017-12-11"
+    },
+    {
+      "name": "Mark VIII Amplifier",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2014-08-27"
+    },
+    {
+      "name": "Resampler",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2014-02-19"
+    },
+    {
+      "name": "t00b Distortion",
+      "developer": "Blamsoft, Inc.",
+      "category": "Effects",
+      "version": "1.3.0",
+      "released": "2017-05-02"
+    },
+    {
+      "name": "Decimort 2",
+      "developer": "D16 Group Audio Software",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-14"
+    },
+    {
+      "name": "Devastor 2",
+      "developer": "D16 Group Audio Software",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-14"
+    },
+    {
+      "name": "Get Layed – With Sound",
+      "developer": "Deadman Audio Devices",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2013-06-12"
+    },
+    {
+      "name": "DYNARAGE Tube Compressor",
+      "developer": "Devoloop",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2015-04-23"
+    },
+    {
+      "name": "Holedo Tube Expander",
+      "developer": "Devoloop",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "SitBull Bass Amp",
+      "developer": "Devoloop",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2015-04-10"
+    },
+    {
+      "name": "Unifylter",
+      "developer": "Devoloop",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2013-07-12"
+    },
+    {
+      "name": "Headphone Monitor Correction",
+      "developer": "DLD Technology",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "Revolution Virtual Surround",
+      "developer": "DLD Technology",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "SPLEX Crossover/Compressor",
+      "developer": "DlogB",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2015-09-08"
+    },
+    {
+      "name": "LooLoo",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-23"
+    },
+    {
+      "name": "LooLoo Mini",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2026-07-09"
+    },
+    {
+      "name": "LooLoo X caliber",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Allpasser",
+      "developer": "Dusty Devices",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-05-05"
+    },
+    {
+      "name": "Cant EQ",
+      "developer": "Dusty Devices",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2026-02-18"
+    },
+    {
+      "name": "Needle Distortion",
+      "developer": "Dusty Devices",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-09-02"
+    },
+    {
+      "name": "Phaser-DDL",
+      "developer": "Dusty Devices",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2023-11-22"
+    },
+    {
+      "name": "Radiation",
+      "developer": "Dusty Devices",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-05-29"
+    },
+    {
+      "name": "295 Equalizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "4 Channel Dub Preamp",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "8 Band Filter/Shifter/Shaper",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ANOMA LoFi Effect",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "AUTO X Compressor",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "BBD4A Bucket Brigade Device",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "C212 Compressor & L36 Limiter",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Champion Filtration & Delay Unit 363",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Champion Reverberation Unit 636",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Delay Line 16",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ES204 Filter Delay",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Filter Chain X8187",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "FreakShift",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "HBL313 Multi Filter",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "HighPass Filter 1012",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "HighPass LowPass Filter 1224",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Industrializer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Janus 2X Phaser",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "LowPass Filter 1024",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "MBEQ Graphic Equalizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "MR Spring Reverb",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "MultiTap Delay",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "OUROBOROS",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "PEQ-213 Parametric Equalizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "PTF60 Digital Reverb",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Reverb AK11",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "SADIST Saturation Distortion",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "SPACEXPANDER Spring Reverb",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Spring FX3180 Reverb",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "TAPEFUNK M10 Tape Recorder",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "TE TapeEcho Mk2",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "TransFluxer LoFi Soundscaping Multi FX",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Vocoder 64",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "WaveTronic Shaper",
+      "developer": "Ekssperimental Sounds",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "AD 480 Reverb",
+      "developer": "Fiedler Audio",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-03-19"
+    },
+    {
+      "name": "4Dyne",
+      "developer": "Flower Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2015-04-01"
+    },
+    {
+      "name": "Buddycomp",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2020-02-07"
+    },
+    {
+      "name": "Forgotten Compressor",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2024-02-16"
+    },
+    {
+      "name": "Forgotten Convolver",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.1.8",
+      "released": "2020-05-28"
+    },
+    {
+      "name": "Forgotten Wave Shaper",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.2.1",
+      "released": "2018-10-30"
+    },
+    {
+      "name": "Forgotten Waveshaper 2",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2019-11-21"
+    },
+    {
+      "name": "Omega DEQ",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.2.1",
+      "released": "2021-03-05"
+    },
+    {
+      "name": "Omega Mastering Clipper",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2020-05-28"
+    },
+    {
+      "name": "Omega Trimmer",
+      "developer": "Forgotten Clank Studios",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2025-02-14"
+    },
+    {
+      "name": "DCAM BusComp",
+      "developer": "FXpansion",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2012-10-21"
+    },
+    {
+      "name": "DCAM ChanComp",
+      "developer": "FXpansion",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-06-30"
+    },
+    {
+      "name": "DCAM EnvShaper",
+      "developer": "FXpansion",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2012-10-01"
+    },
+    {
+      "name": "Etch Red Dual Filter",
+      "developer": "FXpansion",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2015-03-19"
+    },
+    {
+      "name": "GClip Waveshaping Clipper",
+      "developer": "GVXT LTD",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2015-04-23"
+    },
+    {
+      "name": "BalEq",
+      "developer": "Inferior Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2023-11-08"
+    },
+    {
+      "name": "CharComp",
+      "developer": "Inferior Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-12-13"
+    },
+    {
+      "name": "ParEq",
+      "developer": "Inferior Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-06-20"
+    },
+    {
+      "name": "PCM2612 Retro Decimator Unit",
+      "developer": "Inphonik",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-02-26"
+    },
+    {
+      "name": "RX950 Classic AD/DA Converter",
+      "developer": "Inphonik",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2023-01-30"
+    },
+    {
+      "name": "Onyx Limiter",
+      "developer": "iox AudioWare",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2014-11-27"
+    },
+    {
+      "name": "Titan Maximizer",
+      "developer": "iox AudioWare",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2014-11-27"
+    },
+    {
+      "name": "Ozone Maximizer",
+      "developer": "iZotope, Inc.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2012-07-09"
+    },
+    {
+      "name": "Pisces Limiter",
+      "developer": "J-Yul Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2014-04-29"
+    },
+    {
+      "name": "Chenille Chorus Ensemble",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "2.0.2",
+      "released": "2017-03-13"
+    },
+    {
+      "name": "Itsy Audio Phase Inverter",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2012-12-03"
+    },
+    {
+      "name": "Psyclone Dual Rotary Speaker",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-03-13"
+    },
+    {
+      "name": "Steerpike BBD Delay Ensemble",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "3.0.0",
+      "released": "2018-08-23"
+    },
+    {
+      "name": "The Animus Shimmerverb Ensemble",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "1.0.6",
+      "released": "2019-04-08"
+    },
+    {
+      "name": "Titus BBD Delay Line",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "2.1.0",
+      "released": "2017-09-13"
+    },
+    {
+      "name": "Villanelle Killer Wah",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-03-18"
+    },
+    {
+      "name": "Kitchen Sync",
+      "developer": "Josh Levy",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2013-01-17"
+    },
+    {
+      "name": "Disperser",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.6",
+      "released": "2016-01-27"
+    },
+    {
+      "name": "kHs 3-Band EQ",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-01-22"
+    },
+    {
+      "name": "kHs Bitcrush",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Chorus",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Comb Filter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Compressor",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Delay",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Distortion",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Filter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.12",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Formant Filter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Frequency Shifter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Gain",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Gate",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Haas",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Ladder Filter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Limiter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Phase Distortion",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2017-08-31"
+    },
+    {
+      "name": "kHs Phaser",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.10",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Pitch Shifter",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2017-10-05"
+    },
+    {
+      "name": "kHs Resonator",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Reverb",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Reverser",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Ring Mod",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Stereo",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Tape Stop",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.7",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Trance Gate",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.11",
+      "released": "2016-10-26"
+    },
+    {
+      "name": "kHs Transient Shaper",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2017-02-01"
+    },
+    {
+      "name": "kiloHearts Faturator",
+      "developer": "Kilohearts AB",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2013-03-15"
+    },
+    {
+      "name": "Tape Cassette Deck",
+      "developer": "Klevgränd Produkter AB",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-11-06"
+    },
+    {
+      "name": "Amplifikation Caliburn Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.6",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Amplifikation Clarent Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Amplifikation Creme Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Amplifikation Lancaster Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Amplifikation Matchlock Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Amplifikation Rectifor Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Amplifikation VVV Guitar Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Cerberus Bass Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Efektor Bass Cruncher Preamp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Bass Driver Preamp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Bass Smasher Distortion",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor CH3604 Chorus",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor CP3603 Compressor",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor DL3606 Delay",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor DS3603 Distortion",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Echolyte Analog Delay",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Filtrator Modulated Filter",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor FL3606 Flanger",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor FZ3603 Fuzz",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Gainia HB Preamp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Gainia TD Preamp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor GQ3607 Graphic Equalizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2019-08-30"
+    },
+    {
+      "name": "Efektor Grandmaster Distortion",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Harmonitron Harmonizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Meloditron Smart Harmonizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Moon Muffin Fuzz",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor OD3603 Overdrive",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Omnivibe Optical Vibe",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor PAten Graphic Equalizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor PH3605 Phaser",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Ringmojo Ring Modulator",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Rotarion Rotary",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor RV3604 Reverb",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Silencer Noise Gate",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2017-12-22"
+    },
+    {
+      "name": "Efektor TR3604 Tremolo",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Vibracula Vibrato",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-02"
+    },
+    {
+      "name": "Efektor WF3607 Wah Filter",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Efektor Whammo Pitch Shifter",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "EVE-AT1 4-Band Equalizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "EVE-AT4 3-Band Equalizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "EVE-MP5 Program Equalizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Kratos 2 Maximizer",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "2.0.3",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Kuassa Amplifikation Vermilion",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.2.3",
+      "released": "2026-07-03"
+    },
+    {
+      "name": "Pillar Power Amp",
+      "developer": "Kuassa",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2023-06-29"
+    },
+    {
+      "name": "Battle-Axe Sound Destroyer",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Black Knight 5 Band Equalizer",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2020-09-02"
+    },
+    {
+      "name": "Enforcer Dynamic Saturator",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-07-08"
+    },
+    {
+      "name": "Equila 3 Band Tonal EQ",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Mace Professional Compressor",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.6",
+      "released": "2021-05-31"
+    },
+    {
+      "name": "Punisher Audio Mutator",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Red Queen 10 Band 3 Mode Equalizer",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "0.0.15",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "ReQ131 (31 Band EQ)",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Stimulant Subharmonic Generator",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-05-15"
+    },
+    {
+      "name": "Zplane Morphing Filter",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Stereo Converter",
+      "developer": "Le Note Live Software",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-02-08"
+    },
+    {
+      "name": "DYN-4 Dynamic Processor",
+      "developer": "Lectric Panda LLC",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2021-11-11"
+    },
+    {
+      "name": "Fritz",
+      "developer": "Lectric Panda LLC",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2016-08-25"
+    },
+    {
+      "name": "Neutron",
+      "developer": "LoveOne Consulting AB",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2025-09-15"
+    },
+    {
+      "name": "Phonetic Vintage Phone Simulator",
+      "developer": "LoveOne Consulting AB",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2014-09-08"
+    },
+    {
+      "name": "Photon Particle Splitter",
+      "developer": "LoveOne Consulting AB",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-09-22"
+    },
+    {
+      "name": "Classic Filter",
+      "developer": "MagmaSonic",
+      "category": "Effects",
+      "version": "2.0.2",
+      "released": "2019-10-29"
+    },
+    {
+      "name": "ReFlanger",
+      "developer": "MagmaSonic",
+      "category": "Effects",
+      "version": "2.0.6",
+      "released": "2023-07-10"
+    },
+    {
+      "name": "Retrazoo Delay effect",
+      "developer": "MagmaSonic",
+      "category": "Effects",
+      "version": "1.3.0",
+      "released": "2019-06-24"
+    },
+    {
+      "name": "Extreme Dynamics",
+      "developer": "Makeshift Design",
+      "category": "Effects",
+      "version": "1.2.2",
+      "released": "2020-05-15"
+    },
+    {
+      "name": "C670 Compressor",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "E670 Equalizer",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "FRG-4RE Compressor",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "FRG-EEE Equalizer",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "FutzBox",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2014-12-15"
+    },
+    {
+      "name": "Moo Q Equalizer",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "Moo Tube Compressor",
+      "developer": "McDSP",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2014-07-01"
+    },
+    {
+      "name": "Déjà Vu Delay Station",
+      "developer": "Meeker FX",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2017-05-31"
+    },
+    {
+      "name": "Doppio Delay Effects",
+      "developer": "Mobipdi",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2018-11-14"
+    },
+    {
+      "name": "MODRACK DELAY",
+      "developer": "Murf",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "Valley Amalgam",
+      "developer": "Murf",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-02-29"
+    },
+    {
+      "name": "Valley Plateau",
+      "developer": "Murf",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2023-07-17"
+    },
+    {
+      "name": "Desmodus",
+      "developer": "Noise Engineering",
+      "category": "Effects",
+      "version": "2022.9.29",
+      "released": "2022-10-13"
+    },
+    {
+      "name": "Imitor",
+      "developer": "Noise Engineering",
+      "category": "Effects",
+      "version": "2022.9.29",
+      "released": "2022-10-20"
+    },
+    {
+      "name": "Ruina",
+      "developer": "Noise Engineering",
+      "category": "Effects",
+      "version": "2021.11.12",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "Beat Crush 12-Bit Distortion",
+      "developer": "Nucleus SoundLab",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2015-04-06"
+    },
+    {
+      "name": "Bass Tilt Filters",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "Midrange Tilt Filters",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "ReBass Narrow",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-01-30"
+    },
+    {
+      "name": "ReBass Wide",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2014-12-19"
+    },
+    {
+      "name": "ReStereo",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2012-10-10"
+    },
+    {
+      "name": "RiVerb Studios Snd Stages Symphony Halls",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "RiVerb Up-Front Spaces",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2013-05-13"
+    },
+    {
+      "name": "Tone Mutation Instruments",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-09-04"
+    },
+    {
+      "name": "Tone Mutation Vocals",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2013-08-13"
+    },
+    {
+      "name": "Treble Tilt Filters",
+      "developer": "Numerical Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "Carve EQ Ducker",
+      "developer": "Ochen K.",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2015-07-03"
+    },
+    {
+      "name": "Glitch Effect",
+      "developer": "Ochen K.",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2013-04-19"
+    },
+    {
+      "name": "Repeat Looper",
+      "developer": "Ochen K.",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2016-01-11"
+    },
+    {
+      "name": "Rumblit Bit Crusher Effect",
+      "developer": "Oenkenstein Audio",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2022-04-01"
+    },
+    {
+      "name": "Wbl6414",
+      "developer": "omino.com",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2021-09-17"
+    },
+    {
+      "name": "Buffre Beat Repeater",
+      "developer": "PEFF",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2013-03-04"
+    },
+    {
+      "name": "Cassette Recorder Audio Processor – No.2",
+      "developer": "PEFF",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2016-04-01"
+    },
+    {
+      "name": "Rama FX Suite",
+      "developer": "PinkNoise Studio",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2025-12-19"
+    },
+    {
+      "name": "VAC-6 Volume Analyzer & Controller",
+      "developer": "pongasoft",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-06-22"
+    },
+    {
+      "name": "Acid Diode Ladder Filter",
+      "developer": "Primal Audio I/S",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-02-01"
+    },
+    {
+      "name": "Ladder Multimode Filter",
+      "developer": "Primal Audio I/S",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2015-11-18"
+    },
+    {
+      "name": "PMS-20 Analog HP/LP Filter",
+      "developer": "Primal Audio I/S",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2015-12-15"
+    },
+    {
+      "name": "3Plex 3x Line Filter Delay",
+      "developer": "Quadelectra",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2013-06-26"
+    },
+    {
+      "name": "BeatChop Realtime Slicer",
+      "developer": "Quadelectra",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2014-06-19"
+    },
+    {
+      "name": "Stereo Splitter",
+      "developer": "Quadelectra",
+      "category": "Effects",
+      "version": "1.5.2",
+      "released": "2016-09-23"
+    },
+    {
+      "name": "Transient Splitter",
+      "developer": "Quadelectra",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2023-01-26"
+    },
+    {
+      "name": "BV-X Multimode Vocoder",
+      "developer": "Reason Studios",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2024-01-31"
+    },
+    {
+      "name": "Osmium Distortion Matrix",
+      "developer": "Reason Studios",
+      "category": "Effects",
+      "version": "1.0.9",
+      "released": "2025-10-28"
+    },
+    {
+      "name": "Polar Dual Pitch Shifter",
+      "developer": "Reason Studios",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2012-10-23"
+    },
+    {
+      "name": "Rotor Rotary Speaker",
+      "developer": "Reason Studios",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2013-02-21"
+    },
+    {
+      "name": "CoreReLation Phase Analyser",
+      "developer": "Reasonistas",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-03-02"
+    },
+    {
+      "name": "SideChain ReAction Enveloper",
+      "developer": "Reasonistas",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-09-05"
+    },
+    {
+      "name": "American Equalizer model A",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2022-03-28"
+    },
+    {
+      "name": "American Equalizer model B",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2022-03-28"
+    },
+    {
+      "name": "American Equalizer model C",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2021-08-16"
+    },
+    {
+      "name": "British Equalizer model A",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2022-03-08"
+    },
+    {
+      "name": "British Equalizer Model B",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-02-21"
+    },
+    {
+      "name": "C1-Alpha Compressor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2013-10-02"
+    },
+    {
+      "name": "C1-L1 Vintage Compressor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2013-10-03"
+    },
+    {
+      "name": "C1-Sigma Compressor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2013-10-03"
+    },
+    {
+      "name": "Digital Hall Reverb with Orchestral Card",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.7",
+      "released": "2016-02-01"
+    },
+    {
+      "name": "Fuse Stereo Image",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "HLF-RE PASSIVE HIGH/LOW FILTER",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "Inspirer Aural Exciter",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "M-MAX Multiband Limiter",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "ModularRE Multi-Effect Processor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.5.2",
+      "released": "2021-11-25"
+    },
+    {
+      "name": "Multiband Compressor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2016-04-06"
+    },
+    {
+      "name": "PolyIvoks Filter",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2018-01-16"
+    },
+    {
+      "name": "Precision Stereo Compressor",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2022-03-28"
+    },
+    {
+      "name": "RE 200 Bass Enhancer",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2021-03-23"
+    },
+    {
+      "name": "RE 202 Exciter",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2022-04-21"
+    },
+    {
+      "name": "RE 302 Graphic Equaliser",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2022-02-16"
+    },
+    {
+      "name": "Re173 Preamp & EQ",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-04-24"
+    },
+    {
+      "name": "RE3Q Six-band Equalizer",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "2.0.0",
+      "released": "2022-03-08"
+    },
+    {
+      "name": "reMEQ-5 Mid-Range Equalizer",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "rEQP-1A Program Equalizer",
+      "developer": "Red Rock Sound",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": ""
+    },
+    {
+      "name": "RP MasterMagic",
+      "developer": "Rob Papen",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2018-12-17"
+    },
+    {
+      "name": "RPDistort Effect",
+      "developer": "Rob Papen",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2023-06-29"
+    },
+    {
+      "name": "RPEQ Effect",
+      "developer": "Rob Papen",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2018-10-03"
+    },
+    {
+      "name": "RPVerb Effect",
+      "developer": "Rob Papen",
+      "category": "Effects",
+      "version": "1.0.7",
+      "released": "2019-01-22"
+    },
+    {
+      "name": "SU-27 Surround Matrix Decoder",
+      "developer": "ScuzzyEye",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2015-07-13"
+    },
+    {
+      "name": "Infuser",
+      "developer": "Selig Audio, LLC",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-12-22"
+    },
+    {
+      "name": "Selig ColoringEQ",
+      "developer": "Selig Audio, LLC",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-01-26"
+    },
+    {
+      "name": "Selig DeEsser",
+      "developer": "Selig Audio, LLC",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2014-07-03"
+    },
+    {
+      "name": "Selig Gain",
+      "developer": "Selig Audio, LLC",
+      "category": "Effects",
+      "version": "1.2.4",
+      "released": "2015-10-14"
+    },
+    {
+      "name": "Selig Leveler",
+      "developer": "Selig Audio, LLC",
+      "category": "Effects",
+      "version": "1.2.1",
+      "released": "2015-03-07"
+    },
+    {
+      "name": "SM Tritone Multiband Waveshaper",
+      "developer": "Simon Robitaille",
+      "category": "Effects",
+      "version": "1.1.4",
+      "released": "2014-12-22"
+    },
+    {
+      "name": "D1-RT Line Noise Injector",
+      "developer": "SKP Sound Design",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "FAT50 Organic Character",
+      "developer": "SKP Sound Design",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2026-08-04"
+    },
+    {
+      "name": "Q-FX Quad Multi Effector",
+      "developer": "SKP Sound Design",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "Sugar-Q Sweetening Equalizer",
+      "developer": "SKP Sound Design",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "SMFX Delay",
+      "developer": "Skrock Music",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2021-07-02"
+    },
+    {
+      "name": "SMFX Dual Saturator",
+      "developer": "Skrock Music",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2021-08-20"
+    },
+    {
+      "name": "SMFX Reverb",
+      "developer": "Skrock Music",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2021-06-14"
+    },
+    {
+      "name": "Softube FET Compressor",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.13",
+      "released": "2014-04-16"
+    },
+    {
+      "name": "Softube Saturation Knob",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.13",
+      "released": "2013-08-06"
+    },
+    {
+      "name": "Softube Spring Reverb",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.31",
+      "released": "2013-08-26"
+    },
+    {
+      "name": "Softube Trident A-Range",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.13",
+      "released": "2013-08-07"
+    },
+    {
+      "name": "Softube TSAR-1 Reverb",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.11",
+      "released": "2013-08-06"
+    },
+    {
+      "name": "Softube TSAR-1R Reverb",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.11",
+      "released": "2013-07-16"
+    },
+    {
+      "name": "Softube Tube Delay",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.31",
+      "released": "2013-09-24"
+    },
+    {
+      "name": "Softube Tube-Tech Classic Channel",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "2.1.55",
+      "released": "2014-12-12"
+    },
+    {
+      "name": "Softube Valley People Dyna-Mite",
+      "developer": "Softube",
+      "category": "Effects",
+      "version": "1.3.15",
+      "released": "2014-04-16"
+    },
+    {
+      "name": "Bitspeek",
+      "developer": "Sonic Charge",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2012-10-04"
+    },
+    {
+      "name": "Echobode",
+      "developer": "Sonic Charge",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2012-09-14"
+    },
+    {
+      "name": "Pump",
+      "developer": "sonicbits.io",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2023-05-29"
+    },
+    {
+      "name": "GSX Graphic Shaper/Effects",
+      "developer": "Sononics Audio, LLC",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2014-06-02"
+    },
+    {
+      "name": "Strive Creative Filter",
+      "developer": "Speo Music",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2021-09-30"
+    },
+    {
+      "name": "SP-1 Digital PLATE Reverb",
+      "developer": "Sputnik Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-03-07"
+    },
+    {
+      "name": "SP-2 Siberian Halls",
+      "developer": "Sputnik Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2016-04-22"
+    },
+    {
+      "name": "SB Filter Pattern",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2012-08-17"
+    },
+    {
+      "name": "SB Pitch Delay",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2012-08-16"
+    },
+    {
+      "name": "SB Slice Arranger",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2012-08-17"
+    },
+    {
+      "name": "SB Spectralizer",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2012-07-10"
+    },
+    {
+      "name": "SB Vinylizer",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2012-07-12"
+    },
+    {
+      "name": "SB Vocodizer",
+      "developer": "Sugar Bytes",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2012-07-02"
+    },
+    {
+      "name": "Synapse AF-4 Analog Filter",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2020-12-08"
+    },
+    {
+      "name": "Synapse AP-12 Analog Phaser",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2013-01-30"
+    },
+    {
+      "name": "Synapse DC-2 Dual Chorus",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2012-11-22"
+    },
+    {
+      "name": "Synapse DR-1 Deep Reverb",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2012-12-05"
+    },
+    {
+      "name": "Synapse Fat Space",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Synapse GQ-7 Graphic Equalizer",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.6.0",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Synapse Ninety Vintage Phaser",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Synapse RE-160",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "Synapse RM-1 Ring Modulator",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2012-12-06"
+    },
+    {
+      "name": "Synapse VE-3 Vintage Equalizer",
+      "developer": "Synapse Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2012-12-06"
+    },
+    {
+      "name": "CompXpert 3",
+      "developer": "Synth Seduction",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-11-15"
+    },
+    {
+      "name": "Nebula Reverb",
+      "developer": "Synth Seduction",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-03-12"
+    },
+    {
+      "name": "Distortion Chain",
+      "developer": "That Music Company",
+      "category": "Effects",
+      "version": "1.5.7",
+      "released": "2015-11-04"
+    },
+    {
+      "name": "Mr OverDrive",
+      "developer": "That Music Company",
+      "category": "Effects",
+      "version": "0.6.4",
+      "released": "2015-04-10"
+    },
+    {
+      "name": "T2 Phaser",
+      "developer": "That Music Company",
+      "category": "Effects",
+      "version": "1.4.503",
+      "released": "2017-01-20"
+    },
+    {
+      "name": "Digital Filter",
+      "developer": "The Musicology Group, Inc.",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2015-08-18"
+    },
+    {
+      "name": "BB TRS3",
+      "developer": "Tonicmint",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2025-12-15"
+    },
+    {
+      "name": "FlowBrush",
+      "developer": "Tonicmint",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2022-08-15"
+    },
+    {
+      "name": "ST Delay",
+      "developer": "Tonicmint",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-09-06"
+    },
+    {
+      "name": "ST Imager",
+      "developer": "Tonicmint",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-06-19"
+    },
+    {
+      "name": "AbbyChamb Chamber Verb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "AmpEQ Classic Bass Preamp",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2025-05-16"
+    },
+    {
+      "name": "AngryComp Overdriven Compressor",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "AniMuRFA Multi Resonance Filter Array",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2023-02-01"
+    },
+    {
+      "name": "ASVF-212 Analog State-Variable Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "AutoFlngr BlueFace Auto Flanger",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-17"
+    },
+    {
+      "name": "AutoLevel Gain Level Normalizer",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-06-19"
+    },
+    {
+      "name": "AutoPhaser BlueFace Auto Phaser",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-17"
+    },
+    {
+      "name": "BadStorm Phase Shifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2024-07-29"
+    },
+    {
+      "name": "BassPump Bass Preamp",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "BassRolls Dual Dynamic Filters",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-05-09"
+    },
+    {
+      "name": "BlueDepth Epic Reverb Effect",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.5",
+      "released": "2023-10-20"
+    },
+    {
+      "name": "BNDP556 VARIABLE BP FILTER",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2023-12-05"
+    },
+    {
+      "name": "BXPRO550 Stereo Baxandall Equalizer",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2024-05-29"
+    },
+    {
+      "name": "Catalyst MultiMode Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "2.1.0",
+      "released": "2023-02-09"
+    },
+    {
+      "name": "CleanBoost Clean Uncolored Booster",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2023-05-31"
+    },
+    {
+      "name": "Coriolis Force",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2024-03-21"
+    },
+    {
+      "name": "Cronus Modulation FX",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2021-09-15"
+    },
+    {
+      "name": "CustomVibe Multi Vibrato Effect",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2019-01-24"
+    },
+    {
+      "name": "DeepReso Bass Resonance Tool",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-06-16"
+    },
+    {
+      "name": "DoubleComb Comb Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Drop and Lift Semitone Transpose FX",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2020-03-17"
+    },
+    {
+      "name": "DrwCmp78 Stereo Buss Compressor",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-06-18"
+    },
+    {
+      "name": "DrwSat76 Triple Band Saturation",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2023-12-08"
+    },
+    {
+      "name": "Ecruos Multi-Tap Delay",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.3.0",
+      "released": "2026-05-29"
+    },
+    {
+      "name": "EQ6T 6-Band Equalizer",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2024-04-17"
+    },
+    {
+      "name": "FDBKSPR560 Feedback Suppressor Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "FFB914 Resonant Fixed Filter Bank",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-10-24"
+    },
+    {
+      "name": "FireMint Pitch Formant Shifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.4",
+      "released": "2026-05-12"
+    },
+    {
+      "name": "FlangerDbl BlueFace Vari-Delay",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2023-05-22"
+    },
+    {
+      "name": "FlexaComp Compressor",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-02-03"
+    },
+    {
+      "name": "GateVerb Non-Linear Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "GrainShift Delay PitchShifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "GyratorFLT Gyrator Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2025-04-08"
+    },
+    {
+      "name": "HarmBode Frequency Shifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.3.0",
+      "released": "2023-06-20"
+    },
+    {
+      "name": "HarmBoost Clean Bass Preamp",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "HolyVerb Reverb-Delay FX",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Isolate-X Frequency Isolator/Remover",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.1",
+      "released": "2021-09-01"
+    },
+    {
+      "name": "Kleon Modded Overdrive",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-08-25"
+    },
+    {
+      "name": "MacroAmp Classic Equalized Booster",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2024-01-18"
+    },
+    {
+      "name": "MarsPeaks Reverb Placement",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2018-11-12"
+    },
+    {
+      "name": "MetaLazer Variable Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-05-10"
+    },
+    {
+      "name": "MidBooster Mid Freq Booster",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "MiniComp Boutique Compressor",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Murder RhythmCutter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2022-01-21"
+    },
+    {
+      "name": "MuRFA24 Multi Resonance Filter Array 24",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.4",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "NSGate Noise Gate",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2023-06-15"
+    },
+    {
+      "name": "OctaGen QuadVoice System",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "Octopus Attack Gate Ducking Trigger",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "Phase28 PhaseShifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "2.1.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "PhaseTool Phase Invertor Mixtool",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2019-02-11"
+    },
+    {
+      "name": "Phatsat Saturation FX",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2018-11-12"
+    },
+    {
+      "name": "Pipeline Pressure Control",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2021-09-03"
+    },
+    {
+      "name": "PitchSonic BlueFace Pitch Tap Transposer",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2024-02-09"
+    },
+    {
+      "name": "PlateVerb Mechanical Plate Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "PolyRes Resonator",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2022-12-02"
+    },
+    {
+      "name": "QuantWave Quantum Room Sim Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-11-08"
+    },
+    {
+      "name": "Reasonator Acoustic Resonance Emulation",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "2.0.4",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "Reverb-G Paired Springs Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "RewindVerb Reverse Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "S-Guard Voice De-esser",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-08-26"
+    },
+    {
+      "name": "Sabotage 3-band crossover fx",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "SmallStorm Phase Shifter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2026-05-05"
+    },
+    {
+      "name": "Spring 905 Reverberation Effect",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "STRNGFLT String Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2022-12-24"
+    },
+    {
+      "name": "StrongArm classic FX collection",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-01-10"
+    },
+    {
+      "name": "StudioComp Compressor",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "SubColours Octave Diver",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "2.0.1",
+      "released": "2021-03-23"
+    },
+    {
+      "name": "SVF107 State Variable Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2024-12-18"
+    },
+    {
+      "name": "TEQ511 Equalizer",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "ThndrVerb Algo Reverb",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.2",
+      "released": "2023-11-30"
+    },
+    {
+      "name": "TimeGhost Ghost Copy Machine",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2025-12-10"
+    },
+    {
+      "name": "Tranzient Transient Shaper",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2022-09-03"
+    },
+    {
+      "name": "TremoFlex Tremolo AutoPan FX",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2025-03-04"
+    },
+    {
+      "name": "TSM 2040z Sub LowPass Filter",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2023-04-18"
+    },
+    {
+      "name": "Twenty-Six Multi-Band BlueFace EQ",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2026-06-19"
+    },
+    {
+      "name": "Waubaby Multi-Wah",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.2.2",
+      "released": "2024-02-03"
+    },
+    {
+      "name": "xLPG VariPass Gate Effect",
+      "developer": "Turn2on",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2025-07-02"
+    },
+    {
+      "name": "DQ",
+      "developer": "Uberwave",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2020-05-14"
+    },
+    {
+      "name": "Filter",
+      "developer": "Uberwave",
+      "category": "Effects",
+      "version": "1.0.4",
+      "released": "2020-05-14"
+    },
+    {
+      "name": "Propan Advanced Panner",
+      "developer": "Uberwave",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-02-26"
+    },
+    {
+      "name": "G8 Dynamic Gate",
+      "developer": "Unfiltered Audio",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2015-01-22"
+    },
+    {
+      "name": "Renoun Reverb",
+      "developer": "Unfiltered Audio",
+      "category": "Effects",
+      "version": "1.1.6",
+      "released": "2012-10-16"
+    },
+    {
+      "name": "Sunder Amplitude Splitter",
+      "developer": "Unfiltered Audio",
+      "category": "Effects",
+      "version": "1.0.2",
+      "released": "2017-01-11"
+    },
+    {
+      "name": "Yoko Band-Splitter",
+      "developer": "Unfiltered Audio",
+      "category": "Effects",
+      "version": "1.2.0",
+      "released": "2012-11-05"
+    },
+    {
+      "name": "Dragon Gate",
+      "developer": "Vibe Plant",
+      "category": "Effects",
+      "version": "1.1.0",
+      "released": "2013-01-31"
+    },
+    {
+      "name": "Relight Harmonic Exciter",
+      "developer": "Vibe Plant",
+      "category": "Effects",
+      "version": "1.0.1",
+      "released": "2015-05-18"
+    },
+    {
+      "name": "Clarity Spectral Unmasking Processor",
+      "developer": "Vivid DSP",
+      "category": "Effects",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Warp Looper",
+      "developer": "Warp Factor Audio",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-08-12"
+    },
+    {
+      "name": "Wow and Flutter Tape Echo",
+      "developer": "Warp Factor Audio",
+      "category": "Effects",
+      "version": "1.0.3",
+      "released": "2026-06-26"
+    },
+    {
+      "name": "Le Space",
+      "developer": "zvork",
+      "category": "Effects",
+      "version": "1.1.3",
+      "released": "2016-01-07"
+    },
+    {
+      "name": "HazeMate Noise Generator",
+      "developer": "17 Frames Media",
+      "category": "Instruments",
+      "version": "1.2.2",
+      "released": "2019-12-11"
+    },
+    {
+      "name": "EXP1 Expression Processor",
+      "developer": "Amaloo Studio, LLC",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-10-26"
+    },
+    {
+      "name": "ABL3 Computer Bassline",
+      "developer": "AudioRealism",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2022-02-02"
+    },
+    {
+      "name": "ReDominator Polyphonic Synthesizer",
+      "developer": "AudioRealism",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2015-02-04"
+    },
+    {
+      "name": "The Synthwave Plugin",
+      "developer": "auryn64",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2018-12-11"
+    },
+    {
+      "name": "Distributor",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.2.4",
+      "released": "2017-05-05"
+    },
+    {
+      "name": "Expanse Hyperwave Synthesizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "3.1.3",
+      "released": "2018-05-23"
+    },
+    {
+      "name": "Movement Waveform Generator",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2016-01-27"
+    },
+    {
+      "name": "VK-1 Viking Synthesizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.5.0",
+      "released": "2018-06-14"
+    },
+    {
+      "name": "VK-2 Viking Synthesizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.0.7",
+      "released": "2019-01-24"
+    },
+    {
+      "name": "VO-1 Viking Oscillator",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2014-08-27"
+    },
+    {
+      "name": "Zero Hybrid Synthesizer",
+      "developer": "Blamsoft, Inc.",
+      "category": "Instruments",
+      "version": "1.3.1",
+      "released": "2017-04-25"
+    },
+    {
+      "name": "Megasaur",
+      "developer": "DLD Technology",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "Snakebite",
+      "developer": "DLD Technology",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "ST-1",
+      "developer": "DLD Technology",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "Aquios X4 Workstation ROM",
+      "developer": "DNA Labs",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Glacius X Hybrid Wave Synthesizer",
+      "developer": "DNA Labs",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Helium",
+      "developer": "DNA Labs",
+      "category": "Instruments",
+      "version": "2.0.3",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Hydronexius Workstation ROM",
+      "developer": "DNA Labs",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Morphine 8 Digital Drum Module",
+      "developer": "DNA Labs",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Refrain Live Looping Sampler",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2026-08-10"
+    },
+    {
+      "name": "Splitfire Furioso",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "StringWERK – Studio Strings",
+      "developer": "e-instruments lab GmbH",
+      "category": "Instruments",
+      "version": "1.0.175",
+      "released": "2016-06-15"
+    },
+    {
+      "name": "AMALGAM FM / Subtractive Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "DM-999 Drum Machine",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "DRUMSYN Drum Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "EKSSBOX Mk3",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ES-01 Analog Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ES10 Analog Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ES101 Analog Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "ES400 FM Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "HexaTone Sine/Noise Tone Generator",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "SineSynth",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "SquareSwarm Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "SYNR Drum Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "TRANSISTOR Drum Machine",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "VibeMaster LoFi Synthesizer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Wave Master Synth",
+      "developer": "Ekssperimental Sounds",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "Silent Way Voice Controller",
+      "developer": "Expert Sleepers",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2013-06-13"
+    },
+    {
+      "name": "Autosub",
+      "developer": "Forgotten Clank Studios",
+      "category": "Instruments",
+      "version": "1.3.1",
+      "released": "2020-07-20"
+    },
+    {
+      "name": "Vault Ambient Instrument",
+      "developer": "fstaudio",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2020-10-16"
+    },
+    {
+      "name": "Tres Mono Synth",
+      "developer": "FXpansion",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2014-02-07"
+    },
+    {
+      "name": "ChamberTron RE",
+      "developer": "GForce Software Ltd",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2017-10-05"
+    },
+    {
+      "name": "Re-Strings",
+      "developer": "GForce Software Ltd",
+      "category": "Instruments",
+      "version": "1.1.4",
+      "released": "2017-04-18"
+    },
+    {
+      "name": "Re-Tron",
+      "developer": "GForce Software Ltd",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2017-10-05"
+    },
+    {
+      "name": "Drumstix Drum Computer",
+      "developer": "Haaswerk",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2021-06-23"
+    },
+    {
+      "name": "Psychedelic Haas Sample Slice Unit",
+      "developer": "Haaswerk",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2020-06-24"
+    },
+    {
+      "name": "PSYH – Kick Bass Commander",
+      "developer": "Haaswerk",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2021-06-18"
+    },
+    {
+      "name": "MidiTapper – Midi Note Controlled Switch",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2014-01-09"
+    },
+    {
+      "name": "ModPanel12 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "ModPanel16 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "ModPanel8 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "Newtrol-12 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "Newtrol-16 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "Newtrol-8 CV Control Board",
+      "developer": "Hamu",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2015-04-02"
+    },
+    {
+      "name": "AEON Organic Virtual Instrument",
+      "developer": "Heavyocity Media",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2016-05-09"
+    },
+    {
+      "name": "AEON Synth Virtual Instrument",
+      "developer": "Heavyocity Media",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2016-05-09"
+    },
+    {
+      "name": "Super Audio Cart",
+      "developer": "Impact Soundworks",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-09-11"
+    },
+    {
+      "name": "Bass3",
+      "developer": "Inferior Sound",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2025-05-01"
+    },
+    {
+      "name": "RX1200 12-bit Sampler Instrument",
+      "developer": "Inphonik",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2025-04-15"
+    },
+    {
+      "name": "RYM2612 Iconic FM Synthesizer",
+      "developer": "Inphonik",
+      "category": "Instruments",
+      "version": "1.0.5",
+      "released": "2019-05-14"
+    },
+    {
+      "name": "Keyboard Foundry",
+      "developer": "J Chris Griffin",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2025-11-06"
+    },
+    {
+      "name": "S73 Electric Piano",
+      "developer": "J Chris Griffin",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2023-04-02"
+    },
+    {
+      "name": "SAW-1 Discovery SawWave Synth",
+      "developer": "J Chris Griffin",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2022-03-15"
+    },
+    {
+      "name": "Studio Piano",
+      "developer": "J Chris Griffin",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2023-08-29"
+    },
+    {
+      "name": "Virtual Audience",
+      "developer": "J Chris Griffin",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2022-01-14"
+    },
+    {
+      "name": "Ammo 100LA Modulation Oscillator",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "2.0.1",
+      "released": "2018-03-06"
+    },
+    {
+      "name": "Ammo 1200BR Modulation Synthesizer",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2018-02-22"
+    },
+    {
+      "name": "Ammo 400R Modulation Oscillators",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2018-02-22"
+    },
+    {
+      "name": "barCHIMES Concert Mark Tree",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2019-07-08"
+    },
+    {
+      "name": "Champagne SuperNova Vintage Synthesizer",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2018-03-29"
+    },
+    {
+      "name": "Combo 310 Unique Organ",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2015-12-14"
+    },
+    {
+      "name": "Combo B3 Tonewheels Organ",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2020-06-12"
+    },
+    {
+      "name": "Combo Compact Organ",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2014-10-29"
+    },
+    {
+      "name": "Combo Continental Organ",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2020-11-04"
+    },
+    {
+      "name": "Combo Electric Harpsichord",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-01-09"
+    },
+    {
+      "name": "Combo X-705 Space Organ",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2015-07-03"
+    },
+    {
+      "name": "Harpe Laser II Synthesizer",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "2.0.1",
+      "released": "2021-11-19"
+    },
+    {
+      "name": "JPS Harmonic Synthesizer",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2019-03-21"
+    },
+    {
+      "name": "Melodic Electric Glockenspiel",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-12-15"
+    },
+    {
+      "name": "Republik Handheld Percussion",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2015-03-12"
+    },
+    {
+      "name": "Transcendent 2000",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2022-02-23"
+    },
+    {
+      "name": "BOOM 808 Percussion Synth",
+      "developer": "Josh Levy",
+      "category": "Instruments",
+      "version": "2.0.2",
+      "released": "2019-07-31"
+    },
+    {
+      "name": "kiloHearts kHs ONE",
+      "developer": "Kilohearts AB",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2013-12-18"
+    },
+    {
+      "name": "Konarie Chirp Synthesizer",
+      "developer": "KONARIE MUSIC LLC",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-12-05"
+    },
+    {
+      "name": "Korg MonoPoly",
+      "developer": "KORG Inc.",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2014-02-07"
+    },
+    {
+      "name": "Polysix",
+      "developer": "KORG Inc.",
+      "category": "Instruments",
+      "version": "1.0.6",
+      "released": "2014-01-17"
+    },
+    {
+      "name": "Korde Sequencer",
+      "developer": "Lectric Panda LLC",
+      "category": "Instruments",
+      "version": "1.2.3",
+      "released": "2016-05-20"
+    },
+    {
+      "name": "Nostromo Spectral Synthesizer",
+      "developer": "Lectric Panda LLC",
+      "category": "Instruments",
+      "version": "2.1.0",
+      "released": "2018-06-27"
+    },
+    {
+      "name": "Propulsion Drum Sequencer",
+      "developer": "Lectric Panda LLC",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2015-08-18"
+    },
+    {
+      "name": "Rostnomo Random Synthesizer",
+      "developer": "Lectric Panda LLC",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2017-10-11"
+    },
+    {
+      "name": "Torsion Texture Lab",
+      "developer": "Lectric Panda LLC",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-06-18"
+    },
+    {
+      "name": "Little LFO",
+      "developer": "Little IO",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2015-06-01"
+    },
+    {
+      "name": "Proton Particle Accelerator",
+      "developer": "LoveOne Consulting AB",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2017-07-17"
+    },
+    {
+      "name": "Vibro Wavetable Synthesizer",
+      "developer": "LoveOne Consulting AB",
+      "category": "Instruments",
+      "version": "1.1.2",
+      "released": "2016-10-03"
+    },
+    {
+      "name": "Soma Synthesizer",
+      "developer": "MagmaSonic",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2026-03-27"
+    },
+    {
+      "name": "CB-1 Circuit-Bent Brass Synthesizer",
+      "developer": "Meeker FX",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-01-10"
+    },
+    {
+      "name": "CB-2 Circuit-Bent Drums Synthesizer",
+      "developer": "Meeker FX",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-01-10"
+    },
+    {
+      "name": "CB-3 Circuit-Bent Keys Synthesizer",
+      "developer": "Meeker FX",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-01-10"
+    },
+    {
+      "name": "CB-4 Circuit-Bent Organ Synthesizer",
+      "developer": "Meeker FX",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-01-10"
+    },
+    {
+      "name": "CB-5 Circuit-Bent Wind Synthesizer",
+      "developer": "Meeker FX",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-01-10"
+    },
+    {
+      "name": "MODRACK MIDI",
+      "developer": "Murf",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "MODRACK NOISE",
+      "developer": "Murf",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "MODRACK VCO",
+      "developer": "Murf",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "RetroDrums DMX Drum Module",
+      "developer": "Next Wave Software, Inc.",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2019-07-15"
+    },
+    {
+      "name": "Ataraxic Iteritas Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Basimilus",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2022.9.29",
+      "released": "2022-10-13"
+    },
+    {
+      "name": "Basimilus Iteritas",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.5.8",
+      "released": "2018-05-16"
+    },
+    {
+      "name": "Basimilus Iteritas Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Cursus Iteritas Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Cursus Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2022.9.29",
+      "released": "2022-10-13"
+    },
+    {
+      "name": "Loquelic Iteritas Percido",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.5.8",
+      "released": "2018-05-16"
+    },
+    {
+      "name": "Loquelic Iteritas Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Loquelic Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2022.10.5",
+      "released": "2022-10-20"
+    },
+    {
+      "name": "Manis",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2022.9.16",
+      "released": "2022-10-20"
+    },
+    {
+      "name": "Manis Iteritas",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.5.8",
+      "released": "2018-05-16"
+    },
+    {
+      "name": "Manis Iteritas Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Sinc Iter Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2018.10.15",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "Sinc Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2021.11.12",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "Virt Vereor",
+      "developer": "Noise Engineering",
+      "category": "Instruments",
+      "version": "2021.11.12",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "4MER WaveShaper Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2016-02-25"
+    },
+    {
+      "name": "A-Series 1 Modular Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2014-03-07"
+    },
+    {
+      "name": "A-Series 2 Modular Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2014-03-07"
+    },
+    {
+      "name": "Chip64 Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2015-03-12"
+    },
+    {
+      "name": "Driver Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2015-05-18"
+    },
+    {
+      "name": "EDS06s Drum Synth",
+      "developer": "Ochen K.",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2014-04-01"
+    },
+    {
+      "name": "Dalina String Ensemble",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.2.3",
+      "released": "2022-11-30"
+    },
+    {
+      "name": "Dice Analog Synthesizer",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.3.8",
+      "released": "2023-06-30"
+    },
+    {
+      "name": "Roads MK1 Electric Piano",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "2.4.5",
+      "released": "2022-06-13"
+    },
+    {
+      "name": "Roads MK2 Stage Piano",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2022-06-13"
+    },
+    {
+      "name": "Rumble K1 Granular Synthesizer",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.0.10",
+      "released": "2018-02-15"
+    },
+    {
+      "name": "Rumble K2 Builder",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.0.9",
+      "released": "2019-02-22"
+    },
+    {
+      "name": "Rumble K2 Player",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "2.0.4",
+      "released": "2018-03-06"
+    },
+    {
+      "name": "Rumble K2 Player Light",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-03-06"
+    },
+    {
+      "name": "Rumble Klank",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.4.6",
+      "released": "2021-10-12"
+    },
+    {
+      "name": "Rumbler Compact Synthesizer",
+      "developer": "Oenkenstein Audio",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2022-02-15"
+    },
+    {
+      "name": "Wbl3001 Dispositif Pour Contact Premier",
+      "developer": "omino.com",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2013-06-04"
+    },
+    {
+      "name": "wbl5515",
+      "developer": "omino.com",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2013-03-04"
+    },
+    {
+      "name": "iUNO Synthesizer",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "1.5.0",
+      "released": "2026-06-15"
+    },
+    {
+      "name": "Luna Dual Performance Synth",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "1.9.4",
+      "released": "2025-11-20"
+    },
+    {
+      "name": "Maia Matrix Edition",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "2.7.1",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Maia Orange Edition",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "2.7.1",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Maia Synthesizer",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "2.7.1",
+      "released": "2026-06-23"
+    },
+    {
+      "name": "Rama Synthesizer",
+      "developer": "PinkNoise Studio",
+      "category": "Instruments",
+      "version": "1.5.4",
+      "released": "2025-12-12"
+    },
+    {
+      "name": "AutoTheory",
+      "developer": "Pitchblende",
+      "category": "Instruments",
+      "version": "1.0.5",
+      "released": "2014-02-14"
+    },
+    {
+      "name": "Macro Multi-Model Synthesizer",
+      "developer": "Presteign Sound Labs",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2022-02-15"
+    },
+    {
+      "name": "FM4 Frequency Modulation Synthesizer",
+      "developer": "Primal Audio I/S",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2016-12-08"
+    },
+    {
+      "name": "ProjectSAM Orchestral Sampler",
+      "developer": "ProjectSAM",
+      "category": "Instruments",
+      "version": "1.2.1",
+      "released": "2021-08-10"
+    },
+    {
+      "name": "PX1 Dual FM Synthesizer",
+      "developer": "pskonsult",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2023-11-07"
+    },
+    {
+      "name": "Arkana Granular Synth",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.5.0",
+      "released": "2024-08-30"
+    },
+    {
+      "name": "JackBox 7R-707 Drum Module",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.1.5",
+      "released": "2019-08-19"
+    },
+    {
+      "name": "JackBox 7R-727 Perc Module",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.1.5",
+      "released": "2019-08-19"
+    },
+    {
+      "name": "Jackbox 7R-808 Analog Drum Module",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2019-09-24"
+    },
+    {
+      "name": "Jackbox 7R-909 Analog Drum Module",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2025-04-25"
+    },
+    {
+      "name": "JackBox L1MDrum",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.5.2",
+      "released": "2019-08-19"
+    },
+    {
+      "name": "JackBox QASIC RZ-i",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2019-08-19"
+    },
+    {
+      "name": "Mercury 4 Voice Polyphonic Arpeggiator",
+      "developer": "Quadelectra",
+      "category": "Instruments",
+      "version": "1.5.1",
+      "released": "2015-11-26"
+    },
+    {
+      "name": "Ivy",
+      "developer": "Rainwaves",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-03-22"
+    },
+    {
+      "name": "Algoritm FM Synthesizer",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2023-05-15"
+    },
+    {
+      "name": "Complex-1 Modular Synthesizer",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.5",
+      "released": "2020-01-29"
+    },
+    {
+      "name": "Friktion Modeled Strings",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2020-10-26"
+    },
+    {
+      "name": "Layers",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2017-09-27"
+    },
+    {
+      "name": "Layers Wave Edition",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-04-09"
+    },
+    {
+      "name": "Parsec Spectral Synthesizer",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "2.0.3",
+      "released": "2016-11-30"
+    },
+    {
+      "name": "Processed Pianos",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2020-02-26"
+    },
+    {
+      "name": "Radical Keys",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2012-11-14"
+    },
+    {
+      "name": "Reason Drum Kits",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2025-12-09"
+    },
+    {
+      "name": "Reason Electric Bass",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-07-13"
+    },
+    {
+      "name": "Scenic Hybrid Instrument",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2019-10-23"
+    },
+    {
+      "name": "Umpf Club Drums",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2023-03-16"
+    },
+    {
+      "name": "Umpf Retro Beats",
+      "developer": "Reason Studios",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2023-03-16"
+    },
+    {
+      "name": "Ivoks Electromusical Synthesizer",
+      "developer": "Red Rock Sound",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2014-06-11"
+    },
+    {
+      "name": "Red70 Electromusical Synthesizer",
+      "developer": "Red Rock Sound",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2015-10-29"
+    },
+    {
+      "name": "Reveal Sound ReSpire",
+      "developer": "Reveal Sound s.r.o.",
+      "category": "Instruments",
+      "version": "1.0.7",
+      "released": "2019-04-16"
+    },
+    {
+      "name": "Attention Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-04-01"
+    },
+    {
+      "name": "B.I.T. Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2020-02-20"
+    },
+    {
+      "name": "Go2 Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.12",
+      "released": "2023-05-26"
+    },
+    {
+      "name": "PredatorRE Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.20",
+      "released": "2021-02-26"
+    },
+    {
+      "name": "PunchBDRE Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2015-06-01"
+    },
+    {
+      "name": "RGRE Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2016-03-07"
+    },
+    {
+      "name": "Rob Papen Quad Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.86",
+      "released": "2020-07-02"
+    },
+    {
+      "name": "SubBoomBassRE Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.5",
+      "released": "2023-07-17"
+    },
+    {
+      "name": "Vecto Instrument",
+      "developer": "Rob Papen",
+      "category": "Instruments",
+      "version": "1.0.9",
+      "released": "2019-04-10"
+    },
+    {
+      "name": "AC-1 Acoustic Clapper",
+      "developer": "Robotic Bean AB",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2016-03-04"
+    },
+    {
+      "name": "EC-1 Electro Clapper",
+      "developer": "Robotic Bean AB",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2016-03-04"
+    },
+    {
+      "name": "Resonans Physical Synthesizer",
+      "developer": "Robotic Bean AB",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2020-06-10"
+    },
+    {
+      "name": "Step Note Recorder",
+      "developer": "Robotic Bean AB",
+      "category": "Instruments",
+      "version": "2.0.1",
+      "released": "2018-11-15"
+    },
+    {
+      "name": "MS-34 Digital Complex Sound Generator",
+      "developer": "ScuzzyEye",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2015-08-24"
+    },
+    {
+      "name": "Aura-7 Cinematic Atmosphere",
+      "developer": "SKP Sound Design",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2021-11-18"
+    },
+    {
+      "name": "Zoetrope Organic Synthesizer",
+      "developer": "SKP Sound Design",
+      "category": "Instruments",
+      "version": "1.1.5",
+      "released": "2021-11-22"
+    },
+    {
+      "name": "Argonaut Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-03-29"
+    },
+    {
+      "name": "Aurora Hybrid Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.5",
+      "released": "2016-11-16"
+    },
+    {
+      "name": "Cobra",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.6",
+      "released": "2022-03-04"
+    },
+    {
+      "name": "CyberSub",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": ""
+    },
+    {
+      "name": "Electrons Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.8",
+      "released": "2021-09-08"
+    },
+    {
+      "name": "Horizons",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2018-09-14"
+    },
+    {
+      "name": "Iridium Distortion Synth",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2016-02-12"
+    },
+    {
+      "name": "Kraft Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.9",
+      "released": "2017-03-03"
+    },
+    {
+      "name": "Morningstar",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2020-10-23"
+    },
+    {
+      "name": "Nautilus 2",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-11-21"
+    },
+    {
+      "name": "Nautilus Bass Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2017-01-19"
+    },
+    {
+      "name": "Orbis Wavetable Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2016-03-22"
+    },
+    {
+      "name": "Poltergeist",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2018-06-15"
+    },
+    {
+      "name": "Pulse PWM Synth",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.3",
+      "released": "2018-01-26"
+    },
+    {
+      "name": "Solar 5",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "2.0.7",
+      "released": "2018-01-29"
+    },
+    {
+      "name": "Tectonic Synthesizer",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.1",
+      "released": "2017-08-21"
+    },
+    {
+      "name": "Thermal",
+      "developer": "Skrock Music",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2016-12-02"
+    },
+    {
+      "name": "SoedeSoft SidMaster",
+      "developer": "SoedeSoft",
+      "category": "Instruments",
+      "version": "1.4.1",
+      "released": "2023-04-18"
+    },
+    {
+      "name": "Revival",
+      "developer": "Sononics Audio, LLC",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2013-07-26"
+    },
+    {
+      "name": "Granada",
+      "developer": "Soundiron",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-06-07"
+    },
+    {
+      "name": "Soundiron Emotional Piano",
+      "developer": "Soundiron",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2015-06-12"
+    },
+    {
+      "name": "Tribute Wavetable Synthesizer",
+      "developer": "Speo Music",
+      "category": "Instruments",
+      "version": "1.1.2",
+      "released": "2023-02-06"
+    },
+    {
+      "name": "Trust Cypher Synthesizer",
+      "developer": "Speo Music",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2017-10-06"
+    },
+    {
+      "name": "Mixfood Air Ambient Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2021-02-15"
+    },
+    {
+      "name": "Mixfood Ambi Nature Ambiance-creator",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Ambi Urban Ambiance Generator",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Earth Ambient Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2021-02-15"
+    },
+    {
+      "name": "Mixfood Fire Ambient Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2021-02-15"
+    },
+    {
+      "name": "Mixfood Knock Drum Machine",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Octo 8 OSC Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Orange",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood ReFresh Analog Wavetable Synt",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood ReMix Wavetable Synthesizer",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Step 128 Rhythm Assistant",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Stutter 128 Sample Fun",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Unison Xs Sample-based Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "2.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Mixfood Water Ambient Synth",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2021-02-15"
+    },
+    {
+      "name": "Mixfood WT4 Wavetable Synthesizer",
+      "developer": "Studio Corbach",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2026-08-24"
+    },
+    {
+      "name": "Obsession",
+      "developer": "Synapse Audio",
+      "category": "Instruments",
+      "version": "1.2.0",
+      "released": "2022-03-22"
+    },
+    {
+      "name": "Synapse Antidote",
+      "developer": "Synapse Audio",
+      "category": "Instruments",
+      "version": "1.2.8",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "The Legend HZ",
+      "developer": "Synapse Audio",
+      "category": "Instruments",
+      "version": "1.1.1",
+      "released": "2026-04-14"
+    },
+    {
+      "name": "Saturn Core Synthesizer",
+      "developer": "Synth Seduction",
+      "category": "Instruments",
+      "version": "1.1.2",
+      "released": "2026-07-27"
+    },
+    {
+      "name": "Stellar Analog Synthesizer",
+      "developer": "Synth Seduction",
+      "category": "Instruments",
+      "version": "1.1.3",
+      "released": "2024-09-23"
+    },
+    {
+      "name": "XImpact",
+      "developer": "Synth Seduction",
+      "category": "Instruments",
+      "version": "1.2.5",
+      "released": "2021-01-19"
+    },
+    {
+      "name": "Spectra Additive ReSynthesizer",
+      "developer": "Synthetech Sound",
+      "category": "Instruments",
+      "version": "1.0.2",
+      "released": "2018-03-29"
+    },
+    {
+      "name": "SteamGarden",
+      "developer": "Tonicmint",
+      "category": "Instruments",
+      "version": "1.0.4",
+      "released": "2026-07-23"
+    },
+    {
+      "name": "Blackpole Station Polyphonic Synthesizer",
+      "developer": "Turn2on",
+      "category": "Instruments",
+      "version": "1.2.2",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "DyingStar Polysynth Machine",
+      "developer": "Turn2on",
+      "category": "Instruments",
+      "version": "1.3.1",
+      "released": "2018-11-13"
+    },
+    {
+      "name": "ReVoicer Filter-Bank Vocoder Osc",
+      "developer": "Turn2on",
+      "category": "Instruments",
+      "version": "2.0.1",
+      "released": "2022-12-29"
+    },
+    {
+      "name": "WTFM Wavetable FM Synthesizer",
+      "developer": "Turn2on",
+      "category": "Instruments",
+      "version": "1.1.0",
+      "released": "2021-02-09"
+    },
+    {
+      "name": "Beatmaker DOPE",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2023-03-03"
+    },
+    {
+      "name": "Beatmaker EDEN",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-06-29"
+    },
+    {
+      "name": "Beatmaker HUSTLE",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2018-06-29"
+    },
+    {
+      "name": "Virtual Bassist Mellow",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2019-04-11"
+    },
+    {
+      "name": "Virtual Bassist Rowdy",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2019-04-11"
+    },
+    {
+      "name": "Virtual Bassist Royal",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2019-04-11"
+    },
+    {
+      "name": "Virtual Drummer Heavy",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "2.0.2",
+      "released": "2019-09-30"
+    },
+    {
+      "name": "Virtual Drummer Phat",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "2.0.2",
+      "released": "2019-09-30"
+    },
+    {
+      "name": "Virtual Drummer Solid",
+      "developer": "UJAM Development GmbH",
+      "category": "Instruments",
+      "version": "2.0.2",
+      "released": "2019-09-30"
+    },
+    {
+      "name": "AdditiveOscillator",
+      "developer": "WiZ Audio",
+      "category": "Instruments",
+      "version": "1.0.0",
+      "released": "2014-03-10"
+    },
+    {
+      "name": "TableOscillator",
+      "developer": "WiZ Audio",
+      "category": "Instruments",
+      "version": "2.0.1",
+      "released": "2014-06-18"
+    },
+    {
+      "name": "Noxious",
+      "developer": "zvork",
+      "category": "Instruments",
+      "version": "1.6.0",
+      "released": "2016-07-04"
+    },
+    {
+      "name": "Oberon Synthesizer",
+      "developer": "zvork",
+      "category": "Instruments",
+      "version": "2.0.5",
+      "released": "2019-06-27"
+    },
+    {
+      "name": "Denote",
+      "developer": "Andrew Russell",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2020-04-24"
+    },
+    {
+      "name": "Velocity Curve",
+      "developer": "Andrew Russell",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2020-04-24"
+    },
+    {
+      "name": "Imperfector",
+      "developer": "Artur Stereo",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2026-07-22"
+    },
+    {
+      "name": "KBN-P Kinetic Bouncing Note Player",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2026-08-11"
+    },
+    {
+      "name": "RDS16 Rack Drum Sequencer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2026-08-03"
+    },
+    {
+      "name": "SAP10 Sequencer Arpeggio Player",
+      "developer": "Ekssperimental Sounds",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2026-08-10"
+    },
+    {
+      "name": "Agnostik",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.1.0",
+      "released": "2022-05-03"
+    },
+    {
+      "name": "Chordbank",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.6.2",
+      "released": "2020-04-22"
+    },
+    {
+      "name": "Inspiral",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.1.2",
+      "released": "2022-01-05"
+    },
+    {
+      "name": "Melodic Inverter",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.4.2",
+      "released": "2020-12-17"
+    },
+    {
+      "name": "MeloDramatik",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.2.2",
+      "released": "2022-01-05"
+    },
+    {
+      "name": "Note Alter",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.2.0",
+      "released": "2020-01-15"
+    },
+    {
+      "name": "Note Filter",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.3.0",
+      "released": "2020-01-15"
+    },
+    {
+      "name": "Note Humanizer",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.4.1",
+      "released": "2020-11-25"
+    },
+    {
+      "name": "Note Latch",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Players",
+      "version": "1.1.0",
+      "released": "2020-11-26"
+    },
+    {
+      "name": "Player Receive Notes",
+      "developer": "Le Note Live Software",
+      "category": "Players",
+      "version": "1.3.1",
+      "released": "2026-02-20"
+    },
+    {
+      "name": "Aggregate Music System",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2021-12-17"
+    },
+    {
+      "name": "CV Player Tap",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.3",
+      "released": "2018-08-30"
+    },
+    {
+      "name": "Evolution",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2020-04-17"
+    },
+    {
+      "name": "Kompulsion",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2018-09-03"
+    },
+    {
+      "name": "mDSQ",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2021-11-02"
+    },
+    {
+      "name": "RND",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.4",
+      "released": "2018-08-30"
+    },
+    {
+      "name": "UTL Modifier",
+      "developer": "Lectric Panda LLC",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2018-09-03"
+    },
+    {
+      "name": "MIDI Compressor",
+      "developer": "LoveOne Consulting AB",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2018-05-08"
+    },
+    {
+      "name": "MIDI-CV Converter",
+      "developer": "LoveOne Consulting AB",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2019-01-21"
+    },
+    {
+      "name": "WBL4014",
+      "developer": "omino.com",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2022-03-04"
+    },
+    {
+      "name": "Arpeggio Lab",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2025-05-06"
+    },
+    {
+      "name": "Bassline Generator",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.1.0",
+      "released": "2022-12-07"
+    },
+    {
+      "name": "Chord Sequencer",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.1.3",
+      "released": "2025-04-28"
+    },
+    {
+      "name": "Drum Sequencer",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.0.3",
+      "released": "2025-11-25"
+    },
+    {
+      "name": "Pattern Mutator",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.0.4",
+      "released": "2022-09-02"
+    },
+    {
+      "name": "PolyStep Sequencer",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2019-06-05"
+    },
+    {
+      "name": "Quad Note Generator",
+      "developer": "Reason Studios",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2021-03-23"
+    },
+    {
+      "name": "ChordSQ Chord Sequencer",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.3.6",
+      "released": "2025-05-14"
+    },
+    {
+      "name": "Grid64P0 Keyboard Player",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2020-09-08"
+    },
+    {
+      "name": "Grid64P1 Harmonic Player",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2020-08-27"
+    },
+    {
+      "name": "Grid64P2 Generative Player",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.0.5",
+      "released": "2022-03-05"
+    },
+    {
+      "name": "Life Generative Sequencer",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.1.0",
+      "released": "2023-09-21"
+    },
+    {
+      "name": "NoteMix Player",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.0.8",
+      "released": "2022-01-23"
+    },
+    {
+      "name": "NoteRepeat Player",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.1.8",
+      "released": "2021-12-23"
+    },
+    {
+      "name": "NoteSet Corrector || Filter",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.2.0",
+      "released": "2024-05-15"
+    },
+    {
+      "name": "Phrase Key Trigged Sequencer",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.3.0",
+      "released": "2025-07-04"
+    },
+    {
+      "name": "ScaleSQ Sequencer",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.0.6",
+      "released": "2025-04-25"
+    },
+    {
+      "name": "ToneRows",
+      "developer": "Retouch Control",
+      "category": "Players",
+      "version": "1.1.2",
+      "released": "2021-12-06"
+    },
+    {
+      "name": "Euclidean Rhythms",
+      "developer": "Robotic Bean AB",
+      "category": "Players",
+      "version": "1.1.1",
+      "released": "2019-05-15"
+    },
+    {
+      "name": "Sequences",
+      "developer": "Robotic Bean AB",
+      "category": "Players",
+      "version": "1.4.6",
+      "released": "2022-12-02"
+    },
+    {
+      "name": "Selig NoteView",
+      "developer": "Selig Audio, LLC",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2020-11-04"
+    },
+    {
+      "name": "Centauri Chord Chopper",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.3",
+      "released": "2026-06-30"
+    },
+    {
+      "name": "Draco Drum Throne",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.3",
+      "released": "2026-08-05"
+    },
+    {
+      "name": "Ghost Notes",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2026-05-13"
+    },
+    {
+      "name": "Lynx: Song Finisher",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2026-08-13"
+    },
+    {
+      "name": "Lyra Melody Maker",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2026-04-30"
+    },
+    {
+      "name": "Ocelot Polyphonic CV",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2026-08-13"
+    },
+    {
+      "name": "Ursa Bass Engine",
+      "developer": "ShaneTV",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2026-06-10"
+    },
+    {
+      "name": "Map 64",
+      "developer": "Speo Music",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2023-02-06"
+    },
+    {
+      "name": "AutoLatch MIDI Gate",
+      "developer": "Static Cling",
+      "category": "Players",
+      "version": "1.1.2",
+      "released": "2021-09-14"
+    },
+    {
+      "name": "Chord Detector",
+      "developer": "Static Cling",
+      "category": "Players",
+      "version": "1.2.0",
+      "released": "2019-11-05"
+    },
+    {
+      "name": "Delta MIDI Computer",
+      "developer": "Static Cling",
+      "category": "Players",
+      "version": "1.4.0",
+      "released": "2022-07-08"
+    },
+    {
+      "name": "AB Transpose",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2019-08-23"
+    },
+    {
+      "name": "ChordLine",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2020-10-30"
+    },
+    {
+      "name": "InRange",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2021-05-27"
+    },
+    {
+      "name": "MonoPlay",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.1.0",
+      "released": "2025-03-21"
+    },
+    {
+      "name": "Negate",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2019-11-21"
+    },
+    {
+      "name": "Note Limiter",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.2",
+      "released": "2021-05-26"
+    },
+    {
+      "name": "Note Monitor",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.0.0",
+      "released": "2019-05-22"
+    },
+    {
+      "name": "Pearls – Euclidean Collision Sequencer",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.2.1",
+      "released": "2025-05-23"
+    },
+    {
+      "name": "ScaleMatrix",
+      "developer": "Tonicmint",
+      "category": "Players",
+      "version": "1.6.1",
+      "released": "2026-08-11"
+    },
+    {
+      "name": "ST100 Strumming Machine",
+      "developer": "zvork",
+      "category": "Players",
+      "version": "1.0.1",
+      "released": "2018-10-31"
+    },
+    {
+      "name": "CV QUANT FREE",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2023-04-25"
+    },
+    {
+      "name": "Double Dutch Audio Wrangler",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-10-30"
+    },
+    {
+      "name": "DoubleDutch CV Wrangler",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2020-02-05"
+    },
+    {
+      "name": "LPCV PRO",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-12-21"
+    },
+    {
+      "name": "LPCVfree",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-06-23"
+    },
+    {
+      "name": "Split Spitz Gate Randomizor",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2023-04-25"
+    },
+    {
+      "name": "Sputter Spitz: CV Delay",
+      "developer": "17 Frames Media",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-05-05"
+    },
+    {
+      "name": "CV8X4 CV Generator",
+      "developer": "Aftermath Audio",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2014-11-12"
+    },
+    {
+      "name": "Elements DS-LFO",
+      "developer": "AirRaid Audio",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2016-10-17"
+    },
+    {
+      "name": "ARCUS User Knobs",
+      "developer": "Alien Seed Tech",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2021-10-26"
+    },
+    {
+      "name": "KRON",
+      "developer": "Alien Seed Tech",
+      "category": "Utilities",
+      "version": "1.3.2",
+      "released": "2021-10-26"
+    },
+    {
+      "name": "PSDN CV Envelope Generator",
+      "developer": "Alien Seed Tech",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2015-12-02"
+    },
+    {
+      "name": "Double Dry/Wet",
+      "developer": "Andrew Russell",
+      "category": "Utilities",
+      "version": "2.0.1",
+      "released": "2020-06-11"
+    },
+    {
+      "name": "Dual CV Source",
+      "developer": "Andrew Russell",
+      "category": "Utilities",
+      "version": "2.0.1",
+      "released": "2025-02-08"
+    },
+    {
+      "name": "LFX-XP Advanced LFO",
+      "developer": "BASSGRID",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-02-14"
+    },
+    {
+      "name": "Serial Parallel Effects Mixer",
+      "developer": "Bcase",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2026-06-16"
+    },
+    {
+      "name": "xEM",
+      "developer": "Bcase",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-06-16"
+    },
+    {
+      "name": "Polymodular Audio Merger",
+      "developer": "Blamsoft, Inc.",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-12-18"
+    },
+    {
+      "name": "Polymodular Audio Splitter",
+      "developer": "Blamsoft, Inc.",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-12-18"
+    },
+    {
+      "name": "Polymodular CV Breakout Box",
+      "developer": "Blamsoft, Inc.",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2015-03-27"
+    },
+    {
+      "name": "Polymodular CV Merger",
+      "developer": "Blamsoft, Inc.",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2014-11-26"
+    },
+    {
+      "name": "Polymodular CV Splitter",
+      "developer": "Blamsoft, Inc.",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2014-11-26"
+    },
+    {
+      "name": "Get Layed – With Voltage",
+      "developer": "Deadman Audio Devices",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-06-12"
+    },
+    {
+      "name": "One-Note Stand",
+      "developer": "Deadman Audio Devices",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2014-03-12"
+    },
+    {
+      "name": "Threeloo 3LFOs Module",
+      "developer": "Devoloop",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-08-14"
+    },
+    {
+      "name": "Analog Sequencer",
+      "developer": "DLD Technology",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "CV Gateway",
+      "developer": "DLD Technology",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "CV Meter",
+      "developer": "DLD Technology",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "DR4 Quad Drum Trigger",
+      "developer": "DLD Technology",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2020-09-30"
+    },
+    {
+      "name": "Gated Random Generator",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2026-05-12"
+    },
+    {
+      "name": "KBN-G Kinetic Bouncing Note Generator",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-08-11"
+    },
+    {
+      "name": "KGB-G Kinetic Gate Bouncing Generator",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-08-11"
+    },
+    {
+      "name": "Step Farther",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-07-07"
+    },
+    {
+      "name": "Stepling",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-06-03"
+    },
+    {
+      "name": "SW4-C Multi-Switch Controller",
+      "developer": "DOODOV DIGITAL DESIGN",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2016-04-14"
+    },
+    {
+      "name": "6 Channel Mixer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-07-21"
+    },
+    {
+      "name": "CV Beat Generator Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV LFO Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV Logic/Math Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV Mixer Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV NoteQuantize Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV Shape Cycle Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-02-19"
+    },
+    {
+      "name": "CV Slope Generator Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-05-14"
+    },
+    {
+      "name": "CV Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV Trig/Gate Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-03-23"
+    },
+    {
+      "name": "CV Utility Processor",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "CV Visual Meter Tool",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2026-02-17"
+    },
+    {
+      "name": "Sequenced CV Source / Mixer",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-02-27"
+    },
+    {
+      "name": "Spirit Level",
+      "developer": "Ekssperimental Sounds",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-09-02"
+    },
+    {
+      "name": "LaunchEon",
+      "developer": "Enlightenspeed Ltd",
+      "category": "Utilities",
+      "version": "1.3.1",
+      "released": ""
+    },
+    {
+      "name": "Flower Audio Loudness Meter",
+      "developer": "Flower Audio",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2012-08-13"
+    },
+    {
+      "name": "Omega Merger",
+      "developer": "Forgotten Clank Studios",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2019-09-18"
+    },
+    {
+      "name": "Morfin XF Crossfader",
+      "developer": "Groovy Melon",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2012-11-23"
+    },
+    {
+      "name": "PSYH – CV MultiMerger",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2021-01-27"
+    },
+    {
+      "name": "PSYH – CV MultiSplitter",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2021-01-27"
+    },
+    {
+      "name": "PSYH – CV Pulse Generator",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2021-05-26"
+    },
+    {
+      "name": "PSYH – CV Pulse Holder",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2022-02-14"
+    },
+    {
+      "name": "PSYH – CV Pulse Stepper",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2021-07-12"
+    },
+    {
+      "name": "PSYH – CV Pulse To Linear",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2022-01-05"
+    },
+    {
+      "name": "PSYH – Matrix Signal Switch",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2021-06-18"
+    },
+    {
+      "name": "Pulsinator Pulse Sequencer",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-05-24"
+    },
+    {
+      "name": "TrixMate CV Switch",
+      "developer": "Haaswerk",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-02-18"
+    },
+    {
+      "name": "MatchMaker CV In/Out Interface",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2014-10-03"
+    },
+    {
+      "name": "Mesher-4B – CV Buttons Rout Panel",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-01-09"
+    },
+    {
+      "name": "Mesher-4K – CV Knobs Mix Panel",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-01-09"
+    },
+    {
+      "name": "Mesher-8B – CV Buttons Rout Panel",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2014-02-26"
+    },
+    {
+      "name": "Mesher-8K – CV Knobs Mix Panel",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-01-09"
+    },
+    {
+      "name": "Mingler Active Auto Select Latest CV",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2014-08-04"
+    },
+    {
+      "name": "ModSelsor CV Selector & Sensor",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.2.1",
+      "released": "2014-09-22"
+    },
+    {
+      "name": "ModSlewer CV Slewrate Shaper",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-09-26"
+    },
+    {
+      "name": "ModStepper – Trig To Step CV Mod Level",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2013-12-18"
+    },
+    {
+      "name": "ModSweeper – Push To Sweep CV Mod Level",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2013-12-18"
+    },
+    {
+      "name": "MxSplirger CV Flexible Split & Merge",
+      "developer": "Hamu",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2014-06-12"
+    },
+    {
+      "name": "Anansi Mid Side Router",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2013-04-11"
+    },
+    {
+      "name": "Charlotte Envelope Generator",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2013-07-12"
+    },
+    {
+      "name": "Lolth CV Delay Splitter",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.3.0",
+      "released": "2013-08-07"
+    },
+    {
+      "name": "Miranda CV Delay Merger",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.3.0",
+      "released": "2013-08-07"
+    },
+    {
+      "name": "Mordred Audio Bypass Merger",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.3.0",
+      "released": "2013-08-07"
+    },
+    {
+      "name": "Shelob Audio Bypass Splitter",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.3.0",
+      "released": "2013-08-07"
+    },
+    {
+      "name": "TMA-1 Commentator",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2016-01-28"
+    },
+    {
+      "name": "TMA-4 Commentator",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2016-01-28"
+    },
+    {
+      "name": "TMA-9 Commentator",
+      "developer": "Jiggery-Pokery Sound",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2016-01-28"
+    },
+    {
+      "name": "Tick Tick Step Sequencer",
+      "developer": "Josh Levy",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-09-16"
+    },
+    {
+      "name": "Executioner Dj Mixer",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2018-11-30"
+    },
+    {
+      "name": "ReGain Audio Gain Assistant",
+      "developer": "LAB:ONE RECORDINGS",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2017-12-14"
+    },
+    {
+      "name": "Out Gate Note",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.3.2",
+      "released": "2023-02-06"
+    },
+    {
+      "name": "Select Program",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2021-11-01"
+    },
+    {
+      "name": "Set Audio Out",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2026-03-27"
+    },
+    {
+      "name": "Set Cv Out",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2021-11-08"
+    },
+    {
+      "name": "Set Program",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2026-02-20"
+    },
+    {
+      "name": "Set Vca",
+      "developer": "Le Note Live Software",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2026-03-27"
+    },
+    {
+      "name": "AMP",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2017-02-13"
+    },
+    {
+      "name": "Janitor CV Shaper",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2014-10-22"
+    },
+    {
+      "name": "LPM",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2019-05-29"
+    },
+    {
+      "name": "MoPol Polyphonic CV Merger",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2015-05-08"
+    },
+    {
+      "name": "PSQ-1684",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "3.1.1",
+      "released": "2018-01-25"
+    },
+    {
+      "name": "Shape LFO Editor",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.1.3",
+      "released": "2016-02-03"
+    },
+    {
+      "name": "Skope",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2015-04-23"
+    },
+    {
+      "name": "Skope M4 Signal Monitor",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2015-05-22"
+    },
+    {
+      "name": "Spektrum Signal Monitor",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2015-07-08"
+    },
+    {
+      "name": "ZFO-2 CV Oscillators",
+      "developer": "Lectric Panda LLC",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2018-12-01"
+    },
+    {
+      "name": "BZR-1 Chaotic Signal Generator",
+      "developer": "LoveOne Consulting AB",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-05-03"
+    },
+    {
+      "name": "Loudness Normalizer",
+      "developer": "Makeshift Design",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2022-05-25"
+    },
+    {
+      "name": "Mini Normalizer",
+      "developer": "Makeshift Design",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-05-25"
+    },
+    {
+      "name": "CV Mutant",
+      "developer": "Multi-D",
+      "category": "Utilities",
+      "version": "2.0.24",
+      "released": "2014-12-16"
+    },
+    {
+      "name": "MIX88",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2024-04-26"
+    },
+    {
+      "name": "MODRACK ADSR",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "MODRACK LFO",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "MODRACK MATRIX88",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2025-02-20"
+    },
+    {
+      "name": "MODRACK SEQ",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2023-07-01"
+    },
+    {
+      "name": "MODRACK VCA",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "MODRACK VCF",
+      "developer": "Murf",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2023-03-24"
+    },
+    {
+      "name": "VMG-01 Sample Delay",
+      "developer": "Normen Hansen",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2014-05-06"
+    },
+    {
+      "name": "CV Tuner",
+      "developer": "Ochen K.",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2015-07-10"
+    },
+    {
+      "name": "MicroTune",
+      "developer": "Ochen K.",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2014-06-16"
+    },
+    {
+      "name": "Probability CV Trigger",
+      "developer": "Ochen K.",
+      "category": "Utilities",
+      "version": "1.1.2",
+      "released": "2013-03-27"
+    },
+    {
+      "name": "Probability Drum Trigger",
+      "developer": "Ochen K.",
+      "category": "Utilities",
+      "version": "1.2.3",
+      "released": "2013-03-27"
+    },
+    {
+      "name": "Alias8 CV Controller",
+      "developer": "PEFF",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2014-01-08"
+    },
+    {
+      "name": "Directre Audio Router",
+      "developer": "PEFF",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-03-04"
+    },
+    {
+      "name": "Spacre Blank Plate",
+      "developer": "PEFF",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-05-27"
+    },
+    {
+      "name": "FRONT-8 Graphical CV Router",
+      "developer": "Pepin Hazan",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2021-12-07"
+    },
+    {
+      "name": "RVL-1 CV Display / Utility",
+      "developer": "Pepin Hazan",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2021-12-07"
+    },
+    {
+      "name": "Tinker CV Math Assistant",
+      "developer": "Pepin Hazan",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2025-04-01"
+    },
+    {
+      "name": "A/B 12 Audio Out Switch",
+      "developer": "pongasoft",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2021-10-12"
+    },
+    {
+      "name": "A/B 12 Stereo Audio Inputs Switch",
+      "developer": "pongasoft",
+      "category": "Utilities",
+      "version": "1.3.0",
+      "released": "2021-10-12"
+    },
+    {
+      "name": "A/B Audio & CV Switch",
+      "developer": "pongasoft",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2016-03-15"
+    },
+    {
+      "name": "CVA-7 CV Analyzer",
+      "developer": "pongasoft",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2021-06-23"
+    },
+    {
+      "name": "CV Suite Line Mixer",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2012-10-22"
+    },
+    {
+      "name": "CV Suite Line Processor",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.2.2",
+      "released": "2013-01-16"
+    },
+    {
+      "name": "CV Suite Parametrix",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-11-06"
+    },
+    {
+      "name": "CV Suite Signal Repeater",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2014-07-25"
+    },
+    {
+      "name": "CV Suite Vectorizer",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2015-02-10"
+    },
+    {
+      "name": "System 9 Pattern Sequencer",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.5.1",
+      "released": "2016-06-07"
+    },
+    {
+      "name": "Trigate",
+      "developer": "Quadelectra",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2018-09-14"
+    },
+    {
+      "name": "METorC CV Monitoring Tool",
+      "developer": "Rain Streets",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2024-09-14"
+    },
+    {
+      "name": "MODIFIorC CV Modification Tool",
+      "developer": "Rain Streets",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2025-09-20"
+    },
+    {
+      "name": "DEG-2 Dual Envelope Generator",
+      "developer": "ravenherz",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2021-12-21"
+    },
+    {
+      "name": "DVC-1 Digital Voltage Comparator",
+      "developer": "ravenherz",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2021-12-21"
+    },
+    {
+      "name": "Measure",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "2.5.2",
+      "released": "2017-03-15"
+    },
+    {
+      "name": "Peak Programme Meter",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.0.5",
+      "released": "2021-04-17"
+    },
+    {
+      "name": "RE 128 Loudness Meter",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2015-10-16"
+    },
+    {
+      "name": "RE 180 Dynamic Driver",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-05-30"
+    },
+    {
+      "name": "RE 181 Mid/Side Audio Converter",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2016-09-16"
+    },
+    {
+      "name": "RE 60 Real Time Spectrum Analyzer",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.5.1",
+      "released": "2021-12-15"
+    },
+    {
+      "name": "Reference 5",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2020-11-18"
+    },
+    {
+      "name": "Volume Unit Meter",
+      "developer": "Red Rock Sound",
+      "category": "Utilities",
+      "version": "1.0.6",
+      "released": "2021-11-09"
+    },
+    {
+      "name": "ChordSet",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "1.7.1",
+      "released": "2020-09-21"
+    },
+    {
+      "name": "grid64G Gate Sequencer",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2018-11-20"
+    },
+    {
+      "name": "Grid64n Monophonic Note Sequencer",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2018-11-20"
+    },
+    {
+      "name": "JammeR Loops Trigger Module",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "2.0.1",
+      "released": "2021-08-26"
+    },
+    {
+      "name": "Morpher CV Utility",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2025-10-01"
+    },
+    {
+      "name": "Slider Pitch Surface",
+      "developer": "Retouch Control",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2015-04-27"
+    },
+    {
+      "name": "RPSpec Effect",
+      "developer": "Rob Papen",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2017-05-17"
+    },
+    {
+      "name": "Compare CV Scope",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2020-04-29"
+    },
+    {
+      "name": "CV-I Audio to CV",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2020-04-29"
+    },
+    {
+      "name": "CV-O CV to Audio",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2020-04-29"
+    },
+    {
+      "name": "Elementary Logic Gates",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2016-10-28"
+    },
+    {
+      "name": "Euclid Rhythm Generator",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.3.1",
+      "released": "2020-09-08"
+    },
+    {
+      "name": "MT-1 MetroTone Metronome",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2020-04-29"
+    },
+    {
+      "name": "Select CV Switch",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "2.0.1",
+      "released": "2020-08-05"
+    },
+    {
+      "name": "TM-1 Trigger Multiplexer",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.3.1",
+      "released": "2020-05-20"
+    },
+    {
+      "name": "TS-1 Time Slider",
+      "developer": "Robotic Bean AB",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2020-04-29"
+    },
+    {
+      "name": "ReMark",
+      "developer": "Selig Audio, LLC",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2015-04-10"
+    },
+    {
+      "name": "4 Phase LFO",
+      "developer": "Spectral Scan",
+      "category": "Utilities",
+      "version": "1.0.4",
+      "released": "2019-08-12"
+    },
+    {
+      "name": "Frame CV Generator",
+      "developer": "Speo Music",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2017-02-20"
+    },
+    {
+      "name": "Index Chord Dictionary",
+      "developer": "Static Cling",
+      "category": "Utilities",
+      "version": "1.1.3",
+      "released": "2017-10-12"
+    },
+    {
+      "name": "Optic Multi Channel Analyzer",
+      "developer": "Static Cling",
+      "category": "Utilities",
+      "version": "1.2.0",
+      "released": "2021-02-13"
+    },
+    {
+      "name": "Tome Scale and MIDI Visualizer",
+      "developer": "Static Cling",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2017-04-25"
+    },
+    {
+      "name": "CMD:Constants Number Generator",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-05-21"
+    },
+    {
+      "name": "CMD:Equation Math Module",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-05-24"
+    },
+    {
+      "name": "Divisor",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2012-12-06"
+    },
+    {
+      "name": "Equation Junior Math Module",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-05-24"
+    },
+    {
+      "name": "Later",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-04-04"
+    },
+    {
+      "name": "Now",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-02-11"
+    },
+    {
+      "name": "Randrome",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-09-18"
+    },
+    {
+      "name": "Randrome Junior Randomized CV Gate",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-09-18"
+    },
+    {
+      "name": "Scope Junior CV and Audio Oscilloscope",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2013-04-09"
+    },
+    {
+      "name": "Truth",
+      "developer": "The Chronologists",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2013-01-10"
+    },
+    {
+      "name": "Haas Mixer",
+      "developer": "The Musicology Group, Inc.",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2015-04-28"
+    },
+    {
+      "name": "CV Contour",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-12-02"
+    },
+    {
+      "name": "CV Freeze",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2023-04-12"
+    },
+    {
+      "name": "CV Multi",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-11-11"
+    },
+    {
+      "name": "CV Origami",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2022-11-11"
+    },
+    {
+      "name": "CV Pad",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2022-05-03"
+    },
+    {
+      "name": "CV Pistons",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2022-11-11"
+    },
+    {
+      "name": "CV Ranger",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2022-05-02"
+    },
+    {
+      "name": "CV Relay",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2023-02-24"
+    },
+    {
+      "name": "CV Response",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2022-12-14"
+    },
+    {
+      "name": "CV Shades",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-11-20"
+    },
+    {
+      "name": "CV Witch",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2021-03-19"
+    },
+    {
+      "name": "ST Multi",
+      "developer": "Tonicmint",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2024-08-02"
+    },
+    {
+      "name": "InfoBay-In Interface Helper",
+      "developer": "Turn2on",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-04-23"
+    },
+    {
+      "name": "InfoBay-Out Interface Helper",
+      "developer": "Turn2on",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2020-04-23"
+    },
+    {
+      "name": "MetaCore Correlation Meter",
+      "developer": "Turn2on",
+      "category": "Utilities",
+      "version": "1.1.1",
+      "released": "2023-02-07"
+    },
+    {
+      "name": "Metro Click-Machine",
+      "developer": "Turn2on",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2018-06-27"
+    },
+    {
+      "name": "ReSwitch IN Audio Selector",
+      "developer": "Turn2on",
+      "category": "Utilities",
+      "version": "1.0.1",
+      "released": "2020-05-29"
+    },
+    {
+      "name": "Audio to CV",
+      "developer": "Uberwave",
+      "category": "Utilities",
+      "version": "1.1.2",
+      "released": "2020-05-14"
+    },
+    {
+      "name": "ReLabeler",
+      "developer": "umarb8's Sonic Workflow",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-11-13"
+    },
+    {
+      "name": "ReArranger CV Randomizer",
+      "developer": "Veasy",
+      "category": "Utilities",
+      "version": "2.0.0",
+      "released": "2020-10-28"
+    },
+    {
+      "name": "ReTrigger Gated CV Manipulator",
+      "developer": "Veasy",
+      "category": "Utilities",
+      "version": "1.1.0",
+      "released": "2020-10-02"
+    },
+    {
+      "name": "CV DADSR Envelope",
+      "developer": "Warp Factor Audio",
+      "category": "Utilities",
+      "version": "1.0.0",
+      "released": "2026-07-17"
+    },
+    {
+      "name": "PlayGate",
+      "developer": "WiZ Audio",
+      "category": "Utilities",
+      "version": "1.0.3",
+      "released": "2013-06-26"
+    },
+    {
+      "name": "Volt CB-1",
+      "developer": "zvork",
+      "category": "Utilities",
+      "version": "1.0.2",
+      "released": "2013-03-27"
+    },
+    {
+      "name": "Volt SH-1",
+      "developer": "zvork",
+      "category": "Utilities",
+      "version": "1.0.5",
+      "released": "2013-11-12"
+    },
+    {
+      "name": "Volt SL-1",
+      "developer": "zvork",
+      "category": "Utilities",
+      "version": "2.1.2",
+      "released": "2019-08-19"
+    }
+  ]
+}
