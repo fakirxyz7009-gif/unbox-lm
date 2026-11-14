@@ -23,7 +23,7 @@ external folder.
 | Task | Command |
 | --- | --- |
 | Dev server (app + API) on http://localhost:3000 | `npm run dev` (`PORT=3123 npx tsx server.ts` for a spare port) |
-| Type check | `npm run lint` (= `tsc --noEmit`) |
+| Type check + UTF-8 check | `npm run lint` (= `tsc --noEmit`, then `node scripts/check-utf8.mjs`; that check alone is `npm run check:utf8`) |
 | Automated regression suite | `npm test` (= `tsx --test tests/**/*.test.ts`) |
 | Browser Web Audio engine probe | `npm run test:browser-audio` (Chrome + real `OfflineAudioContext`; checks sample selection and rendered output) |
 | Browser recorded archtop probe | `npm run test:browser-shinyguitar` (loads the bundled CC0 Shinyguitar pack, checks the selected MIDI 60 sample, and measures offline output) |
