@@ -48,6 +48,11 @@ external folder.
 **Type-check baseline: 0 errors**, and `npx tsc --noEmit --noUnusedLocals` reports only unused
 `React` default imports (harmless with the JSX transform). Keep both clean.
 
+**Git hooks:** `.githooks/pre-commit` runs `scripts/check-utf8.mjs --staged`, so a commit whose staged
+text is not valid UTF-8 (or carries a U+FFFD) is rejected. The hooks are tracked: enable them once per
+clone with `npm run hooks:install` (= `git config core.hooksPath .githooks`); `git commit --no-verify`
+skips the check.
+
 ## Verifying changes
 
 - **Automated Regression Suite**: `npm test` runs all unit test suites in `tests/` covering:
