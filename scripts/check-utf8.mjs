@@ -1,7 +1,12 @@
-// Fails when a tracked text file contains bytes that are not valid UTF-8, or a U+FFFD
-// replacement character (what a CP1252 byte turns into when a tool re-encodes the file).
-// Both have silently corrupted docs before (a 0xD7 multiplication sign in CLAUDE.md), so they
-// are treated as build errors. Binaries are skipped by extension and by a NUL-byte sniff.
+// Fails when a text file contains bytes that are not valid UTF-8, or a U+FFFD replacement
+// character (what a CP1252 byte turns into when a tool re-encodes the file). Both have silently
+// corrupted docs before (a 0xD7 multiplication sign in CLAUDE.md), so they are build errors.
+//
+//   node scripts/check-utf8.mjs            every tracked file in the working tree
+//   node scripts/check-utf8.mjs --staged   only what is staged for commit, read from the index
+//
+// The staged mode is what .githooks/pre-commit runs: the index is what a commit will contain, and
+// the working tree may already have been repaired after the bad bytes were staged.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
@@ -24,6 +29,12 @@ const CP1252_NAMES = {
   0xd7: 'multiplication sign',
   0xf7: 'division sign',
 };
+
+const stagedMode = process.argv.includes('--staged');
+
+function git(args, options = {}) {
+  return execFileSync('git', args, { maxBuffer: 64 * 1024 * 1024, ...options });
+}
 
 /** Byte offsets that cannot start a valid UTF-8 sequence. */
 function invalidOffsets(buf) {
@@ -73,35 +84,50 @@ function replacementOffsets(buf) {
   return offsets;
 }
 
-function trackedFiles() {
-  try {
-    return execFileSync('git', ['ls-files', '-z'], { maxBuffer: 64 * 1024 * 1024 })
+function isBinary(buf) {
+  return buf.subarray(0, 8000).includes(0);
+}
+
+/** [{ file, buf }] for every tracked file, or only for the staged ones. */
+function collect() {
+  if (stagedMode) {
+    const staged = git(['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR'])
       .toString()
       .split('\0')
       .filter(Boolean);
-  } catch {
-    console.error('check-utf8: not a git checkout, nothing to check');
-    return [];
+    const sources = [];
+    for (const file of staged) {
+      if (BINARY_EXTENSIONS.test(file)) continue;
+      try {
+        sources.push({ file, buf: git(['cat-file', 'blob', ':' + file]) });
+      } catch {
+        // A path without an index entry (e.g. unmerged) is not this check's problem.
+      }
+    }
+    return { sources, scope: 'staged' };
   }
+
+  const files = git(['ls-files', '-z']).toString().split('\0').filter(Boolean);
+  const sources = [];
+  for (const file of files) {
+    if (BINARY_EXTENSIONS.test(file)) continue;
+    try {
+      sources.push({ file, buf: readFileSync(file) });
+    } catch {
+      continue;
+    }
+  }
+  return { sources, scope: 'tracked' };
 }
 
 const decoder = new TextDecoder('utf-8', { fatal: true });
+const { sources, scope } = collect();
 const problems = [];
 let scanned = 0;
 let skipped = 0;
 
-for (const file of trackedFiles()) {
-  if (BINARY_EXTENSIONS.test(file)) {
-    skipped++;
-    continue;
-  }
-  let buf;
-  try {
-    buf = readFileSync(file);
-  } catch {
-    continue;
-  }
-  if (buf.subarray(0, 8000).includes(0)) {
+for (const { file, buf } of sources) {
+  if (isBinary(buf)) {
     skipped++;
     continue;
   }
@@ -118,7 +144,7 @@ for (const file of trackedFiles()) {
       problems.push(`${file}:${lineOf(offset)}: invalid UTF-8 byte 0x${byte.toString(16).toUpperCase().padStart(2, '0')}${name}`);
     }
     if (invalid.length > 10) problems.push(`${file}: … and ${invalid.length - 10} more invalid byte(s)`);
-  } else if (replacements.length) {
+  } else {
     for (const offset of replacements.slice(0, 10)) {
       problems.push(`${file}:${lineOf(offset)}: U+FFFD replacement character`);
     }
@@ -137,10 +163,11 @@ for (const file of trackedFiles()) {
 }
 
 if (problems.length) {
-  console.error(`check-utf8: ${problems.length} problem(s) in ${scanned} text file(s):`);
+  const where = scope === 'staged' ? 'staged for commit' : 'tracked';
+  console.error(`check-utf8: ${problems.length} problem(s) in ${scanned} ${where} text file(s):`);
   for (const problem of problems) console.error('  ' + problem);
-  console.error('Fix: save the file as UTF-8 (a CP1252 byte such as 0xD7 is not UTF-8).');
+  console.error('Fix: save the file as UTF-8 (a CP1252 byte such as 0xD7 is not UTF-8), then stage it again.');
   process.exit(1);
 }
 
-console.log(`check-utf8: ${scanned} text file(s) valid UTF-8, ${skipped} binary file(s) skipped`);
+console.log(`check-utf8: ${scanned} ${scope} text file(s) valid UTF-8, ${skipped} binary file(s) skipped`);
