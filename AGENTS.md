@@ -10,7 +10,8 @@ external folder.
   `public/favicon.svg` (rendered to `build/icon.png` for electron-builder).
 - Server: Express 4 run with `tsx` (`server.ts`), hosts `/api/*` (Gemini AI + library) and serves
   the app (Vite middleware in dev, `dist/` in production) and the library bundle at `/library`.
-- Desktop: Electron 45 (`electron/main.cjs`) → portable `release/Unbox-Studio.exe`; it embeds the
+- Desktop: Electron 45 (`electron/main.cjs`) → NSIS installer `release/Unbox-Studio-Setup-1.0.0.exe`
+  (installed once; no per-launch self-extraction); it embeds the
   same API via the esbuild bundle `electron/api-server.cjs` (fixed loopback ports 47821–47825 so
   IndexedDB projects survive restarts).
 - AI provider: Google Gemini via `@google/genai` (server-side only, key in `.env`). Every AI
@@ -40,8 +41,8 @@ external folder.
 | Bundle the API for Electron → `electron/api-server.cjs` | `npm run build:api` |
 | Run desktop app from source | `npm run electron` or `run-app.bat` |
 | Run standalone GPU app (no Electron) | `npm run standalone` or `Start-Unbox-Standalone.bat` |
-| Build portable exe (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio.exe` |
-| Build the exe to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
+| Build the Windows installer (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio-Setup-1.0.0.exe` |
+| Build the installer to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share-Setup-1.0.0.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
 | Build and validate the project-owned VST3 host fixtures | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\vst3\smoke.ps1` (Windows x64; tests only the source-built delay and MIDI synth fixtures, never plugins from `D:\vsr`) |
 
 **Type-check baseline: 0 errors**, and `npx tsc --noEmit --noUnusedLocals` reports only unused
