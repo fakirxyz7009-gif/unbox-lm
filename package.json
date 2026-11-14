@@ -98,7 +98,7 @@
     "manual": "node scripts/generate-manual.js",
     "reference:devices": "node scripts/local-temp.mjs tsx scripts/generate-device-reference.ts",
     "electron": "npm run build && npm run build:api && electron .",
-    "dist:win": "npm run build && npm run build:api && electron-builder --win portable",
+    "dist:win": "npm run build && npm run build:api && electron-builder --win nsis",
     "bundle:library": "node scripts/local-temp.mjs tsx scripts/bundle-library.ts",
     "instrument": "node scripts/local-temp.mjs tsx scripts/instruments/cli.ts",
     "fetch:instrument:vcsl-pipe-organ": "node scripts/instruments/fetch-vcsl-pipe-organ.mjs",
@@ -108,7 +108,7 @@
     "fetch:instrument:freepats-bass": "node scripts/instruments/fetch-freepats-bass.mjs",
     "fetch:instrument:freepats-recorder": "node scripts/instruments/fetch-freepats-recorder.mjs",
     "fetch:instrument:freepats-bagpipe": "node scripts/instruments/fetch-freepats-bagpipe.mjs",
-    "dist:win:share": "node scripts/local-temp.mjs vite build --mode share && node scripts/local-temp.mjs tsx scripts/prune-share-build.ts && npm run build:api:share && electron-builder --win portable --config scripts/electron-builder-share.cjs",
+    "dist:win:share": "node scripts/local-temp.mjs vite build --mode share && node scripts/local-temp.mjs tsx scripts/prune-share-build.ts && npm run build:api:share && electron-builder --win nsis --config scripts/electron-builder-share.cjs",
     "build:api:share": "node scripts/local-temp.mjs tsx scripts/build-api.ts --share",
     "prune:share-build": "node scripts/local-temp.mjs tsx scripts/prune-share-build.ts",
     "audit:share-package": "node scripts/local-temp.mjs tsx scripts/audit-share-package.ts"
@@ -155,14 +155,24 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "win": {
       "target": [
-        "portable"
+        "nsis"
       ],
-      "artifactName": "Unbox-Studio.exe",
       "icon": "build/icon.png"
+    },
+    "nsis": {
+      "artifactName": "Unbox-Studio-Setup-${version}.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Unbox Studio",
+      "deleteAppDataOnUninstall": false
     }
   },
   "overrides": {

@@ -70,7 +70,9 @@ export default defineConfig(({ mode }) => {
       watch:
         process.env.DISABLE_HMR === 'true'
           ? null
-          : { ignored: ['**/.tmp/**', '**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release/**', '**/dist/**'] },
+          // Every desktop build output folder is ignored, not just `release/`: the others hold thousands of
+          // locked binaries, and watching release-local/win-unpacked/electron.exe crashed the dev server with EBUSY.
+          : { ignored: ['**/.tmp/**', '**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release*/**', '**/release/**', '**/dist/**'] },
     },
   };
 });

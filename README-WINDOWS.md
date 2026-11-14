@@ -2,8 +2,8 @@
 
 ## Get the .exe
 1. Install Node.js LTS from https://nodejs.org (one time).
-2. Double-click **build-exe.bat**. It installs everything and builds `release\Unbox-Studio.exe` (portable, no installer).
-3. Double-click `Unbox-Studio.exe` to run.
+2. Double-click **build-exe.bat**. It installs everything and builds `release\Unbox-Studio-Setup-1.0.0.exe`. Run that installer once; the installed app then starts immediately instead of unpacking itself on every launch.
+3. Launch **Unbox Studio** from the Start menu or the desktop shortcut (both created by the installer).
 
 ## Run without building an exe
 Double-click **run-app.bat** (opens the app in a desktop window).
