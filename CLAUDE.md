@@ -307,7 +307,7 @@ transport MIDI LED). Settings · MIDI shows ports, the map with Learn / Clear, a
   Only four sizes render: 11 label, 13 body, 18 title, 22 readout (@theme text tokens); the
   .unbox-cabinet rule raises any legacy sub-11px utility class to 11px. Measured on the
   workstation, rack and mixer at 1600 and 1280: min 11px, no clipped text, no per-device scrollers.
-- Contrast: audit the three tabs at 1600�1000 with a canvas-resolved colour walker before changing
+- Contrast: audit the three tabs at 1600×1000 with a canvas-resolved colour walker before changing
   chrome colours; the current pass reports 0 text pairs below 4.5:1 on solid surfaces.
 - Skin tokens: `@theme` in `src/index.css` (`bg-metal-1`, `text-lcd-ink`, `font-label`, `font-lcd` …) and
   the `.us-*` classes inside `@layer components` (so Tailwind utilities on the same element still win).
