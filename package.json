@@ -166,6 +166,9 @@
       ],
       "icon": "build/icon.png"
     },
+    "portable": {
+      "artifactName": "Unbox-Studio.exe"
+    },
     "nsis": {
       "artifactName": "Unbox-Studio-Setup-${version}.exe",
       "oneClick": false,
