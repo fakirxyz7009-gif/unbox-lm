@@ -50,8 +50,9 @@ external folder.
 
 **Git hooks:** `.githooks/pre-commit` runs `scripts/check-utf8.mjs --staged`, so a commit whose staged
 text is not valid UTF-8 (or carries a U+FFFD) is rejected. The hooks are tracked: enable them once per
-clone with `npm run hooks:install` (= `git config core.hooksPath .githooks`); `git commit --no-verify`
-skips the check.
+clone with `npm run hooks:install` (= `scripts/install-hooks.mjs`: sets `core.hooksPath` and refuses when
+`.githooks/pre-commit` is missing, so an old checkout cannot silently end up with no hooks); `git commit
+--no-verify` skips the check.
 
 ## Verifying changes
 
