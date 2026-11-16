@@ -17,6 +17,7 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
   const len = +(b - a).toFixed(3);
   const active = len > 0;
   const [draft, setDraft] = useState<{ a: string; b: string } | null>(null);
+  const [gapDraft, setGapDraft] = useState<string | null>(null);
   const [grab, setGrab] = useState<{ x: number; a0: number; b0: number } | null>(null);
   const spb = Math.max(1, audioEngine.stepsPerBar);
   const step = 1 / spb;
@@ -108,12 +109,17 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
       changed ? 'success' : 'info'
     );
   };
+  /** Gap the RIPPLE INSERT button opens: typed in the strip, defaulting to the section length. */
+  const gap = (() => {
+    const typed = Number(gapDraft);
+    return Number.isFinite(typed) && typed > 0 ? typed : len;
+  })();
   const rippleIns = () => {
-    const r = audioEngine.rippleInsertSection(a);
+    const r = audioEngine.rippleInsertSection(a, gap);
     const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
     toast(
       changed
-        ? `Opened a ${len} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+        ? `Opened a ${gap} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
         : 'Nothing at or after this point to push right',
       changed ? 'success' : 'info'
     );
@@ -197,9 +203,37 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
       <button className={btn('text-amber-300')} disabled={!active} onClick={() => void rippleDel()} title="Delete the section and pull everything after it left (Shift+X)" data-testid="section-strip-ripple-delete">
         RIPPLE DELETE
       </button>
-      <button className={btn('text-emerald-300')} disabled={!active} onClick={rippleIns} title="Open a gap this long at the section start and push everything after it right (Shift+I)" data-testid="section-strip-ripple-insert">
+      <button
+        className={btn('text-emerald-300')}
+        disabled={!active}
+        onClick={rippleIns}
+        title={`Open a ${gap} bar gap at the section start and push everything after it right (Shift+I uses the section length)`}
+        data-testid="section-strip-ripple-insert"
+      >
         RIPPLE INSERT
       </button>
+      <label className="flex items-center gap-1 opacity-90" title="Length of the gap RIPPLE INSERT opens (defaults to the section length)">
+        <span className="opacity-70">gap</span>
+        <input
+          value={gapDraft ?? String(len)}
+          onChange={(e) => setGapDraft(e.target.value)}
+          onBlur={() => {
+            const typed = Number(gapDraft);
+            if (!Number.isFinite(typed) || typed <= 0) setGapDraft(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setGapDraft(null);
+            e.stopPropagation();
+          }}
+          type="number"
+          step={step}
+          min={step}
+          className={`w-12 px-1 py-0 rounded text-right tabular-nums border ${light ? 'bg-[#181c20] border-[#3a4047] text-[#e8e5df]' : 'bg-slate-900 border-slate-700 text-white'}`}
+          aria-label="Ripple insert gap length in bars"
+          data-testid="section-strip-gap"
+        />
+        <span className="opacity-70">bars</span>
+      </label>
       <span className="ml-auto opacity-50 hidden lg:inline">Shift+D · Shift+Backspace · Shift+X · Shift+I</span>
     </div>
   );

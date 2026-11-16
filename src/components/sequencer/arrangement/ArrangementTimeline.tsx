@@ -57,7 +57,7 @@ import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { gainToDb, meterPos } from '../../../studio/ui/levels.ts';
 import { rememberUi, setUi, useUi, type SeqTool } from '../../../shell/uiStore.ts';
 import { focusClip } from '../../../shell/clipFocus.ts';
-import { showAlert, showPrompt } from '../../../shell/dialogService.ts';
+import { showAlert, showConfirm, showPrompt } from '../../../shell/dialogService.ts';
 import { setText, setWidth } from '../../../ui/skin/dom.ts';
 import { useEngineVersion, useFrame, useMeterFrame, useSequencerVersion } from '../../../nexa/useEngine.ts';
 import { DARK_TIMELINE, LIGHT_TIMELINE } from './timelineTheme.ts';
@@ -726,31 +726,70 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     const len = b - a;
     if (!(len > 0)) return false;
     const key = e.key.toLowerCase();
+    // The menu / strip force users to see a confirmation: the destructive keys ask the same question.
+    const inside = audioEngine.sectionContents(a, b);
+    const total = inside.clips + inside.points + inside.markers + inside.blocks + inside.folders;
+    const describe = () =>
+      [
+        inside.clips && `${inside.clips} clip${inside.clips === 1 ? '' : 's'}`,
+        inside.points && `${inside.points} automation point${inside.points === 1 ? '' : 's'}`,
+        inside.markers && `${inside.markers} marker${inside.markers === 1 ? '' : 's'}`,
+        inside.blocks && `${inside.blocks} block${inside.blocks === 1 ? '' : 's'}`,
+        inside.folders && `${inside.folders} group${inside.folders === 1 ? '' : 's'}`,
+      ]
+        .filter(Boolean)
+        .join(', ');
     if (e.shiftKey && key === 'd') {
+      if (!total) {
+        toast('That section is empty — nothing to copy', 'info');
+        return true;
+      }
       const made = audioEngine.duplicateSection(a, b);
       toast(made ? `Copied section — ${made} clip${made === 1 ? '' : 's'} to bar ${+(b + 1).toFixed(2)}` : 'That section has no clips to copy', made ? 'success' : 'info');
       return true;
     }
     if (e.shiftKey && (e.key === 'Backspace' || e.key === 'Delete')) {
-      const r = audioEngine.deleteSection(a, b);
-      const n = r.clips + r.lanes + r.markers + r.blocks + r.folders;
-      toast(
-        n
-          ? `Deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'}, ${r.lanes} automation lane${r.lanes === 1 ? '' : 's'}, ${r.markers} marker${r.markers === 1 ? '' : 's'}, ${r.blocks} block${r.blocks === 1 ? '' : 's'}, ${r.folders} group${r.folders === 1 ? '' : 's'} (Ctrl+Z restores it)`
-          : 'That section had nothing to delete',
-        n ? 'success' : 'info'
-      );
+      if (!total) {
+        toast('That section is empty — nothing to delete', 'info');
+        return true;
+      }
+      void showConfirm({
+        title: `Delete bars ${+(a + 1).toFixed(2)}–${+(b + 1).toFixed(2)}?`,
+        message: `This removes ${describe()}. One undo step restores it.`,
+        confirmLabel: 'Delete section',
+      }).then((ok) => {
+        if (!ok) return;
+        const r = audioEngine.deleteSection(a, b);
+        const n = r.clips + r.lanes + r.markers + r.blocks + r.folders;
+        toast(
+          n
+            ? `Deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'}, ${r.lanes} automation lane${r.lanes === 1 ? '' : 's'}, ${r.markers} marker${r.markers === 1 ? '' : 's'}, ${r.blocks} block${r.blocks === 1 ? '' : 's'}, ${r.folders} group${r.folders === 1 ? '' : 's'} (Ctrl+Z restores it)`
+            : 'That section had nothing to delete',
+          n ? 'success' : 'info'
+        );
+      });
       return true;
     }
     if (e.shiftKey && key === 'x') {
-      const r = audioEngine.rippleDeleteSection(a, b);
-      const changed = r.clips + r.shifted + r.lanes + r.markers + r.blocks + r.folders;
-      toast(
-        changed
-          ? `Ripple deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'} removed, ${r.shifted} later clip${r.shifted === 1 ? '' : 's'} pulled left (Ctrl+Z restores it)`
-          : 'Nothing after this section to ripple',
-        changed ? 'success' : 'info'
-      );
+      if (!total) {
+        toast('That section is empty — nothing to ripple', 'info');
+        return true;
+      }
+      void showConfirm({
+        title: `Ripple delete bars ${+(a + 1).toFixed(2)}–${+(b + 1).toFixed(2)}?`,
+        message: `This removes ${describe()} and pulls everything after the section ${len} bar${len === 1 ? '' : 's'} left. One undo step restores it.`,
+        confirmLabel: 'Ripple delete',
+      }).then((ok) => {
+        if (!ok) return;
+        const r = audioEngine.rippleDeleteSection(a, b);
+        const changed = r.clips + r.shifted + r.lanes + r.markers + r.blocks + r.folders;
+        toast(
+          changed
+            ? `Ripple deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'} removed, ${r.shifted} later clip${r.shifted === 1 ? '' : 's'} pulled left (Ctrl+Z restores it)`
+            : 'Nothing after this section to ripple',
+          changed ? 'success' : 'info'
+        );
+      });
       return true;
     }
     if (e.shiftKey && key === 'i') {

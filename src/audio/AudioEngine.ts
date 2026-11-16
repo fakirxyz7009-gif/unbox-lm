@@ -3508,6 +3508,27 @@ export class AudioEngine {
   }
 
   /**
+   * What a section range holds, without changing anything — the strip's readout and the warning
+   * before a destructive section action use it.
+   */
+  public sectionContents(fromBar: number, toBar: number): { clips: number; points: number; markers: number; blocks: number; folders: number } {
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return { clips: 0, points: 0, markers: 0, blocks: 0, folders: 0 };
+    const spb = this.stepsPerBar;
+    const fromPos = from * spb;
+    const toPos = to * spb;
+    const inBar = (bar: number) => bar >= from - 1e-9 && bar < to - 1e-9;
+    return {
+      clips: this.sequencer.clipsInRange(from, to).length,
+      points: this.automation.lanes.reduce((n, l) => n + l.points.filter((p) => p.pos >= fromPos - 1e-6 && p.pos < toPos - 1e-6).length, 0),
+      markers: this.arrangementMarkers.filter((m) => inBar(m.bar)).length,
+      blocks: this.blockPlacements.filter((p) => inBar(p.startBar)).length,
+      folders: this.trackFolders.reduce((n, f) => n + (f.clips ?? []).filter((c) => inBar(c.startBar)).length, 0),
+    };
+  }
+
+  /**
    * Deletes a song section: its clips, automation points, markers, block placements and folder
    * regions, as one gesture and ONE undo step. The result says what actually went, so the UI can
    * report it truthfully.
@@ -3613,16 +3634,18 @@ export class AudioEngine {
   }
 
   /**
-   * Ripple insert: opens a gap at `atBar` as long as the loop region, pushing every clip,
-   * automation point, marker, block placement and folder region at or after it to the right.
-   * One gesture and ONE undo step.
+   * Ripple insert: opens a gap at `atBar` — `lengthBars`, or the loop region's length when it is
+   * not given — pushing every clip, automation point, marker, block placement and folder region at
+   * or after it to the right. One gesture and ONE undo step.
    */
   public rippleInsertSection(
-    atBar: number
+    atBar: number,
+    lengthBars?: number
   ): { clips: number; lanes: number; markers: number; blocks: number; folders: number; loop: boolean } {
     const zero = { clips: 0, lanes: 0, markers: 0, blocks: 0, folders: 0, loop: false };
     const at = Number(atBar);
-    const delta = this.loopEndBar - this.loopStartBar;
+    const wanted = lengthBars === undefined ? this.loopEndBar - this.loopStartBar : Number(lengthBars);
+    const delta = Number.isFinite(wanted) && wanted > 0 ? snapBarTo16th(wanted, this.stepsPerBar) : 0;
     if (!Number.isFinite(at) || at < 0 || !(delta > 0)) return zero;
     const spb = this.stepsPerBar;
     const before = this.exportProjectJSON();
