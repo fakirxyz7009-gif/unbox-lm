@@ -179,6 +179,45 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   const [menu, setMenu] = useState<Menu | null>(null);
   const [laneMenu, setLaneMenu] = useState<{ x: number; y: number; trackId: string; bar: number } | null>(null);
   const [sectionMenu, setSectionMenu] = useState<{ x: number; y: number; a: number; b: number } | null>(null);
+  const sectionMenuRef = useRef<HTMLDivElement | null>(null);
+  const laneMenuRef = useRef<HTMLDivElement | null>(null);
+  // The lane menu has the same placement problem: Escape and an outside press dismiss it.
+  useEffect(() => {
+    if (!laneMenu) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') setLaneMenu(null);
+    };
+    const onDown = (ev: PointerEvent) => {
+      const el = laneMenuRef.current;
+      if (el && ev.target instanceof Node && el.contains(ev.target)) return;
+      setLaneMenu(null);
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown, true);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onDown, true);
+    };
+  }, [laneMenu]);
+  // The menu sits outside the scroller that owns the key handler: it dismisses itself on Escape
+  // and on any pointer press that lands anywhere but inside it.
+  useEffect(() => {
+    if (!sectionMenu) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') setSectionMenu(null);
+    };
+    const onDown = (ev: PointerEvent) => {
+      const el = sectionMenuRef.current;
+      if (el && ev.target instanceof Node && el.contains(ev.target)) return;
+      setSectionMenu(null);
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown, true);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onDown, true);
+    };
+  }, [sectionMenu]);
   const [openClip, setOpenClip] = useState<ClipRef | null>(null);
   const [openAudio, setOpenAudio] = useState<ClipRef | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
@@ -853,6 +892,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       setSelected(new Set());
       setMenu(null);
       setLaneMenu(null);
+      setSectionMenu(null);
     } else handled = false;
     if (handled) {
       e.preventDefault();
@@ -1632,12 +1672,9 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                 onPointerDown={onRulerDown}
                 onDoubleClick={onRulerDouble}
                 onContextMenu={(e) => {
+                  // Anywhere on the ruler: the menu acts on the looped section, whatever bar was clicked.
                   e.preventDefault();
-                  const r = e.currentTarget.getBoundingClientRect();
-                  const bar = barAt(e.clientX);
-                  if (e.clientY - r.top < 14 && bar > loop.start + 1e-9 && bar < loop.end - 1e-9) {
-                    setSectionMenu({ x: e.clientX, y: e.clientY, a: loop.start, b: loop.end });
-                  }
+                  setSectionMenu({ x: e.clientX, y: e.clientY, a: loop.start, b: loop.end });
                 }}
                 data-testid="arr-ruler"
               />
@@ -2164,6 +2201,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
         );
         return (
           <div
+            ref={sectionMenuRef}
             className="fixed z-50 min-w-[250px] py-1 rounded border border-cyan-500/60 bg-[#111826] shadow-2xl text-[11px] font-mono"
             style={{ left: Math.min(sectionMenu.x, window.innerWidth - 270), top: Math.min(sectionMenu.y, window.innerHeight - 220) }}
             onPointerDown={(e) => e.stopPropagation()}
@@ -2266,6 +2304,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
         const close = () => setLaneMenu(null);
         return (
           <div
+            ref={laneMenuRef}
             className="fixed z-50 min-w-[220px] py-1 rounded border border-cyan-500/60 bg-[#111826] shadow-2xl text-[11px] font-mono"
             style={{ left: Math.min(laneMenu.x, window.innerWidth - 240), top: Math.min(laneMenu.y, window.innerHeight - 280) }}
             onPointerDown={(e) => e.stopPropagation()}
