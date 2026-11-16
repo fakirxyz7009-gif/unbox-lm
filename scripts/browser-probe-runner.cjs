@@ -187,6 +187,33 @@ async function runMixerReadoutProbe(page) {
 }
 
 /**
+ * The section context menu is opened from the ruler and sits outside the scroller that owns the
+ * arrangement key handler. Check both dismissal paths with real input: Escape and a pointer press
+ * outside the menu. This lives in the production probe because it already has the starter
+ * arrangement loaded and runs in CI.
+ */
+async function assertSectionMenuDismisses(page) {
+  const assert = require('node:assert/strict');
+  const ruler = page.locator('[data-testid="arr-ruler"]');
+  const menu = page.locator('[data-testid="section-menu"]');
+  await ruler.waitFor({ state: 'visible', timeout: 15_000 });
+
+  const open = async () => {
+    await ruler.click({ button: 'right' });
+    await menu.waitFor({ state: 'visible', timeout: 5_000 });
+    assert.match(await menu.innerText(), /SECTION · BARS/, 'Right-clicking the ruler opened the wrong menu');
+  };
+
+  await open();
+  await page.keyboard.press('Escape');
+  await menu.waitFor({ state: 'hidden', timeout: 5_000 });
+
+  await open();
+  await page.mouse.click(5, 5);
+  await menu.waitFor({ state: 'hidden', timeout: 5_000 });
+}
+
+/**
  * Drive the built app with real pointer gestures and transport runs. These budgets are deliberately
  * looser than the measured production numbers (17 ms clip frames, 4-10 ms note pointer-up, 33 ms
  * split-Mixer transport) so a busy CI runner does not fail on one paint, while the old whole-app
@@ -514,6 +541,12 @@ async function runPerformanceProbe(page) {
   // viewport change cannot affect any frame or handler budget.
   const splitReadouts = await assertSplitMixerReadoutsFit(page);
 
+  // The Mixer tab was needed for the split measurement; the arrangement ruler only exists on the
+  // Workstation tab. Check the section-menu dismissal after every timed interaction.
+  await page.getByRole('tab', { name: /Workstation/ }).first().click();
+  await page.waitForTimeout(300);
+  await assertSectionMenuDismisses(page);
+
   const failures = [];
   const requireFrame = (name, result, budget) => {
     if (result.frames.count < 8) failures.push(`${name}: only ${result.frames.count} animation frames sampled`);
@@ -544,6 +577,7 @@ async function runPerformanceProbe(page) {
     `transport ${transport.frames.p95}/${transport.frames.max} ms p95/max, ${positionBefore || '—'} → ${positionAfter}; ` +
     `split Mixer transport ${mixerTransport.frames.p95}/${mixerTransport.frames.max} ms p95/max${mixerTransportRetried ? ' (later sample)' : ''}, ${mixerMetersLive} channel meters live; ` +
     `${splitReadouts.count} fader readouts above the divider at 1280×800 (${splitReadouts.tightest.toFixed(1)} px initial, ${splitReadouts.draggedTightest.toFixed(1)} px at the dragged minimum); ` +
+    `section menu dismissed by Escape and an outside press; ` +
     `all edits produced visible selection/position changes (selection ${selectedBefore} → ${selectedAfter} → ${selectedAfterMove}).`;
   return { summary, clip, draw, move, stepGrid, transport, mixerTransport };
 }
