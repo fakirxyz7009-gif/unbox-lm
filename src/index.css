@@ -1531,6 +1531,7 @@
     radial-gradient(ellipse at 50% 0%, rgba(166, 112, 52, 0.16), transparent 60%),
     linear-gradient(180deg, #15110d, #080706);
 }
+.channel-step[data-playing='1'] { outline: 2px solid #67e8f9; outline-offset: 0; z-index: 10; }
 .unbox-sequencer-console {
   color: #ded1ba;
   background: linear-gradient(180deg, #15110d, #0c0a08);
@@ -5591,6 +5592,12 @@ body {
   letter-spacing: 0 !important;
   text-transform: uppercase;
   opacity: 0.7;
+}
+.spec-knob-readout__label--solo,
+.spec-knob-readout__value--solo {
+  flex: 1 1 auto;
+  width: 100%;
+  text-align: center;
 }
 .spec-knob-readout__value {
   flex: 0 0 auto;

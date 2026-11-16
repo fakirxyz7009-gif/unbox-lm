@@ -10,7 +10,7 @@ import type { ArrangementClip, SequencerTrack } from '../audio/types.ts';
 import { findPattern } from '../audio/sequencer/model.ts';
 import { NoteClipEditor } from '../components/sequencer/arrangement/NoteClipEditor.tsx';
 import type { SequencerTabMode } from '../components/sequencer/SequencerView.tsx';
-import { useEngineVersion } from '../nexa/useEngine.ts';
+import { useEngineVersion, useSequencerVersion } from '../nexa/useEngine.ts';
 import { focusClip, useClipFocus } from '../shell/clipFocus.ts';
 import { AudioClipEditor } from './AudioClipEditor.tsx';
 
@@ -98,6 +98,7 @@ function ClipPicker() {
 
 export function ClipFocusEditor({ onOpenEditor, onSelectPart }: Props) {
   useEngineVersion();
+  useSequencerVersion();
   const focus = useClipFocus();
   const track = focus ? audioEngine.tracks.find((t) => t.id === focus.trackId) : undefined;
   const clip = track?.arrangementClips?.find((c) => c.id === focus?.clipId);

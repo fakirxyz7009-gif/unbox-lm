@@ -3,18 +3,550 @@ const os = require('node:os');
 const path = require('node:path');
 const net = require('node:net');
 const { spawnSync } = require('node:child_process');
-const { createServer } = require('vite');
+const { createServer, preview } = require('vite');
 const { chromium } = require('playwright-core');
 
-const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'batch-001', 'batch-002', 'batch-003', 'batch-004', 'batch-005', 'batch-006', 'batch-007', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'shortcut-help-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'audio-take-name', 'recording-journal-recovery', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'stereo-tremolo-response', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'level-spread', 'hiphop-kits', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow', 'rv7000-impulse-controls', 'link-import-provenance']);
+const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'batch-001', 'batch-002', 'batch-003', 'batch-004', 'batch-005', 'batch-006', 'batch-007', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'shortcut-help-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'audio-take-name', 'recording-journal-recovery', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'stereo-tremolo-response', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'level-spread', 'hiphop-kits', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow', 'rv7000-impulse-controls', 'link-import-provenance', 'dense-synth-labels', 'mixer-readout-layout', 'performance-regression']);
 const probe = process.argv[2] ?? 'multisample-engine';
 if (!probes.has(probe)) throw new Error(`Unknown browser probe: ${probe}`);
+const performanceProbe = probe === 'performance-regression';
 
 // The real spelling of the folder: a shell can report the drive as "c:", and Vite then serves the
 // project's modules at other URLs than the /src/… ones the app probes look up.
 const root = fs.realpathSync.native(path.resolve(__dirname, '..'));
+const denseSummaryPath = path.join(root, '.tmp', 'dense-synth-labels-summary.json');
+const denseFailurePath = path.join(root, '.tmp', 'dense-synth-labels-failure.txt');
+if (probe === 'dense-synth-labels') {
+  fs.rmSync(denseSummaryPath, { force: true });
+  fs.rmSync(denseFailurePath, { force: true });
+}
 const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const headed = process.argv.includes('--headed');
+
+const bounded = (promise, ms, message) => new Promise((resolve, reject) => {
+  const timer = setTimeout(() => reject(new Error(message)), ms);
+  promise.then((value) => {
+    clearTimeout(timer);
+    resolve(value);
+  }, (error) => {
+    clearTimeout(timer);
+    reject(error);
+  });
+});
+
+const round1 = (value) => Math.round(value * 10) / 10;
+
+function summarizePerformance(raw, label, wallMs) {
+  const frames = raw.frames.filter((value) => Number.isFinite(value) && value > 0 && value < 1000);
+  const sorted = [...frames].sort((a, b) => a - b);
+  const at = (p) => sorted[Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * p))] ?? 0;
+  const pointer = raw.handlers.filter((entry) => entry.name.startsWith('pointer'));
+  const maxOf = (name) => round1(Math.max(0, ...pointer.filter((entry) => entry.name === name).map((entry) => entry.duration)));
+  return {
+    label,
+    wallMs,
+    frames: {
+      count: frames.length,
+      median: round1(at(0.5)),
+      p95: round1(at(0.95)),
+      max: round1(sorted[sorted.length - 1] ?? 0),
+      over34: frames.filter((value) => value > 34).length,
+      over50: frames.filter((value) => value > 50).length,
+      slowShare: frames.length ? round1((frames.filter((value) => value > 34).length / frames.length) * 100) : 100,
+    },
+    handlers: {
+      pointerdown: maxOf('pointerdown'),
+      pointermove: maxOf('pointermove'),
+      pointerup: maxOf('pointerup'),
+    },
+    longAnimationFrames: raw.loaf.map((entry) => entry.duration),
+    longAnimationFrameDetails: raw.loaf
+      .filter((entry) => entry.scripts?.length || entry.styleLayout)
+      .map((entry) => ({ duration: entry.duration, styleLayout: entry.styleLayout, scripts: entry.scripts })),
+  };
+}
+
+/**
+ * Measure the split Mixer at the smallest layout it supports with the keyboard dock open. Every
+ * channel, VCA and master fader readout must finish above the divider; if one extends past it the
+ * console has become shorter than its fixed lower block and the readout is being clipped. Expand
+ * the mixer, then drag the divider back up past its minimum: the clamp must stop it while every
+ * readout remains above the divider.
+ */
+async function assertSplitMixerReadoutsFit(page) {
+  const assert = require('node:assert/strict');
+  const viewport = page.viewportSize();
+  assert(viewport, 'The performance browser has no viewport to restore');
+  await page.setViewportSize({ width: 1280, height: 800 });
+  try {
+    await page.waitForTimeout(200);
+    const readLayout = () => page.evaluate(() => {
+      // The hidden Rack tab also renders a keyboard dock, so scope this to the active Mixer tab.
+      const mixer = document.querySelector('[data-testid="mixer-tab"]');
+      const divider = mixer?.querySelector('[role="separator"][aria-label="Resize mixer and clip editor"]');
+      const dividerTop = divider?.getBoundingClientRect().top ?? null;
+      const readouts = [...(mixer?.querySelectorAll('.cs-readout') ?? [])].map((element) => {
+        const rect = element.getBoundingClientRect();
+        const strip = element.closest('[aria-label]');
+        return {
+          label: strip?.getAttribute('aria-label') || element.textContent?.trim() || 'fader readout',
+          bottom: rect.bottom,
+          height: rect.height,
+        };
+      });
+      return {
+        dividerTop,
+        readouts,
+        keyboardDockHeight: mixer?.querySelector('.unbox-live-keyboard')?.getBoundingClientRect().height ?? 0,
+        viewportHeight: window.innerHeight,
+        scrollY: window.scrollY,
+        mixerTop: mixer?.getBoundingClientRect().top ?? null,
+      };
+    });
+
+    const assertReadoutsFit = (layout, phase) => {
+      assert(layout.dividerTop !== null, `${phase}: the Mixer is not in split view at 1280×800; there is no divider to measure`);
+      assert(
+        layout.dividerTop > 0 && layout.dividerTop < layout.viewportHeight,
+        `${phase}: the divider is outside the viewport (top ${layout.dividerTop.toFixed(1)}, mixer top ${layout.mixerTop?.toFixed(1) ?? 'missing'}, viewport ${layout.viewportHeight}, scrollY ${layout.scrollY})`,
+      );
+      assert(layout.readouts.length > 0, `${phase}: the split Mixer rendered no fader readouts at 1280×800`);
+      assert(layout.keyboardDockHeight > 0, `${phase}: the 1280×800 readout check requires the keyboard dock to be visible`);
+      const clipped = layout.readouts.filter((readout) => readout.height <= 0 || readout.bottom > layout.dividerTop + 0.5);
+      assert.equal(
+        clipped.length,
+        0,
+        `${phase}: ${clipped.length} fader readout(s) cross the split divider: ${clipped.map((readout) => `${readout.label} (${readout.bottom.toFixed(1)} > ${layout.dividerTop.toFixed(1)} px)`).join(', ')}`,
+      );
+      return Math.min(...layout.readouts.map((readout) => layout.dividerTop - readout.bottom));
+    };
+
+    const dragDivider = async (deltaY) => {
+      const handle = page.locator('[data-testid="mixer-tab"] [role="separator"][aria-label="Resize mixer and clip editor"]');
+      const box = await handle.boundingBox();
+      assert(box, 'The split Mixer divider has no bounding box');
+      const x = box.x + box.width / 2;
+      const startY = box.y + box.height / 2;
+      await page.mouse.move(x, startY);
+      await page.mouse.down();
+      for (let step = 1; step <= 8; step += 1) {
+        await page.mouse.move(x, startY + (deltaY * step) / 8);
+        await page.waitForTimeout(10);
+      }
+      await page.mouse.up();
+      await page.waitForTimeout(120);
+      return startY + deltaY;
+    };
+
+    const initial = await readLayout();
+    const tightest = assertReadoutsFit(initial, 'At 1280×800');
+
+    await dragDivider(80);
+    const expanded = await readLayout();
+    assert(expanded.dividerTop !== null, 'The downward divider drag left split view; the mixer cannot be expanded');
+    assert(
+      expanded.dividerTop > initial.dividerTop + 20,
+      `The downward divider drag did not expand the mixer (${initial.dividerTop.toFixed(1)} → ${expanded.dividerTop.toFixed(1)} px)`,
+    );
+
+    const upTarget = await dragDivider(-180);
+    const minimum = await readLayout();
+    const draggedTightest = assertReadoutsFit(minimum, 'After dragging the divider to its minimum');
+    assert(
+      minimum.dividerTop < expanded.dividerTop - 40,
+      `The divider did not move back up (${expanded.dividerTop.toFixed(1)} → ${minimum.dividerTop.toFixed(1)} px)`,
+    );
+    assert(
+      minimum.dividerTop > upTarget + 10,
+      `The divider was not clamped at its minimum; it ended at ${minimum.dividerTop.toFixed(1)} px, past the ${upTarget.toFixed(1)} px drag target`,
+    );
+    return { count: initial.readouts.length, tightest, draggedTightest };
+  } finally {
+    await page.setViewportSize(viewport);
+  }
+}
+
+/**
+ * Standalone CI entry for the split Mixer layout contract. The browser context is created at
+ * 1280×800, so the keyboard dock is open when the app mounts, matching the layout that used to clip
+ * the readouts.
+ */
+async function runMixerReadoutProbe(page) {
+  const starter = page.getByRole('button', { name: /Starter groove/ }).first();
+  await starter.waitFor({ state: 'visible', timeout: 30_000 });
+  await starter.click();
+  await page.locator('[data-testid="arr-clip"]').first().waitFor({ state: 'visible', timeout: 30_000 });
+  await page.locator('[data-testid="tab-mixer"]').click();
+  await page.waitForFunction(() => document.querySelector('[data-testid="tab-mixer"]')?.getAttribute('aria-selected') === 'true', null, { timeout: 10_000 });
+  await page.locator('[data-testid="mixer-tab"]').waitFor({ state: 'visible', timeout: 15_000 });
+  await page.locator('[data-testid="mixer-tab"] .cs-readout').first().waitFor({ state: 'visible', timeout: 10_000 });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(250);
+  const layout = await assertSplitMixerReadoutsFit(page);
+  return `PASS · split Mixer readout layout: ${layout.count} fader readouts above the divider at 1280×800 (${layout.tightest.toFixed(1)} px initial, ${layout.draggedTightest.toFixed(1)} px after dragging the divider to its minimum), keyboard dock open.`;
+}
+
+/**
+ * Drive the built app with real pointer gestures and transport runs. These budgets are deliberately
+ * looser than the measured production numbers (17 ms clip frames, 4-10 ms note pointer-up, 33 ms
+ * split-Mixer transport) so a busy CI runner does not fail on one paint, while the old whole-app
+ * re-render path (183-283 ms frames, 37 ms note pointer-up) fails clearly. The edit/undo/meter
+ * assertions keep a fast but broken gesture from passing.
+ */
+async function runPerformanceProbe(page) {
+  const assert = require('node:assert/strict');
+  const starter = page.getByRole('button', { name: /Starter groove/ }).first();
+  await starter.waitFor({ state: 'visible', timeout: 30_000 });
+  await starter.click();
+  const firstClip = page.locator('[data-testid="arr-clip"]').first();
+  await firstClip.waitFor({ state: 'visible', timeout: 30_000 });
+  const clipCount = await page.locator('[data-testid="arr-clip"]').count();
+  assert(clipCount >= 4, `The starter project rendered only ${clipCount} arrangement clips`);
+  await page.evaluate(() => document.fonts.ready);
+  // Let the initial project render, instrument loading and first paints finish before sampling.
+  await page.waitForTimeout(2_000);
+
+  await page.evaluate(() => {
+    const state = {
+      active: false,
+      last: 0,
+      startedAt: 0,
+      frames: [],
+      handlers: [],
+      loaf: [],
+      longTasks: [],
+    };
+    const starts = new WeakMap();
+    const tick = (time) => {
+      if (state.active) {
+        if (state.last) state.frames.push(time - state.last);
+        state.last = time;
+      } else {
+        state.last = 0;
+      }
+      requestAnimationFrame(tick);
+    };
+    for (const type of ['pointerdown', 'pointermove', 'pointerup']) {
+      window.addEventListener(type, (event) => starts.set(event, performance.now()), true);
+      window.addEventListener(type, (event) => {
+        const started = starts.get(event);
+        if (!state.active || started === undefined) return;
+        state.handlers.push({ name: type, duration: performance.now() - started });
+      }, false);
+    }
+    try {
+      new PerformanceObserver((list) => {
+        if (!state.active) return;
+        for (const entry of list.getEntries()) {
+          state.loaf.push({
+            duration: Math.round(entry.duration),
+            blocking: Math.round(entry.blockingDuration || 0),
+            styleLayout: entry.styleAndLayoutStart ? Math.round(entry.startTime + entry.duration - entry.styleAndLayoutStart) : 0,
+            scripts: (entry.scripts || []).map((script) => ({
+              invoker: script.invoker || '',
+              source: (script.sourceURL || '').split('/').pop() || '',
+              duration: Math.round(script.duration),
+              forcedLayout: Math.round(script.forcedStyleAndLayoutDuration || 0),
+            })).filter((script) => script.duration > 0),
+          });
+        }
+      }).observe({ type: 'long-animation-frame', buffered: false });
+    } catch { /* older Chrome: frame intervals still measure the gesture */ }
+    try {
+      new PerformanceObserver((list) => {
+        if (!state.active) return;
+        for (const entry of list.getEntries()) state.longTasks.push(Math.round(entry.duration));
+      }).observe({ type: 'longtask', buffered: false });
+    } catch { /* longtask is optional */ }
+    window.__unboxPerformanceProbe = {
+      start() {
+        state.active = true;
+        state.last = 0;
+        state.startedAt = performance.now();
+        state.frames = [];
+        state.handlers = [];
+        state.loaf = [];
+        state.longTasks = [];
+      },
+      stop() {
+        state.active = false;
+        return {
+          frames: state.frames.slice(),
+          handlers: state.handlers.slice(),
+          loaf: state.loaf.slice(),
+          longTasks: state.longTasks.slice(),
+        };
+      },
+    };
+    requestAnimationFrame(tick);
+  });
+
+  const measure = async (label, action) => {
+    await page.waitForTimeout(200);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await page.evaluate(() => window.__unboxPerformanceProbe.start());
+    const started = Date.now();
+    await action();
+    const raw = await page.evaluate(() => window.__unboxPerformanceProbe.stop());
+    const result = summarizePerformance(raw, label, Date.now() - started);
+    result.longTasks = raw.longTasks;
+    console.log(JSON.stringify(result));
+    return result;
+  };
+
+  const clipBefore = await firstClip.boundingBox();
+  assert(clipBefore, 'The first arrangement clip has no bounding box');
+  const clip = await measure('clip-drag', async () => {
+    const x = clipBefore.x + Math.min(clipBefore.width * 0.5, 40);
+    const y = clipBefore.y + clipBefore.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    for (let step = 1; step <= 24; step += 1) {
+      await page.mouse.move(x + step * 3, y);
+      await page.waitForTimeout(10);
+    }
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+  });
+  const clipAfter = await firstClip.boundingBox();
+  assert(clipAfter, 'The first arrangement clip disappeared after its drag');
+  const clipDx = Math.round(clipAfter.x - clipBefore.x);
+  assert(clipDx >= 20, `Clip drag moved only ${clipDx}px; the pointer gesture did not edit the clip`);
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  const clipUndo = await firstClip.boundingBox();
+  assert(clipUndo, 'The first arrangement clip disappeared after undo');
+  assert(Math.abs(clipUndo.x - clipBefore.x) <= 2, `Undo left the clip at x=${clipUndo.x}, expected ${clipBefore.x}`);
+
+  await firstClip.dblclick({ position: { x: 20, y: 8 } });
+  await page.locator('[data-testid="piano-roll-grid"]').waitFor({ state: 'visible', timeout: 15_000 });
+  await page.locator('[data-testid="roll-tool-draw"]').click();
+  const toolbarBefore = await page.locator('[data-testid="piano-roll-toolbar"]').innerText();
+  const selectedBefore = Number(toolbarBefore.match(/(\d+) sel/)?.[1] ?? -1);
+  const grid = page.locator('[data-testid="piano-roll-grid"]');
+  const gridBox = await grid.boundingBox();
+  assert(gridBox, 'The piano-roll grid has no bounding box');
+  const noteX = gridBox.x + 40;
+  const noteY = gridBox.y + Math.min(240, gridBox.height * 0.45);
+  const draw = await measure('note-draw', async () => {
+    await page.mouse.move(noteX, noteY);
+    await page.mouse.down();
+    for (let step = 1; step <= 20; step += 1) {
+      await page.mouse.move(noteX + step, noteY);
+      await page.waitForTimeout(10);
+    }
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+  });
+  const toolbarAfterDraw = await page.locator('[data-testid="piano-roll-toolbar"]').innerText();
+  const selectedAfter = Number(toolbarAfterDraw.match(/(\d+) sel/)?.[1] ?? -1);
+  assert(selectedAfter >= 1, `Drawing did not select a note (toolbar selection ${selectedBefore} → ${selectedAfter})`);
+
+  await page.locator('[data-testid="roll-tool-select"]').click();
+  const move = await measure('note-move', async () => {
+    await page.mouse.move(noteX + 10, noteY);
+    await page.mouse.down();
+    for (let step = 1; step <= 20; step += 1) {
+      await page.mouse.move(noteX + 10 + step * 2, noteY + 12);
+      await page.waitForTimeout(10);
+    }
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+  });
+  const toolbarAfterMove = await page.locator('[data-testid="piano-roll-toolbar"]').innerText();
+  const selectedAfterMove = Number(toolbarAfterMove.match(/(\d+) sel/)?.[1] ?? -1);
+  assert(selectedAfterMove >= 1, `The note move did not land on the selected note (selection ${selectedAfter} → ${selectedAfterMove})`);
+
+  // The Workstation tab only hosts the arrangement timeline. The multi-view STEP GRID is a tab in
+  // the Mixer's Clip Editor, outside the sequencer's own hidden view-tab rail.
+  await page.getByRole('tab', { name: /Mixer/ }).first().click();
+  await page.getByRole('tab', { name: /^Step grid/ }).first().click();
+  const stepRows = page.locator('[data-testid="step-grid-row"]');
+  await stepRows.first().waitFor({ state: 'visible', timeout: 15_000 });
+  const findStepTarget = () => page.evaluate(() => {
+    const rows = [...document.querySelectorAll('[data-testid="step-grid-row"]')];
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      const cells = [...rows[rowIndex].querySelectorAll('[data-testid="step-cell"]')];
+      const empty = cells
+        .map((cell, index) => ({ index, title: cell.getAttribute('title') || '' }))
+        .filter((entry) => /^Step \d+$/.test(entry.title));
+      if (empty.length >= 6) return { rowIndex, steps: empty.slice(0, 6).map((entry) => entry.index) };
+    }
+    return null;
+  });
+  const stepCell = (target, step) => stepRows.nth(target.rowIndex).locator(`[data-step-index="${step}"]`);
+  const clickStep = async (target, step) => {
+    const box = await stepCell(target, step).boundingBox();
+    if (!box) throw new Error(`Step-grid cell ${step} has no bounding box`);
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(70);
+  };
+  const editSteps = async (target) => {
+    for (const step of target.steps) await clickStep(target, step);
+    await page.waitForTimeout(150);
+  };
+  const removeSteps = async (target) => {
+    for (const step of target.steps) {
+      const cell = stepCell(target, step);
+      if (!((await cell.getAttribute('title')) || '').includes(':')) continue;
+      await clickStep(target, step);
+    }
+    await page.waitForTimeout(150);
+  };
+  const countOnSteps = (target) => stepRows.nth(target.rowIndex).locator('[data-testid="step-cell"]').evaluateAll((nodes) =>
+    nodes.filter((node) => (node.getAttribute('title') || '').includes(':')).length);
+  const runStepGrid = async (label) => {
+    const target = await findStepTarget();
+    assert(target, 'No step-grid row had six empty steps to edit');
+    const before = await countOnSteps(target);
+    const result = await measure(label, () => editSteps(target));
+    const after = await countOnSteps(target);
+    assert(after >= before + 3, `${label} clicks produced only ${after - before} of 6 expected steps`);
+    return { result, target, added: after - before };
+  };
+
+  // Pay the first step-select/edit paint unmeasured, then remove the warm-up notes so the measured
+  // sample and the later transport run start from the original pattern.
+  const stepGridWarmup = await findStepTarget();
+  assert(stepGridWarmup, 'No step-grid row had six empty steps to warm up');
+  await editSteps(stepGridWarmup);
+  await removeSteps(stepGridWarmup);
+  // The engine coalesces sequencer edits into an undo snapshot 500 ms after the last click. Let
+  // that snapshot land before measuring so it cannot consume a frame in the sample.
+  await page.waitForTimeout(700);
+
+  const stepGridFrameBudget = { p95: 55, max: 120, over50: 2 };
+  const stepGridFrameMisses = (result) =>
+    result.frames.count < 8 ||
+    result.frames.p95 > stepGridFrameBudget.p95 ||
+    result.frames.max > stepGridFrameBudget.max ||
+    result.frames.over50 > stepGridFrameBudget.over50;
+  let stepGridSample = await runStepGrid('step-grid-edit');
+  let stepGridRetried = false;
+  for (let retry = 1; retry <= 2 && stepGridFrameMisses(stepGridSample.result); retry += 1) {
+    // Remove the failed sample's notes before retrying, so the selected sample is the only edit
+    // left behind and the later transport measurement sees the same pattern workload.
+    stepGridRetried = true;
+    console.log(`RETRY ${retry}/2 · step-grid-edit frame sample ${JSON.stringify(stepGridSample.result.frames)}; retrying after a transient renderer stall.`);
+    await removeSteps(stepGridSample.target);
+    await page.waitForTimeout(retry === 1 ? 500 : 1_200);
+    stepGridSample = await runStepGrid(`step-grid-edit-retry-${retry}`);
+  }
+  const stepGrid = stepGridSample.result;
+  const stepGridAdded = stepGridSample.added;
+
+  // Measure transport where the Mixer console's live meters are not part of the workload; hidden
+  // tabs pause their effects. Step-grid playback in the split view is a separate Mixer concern.
+  await page.getByRole('tab', { name: /Workstation/ }).first().click();
+  await page.waitForTimeout(300);
+  const transportBar = page.locator('[data-testid="transport-bar"]');
+  const readPosition = async () => (await transportBar.innerText()).match(/\d+\.\d+\.\d+/)?.[0] ?? '';
+  const positionBefore = await readPosition();
+  const play = page.locator('[data-testid="transport-play"]');
+  const transport = await measure('transport-play', async () => {
+    await play.click();
+    await page.waitForTimeout(1_800);
+  });
+  const positionAfter = await readPosition();
+  assert(positionAfter && positionAfter !== positionBefore, `Transport did not advance (${positionBefore || 'no position'} → ${positionAfter || 'no position'})`);
+  await play.click().catch(() => {});
+  await page.waitForTimeout(200);
+
+  // Same transport run with the split Mixer console visible: its live meters are an extra paint
+  // workload that the Workstation measurement above deliberately does not include.
+  await page.getByRole('tab', { name: /Mixer/ }).first().click();
+  await page.waitForTimeout(300);
+  await page.bringToFront();
+
+  // Pay the first Mixer paint and meter-frame cost unmeasured. A cold headless renderer can miss
+  // one or two vsyncs on that run even when the steady-state console is smooth.
+  await play.click();
+  await page.waitForTimeout(900);
+  await play.click().catch(() => {});
+  await page.waitForTimeout(300);
+
+  const mixerFrameBudget = { p95: 45, max: 120, over50: 2 };
+  const mixerFrameMisses = (result) =>
+    result.frames.count < 8 ||
+    result.frames.p95 > mixerFrameBudget.p95 ||
+    result.frames.max > mixerFrameBudget.max ||
+    result.frames.over50 > mixerFrameBudget.over50;
+  const readLiveMeters = () => page.evaluate(() => {
+    const meters = [...document.querySelectorAll('[data-testid="channel-meter"]')];
+    return meters.filter((meter) =>
+      [...meter.querySelectorAll('span')].some((span) => {
+        const height = parseFloat(span.style.height);
+        const bottom = parseFloat(span.style.bottom);
+        return (Number.isFinite(height) && height > 0) || (Number.isFinite(bottom) && bottom > 0);
+      })
+    ).length;
+  });
+  const runMixerTransport = async (label) => {
+    const before = await readPosition();
+    const result = await measure(label, async () => {
+      await play.click();
+      await page.waitForTimeout(1_800);
+    });
+    const after = await readPosition();
+    const metersLive = await readLiveMeters();
+    await play.click().catch(() => {});
+    await page.waitForTimeout(200);
+    assert(after && after !== before, `${label} did not advance (${before || 'no position'} → ${after || 'no position'})`);
+    return { result, metersLive };
+  };
+
+  let mixerSample = await runMixerTransport('mixer-transport');
+  let mixerTransportRetried = false;
+  for (let retry = 1; retry <= 2 && mixerFrameMisses(mixerSample.result); retry += 1) {
+    // A short frame-time miss is usually the OS/headless compositor starved for a few frames. Keep
+    // the budget, but make up to two later samples: a consistent regression misses all three.
+    mixerTransportRetried = true;
+    console.log(`RETRY ${retry}/2 · mixer-transport frame sample ${JSON.stringify(mixerSample.result.frames)}; retrying after a transient renderer stall.`);
+    await page.waitForTimeout(retry === 1 ? 500 : 1_200);
+    mixerSample = await runMixerTransport(`mixer-transport-retry-${retry}`);
+  }
+
+  const mixerTransport = mixerSample.result;
+  const mixerMetersLive = mixerSample.metersLive;
+  assert(mixerMetersLive >= 2, `Split Mixer playback left only ${mixerMetersLive} channel meter(s) moving`);
+
+  // The readout layout is independent of the transport measurements above; check it last so the
+  // viewport change cannot affect any frame or handler budget.
+  const splitReadouts = await assertSplitMixerReadoutsFit(page);
+
+  const failures = [];
+  const requireFrame = (name, result, budget) => {
+    if (result.frames.count < 8) failures.push(`${name}: only ${result.frames.count} animation frames sampled`);
+    if (result.frames.p95 > budget.p95) failures.push(`${name}: frame p95 ${result.frames.p95}ms > ${budget.p95}ms`);
+    if (result.frames.max > budget.max) failures.push(`${name}: worst frame ${result.frames.max}ms > ${budget.max}ms`);
+    if (result.frames.over50 > budget.over50) failures.push(`${name}: ${result.frames.over50} frames >50ms > ${budget.over50}`);
+    if (result.handlers.pointerup > budget.pointerup) failures.push(`${name}: pointer-up handler ${result.handlers.pointerup}ms > ${budget.pointerup}ms`);
+    if (result.handlers.pointermove > budget.pointermove) failures.push(`${name}: pointer-move handler ${result.handlers.pointermove}ms > ${budget.pointermove}ms`);
+  };
+  requireFrame('clip-drag', clip, { p95: 40, max: 100, over50: 1, pointerup: 20, pointermove: 15 });
+  requireFrame('note-draw', draw, { p95: 45, max: 250, over50: 2, pointerup: 25, pointermove: 20 });
+  requireFrame('note-move', move, { p95: 45, max: 120, over50: 1, pointerup: 18, pointermove: 20 });
+  // A step click repaints one grid cell; headless Chrome measures that paint as a 33-50 ms frame
+  // even after the structural app render is gone. Transport is measured with hidden tabs paused.
+  requireFrame('step-grid-edit', stepGrid, { ...stepGridFrameBudget, pointerup: 20, pointermove: 20 });
+  requireFrame('transport-play', transport, { p95: 40, max: 120, over50: 2, pointerup: 25, pointermove: 20 });
+  requireFrame('mixer-transport', mixerTransport, { ...mixerFrameBudget, pointerup: 25, pointermove: 20 });
+  if (draw.handlers.pointerdown > 25) failures.push(`note-draw: pointer-down handler ${draw.handlers.pointerdown}ms > 25ms`);
+  if (move.handlers.pointerdown > 20) failures.push(`note-move: pointer-down handler ${move.handlers.pointerdown}ms > 20ms`);
+  if (stepGrid.handlers.pointerdown > 25) failures.push(`step-grid-edit: pointer-down handler ${stepGrid.handlers.pointerdown}ms > 25ms`);
+  if (clipDx < 20) failures.push(`clip-drag moved only ${clipDx}px`);
+  if (failures.length) throw new Error(`performance regression (${failures.join('; ')})\n${JSON.stringify({ clip, draw, move, stepGrid, transport, mixerTransport })}`);
+
+  const summary = `PASS · production build · clip drag ${clip.frames.p95}/${clip.frames.max} ms p95/max, ${clip.handlers.pointerup} ms pointer-up (moved ${clipDx}px, undo restored); ` +
+    `note draw ${draw.frames.p95}/${draw.frames.max} ms p95/max, ${draw.handlers.pointerup} ms pointer-up; ` +
+    `note move ${move.frames.p95}/${move.frames.max} ms p95/max, ${move.handlers.pointerup} ms pointer-up; ` +
+    `step grid ${stepGrid.frames.p95}/${stepGrid.frames.max} ms p95/max, ${stepGridAdded} steps added${stepGridRetried ? ' (later sample)' : ''}; ` +
+    `transport ${transport.frames.p95}/${transport.frames.max} ms p95/max, ${positionBefore || '—'} → ${positionAfter}; ` +
+    `split Mixer transport ${mixerTransport.frames.p95}/${mixerTransport.frames.max} ms p95/max${mixerTransportRetried ? ' (later sample)' : ''}, ${mixerMetersLive} channel meters live; ` +
+    `${splitReadouts.count} fader readouts above the divider at 1280×800 (${splitReadouts.tightest.toFixed(1)} px initial, ${splitReadouts.draggedTightest.toFixed(1)} px at the dragged minimum); ` +
+    `all edits produced visible selection/position changes (selection ${selectedBefore} → ${selectedAfter} → ${selectedAfterMove}).`;
+  return { summary, clip, draw, move, stepGrid, transport, mixerTransport };
+}
 
 function availablePort() {
   return new Promise((resolve, reject) => {
@@ -127,21 +659,46 @@ async function main() {
   }
   // Chrome scopes MIDI permission to an origin; a stable port avoids a new prompt on every run.
   const port = physicalMidiProbe ? configuredMidiPort : await availablePort();
+  const origin = `http://127.0.0.1:${port}`;
   const artifacts = new Map();
   const phaseBase = Date.now();
   const phase = (label) => { if (process.env.PROBE_PHASES === '1') console.log(`PHASE ${label} ${Date.now() - phaseBase} ms`); };
-  const server = await createServer({
-    configFile: false,
-    plugins: probe === 'note-audio-editing' ? [(await import('@tailwindcss/vite')).default()] : [],
-    root,
-    appType: 'mpa',
-    resolve: { alias: { '@': path.join(root, 'src') } },
-    optimizeDeps: { noDiscovery: true, include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom', 'react-dom/client'] },
-    // Disposable Chrome/Electron profiles and package artifacts live in .tmp. A user can keep one
-    // open while a headless probe starts; do not let Vite's source watcher touch locked Cookies or
-    // profile databases there.
-    server: { host: '127.0.0.1', port, strictPort: true, hmr: false, watch: { ignored: ['**/.tmp/**', '**/release/**'] } },
-  });
+  let server;
+  if (performanceProbe) {
+    // The budgets below are production numbers. Serving dist/ keeps React's development JSX runtime
+    // and StrictMode double renders out of the measurement.
+    if (!fs.existsSync(path.join(root, 'dist', 'index.html'))) {
+      throw new Error('performance-regression needs a production build; run `npm run build` first (or use `npm run test:browser-performance`).');
+    }
+    server = await bounded(preview({
+      configFile: false,
+      root,
+      preview: { host: '127.0.0.1', port, strictPort: true },
+    }), 120_000, 'The production preview server did not start within 120 s');
+    let ready = false;
+    for (let attempt = 0; attempt < 120 && !ready; attempt += 1) {
+      try {
+        ready = (await fetch(origin)).ok;
+      } catch { /* preview is still binding */ }
+      if (!ready) await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    if (!ready) throw new Error(`The production preview did not answer at ${origin}`);
+  } else {
+    server = await createServer({
+      configFile: false,
+      plugins: probe === 'note-audio-editing' || probe === 'dense-synth-labels' || probe === 'mixer-readout-layout' ? [(await import('@tailwindcss/vite')).default()] : [],
+      root,
+      appType: 'mpa',
+      resolve: { alias: { '@': path.join(root, 'src') } },
+      optimizeDeps: { noDiscovery: true, include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom', 'react-dom/client'] },
+      // Disposable Chrome/Electron profiles and package artifacts live in .tmp. A user can keep one
+      // open while a headless probe starts; do not let Vite's source watcher touch locked Cookies or
+      // profile databases there.
+      // A build running beside a probe (CMake objects under third_party/, dist/) locks its outputs; watching them
+      // crashes the dev server with EBUSY and takes the probe down with it.
+      server: { host: '127.0.0.1', port, strictPort: true, hmr: false, watch: { ignored: ['**/.tmp/**', '**/release/**', '**/third_party/**', '**/dist/**'] } },
+    });
+  }
   if (probe === 'export-roundtrip') {
     const artifactMiddleware = (req, res, next) => {
       const url = new URL(req.url ?? '/', `http://127.0.0.1:${port}`);
@@ -174,25 +731,19 @@ async function main() {
   }
   let browser;
   let context;
-  const bounded = (promise, ms, message) => new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then((value) => {
-      clearTimeout(timer);
-      resolve(value);
-    }, (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
-  });
   try {
     // Vite's listen and Chrome's launch are the two phases with nothing to report on; bound them so a stall
     // names itself instead of burning the whole result timeout.
-    await bounded(server.listen(), 120_000, 'The Vite probe server did not start listening within 120 s');
+    if (!performanceProbe) await bounded(server.listen(), 120_000, 'The Vite probe server did not start listening within 120 s');
     phase('vite listening');
     const launchOptions = {
       headless: !headed,
       executablePath: chrome,
-      args: ['--no-proxy-server', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', ...(headed ? ['--start-maximized'] : [])],
+      args: [
+        '--no-proxy-server', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream',
+        ...(performanceProbe ? ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'] : []),
+        ...(headed ? ['--start-maximized'] : []),
+      ],
     };
     if (physicalMidiProbe) {
       const userDataDir = path.join(os.tmpdir(), 'unbox-studio-physical-midi-chrome-profile');
@@ -202,12 +753,34 @@ async function main() {
       browser = context.browser();
     } else {
       browser = await bounded(chromium.launch(launchOptions), 120_000, 'Chrome did not start within 120 s');
-      context = await browser.newContext();
+      context = performanceProbe
+        ? await browser.newContext({ viewport: { width: 1600, height: 1000 } })
+        : probe === 'mixer-readout-layout'
+          ? await browser.newContext({ viewport: { width: 1280, height: 800 } })
+          : await browser.newContext();
     }
     phase('browser launched');
     const page = await context.newPage();
+    // Check the dense faceplates at the 1280 px rack layout first; after that probe passes, the
+    // runner widens the same page to the 1476 px design threshold for the second inspection.
+    if (probe === 'dense-synth-labels') await page.setViewportSize({ width: 1280, height: 960 });
+    // Both physical probes need a click once their page reports ready; a module-fetch retry re-runs that step.
+    const startPhysicalProbe = async () => {
+      await page.waitForFunction(() => {
+        const status = document.querySelector('#result')?.getAttribute('data-status');
+        return status === 'ready' || status === 'failed' || status === 'skipped';
+      }, null, { timeout: 180_000 });
+      const moduleStatus = await page.locator('#result').getAttribute('data-status');
+      if (moduleStatus !== 'ready' && moduleStatus !== 'skipped') throw new Error(`${probe} module failed to load: ${await page.locator('#result').innerText()}`);
+      if (probe === 'physical-midi-recording') await page.locator('#connect').click();
+      else await page.locator('button[aria-label="Record armed tracks"]').click();
+    };
     const errors = [];
     const failedRequests = [];
+    // Set when Vite re-optimises dependencies under the running page (a lockfile or config change beside the
+    // probe) and aborts a module request: the page can then never finish loading, so its result timeout should
+    // not be spent waiting for nothing.
+    let moduleFetchAborted = false;
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {
       if (message.type() !== 'error' && message.text().startsWith('PHYSICAL_MIDI_')) {
@@ -219,7 +792,9 @@ async function main() {
       if (response.status() < 400) return;
       const url = new URL(response.url());
       // The UI probes serve no API: the app's VST, stem-library and local-assistant requests fall back when it is absent.
-      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'midi-bootstrap' || probe === 'export-page-ui' || probe === 'sf2-import' || probe === 'patch-browser-accessibility') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/stems/library' || url.pathname === '/api/local-ai/status')) return;
+      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'physical-midi-ui-recording' || probe === 'midi-bootstrap' || probe === 'export-page-ui' || probe === 'sf2-import' || probe === 'patch-browser-accessibility' || probe === 'dense-synth-labels') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/stems/library' || url.pathname === '/api/local-ai/status')) return;
+      // The production performance probe has no API or bundled library; those optional requests fall back.
+      if ((performanceProbe || probe === 'mixer-readout-layout') && response.status() === 404 && (url.pathname.startsWith('/api/') || url.pathname.startsWith('/library/') || url.pathname.startsWith('/instruments/') || url.pathname.startsWith('/samples/'))) return;
       // The app-level selection probe runs without the local API server; the app falls back when it is absent.
       if (probe === 'instrument-selection-app' && response.status() === 404 && url.pathname.startsWith('/api/')) return;
       if (url.pathname !== '/favicon.ico') errors.push(`HTTP ${response.status()} ${url.pathname}`);
@@ -227,6 +802,10 @@ async function main() {
     page.on('requestfailed', (request) => {
       const failure = `${request.method()} ${request.url()} ${request.failure()?.errorText ?? 'unknown failure'}`;
       failedRequests.push(failure);
+      if (/\/node_modules\//.test(request.url()) && /ERR_ABORTED/.test(request.failure()?.errorText ?? '')) {
+        moduleFetchAborted = true;
+        console.log(`PROBE_MODULE_FETCH_ABORTED ${failure}`);
+      }
       if (probe === 'physical-midi-recording') console.log(`PHYSICAL_MIDI_REQUEST_FAILED ${failure}`);
     });
     const query = probe === 'physical-midi-ui-recording'
@@ -247,12 +826,11 @@ async function main() {
               return value ? `?${value}` : '';
             })()
         : '';
-    const origin = `http://127.0.0.1:${port}`;
     const pageProbe = probe === 'physical-midi-ui-recording' ? 'midi-ui-recording' : probe;
     // A clean Vite dependency cache can legitimately need more than 30 seconds
     // before the first probe page reaches `load` on Windows. This is bootstrap
     // time, not an audio-test timeout; retain the stricter result timeouts below.
-    await page.goto(probe === 'export-page-ui' || probe === 'rack-ui-workflow' ? origin : `${origin}/tests/browser/${pageProbe}.html${query}`, { waitUntil: 'load', timeout: 60_000 });
+    await page.goto(performanceProbe || probe === 'mixer-readout-layout' || probe === 'export-page-ui' || probe === 'rack-ui-workflow' ? origin : `${origin}/tests/browser/${pageProbe}.html${query}`, { waitUntil: 'load', timeout: 60_000 });
     phase('page loaded');
     if (probe === 'export-page-ui' || probe === 'rack-ui-workflow') {
       // A brand-new profile has no project, so the app opens its "Welcome to Unbox Studio" dialog and
@@ -837,17 +1415,50 @@ async function main() {
         }
       });
       console.log(`PHYSICAL_MIDI_PERMISSION ${permission}`);
-      await page.waitForFunction(() => {
-        const status = document.querySelector('#result')?.getAttribute('data-status');
-        return status === 'ready' || status === 'failed';
-      }, null, { timeout: 180_000 });
-      const moduleStatus = await page.locator('#result').getAttribute('data-status');
-      if (moduleStatus !== 'ready') throw new Error(`${probe} module failed to load: ${await page.locator('#result').innerText()}`);
-      if (probe === 'physical-midi-recording') await page.locator('#connect').click();
-      else await page.locator('button[aria-label="Record armed tracks"]').click();
+      await startPhysicalProbe();
+    }
+    let performanceSummary = '';
+    if (performanceProbe) {
+      const performance = await runPerformanceProbe(page);
+      if (failedRequests.length) throw new Error(`performance-regression had failed requests: ${failedRequests.join(' | ')}`);
+      console.log(JSON.stringify({
+        label: 'performance-metrics',
+        clip: performance.clip,
+        draw: performance.draw,
+        move: performance.move,
+        stepGrid: performance.stepGrid,
+        transport: performance.transport,
+        mixerTransport: performance.mixerTransport,
+      }));
+      performanceSummary = performance.summary;
     }
     let result = '';
-    if (probe !== 'export-page-ui' && probe !== 'rack-ui-workflow') {
+    if (performanceProbe) result = performanceSummary;
+    else if (probe === 'mixer-readout-layout') result = await runMixerReadoutProbe(page);
+    // A normal viewport only shows the top of the 21-unit dense rack. For the diagnostic
+    // screenshots, temporarily extend the viewport to the rack's full scroll height; the width (and
+    // therefore every layout measurement above) stays fixed.
+    const captureFullRack = async (width, filename) => {
+      const scroller = page.locator('[data-testid="rack-scroller"]');
+      const metrics = await scroller.evaluate((element) => ({
+        content: element.scrollHeight,
+        visible: element.clientHeight,
+        viewport: window.innerHeight,
+      }));
+      const original = page.viewportSize();
+      await page.setViewportSize({
+        width,
+        height: Math.max(960, Math.ceil(metrics.content + (metrics.viewport - metrics.visible) + 120)),
+      });
+      await page.waitForTimeout(80);
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const screenshot = path.join(root, '.tmp', filename);
+      fs.mkdirSync(path.dirname(screenshot), { recursive: true });
+      await scroller.screenshot({ path: screenshot });
+      console.log(`UI screenshot: ${screenshot}`);
+      if (original) await page.setViewportSize(original);
+    };
+    if (probe !== 'export-page-ui' && probe !== 'rack-ui-workflow' && probe !== 'mixer-readout-layout' && !performanceProbe) {
       // The catalog sweep now mounts more than a hundred devices, including
       // recorded packs that correctly wait for their middle velocity layer.
       // Keep its assertions intact but give that exhaustive acceptance enough
@@ -859,29 +1470,98 @@ async function main() {
             // but has to decode every pack to get there.
             : probe === 'level-spread' ? 480_000
             : 300_000;
-      try {
-        await page.waitForFunction(() => {
-          const status = document.querySelector('#result')?.getAttribute('data-status');
-          return status === 'passed' || status === 'failed';
-        }, null, { timeout: resultTimeout });
-      } catch (error) {
-        // A probe that never reports is almost always waiting on a module that never arrived, so describe the
-        // page in the failure instead of leaving only a timeout behind.
-        const pageState = await page.evaluate(() => ({
-          url: location.href,
-          readyState: document.readyState,
-          status: document.querySelector('#result')?.getAttribute('data-status') ?? null,
-          message: (document.querySelector('#result')?.textContent ?? '').slice(0, 400),
-          pendingModules: performance.getEntriesByType('resource')
-            .filter((entry) => entry.name.startsWith(location.origin) && entry.responseEnd === 0)
-            .map((entry) => entry.name),
-        })).catch((stateError) => ({ unavailable: String(stateError) }));
-        throw new Error(`${error.message}; page state=${JSON.stringify(pageState)}; failed requests=${JSON.stringify(failedRequests)}`);
+      let resultDeadline = Date.now() + resultTimeout;
+      let moduleRetryUsed = false;
+      for (;;) {
+        const remaining = resultDeadline - Date.now();
+        try {
+          // Poll in short slices so an aborted module request is noticed within a second instead of after the
+          // whole result timeout, which would leave no room in the driver's budget for a retry.
+          await page.waitForFunction(() => {
+            const status = document.querySelector('#result')?.getAttribute('data-status');
+            return status === 'passed' || status === 'failed' || status === 'skipped';
+          }, null, { timeout: Math.max(250, Math.min(remaining, 1_000)) });
+          break;
+        } catch (error) {
+          if (moduleFetchAborted) {
+            if (moduleRetryUsed) {
+              throw new Error(`${probe} aborted a module request again after a retry: ${failedRequests.join(' | ')}`);
+            }
+            // Vite re-optimised dependencies under the page (a lockfile or config change beside the probe), which
+            // aborts module requests and leaves the probe half-loaded. Reload once and let it run again from the
+            // top; the aborted attempt's own diagnostics are dropped because the retry is a fresh attempt.
+            moduleRetryUsed = true;
+            moduleFetchAborted = false;
+            console.log(`PROBE_MODULE_FETCH_RETRY ${probe}: reloading the page once after a /node_modules request aborted`);
+            failedRequests.length = 0;
+            errors.length = 0;
+            await page.reload({ waitUntil: 'load', timeout: 60_000 });
+            if (physicalMidiProbe) await startPhysicalProbe();
+            resultDeadline = Date.now() + resultTimeout;
+            continue;
+          }
+          if (Date.now() < resultDeadline) continue;
+          // A probe that never reports is almost always waiting on a module that never arrived, so describe the
+          // page in the failure instead of leaving only a timeout behind.
+          const pageState = await page.evaluate(() => ({
+            url: location.href,
+            readyState: document.readyState,
+            status: document.querySelector('#result')?.getAttribute('data-status') ?? null,
+            message: (document.querySelector('#result')?.textContent ?? '').slice(0, 400),
+            pendingModules: performance.getEntriesByType('resource')
+              .filter((entry) => entry.name.startsWith(location.origin) && entry.responseEnd === 0)
+              .map((entry) => entry.name),
+          })).catch((stateError) => ({ unavailable: String(stateError) }));
+          throw new Error(`${error.message}; page state=${JSON.stringify(pageState)}; failed requests=${JSON.stringify(failedRequests)}`);
+        }
       }
       phase('result reported');
       const status = await page.locator('#result').getAttribute('data-status');
       result = await page.locator('#result').innerText();
-      if (status !== 'passed') throw new Error(`${probe} reported: ${result}`);
+      if (probe === 'dense-synth-labels') {
+        await captureFullRack(1280, 'dense-synth-labels-1280.png');
+      }
+      if (status === 'skipped') {
+        // A machine precondition (no controller, MIDI permission refused), not a code failure: the page's SKIP
+        // line is printed like a PASS so the suite records exactly which acceptance did not run. A machine that
+        // is supposed to have the controller sets UNBOX_REQUIRE_PHYSICAL_MIDI=1 and gets a failure instead.
+        if (process.env.UNBOX_REQUIRE_PHYSICAL_MIDI === '1') {
+          throw new Error(`${probe} requires physical MIDI acceptance but skipped: ${result}`);
+        }
+      } else if (status !== 'passed') {
+        throw new Error(`${probe} reported: ${result}`);
+      }
+    }
+    if (probe === 'dense-synth-labels') {
+      // The page exposes the same inspection for the wider reference layout. Reflow the real rack
+      // without rebuilding the devices, then fail with the same diagnostic if anything clips.
+      const firstWidth = await page.evaluate(() => window.innerWidth);
+      await page.setViewportSize({ width: 1476, height: 960 });
+      await page.waitForTimeout(80);
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const wide = await page.evaluate(() => window.__denseSynthProbe?.inspect() ?? null);
+      if (!wide) throw new Error('dense-synth-labels did not expose its inspection hook');
+      await captureFullRack(1476, 'dense-synth-labels-1476.png');
+      fs.mkdirSync(path.join(root, '.tmp'), { recursive: true });
+      fs.writeFileSync(
+        denseSummaryPath,
+        JSON.stringify({
+          widths: [firstWidth, wide.width],
+          specs: wide.specs,
+          cells: wide.cells,
+          controls: wide.controls,
+          labels: wide.labels,
+          rails: wide.rails,
+        }, null, 2),
+      );
+      if (wide.failures.length) {
+        const shown = wide.failures.slice(0, 40).join('\n');
+        const more = wide.failures.length > 40 ? `\n… ${wide.failures.length - 40} more` : '';
+        throw new Error(`${wide.failures.length} dense faceplate label-fit failure(s) at ${wide.width}px:\n${shown}${more}`);
+      }
+      result = `${result}\nPASS · ${wide.specs} dense synth specs · ${wide.cells} parameter cells, ${wide.controls} controls, ` +
+        `${wide.labels} labels and ${wide.rails} section-rail labels · no clipped text, no cell overflow, ` +
+        `every label ≥ 11px at ${wide.width}px.`;
     }
     if (errors.length) throw new Error(`${probe} had browser errors: ${errors.join(' | ')}`);
     if (result) console.log(result);
@@ -949,6 +1629,10 @@ async function main() {
 }
 
 main().catch((error) => {
+  if (probe === 'dense-synth-labels') {
+    fs.mkdirSync(path.dirname(denseFailurePath), { recursive: true });
+    fs.writeFileSync(denseFailurePath, error instanceof Error ? error.message : String(error));
+  }
   console.error(error);
   process.exitCode = 1;
 });

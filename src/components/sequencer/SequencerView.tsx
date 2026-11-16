@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStepTick } from '../../nexa/useEngine.ts';
+import { useSequencerVersion, useFrame } from '../../nexa/useEngine.ts';
 import { useEscapeKey } from '../../shell/useEscapeKey.ts';
 import { AudioEngine } from '../../audio/AudioEngine.ts';
 import { BaseDevice } from '../../audio/BaseDevice.ts';
@@ -26,6 +26,7 @@ import { focusClip, useClipFocus } from '../../shell/clipFocus.ts';
 import { NoteClipEditor } from './arrangement/NoteClipEditor.tsx';
 import { SNAP_AUTO } from './adaptiveGrid.ts';
 import { RECORDED_INSTRUMENT_OPTIONS } from '../../audio/instrumentCatalog.ts';
+import { setText } from '../../ui/skin/dom.ts';
 import {
   AudioLines,
   Play,
@@ -105,7 +106,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
   onViewModeChange,
   onOpenStems,
 }) => {
-  useStepTick(); // playhead step / bar readouts and step highlights
+  const sequencerRevision = useSequencerVersion(); // note / pattern edits re-render this editor, not the whole app
   // Step grid, piano roll and generators edit note tracks; the arrangement shows audio tracks too.
   const tracks = allTracks.filter((t) => t.kind !== 'audio');
   const [selectedTrackId, setSelectedTrackId] = useState<string>(() => {
@@ -134,6 +135,10 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
   const [showGeneratorMenu, setShowGeneratorMenu] = useState<boolean>(false);
   // the menu covers the editor's right-hand controls: Escape or a click outside closes it
   const generatorMenuRef = useRef<HTMLDivElement>(null);
+  const channelGridRef = useRef<HTMLDivElement>(null);
+  const songStepRef = useRef<HTMLElement>(null);
+  const playheadStepRef = useRef<HTMLElement>(null);
+  const lastPlayingKey = useRef('');
   useEscapeKey(() => setShowGeneratorMenu(false), showGeneratorMenu);
   useEffect(() => {
     if (!showGeneratorMenu) return;
@@ -217,6 +222,28 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     return ph && ph.patternId === track.activePatternId ? ph.step : -1;
   };
   const currentStep = activeTrack ? stepPlayingOf(activeTrack) : -1;
+
+  // The channel rack paints the playing step without re-rendering the editor every 16th: only the
+  // two readouts and the current cells' data attribute change, and only when the step changes.
+  useFrame(() => {
+    if (viewMode !== 'channel_rack') return;
+    const active = activeTrack ? stepPlayingOf(activeTrack) : -1;
+    setText(songStepRef.current, active >= 0 ? String(active + 1) : '–');
+    setText(playheadStepRef.current, `STEP ${active >= 0 ? active + 1 : '–'}`);
+    const key = `${sequencerRevision}|${gridSteps}|${tracks.map((t) => `${t.id}:${stepPlayingOf(t)}`).join('|')}`;
+    if (key === lastPlayingKey.current) return;
+    lastPlayingKey.current = key;
+    const grid = channelGridRef.current;
+    if (!grid) return;
+    grid.querySelectorAll('[data-playing="1"]').forEach((cell) => cell.removeAttribute('data-playing'));
+    for (const track of tracks) {
+      const step = stepPlayingOf(track);
+      if (step < 0) continue;
+      grid
+        .querySelector(`[data-track-id="${CSS.escape(track.id)}"] [data-step-index="${step}"]`)
+        ?.setAttribute('data-playing', '1');
+    }
+  });
 
   const selectTrack = (trackId: string) => {
     setSelectedTrackId(trackId);
@@ -518,7 +545,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     const dev = devices.find((d) => d.id === track.deviceId);
 
     if (curNote) {
-      audioEngine.setTrackStep(track.id, stepIdx, null);
+      audioEngine.setTrackStep(track.id, stepIdx, null, { sequencerOnly: true });
     } else {
       const kit = drumLanesFor(dev);
       const defaultPitch = kit ? kit[0].note : 60 + audioEngine.rootKey;
@@ -535,7 +562,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
         ratchet: defaultRatchet,
         probability: defaultProbability,
         chordNotes,
-      });
+      }, { sequencerOnly: true });
 
       auditionDeviceNote(dev, defaultPitch, 0.88, chordNotes);
     }
@@ -546,9 +573,9 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
     e.preventDefault();
     const covering = findCoveringNote(track, stepIdx);
     if (covering) {
-      audioEngine.setTrackStep(track.id, covering.startStep, null);
+      audioEngine.setTrackStep(track.id, covering.startStep, null, { sequencerOnly: true });
     } else {
-      audioEngine.setTrackStep(track.id, stepIdx, null);
+      audioEngine.setTrackStep(track.id, stepIdx, null, { sequencerOnly: true });
     }
   };
 
@@ -1027,9 +1054,8 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                 </strong>
                 <span className="text-slate-600">&bull;</span>
                 <span className="text-slate-400">STEP:</span>
-                <strong className="text-cyan-300">
-                  {currentStep >= 0 ? currentStep + 1 : '–'} / {gridSteps}
-                </strong>
+                <strong ref={songStepRef} className="text-cyan-300" />
+                <span className="text-slate-400">/ {gridSteps}</span>
                 <span className="text-slate-600">&bull;</span>
                 <span className="text-emerald-300 font-bold">{audioEngine.activeArrangementSection}</span>
               </div>
@@ -1140,11 +1166,11 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                     />
                     <span className="text-emerald-400 font-bold">{(globalSwing * 100).toFixed(0)}%</span>
                   </div>
-                  <span>PLAYHEAD: <strong className="text-amber-400">STEP {currentStep >= 0 ? currentStep + 1 : '–'}</strong></span>
+                  <span>PLAYHEAD: <strong ref={playheadStepRef} className="text-amber-400" /></span>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto overflow-x-auto p-2 space-y-1.5 bg-[#100d0a]">
+              <div ref={channelGridRef} className="flex-1 overflow-y-auto overflow-x-auto p-2 space-y-1.5 bg-[#100d0a]">
                 {tracks.length === 0 && (
                   <div className="my-4 max-w-4xl mx-auto p-5 rounded-xl us-metal border border-[#796d5b] shadow-2xl text-center space-y-4 font-mono text-ink">
                     <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#282016] text-[#ffc87a] border border-[#d69b50]/60 text-xs font-black">
@@ -1191,12 +1217,13 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                   const isSelected = track.id === activeTrack?.id;
                   const dev = devices.find((d) => d.id === track.deviceId);
                   const rowLen = syncTrackPatterns(track, audioEngine.activePatternIndex).length;
-                  const rowStep = stepPlayingOf(track);
-
                   return (
                     <div
                       key={track.id}
-                      className={`flex items-center rounded-lg border transition-all p-1.5 ${
+                      data-track-id={track.id}
+                      data-testid="step-grid-row"
+                      data-track-name={track.name}
+                      className={`flex items-center rounded-lg border p-1.5 ${
                         isSelected
                           ? 'bg-gradient-to-r from-[#1e3a8a] via-[#312e81] to-[#1e1b4b] border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
                           : 'bg-[#1f2937] hover:bg-[#374151] border-cyan-600/60'
@@ -1438,7 +1465,6 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                           const covering = findCoveringNote(track, stepIdx);
                           const isHead = !!track.steps[stepIdx];
                           const isTail = !isHead && !!covering;
-                          const isCurrent = rowStep === stepIdx;
                           const beatIndex = Math.floor(stepIdx / 4);
                           const isEvenBeat = beatIndex % 2 === 0;
 
@@ -1447,7 +1473,9 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                               key={stepIdx}
                               onClick={() => handleStepClick(track, stepIdx)}
                               onContextMenu={(e) => handleStepContextMenu(e, track, stepIdx)}
-                              className={`w-7 sm:w-8 h-8 rounded-xs cursor-pointer flex flex-col items-center justify-center transition-all relative select-none flex-shrink-0 ${
+                              data-testid="step-cell"
+                              data-step-index={stepIdx}
+                              className={`channel-step w-7 sm:w-8 h-8 rounded-xs cursor-pointer flex flex-col items-center justify-center relative select-none flex-shrink-0 ${
                                 isHead
                                   ? 'bg-gradient-to-b from-cyan-400 to-emerald-500 shadow-[0_0_10px_rgba(6,182,212,0.85)] border border-cyan-200 scale-95'
                                   : isTail
@@ -1455,7 +1483,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                                   : isEvenBeat
                                   ? 'bg-[#101827] hover:bg-[#1a2740] border border-cyan-500/30'
                                   : 'bg-[#0a0f1a] hover:bg-[#141e33] border border-slate-800'
-                              } ${isCurrent ? 'ring-2 ring-cyan-300 z-10' : ''}`}
+                              }`}
                               title={
                                 isHead
                                   ? `Step ${stepIdx + 1}: ${getNoteName(track.steps[stepIdx]!.note)} (Len: ${track.steps[stepIdx]!.length || 1} steps)`

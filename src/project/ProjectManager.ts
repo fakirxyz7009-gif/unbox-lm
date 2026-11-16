@@ -177,10 +177,13 @@ class ProjectManager {
     });
     // AudioEngine notifications are structural (not animation or meter frames), so this
     // captures an edit promptly without putting persistent I/O in a real-time path.
-    audioEngine.subscribe(() => {
+    const markDirty = () => {
       this.dirtyMarker = true;
       this.scheduleRecovery();
-    });
+    };
+    audioEngine.subscribe(markDirty);
+    // Note-content edits deliberately skip the structural event so they do not re-render the whole app.
+    audioEngine.subscribeSequencer(markDirty);
   }
 
   subscribe(cb: () => void): () => void {

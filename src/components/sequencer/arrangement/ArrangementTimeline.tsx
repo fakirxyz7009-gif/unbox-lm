@@ -59,12 +59,13 @@ import { rememberUi, setUi, useUi, type SeqTool } from '../../../shell/uiStore.t
 import { focusClip } from '../../../shell/clipFocus.ts';
 import { showAlert, showPrompt } from '../../../shell/dialogService.ts';
 import { setText, setWidth } from '../../../ui/skin/dom.ts';
-import { useFrame, useMeterFrame } from '../../../nexa/useEngine.ts';
+import { useEngineVersion, useFrame, useMeterFrame, useSequencerVersion } from '../../../nexa/useEngine.ts';
 import { DARK_TIMELINE, LIGHT_TIMELINE } from './timelineTheme.ts';
 import { TrackHeader } from './TrackHeader.tsx';
 import { SeqToolbar, type SnapId } from './SeqToolbar.tsx';
 import { TrackFolderMenu } from './TrackFolderMenu.tsx';
 import { SongBlockEditor } from './SongBlockEditor.tsx';
+import { SectionStrip } from './SectionStrip.tsx';
 
 interface Props {
   audioEngine: AudioEngine;
@@ -104,6 +105,8 @@ type Drag =
   | { kind: 'blockMove'; placementId: string; startBar: number; pointerBar: number; deltaBars: number; moved: boolean }
   | { kind: 'blockResize'; placementId: string; startLength: number; pointerBar: number; deltaBars: number; moved: boolean }
   | { kind: 'trim'; ref: ClipRef; edge: 'start' | 'end'; bar: number }
+  | { kind: 'fade'; ref: ClipRef; edge: 'in' | 'out'; seconds: number }
+  | { kind: 'section'; startBar: number; len: number; pointerBar: number; deltaBars: number; copy: boolean }
   | { kind: 'loop'; ref: ClipRef; pass: number; length: number }
   | { kind: 'paint'; trackId: string; startBar: number; endBar: number; defaultLen: number }
   | { kind: 'loopRange'; mode: 'L' | 'R' | 'new'; a: number; b: number }
@@ -123,6 +126,8 @@ const keyOf = (r: ClipRef) => `${r.trackId}::${r.clipId}`;
 
 export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, activeTrack, onSelectTrack, onEditPattern, onAudition, theme = 'dark', onAddInstrument }) => {
   const seq = audioEngine.sequencer;
+  const engineRevision = useEngineVersion();
+  const sequencerRevision = useSequencerVersion();
   const spb = audioEngine.stepsPerBar;
   const beatsPerBar = Math.max(1, Math.round(spb / beatSteps(audioEngine.timeSignature)));
   const light = theme === 'light';
@@ -163,8 +168,16 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
 
   const [follow, setFollow] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [drag, setDrag] = useState<Drag | null>(null);
+  const [drag, setDragState] = useState<Drag | null>(null);
+  const dragRef = useRef<Drag | null>(null);
+  // Pointer moves use the live ref: a clip preview is a DOM transform, not a React render per snap step.
+  const setDrag = (next: Drag | null) => {
+    dragRef.current = next;
+    setDragState(next);
+  };
   const [menu, setMenu] = useState<Menu | null>(null);
+  const [laneMenu, setLaneMenu] = useState<{ x: number; y: number; trackId: string; bar: number } | null>(null);
+  const [sectionMenu, setSectionMenu] = useState<{ x: number; y: number; a: number; b: number } | null>(null);
   const [openClip, setOpenClip] = useState<ClipRef | null>(null);
   const [openAudio, setOpenAudio] = useState<ClipRef | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
@@ -198,8 +211,6 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   /** Horizontal scroll, kept from scroll events: reading `scrollLeft` every frame forces a layout. */
   const scrollLeftRef = useRef(0);
   const posRef = useRef<HTMLSpanElement | null>(null);
-  const dragRef = useRef<Drag | null>(null);
-  dragRef.current = drag;
 
   useEffect(() => {
     const sc = scrollerRef.current;
@@ -295,6 +306,33 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     const t = tracks.find((x) => x.id === ref.trackId);
     const c = t?.arrangementClips?.find((x) => x.id === ref.clipId);
     return t && c ? { t, c } : null;
+  };
+  /** Clip drag: move the selected clip elements directly so the timeline does not re-render per pointer move. */
+  const previewClipMove = (d: Extract<Drag, { kind: 'move' }>) => {
+    for (const ref of d.refs) {
+      const f = findClip(ref);
+      const el = document.querySelector<HTMLElement>(`[data-clip-key="${keyOf(ref)}"]`);
+      if (!f || !el) continue;
+      const sourceLane = tracks.indexOf(f.t);
+      if (sourceLane < 0) continue;
+      const targetLane = Math.max(0, Math.min(tracks.length - 1, sourceLane + d.deltaLanes));
+      const dest = tracks[targetLane];
+      const fits = !!dest && (f.c.kind === 'audio' ? dest.kind === 'audio' : dest.kind !== 'audio');
+      el.style.transform = `translateX(${d.deltaBars * barPx}px)`;
+      el.style.top = `${fits ? rowTop(targetLane) - rowTop(sourceLane) + 2 : 2}px`;
+      el.style.zIndex = '12';
+      el.style.willChange = 'transform';
+    }
+  };
+  const clearClipMovePreview = (refs: ClipRef[]) => {
+    for (const ref of refs) {
+      const el = document.querySelector<HTMLElement>(`[data-clip-key="${keyOf(ref)}"]`);
+      if (!el) continue;
+      el.style.transform = '';
+      el.style.top = '';
+      el.style.zIndex = '';
+      el.style.willChange = '';
+    }
   };
   const passBars = (t: SequencerTrack, c: ArrangementClip): number => {
     if (c.kind === 'notes') return c.loopBars && c.loopBars > 0 ? c.loopBars : c.lengthBars;
@@ -416,7 +454,15 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     }
   }, [audioEngine, barPx, vpW, beatsPerBar, P, ui.editCursorBar]);
 
+  // The ruler is a canvas, but a drag only changes the ruler when it moves the loop locators or a
+  // marker. Repainting it on every clip/note drag frame made the timeline feel sticky.
+  const rulerKey = `${barPx}|${vpW}|${beatsPerBar}|${ui.editCursorBar}|${songEnd}|${loop.start}|${loop.end}|${audioEngine.loopEnabled}|${audioEngine.arrangementMarkers.map((m) => `${m.id}:${m.bar}:${m.name}:${m.color}`).join('|')}`;
+  const rulerKeyRef = useRef('');
   useLayoutEffect(() => {
+    const d = drag;
+    const rulerDrag = d?.kind === 'loopRange' || d?.kind === 'marker';
+    if (!rulerDrag && rulerKeyRef.current === rulerKey) return;
+    rulerKeyRef.current = rulerKey;
     drawRuler();
   });
 
@@ -669,11 +715,71 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     if (f) onClipDouble(f.t, f.c);
   };
 
+  /**
+   * Section keys on the loop region (no Ctrl): Shift+D duplicate, Shift+Backspace delete,
+   * Shift+X ripple delete, Shift+I ripple insert, Alt+Shift+←/→ move by the section length.
+   */
+  const sectionShortcut = (e: React.KeyboardEvent<HTMLDivElement>): boolean => {
+    if (e.ctrlKey || e.metaKey) return false;
+    const a = audioEngine.loopStartBar;
+    const b = audioEngine.loopEndBar;
+    const len = b - a;
+    if (!(len > 0)) return false;
+    const key = e.key.toLowerCase();
+    if (e.shiftKey && key === 'd') {
+      const made = audioEngine.duplicateSection(a, b);
+      toast(made ? `Copied section — ${made} clip${made === 1 ? '' : 's'} to bar ${+(b + 1).toFixed(2)}` : 'That section has no clips to copy', made ? 'success' : 'info');
+      return true;
+    }
+    if (e.shiftKey && (e.key === 'Backspace' || e.key === 'Delete')) {
+      const r = audioEngine.deleteSection(a, b);
+      const n = r.clips + r.lanes + r.markers + r.blocks + r.folders;
+      toast(
+        n
+          ? `Deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'}, ${r.lanes} automation lane${r.lanes === 1 ? '' : 's'}, ${r.markers} marker${r.markers === 1 ? '' : 's'}, ${r.blocks} block${r.blocks === 1 ? '' : 's'}, ${r.folders} group${r.folders === 1 ? '' : 's'} (Ctrl+Z restores it)`
+          : 'That section had nothing to delete',
+        n ? 'success' : 'info'
+      );
+      return true;
+    }
+    if (e.shiftKey && key === 'x') {
+      const r = audioEngine.rippleDeleteSection(a, b);
+      const changed = r.clips + r.shifted + r.lanes + r.markers + r.blocks + r.folders;
+      toast(
+        changed
+          ? `Ripple deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'} removed, ${r.shifted} later clip${r.shifted === 1 ? '' : 's'} pulled left (Ctrl+Z restores it)`
+          : 'Nothing after this section to ripple',
+        changed ? 'success' : 'info'
+      );
+      return true;
+    }
+    if (e.shiftKey && key === 'i') {
+      const r = audioEngine.rippleInsertSection(a);
+      const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
+      toast(
+        changed
+          ? `Opened a ${len} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+          : 'Nothing at or after this point to push right',
+        changed ? 'success' : 'info'
+      );
+      return true;
+    }
+    if (e.altKey && e.shiftKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      const dir = e.key === 'ArrowRight' ? 1 : -1;
+      const moved = audioEngine.moveSection(a, b, dir * len);
+      toast(moved ? `Moved section ${dir > 0 ? 'right' : 'left'} by ${len} bars — ${moved} clip${moved === 1 ? '' : 's'}` : 'That section has no clips to move', moved ? 'success' : 'info');
+      return true;
+    }
+    return false;
+  };
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
     const mod = e.ctrlKey || e.metaKey;
     let handled = true;
-    if ((e.key === 'Delete' || e.key === 'Backspace') && selected.size) deleteSelected();
+    if (sectionShortcut(e)) {
+      // the section key already ran and reported what it did
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && selected.size) deleteSelected();
     else if (mod && e.key.toLowerCase() === 'd' && selected.size) duplicateSelected();
     else if (mod && e.key.toLowerCase() === 'c' && selected.size) copySelected();
     else if (mod && e.key.toLowerCase() === 'x' && selected.size) {
@@ -692,6 +798,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     } else if (e.key === 'Escape') {
       setSelected(new Set());
       setMenu(null);
+      setLaneMenu(null);
     } else handled = false;
     if (handled) {
       e.preventDefault();
@@ -712,6 +819,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   const onClipDown = (e: React.PointerEvent<HTMLDivElement>, t: SequencerTrack, c: ArrangementClip, laneIdx: number) => {
     if (e.button === 2) return;
     e.stopPropagation();
+    setLaneMenu(null);
     scrollerRef.current?.focus({ preventScroll: true });
     if (viewTool(e)) return;
     const ref = { trackId: t.id, clipId: c.id };
@@ -782,6 +890,13 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       capture(e);
       return;
     }
+    const fadeEdge = (e.target as HTMLElement).dataset?.fade as 'in' | 'out' | undefined;
+    if (fadeEdge && c.kind === 'audio') {
+      setSelected(new Set([k]));
+      setDrag({ kind: 'fade', ref, edge: fadeEdge, seconds: fadeEdge === 'in' ? c.fadeIn ?? 0 : c.fadeOut ?? 0 });
+      capture(e);
+      return;
+    }
     // pointer / pencil
     if (px > rect.width - 12 && py < 12) {
       setSelected(new Set([k]));
@@ -849,6 +964,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     scrollerRef.current?.focus({ preventScroll: true });
     onSelectTrack(t.id);
     setMenu(null);
+    setLaneMenu(null);
     if (viewTool(e)) return;
     if (tool === 'pencil' && t.kind !== 'audio') {
       const start = snapFloor(barAt(e.clientX));
@@ -888,7 +1004,13 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
     if (d.kind === 'move') {
       const db = snapRound(bar - d.startBar);
       const dl = laneAt(e.clientY) - d.startLane;
-      if (db !== d.deltaBars || dl !== d.deltaLanes) setDrag({ ...d, deltaBars: db, deltaLanes: dl, moved: true });
+      if (db !== d.deltaBars || dl !== d.deltaLanes) {
+        const next = { ...d, deltaBars: db, deltaLanes: dl, moved: true };
+        dragRef.current = next;
+        // A normal move is painted by transform below. Alt-copy still needs React to draw the ghost copy.
+        if (d.copy) setDrag(next);
+        else previewClipMove(next);
+      }
     } else if (d.kind === 'folderClipMove') {
       const db = snapRound(bar - d.pointerBar);
       if (db !== d.deltaBars) setDrag({ ...d, deltaBars: db, moved: true });
@@ -897,6 +1019,18 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       if (db !== d.deltaBars) setDrag({ ...d, deltaBars: db, moved: true });
     } else if (d.kind === 'trim') {
       setDrag({ ...d, bar: Math.max(0, snapRound(bar)) });
+    } else if (d.kind === 'section') {
+      const db = snapRound(bar - d.pointerBar);
+      if (db !== d.deltaBars) setDrag({ ...d, deltaBars: db });
+    } else if (d.kind === 'fade') {
+      // Fade length is measured from the clip edge the handle sits on, in seconds of song time.
+      const f = findClip(d.ref);
+      if (!f) return;
+      const edgeBar = d.edge === 'in' ? f.c.startBar : clipEndBar(f.c);
+      const secPerBarNow = secPerBar(audioEngine.bpm, spb);
+      const maxSec = f.c.lengthBars * secPerBarNow;
+      const seconds = Math.max(0, Math.min(maxSec, Math.abs(bar - edgeBar) * secPerBarNow));
+      if (Math.abs(seconds - d.seconds) > 0.005) setDrag({ ...d, seconds });
     } else if (d.kind === 'loop') {
       const f = findClip(d.ref);
       if (!f) return;
@@ -927,6 +1061,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
 
   const onPointerUp = () => {
     const d = dragRef.current;
+    if (d?.kind === 'move') clearClipMovePreview(d.refs);
     setDrag(null);
     if (!d) return;
     if (d.kind === 'move') {
@@ -948,13 +1083,27 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
         if (owner) next.add(keyOf({ trackId: owner, clipId }));
       }
       setSelected(next);
-      audioEngine.commitEdit();
+      // The timeline already subscribes to sequencer edits; a clip move does not rebuild the app.
+      audioEngine.commitSequencerEdit();
     } else if (d.kind === 'folderClipMove') {
       if (d.moved && d.deltaBars !== 0) audioEngine.moveTrackFolderClip(d.folderId, d.clipId, d.startBar + d.deltaBars);
     } else if (d.kind === 'blockMove') {
       if (d.moved && d.deltaBars !== 0) audioEngine.moveSongBlockPlacement(d.placementId, d.startBar + d.deltaBars);
     } else if (d.kind === 'blockResize') {
       if (d.moved && d.deltaBars !== 0) audioEngine.resizeSongBlockPlacement(d.placementId, d.startLength + d.deltaBars);
+    } else if (d.kind === 'section') {
+      if (d.deltaBars === 0) return;
+      const end = d.startBar + d.len;
+      if (d.copy) {
+        const made = audioEngine.duplicateSection(d.startBar, end, d.startBar + d.deltaBars);
+        if (made) toast(`Copied section — ${made} clip${made === 1 ? '' : 's'} from bar ${+(d.startBar + d.deltaBars + 1).toFixed(3)}`, 'success');
+      } else {
+        const moved = audioEngine.moveSection(d.startBar, end, d.deltaBars);
+        if (moved) toast(`Moved section — ${moved} clip${moved === 1 ? '' : 's'} by ${d.deltaBars > 0 ? '+' : ''}${d.deltaBars} bars`, 'success');
+      }
+    } else if (d.kind === 'fade') {
+      const seconds = Math.round(d.seconds * 100) / 100;
+      seq.updateAudioClip(d.ref.trackId, d.ref.clipId, d.edge === 'in' ? { fadeIn: seconds } : { fadeOut: seconds });
     } else if (d.kind === 'trim') {
       seq.resizeClip(d.ref.trackId, d.ref.clipId, d.edge, d.bar);
     } else if (d.kind === 'loop') {
@@ -1004,6 +1153,19 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       const lx = loop.start * barPx;
       const rx = loop.end * barPx;
       const x = bar * barPx;
+      // Alt-drag inside the loop region: move that whole section (Alt+Shift: copy it).
+      if (e.altKey && loop.end > loop.start && x > lx + 8 && x < rx - 8) {
+        setDrag({
+          kind: 'section',
+          startBar: loop.start,
+          len: loop.end - loop.start,
+          pointerBar: snapRound(bar),
+          deltaBars: 0,
+          copy: e.shiftKey,
+        });
+        e.currentTarget.setPointerCapture(e.pointerId);
+        return;
+      }
       if (Math.abs(x - lx) < 8) setDrag({ kind: 'loopRange', mode: 'L', a: loop.start, b: loop.end });
       else if (Math.abs(x - rx) < 8) setDrag({ kind: 'loopRange', mode: 'R', a: loop.start, b: loop.end });
       else setDrag({ kind: 'loopRange', mode: 'new', a: snapFloor(bar), b: snapFloor(bar) + snap });
@@ -1061,8 +1223,20 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   const clipColor = (t: SequencerTrack, c: ArrangementClip) =>
     c.kind === 'notes' || c.kind === 'audio' ? c.color || t.color || '#7f9a8e' : findPattern(t, c.patternId)?.color || t.color || '#f59e0b';
 
-  const clipLabel = (t: SequencerTrack, c: ArrangementClip) =>
-    c.kind === 'audio' ? c.name || 'Audio' : c.kind === 'notes' ? c.name || 'Note clip' : findPattern(t, c.patternId)?.name || 'Pattern';
+  /** Short letter of a pattern in its track's list (A, B, C…), as a sequencer bank shows it. */
+  const patternCode = (t: SequencerTrack, patternId?: string) => {
+    const idx = (t.patternList || []).findIndex((p) => p.id === patternId);
+    if (idx < 0) return '';
+    return idx < 26 ? String.fromCharCode(65 + idx) : `P${idx + 1}`;
+  };
+
+  const clipLabel = (t: SequencerTrack, c: ArrangementClip) => {
+    if (c.kind === 'audio') return c.name || 'Audio';
+    if (c.kind === 'notes') return c.name || 'Note clip';
+    const name = findPattern(t, c.patternId)?.name || 'Pattern';
+    const code = patternCode(t, c.patternId);
+    return code ? `${code} · ${name}` : name;
+  };
 
   /** Imports audio files onto a lane (new audio track when the lane is not an audio track). */
   const importFiles = async (files: File[], trackId?: string, bar = 0) => {
@@ -1364,6 +1538,8 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       </div>
       )}
 
+      <SectionStrip audioEngine={audioEngine} light={light} />
+
       {/* timeline */}
       <div
         ref={scrollerRef}
@@ -1401,7 +1577,14 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                 height={RULER_H * (window.devicePixelRatio || 1)}
                 onPointerDown={onRulerDown}
                 onDoubleClick={onRulerDouble}
-                onContextMenu={(e) => e.preventDefault()}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  const r = e.currentTarget.getBoundingClientRect();
+                  const bar = barAt(e.clientX);
+                  if (e.clientY - r.top < 14 && bar > loop.start + 1e-9 && bar < loop.end - 1e-9) {
+                    setSectionMenu({ x: e.clientX, y: e.clientY, a: loop.start, b: loop.end });
+                  }
+                }}
                 data-testid="arr-ruler"
               />
               <div
@@ -1689,6 +1872,13 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                   className="relative border-b"
                   style={{ width: lanesW, backgroundImage: gridBg, backgroundColor: laneIdx % 2 ? P.laneB : P.laneA, borderColor: P.laneBorder }}
                   onPointerDown={(e) => onLaneDown(e, t)}
+                  onContextMenu={(e) => {
+                    // Right-click empty lane space: place any pattern here without changing what the track edits.
+                    if (e.target !== e.currentTarget || t.kind === 'audio') return;
+                    e.preventDefault();
+                    onSelectTrack(t.id);
+                    setLaneMenu({ x: e.clientX, y: e.clientY, trackId: t.id, bar: snapFloor(barAt(e.clientX)) });
+                  }}
                   onDoubleClick={(e) => {
                     if (tool !== 'pointer' || e.target !== e.currentTarget || t.kind === 'audio') return;
                     const start = snapFloor(barAt(e.clientX));
@@ -1744,7 +1934,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                             {c.kind === 'audio' ? (
                               <AudioClipWave clip={c} width={w} height={h - 16} color={ink} bpm={audioEngine.bpm} spb={spb} />
                             ) : (
-                              <ClipPreview clip={c} pattern={p} barPx={barPx} spb={spb} width={w} height={h - 16} color={ink} />
+                              <ClipPreview revision={engineRevision + sequencerRevision} clip={c} pattern={p} barPx={barPx} spb={spb} width={w} height={h - 16} color={ink} />
                             )}
                           </div>
                         )}
@@ -1755,6 +1945,45 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                           {c.kind === 'notes' ? '♪ ' : c.kind === 'audio' ? '∿ ' : ''}
                           {clipLabel(t, c)}
                         </div>
+                        {c.kind === 'audio' && h > 20 && (() => {
+                          // Fade handles: drag the bottom corners to fade in / out; the shaded wedge is the fade.
+                          const spbSec = secPerBar(audioEngine.bpm, spb);
+                          const live = drag?.kind === 'fade' && keyOf(drag.ref) === k ? drag : null;
+                          const secOf = (edge: 'in' | 'out') =>
+                            live?.edge === edge ? live.seconds : edge === 'in' ? c.fadeIn ?? 0 : c.fadeOut ?? 0;
+                          const inSec = secOf('in');
+                          const outSec = secOf('out');
+                          const inPx = Math.min(w, Math.max(0, (inSec / Math.max(1e-6, spbSec)) * barPx));
+                          const outPx = Math.min(w, Math.max(0, (outSec / Math.max(1e-6, spbSec)) * barPx));
+                          return (
+                            <>
+                              {inPx > 1 && (
+                                <div
+                                  className="absolute inset-y-0 left-0 pointer-events-none z-[4]"
+                                  style={{ width: inPx, background: 'linear-gradient(to right, rgba(0,0,0,0.62), rgba(0,0,0,0))' }}
+                                />
+                              )}
+                              {outPx > 1 && (
+                                <div
+                                  className="absolute inset-y-0 right-0 pointer-events-none z-[4]"
+                                  style={{ width: outPx, background: 'linear-gradient(to left, rgba(0,0,0,0.62), rgba(0,0,0,0))' }}
+                                />
+                              )}
+                              <div
+                                data-fade="in"
+                                className="absolute bottom-0 w-[9px] h-[10px] z-[7] cursor-ew-resize rounded-sm bg-white/55 hover:bg-white/90 border border-black/40"
+                                style={{ left: Math.max(0, Math.min(w - 9, inPx - 4)) }}
+                                title={`Fade in ${inSec.toFixed(2)} s — drag right`}
+                              />
+                              <div
+                                data-fade="out"
+                                className="absolute bottom-0 w-[9px] h-[10px] z-[7] cursor-ew-resize rounded-sm bg-white/55 hover:bg-white/90 border border-black/40"
+                                style={{ right: Math.max(0, Math.min(w - 9, outPx - 4)) }}
+                                title={`Fade out ${outSec.toFixed(2)} s — drag left`}
+                              />
+                            </>
+                          );
+                        })()}
                         <div className="absolute top-0 bottom-0 left-0 w-[5px] cursor-ew-resize hover:bg-white/20" />
                         <div className="absolute top-0 bottom-0 right-0 w-[5px] cursor-ew-resize hover:bg-white/20" />
                         <div className="absolute top-0 right-0 w-[11px] h-[11px] bg-white/25 hover:bg-white/60 cursor-e-resize flex items-center justify-center" title="Drag to loop (repeat the content)">
@@ -1815,6 +2044,23 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
             />
           )}
 
+          {/* section drag ghost: where the whole section will land */}
+          {drag?.kind === 'section' && drag.deltaBars !== 0 && (
+            <div
+              className="absolute pointer-events-none z-[12] rounded-sm border-2 border-dashed border-cyan-300 bg-cyan-400/10"
+              style={{
+                left: HEADER_W + Math.max(0, drag.startBar + drag.deltaBars) * barPx,
+                width: drag.len * barPx,
+                top: RULER_H,
+                height: tempoH + rowTop(tracks.length),
+              }}
+            >
+              <span className="absolute -top-5 left-0 px-1 rounded bg-cyan-400 text-black text-[11px] font-bold whitespace-nowrap">
+                {drag.copy ? 'COPY' : 'MOVE'} SECTION · {drag.len} bars · {drag.deltaBars > 0 ? '+' : ''}{drag.deltaBars}
+              </span>
+            </div>
+          )}
+
           {/* playhead */}
           <div
             ref={playheadRef}
@@ -1845,6 +2091,171 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
           />
         )}
       </div>
+
+      {sectionMenu && (() => {
+        const a = sectionMenu.a;
+        const b = sectionMenu.b;
+        const playheadBar = audioEngine.getPlayheadPosition() / spb;
+        const run = (label: string, fn: () => void) => (
+          <button
+            key={label}
+            onClick={() => {
+              fn();
+              setSectionMenu(null);
+            }}
+            className="w-full text-left px-3 py-1 hover:bg-slate-800 text-slate-200"
+          >
+            {label}
+          </button>
+        );
+        return (
+          <div
+            className="fixed z-50 min-w-[250px] py-1 rounded border border-cyan-500/60 bg-[#111826] shadow-2xl text-[11px] font-mono"
+            style={{ left: Math.min(sectionMenu.x, window.innerWidth - 270), top: Math.min(sectionMenu.y, window.innerHeight - 220) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            role="menu"
+            data-testid="section-menu"
+          >
+            <div className="px-3 py-1 text-slate-500">
+              SECTION · BARS {+(a + 1).toFixed(3)}–{+(b + 1).toFixed(3)}
+            </div>
+            {run(`Duplicate section after it (bar ${+(b + 1).toFixed(3)})`, () => {
+              const made = audioEngine.duplicateSection(a, b);
+              if (made) toast(`Duplicated section — ${made} clip${made === 1 ? '' : 's'} with automation, markers and blocks`, 'success');
+            })}
+            {run(`Duplicate to playhead (bar ${+(playheadBar + 1).toFixed(2)})`, () => {
+              const made = audioEngine.duplicateSection(a, b, Math.floor(playheadBar));
+              if (made) toast(`Duplicated section at playhead — ${made} clip${made === 1 ? '' : 's'} with automation, markers and blocks`, 'success');
+            })}
+            {run('Move section to playhead', () => {
+              const moved = audioEngine.moveSection(a, b, Math.floor(playheadBar) - a);
+              if (moved) toast(`Moved section — ${moved} clip${moved === 1 ? '' : 's'} with automation, markers and blocks`, 'success');
+            })}
+            {run('Move section one bar later', () => {
+              const moved = audioEngine.moveSection(a, b, 1);
+              if (moved) toast(`Moved section — ${moved} clip${moved === 1 ? '' : 's'} with automation, markers and blocks`, 'success');
+            })}
+            <button
+              onClick={() => {
+                const gone = audioEngine.deleteSection(a, b);
+                const parts = [
+                  gone.clips && `${gone.clips} clip${gone.clips === 1 ? '' : 's'}`,
+                  gone.lanes && `${gone.lanes} automation lane${gone.lanes === 1 ? '' : 's'}`,
+                  gone.markers && `${gone.markers} marker${gone.markers === 1 ? '' : 's'}`,
+                  gone.blocks && `${gone.blocks} block${gone.blocks === 1 ? '' : 's'}`,
+                  gone.folders && `${gone.folders} group${gone.folders === 1 ? '' : 's'}`,
+                ].filter(Boolean);
+                toast(
+                  parts.length ? `Deleted section — ${parts.join(', ')} (Ctrl+Z restores it)` : 'That section had nothing to delete',
+                  parts.length ? 'success' : 'info'
+                );
+                setSectionMenu(null);
+              }}
+              className="w-full text-left px-3 py-1 hover:bg-slate-800 text-red-300 border-t border-slate-800"
+              data-testid="section-menu-delete"
+            >
+              Delete section (clips, automation, markers, blocks, groups)
+            </button>
+            <button
+              onClick={() => {
+                const r = audioEngine.rippleDeleteSection(a, b);
+                const changed = r.clips + r.shifted + r.lanes + r.markers + r.blocks + r.folders;
+                toast(
+                  changed
+                    ? `Ripple deleted section — ${r.clips} clip${r.clips === 1 ? '' : 's'} removed, ${r.shifted} later clip${r.shifted === 1 ? '' : 's'} pulled left (Ctrl+Z restores it)`
+                    : 'Nothing after this section to ripple',
+                  changed ? 'success' : 'info'
+                );
+                setSectionMenu(null);
+              }}
+              className="w-full text-left px-3 py-1 hover:bg-slate-800 text-amber-300"
+              data-testid="section-menu-ripple"
+            >
+              Ripple delete section (closes the gap)
+            </button>
+            <button
+              onClick={() => {
+                const r = audioEngine.rippleInsertSection(a);
+                const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
+                toast(
+                  changed
+                    ? `Opened a ${b - a} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+                    : 'Nothing at or after this point to push right',
+                  changed ? 'success' : 'info'
+                );
+                setSectionMenu(null);
+              }}
+              className="w-full text-left px-3 py-1 hover:bg-slate-800 text-emerald-300"
+              data-testid="section-menu-insert"
+            >
+              Ripple insert here (open a gap of {b - a} bars)
+            </button>
+            <div className="px-3 py-1 mt-1 border-t border-slate-800 text-slate-500">
+              Alt-drag the loop region to move · Alt+Shift to copy · carries clips, automation, markers, blocks, folder groups and the loop
+            </div>
+          </div>
+        );
+      })()}
+
+      {laneMenu && (() => {
+        const t = tracks.find((x) => x.id === laneMenu.trackId);
+        if (!t) return null;
+        const list = seq.patterns(t.id);
+        const place = (patternId: string) => {
+          seq.addPatternClip(t.id, laneMenu.bar, { patternId });
+          setLaneMenu(null);
+        };
+        const close = () => setLaneMenu(null);
+        return (
+          <div
+            className="fixed z-50 min-w-[220px] py-1 rounded border border-cyan-500/60 bg-[#111826] shadow-2xl text-[11px] font-mono"
+            style={{ left: Math.min(laneMenu.x, window.innerWidth - 240), top: Math.min(laneMenu.y, window.innerHeight - 280) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            role="menu"
+            data-testid="lane-pattern-menu"
+          >
+            <div className="px-3 py-1 text-slate-500">PLACE PATTERN · BAR {+(laneMenu.bar + 1).toFixed(3)}</div>
+            {list.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => place(p.id)}
+                className="w-full text-left px-3 py-1 hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+                data-testid="lane-place-pattern"
+              >
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: p.color }} />
+                <span className="font-bold text-amber-200 w-4 shrink-0">
+                  {i < 26 ? String.fromCharCode(65 + i) : `P${i + 1}`}
+                </span>
+                <span className="truncate flex-1">{p.name}</span>
+              </button>
+            ))}
+            <button
+              onClick={() => {
+                const made = seq.createPattern(t.id);
+                if (made) place(made.id);
+                else close();
+              }}
+              className="w-full text-left px-3 py-1 hover:bg-slate-800 text-emerald-300 border-t border-slate-800"
+            >
+              + New pattern and place
+            </button>
+            <button
+              onClick={() => {
+                const cur = t.activePatternId;
+                const made = cur ? seq.duplicatePattern(t.id, cur) : null;
+                if (made) place(made.id);
+                else close();
+              }}
+              className="w-full text-left px-3 py-1 hover:bg-slate-800 text-emerald-300"
+            >
+              + Duplicate current and place
+            </button>
+            <button onClick={close} className="w-full text-left px-3 py-1 hover:bg-slate-800 text-slate-400 border-t border-slate-800">
+              Close
+            </button>
+          </div>
+        );
+      })()}
 
       {menu && (
         <ClipMenu

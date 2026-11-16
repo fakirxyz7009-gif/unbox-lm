@@ -16,7 +16,7 @@ import { setWidth } from '../../ui/skin/dom.ts';
 import { Sel } from '../../studio/ui/controls.tsx';
 import { Fader } from '../../studio/ui/Fader.tsx';
 import { formatDb } from '../../studio/ui/levels.ts';
-import { StereoMeter } from '../../studio/ui/Meter.tsx';
+import { ChannelMeter } from './ChannelMeter.tsx';
 import { RingKnob } from '../../ui/skin/RingKnob.tsx';
 import { automateMenuAt } from '../AutomateMenu.tsx';
 import { LedButton } from '../../ui/skin/panel.tsx';
@@ -111,11 +111,12 @@ interface StripProps {
   buses: ChannelRef[];
   compact: boolean;
   selected: boolean;
+  meterPhase?: number;
   onSelect: (id: string) => void;
   onOpenDevice?: (id: string) => void;
 }
 
-export function ConsoleStrip({ ch, buses, compact, selected, onSelect, onOpenDevice }: StripProps) {
+export function ConsoleStrip({ ch, buses, compact, selected, meterPhase = 0, onSelect, onOpenDevice }: StripProps) {
   useChannelAutomation(ch.id);
   const [, bump] = useReducer((n: number) => n + 1, 0);
   const [renaming, setRenaming] = useState(false);
@@ -359,7 +360,7 @@ export function ConsoleStrip({ ch, buses, compact, selected, onSelect, onOpenDev
         </div>
         <div className="flex justify-center gap-1 pt-1">
           <Fader value={s.volume ?? 0.85} def={0.85} color={s.color} label={`${s.name} volume`} height={92} onChange={(v) => set(() => m.setVolume(ch.id, v))} onCommit={save} />
-          <StereoMeter read={() => m.levels(ch.id)} height={92} />
+          <ChannelMeter read={() => m.levels(ch.id)} height={92} width={16} phase={meterPhase} groups={2} />
         </div>
         <div className="cs-readout">{formatDb(s.volume ?? 0.85)} dB</div>
       </div>

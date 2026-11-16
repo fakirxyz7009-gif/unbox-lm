@@ -1,4 +1,4 @@
-name: Verify the browser audio probe
+name: Verify the hip-hop browser probe
 description: >-
   Installs the optional pinned playwright-core and runs the hip-hop kit browser probe. Kept separate
   from the unit suite because the probe boots a Vite dev server and Chrome, and it stalls when it

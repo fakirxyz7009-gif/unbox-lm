@@ -15,6 +15,8 @@ interface Props {
   width: number;
   height: number;
   color: string;
+  /** Engine revision: patterns/clips are mutated in place, so memo needs an explicit invalidation. */
+  revision: number;
 }
 
 interface Dash {
@@ -25,7 +27,7 @@ interface Dash {
 
 const MAX_DASHES = 600;
 
-export const ClipPreview: React.FC<Props> = ({ clip, pattern, barPx, spb, width, height, color }) => {
+export const ClipPreview = React.memo(function ClipPreview({ clip, pattern, barPx, spb, width, height, color }: Props) {
   const px16 = barPx / spb;
   let dashes: Dash[] = [];
   let tileW = 0;
@@ -81,4 +83,4 @@ export const ClipPreview: React.FC<Props> = ({ clip, pattern, barPx, spb, width,
       )}
     </svg>
   );
-};
+});

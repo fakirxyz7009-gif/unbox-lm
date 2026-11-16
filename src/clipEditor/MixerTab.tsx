@@ -11,6 +11,13 @@ import { setUi, useUi } from '../shell/uiStore.ts';
 import { capturePointer } from '../ui/skin/pointer.ts';
 import { ClipEditorArea, type EditorRequest } from './ClipEditorArea.tsx';
 
+/**
+ * Wrapper height (console toolbar included) that keeps a channel strip's fader readout inside the
+ * split at 1280×800 with the keyboard dock open. The strip's fixed lower block is ~237 px and the
+ * toolbar is ~41 px.
+ */
+const MIN_SPLIT_MIXER_HEIGHT = 292;
+
 interface Props {
   request: EditorRequest | null;
   renderSequencer: (request: EditorRequest, onModeChange: (mode: SequencerTabMode) => void) => React.ReactNode;
@@ -37,10 +44,8 @@ export function MixerTab({ request, renderSequencer, selectedPart, onSelectPart,
       <div ref={boxRef} className="flex-1 min-h-0 flex flex-col">
         {/* Mixer console: hidden when Clip Editor is full screen */}
         <div
-          className={`flex flex-col ${
-            isClipFull ? 'hidden' : isMixerFull ? 'flex-1 min-h-0' : 'min-h-[160px]'
-          }`}
-          style={isSplit ? { height: `${mixSplit * 100}%` } : undefined}
+          className={`flex flex-col ${isClipFull ? 'hidden' : isMixerFull ? 'flex-1 min-h-0' : ''}`}
+          style={isSplit ? { height: `${mixSplit * 100}%`, minHeight: MIN_SPLIT_MIXER_HEIGHT } : undefined}
         >
           <StudioMixer onOpenDevice={onOpenDevice} selectedPart={selectedPart} onSelectPart={onSelectPart} />
         </div>
@@ -59,12 +64,13 @@ export function MixerTab({ request, renderSequencer, selectedPart, onSelectPart,
                 const r = boxRef.current?.getBoundingClientRect();
                 if (r) {
                   const frac = (ev.clientY - r.top) / r.height;
+                  const minFrac = Math.min(0.88, MIN_SPLIT_MIXER_HEIGHT / r.height);
                   if (frac < 0.12) {
                     setUi({ mixerLayout: 'clip' });
                   } else if (frac > 0.88) {
                     setUi({ mixerLayout: 'mixer' });
                   } else {
-                    setUi({ mixSplit: Math.max(0.12, Math.min(0.88, frac)) });
+                    setUi({ mixSplit: Math.max(minFrac, Math.min(0.88, frac)) });
                   }
                 }
               };

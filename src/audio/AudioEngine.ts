@@ -108,6 +108,28 @@ import { renderSong } from './render/renderSong.ts';
 import { runExport, DEFAULT_EXPORT } from './export/exporter.ts';
 import { AutomationController } from './automation/AutomationController.ts';
 import { sortPoints, valueAt, type AutoLane, type AutoPoint } from './automation/model.ts';
+import {
+  clearSectionFolderClips,
+  clearSectionMarkers,
+  clearSectionPlacements,
+  clearSectionPoints,
+  copySectionFolderClips,
+  copySectionMarkers,
+  copySectionPlacements,
+  copySectionPoints,
+  insertSectionFolderClips,
+  insertSectionMarkers,
+  insertSectionPlacements,
+  insertSectionPoints,
+  rippleSectionFolderClips,
+  rippleSectionMarkers,
+  rippleSectionPlacements,
+  rippleSectionPoints,
+  shiftSectionFolderClips,
+  shiftSectionMarkers,
+  shiftSectionPlacements,
+  shiftSectionPoints,
+} from './sequencer/sectionAutomation.ts';
 import { MasteringChain } from './mastering/MasteringChain.ts';
 import { MeterHub } from './analysis/MeterHub.ts';
 import { ReferencePlayer } from './mastering/ReferencePlayer.ts';
@@ -939,6 +961,20 @@ export class AudioEngine {
 
   private notify(): void {
     this.listeners.forEach((cb) => cb());
+    this.captureUndoSoon();
+  }
+
+  private readonly sequencerListeners = new Set<() => void>();
+
+  /** Note / pattern content edits: sequencer views re-render without rebuilding the whole app. */
+  public subscribeSequencer(cb: () => void): () => void {
+    this.sequencerListeners.add(cb);
+    return () => this.sequencerListeners.delete(cb);
+  }
+
+  /** Commit a note-content edit. The piano roll already painted it; only sequencer UI needs the event. */
+  public commitSequencerEdit(): void {
+    this.sequencerListeners.forEach((cb) => cb());
     this.captureUndoSoon();
   }
 
@@ -3378,6 +3414,262 @@ export class AudioEngine {
     this.commitEdit();
   }
 
+  /**
+   * Moves a song section: every clip that starts in the range, the automation points in it and its
+   * markers, as one gesture and ONE undo step. Returns the number of clips moved.
+   */
+  public moveSection(fromBar: number, toBar: number, deltaBars: number): number {
+    const delta = snapBarTo16th(Number(deltaBars) || 0, this.stepsPerBar);
+    if (Math.abs(delta) < 1e-9) return 0;
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return 0;
+    const spb = this.stepsPerBar;
+    const before = this.exportProjectJSON();
+    const clips = this.sequencer.moveSection(from, to, delta, false);
+    let points = 0;
+    for (const lane of this.automation.lanes) {
+      const next = shiftSectionPoints(lane.points, from * spb, to * spb, delta * spb);
+      if (next) {
+        lane.points = next;
+        points++;
+      }
+    }
+    const markers = shiftSectionMarkers(this.arrangementMarkers, from, to, delta);
+    const placements = shiftSectionPlacements(this.blockPlacements, from, to, delta);
+    const folders = shiftSectionFolderClips(this.trackFolders, from, to, delta);
+    // The loop region is the section when it sits inside it: it moves along, so the same bars stay looped.
+    const loopInSection = this.loopEndBar > from + 1e-9 && this.loopStartBar < to - 1e-9;
+    if (!clips && !points && !markers && !placements && !folders && !loopInSection) return 0;
+    if (markers) this.arrangementMarkers = markers;
+    if (placements) this.blockPlacements = placements;
+    if (folders) this.trackFolders = folders;
+    if (loopInSection) {
+      const len = this.loopEndBar - this.loopStartBar;
+      this.setLoopLocators(Math.max(0, this.loopStartBar + delta), Math.max(0, this.loopStartBar + delta) + len);
+    }
+    this.commitEdit();
+    const after = this.exportProjectJSON();
+    undoJournal.push(
+      `section:move:${Date.now()}`,
+      'Move section',
+      () => this.restoreProject(before),
+      () => this.restoreProject(after)
+    );
+    this.lastTracksJson = this.takeUndoSnapshot();
+    return clips;
+  }
+
+  /**
+   * Copies a song section — clips, automation points and markers — so it starts again at
+   * `toBarStart` (default: right after the range). One gesture, ONE undo step. Returns the clips copied.
+   */
+  public duplicateSection(fromBar: number, toBar: number, toBarStart?: number): number {
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return 0;
+    const target = toBarStart === undefined ? to : Number(toBarStart);
+    if (!Number.isFinite(target) || target < 0) return 0;
+    const spb = this.stepsPerBar;
+    const delta = target - from;
+    const before = this.exportProjectJSON();
+    const made = this.sequencer.duplicateSection(from, to, target, false);
+    let points = 0;
+    for (const lane of this.automation.lanes) {
+      const next = copySectionPoints(lane.points, from * spb, to * spb, delta * spb);
+      if (next) {
+        lane.points = next;
+        points++;
+      }
+    }
+    const markers = copySectionMarkers(this.arrangementMarkers, from, to, delta, () => newSeqId('marker'));
+    const placements = copySectionPlacements(this.blockPlacements, from, to, delta, () => newSeqId('block_placement'));
+    const folders = copySectionFolderClips(this.trackFolders, from, to, delta, () => newSeqId('folder_clip'));
+    // With its loop inside the section, the copy becomes the looped range: you can play the repeat at once.
+    const loopInSection = this.loopEndBar > from + 1e-9 && this.loopStartBar < to - 1e-9;
+    if (!made.length && !points && !markers && !placements && !folders && !loopInSection) return 0;
+    if (markers) this.arrangementMarkers = markers;
+    if (placements) this.blockPlacements = placements;
+    if (folders) this.trackFolders = folders;
+    if (loopInSection) {
+      const len = this.loopEndBar - this.loopStartBar;
+      this.setLoopLocators(target, target + len);
+    }
+    this.commitEdit();
+    const after = this.exportProjectJSON();
+    undoJournal.push(
+      `section:copy:${Date.now()}`,
+      'Copy section',
+      () => this.restoreProject(before),
+      () => this.restoreProject(after)
+    );
+    this.lastTracksJson = this.takeUndoSnapshot();
+    return made.length;
+  }
+
+  /**
+   * Deletes a song section: its clips, automation points, markers, block placements and folder
+   * regions, as one gesture and ONE undo step. The result says what actually went, so the UI can
+   * report it truthfully.
+   */
+  public deleteSection(fromBar: number, toBar: number): { clips: number; lanes: number; markers: number; blocks: number; folders: number } {
+    const none = { clips: 0, lanes: 0, markers: 0, blocks: 0, folders: 0 };
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return none;
+    const spb = this.stepsPerBar;
+    const before = this.exportProjectJSON();
+    const clips = this.sequencer.deleteSectionClips(from, to, false);
+    let points = 0;
+    for (const lane of this.automation.lanes) {
+      const next = clearSectionPoints(lane.points, from * spb, to * spb);
+      if (next) {
+        lane.points = next;
+        points++;
+      }
+    }
+    const markers = clearSectionMarkers(this.arrangementMarkers, from, to);
+    const placements = clearSectionPlacements(this.blockPlacements, from, to);
+    const folders = clearSectionFolderClips(this.trackFolders, from, to);
+    const regionCount = (list: typeof this.trackFolders) => list.reduce((n, f) => n + (f.clips?.length ?? 0), 0);
+    const result = {
+      clips,
+      lanes: points,
+      markers: markers ? this.arrangementMarkers.length - markers.length : 0,
+      blocks: placements ? this.blockPlacements.length - placements.length : 0,
+      folders: folders ? regionCount(this.trackFolders) - regionCount(folders) : 0,
+    };
+    if (!clips && !points && !markers && !placements && !folders) return none;
+    if (markers) this.arrangementMarkers = markers;
+    if (placements) this.blockPlacements = placements;
+    if (folders) this.trackFolders = folders;
+    this.commitEdit();
+    const after = this.exportProjectJSON();
+    undoJournal.push(
+      `section:delete:${Date.now()}`,
+      'Delete section',
+      () => this.restoreProject(before),
+      () => this.restoreProject(after)
+    );
+    this.lastTracksJson = this.takeUndoSnapshot();
+    return result;
+  }
+
+  /**
+   * Ripple delete: removes the section and pulls everything after it left by its length, so the
+   * song closes up. Clips, automation, markers, block placements, folder regions and the loop move
+   * together, in one gesture and ONE undo step.
+   */
+  public rippleDeleteSection(
+    fromBar: number,
+    toBar: number
+  ): { clips: number; shifted: number; lanes: number; markers: number; blocks: number; folders: number } {
+    const zero = { clips: 0, shifted: 0, lanes: 0, markers: 0, blocks: 0, folders: 0 };
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return zero;
+    const spb = this.stepsPerBar;
+    const before = this.exportProjectJSON();
+    const { removed, shifted } = this.sequencer.rippleSectionClips(from, to, false);
+    let lanes = 0;
+    for (const lane of this.automation.lanes) {
+      const next = rippleSectionPoints(lane.points, from * spb, to * spb);
+      if (next) {
+        lane.points = next;
+        lanes++;
+      }
+    }
+    const markers = rippleSectionMarkers(this.arrangementMarkers, from, to);
+    const placements = rippleSectionPlacements(this.blockPlacements, from, to);
+    const folders = rippleSectionFolderClips(this.trackFolders, from, to);
+    const regionCount = (list: typeof this.trackFolders) => list.reduce((n, f) => n + (f.clips?.length ?? 0), 0);
+    const result = {
+      clips: removed,
+      shifted,
+      lanes,
+      markers: markers ? this.arrangementMarkers.length - markers.length : 0,
+      blocks: placements ? this.blockPlacements.length - placements.length : 0,
+      folders: folders ? regionCount(this.trackFolders) - regionCount(folders) : 0,
+    };
+    const loopAfter = this.loopStartBar >= to - 1e-9;
+    if (!removed && !shifted && !lanes && !markers && !placements && !folders && !loopAfter) return zero;
+    if (markers) this.arrangementMarkers = markers;
+    if (placements) this.blockPlacements = placements;
+    if (folders) this.trackFolders = folders;
+    if (loopAfter) {
+      const delta = to - from;
+      this.setLoopLocators(Math.max(0, this.loopStartBar - delta), Math.max(0, this.loopEndBar - delta));
+    }
+    this.commitEdit();
+    const after = this.exportProjectJSON();
+    undoJournal.push(
+      `section:ripple:${Date.now()}`,
+      'Ripple delete section',
+      () => this.restoreProject(before),
+      () => this.restoreProject(after)
+    );
+    this.lastTracksJson = this.takeUndoSnapshot();
+    return result;
+  }
+
+  /**
+   * Ripple insert: opens a gap at `atBar` as long as the loop region, pushing every clip,
+   * automation point, marker, block placement and folder region at or after it to the right.
+   * One gesture and ONE undo step.
+   */
+  public rippleInsertSection(
+    atBar: number
+  ): { clips: number; lanes: number; markers: number; blocks: number; folders: number; loop: boolean } {
+    const zero = { clips: 0, lanes: 0, markers: 0, blocks: 0, folders: 0, loop: false };
+    const at = Number(atBar);
+    const delta = this.loopEndBar - this.loopStartBar;
+    if (!Number.isFinite(at) || at < 0 || !(delta > 0)) return zero;
+    const spb = this.stepsPerBar;
+    const before = this.exportProjectJSON();
+    const clips = this.sequencer.rippleInsertClips(at, delta, false);
+    let lanes = 0;
+    for (const lane of this.automation.lanes) {
+      const next = insertSectionPoints(lane.points, at * spb, delta * spb);
+      if (next) {
+        lane.points = next;
+        lanes++;
+      }
+    }
+    // An insert moves items rather than removing them, so these count what was pushed right.
+    const markerCount = this.arrangementMarkers.filter((m) => m.bar >= at - 1e-9).length;
+    const blockCount = this.blockPlacements.filter((p) => p.startBar >= at - 1e-9).length;
+    const folderCount = this.trackFolders.reduce(
+      (n, f) => n + (f.clips ?? []).filter((c) => c.startBar >= at - 1e-9).length,
+      0
+    );
+    const markers = insertSectionMarkers(this.arrangementMarkers, at, delta);
+    const placements = insertSectionPlacements(this.blockPlacements, at, delta);
+    const folders = insertSectionFolderClips(this.trackFolders, at, delta);
+    const result = {
+      clips,
+      lanes,
+      markers: markerCount,
+      blocks: blockCount,
+      folders: folderCount,
+      loop: this.loopStartBar >= at - 1e-9,
+    };
+    if (!clips && !lanes && !result.markers && !result.blocks && !result.folders && !result.loop) return zero;
+    if (markers) this.arrangementMarkers = markers;
+    if (placements) this.blockPlacements = placements;
+    if (folders) this.trackFolders = folders;
+    if (result.loop) this.setLoopLocators(this.loopStartBar + delta, this.loopEndBar + delta);
+    this.commitEdit();
+    const after = this.exportProjectJSON();
+    undoJournal.push(
+      `section:insert:${Date.now()}`,
+      'Ripple insert section',
+      () => this.restoreProject(before),
+      () => this.restoreProject(after)
+    );
+    this.lastTracksJson = this.takeUndoSnapshot();
+    return result;
+  }
+
   // Song Blocks: reusable scene sections placed on a shared song lane.
   public createSongBlock(
     name?: string,
@@ -3835,8 +4127,12 @@ export class AudioEngine {
     return track;
   }
 
-  /** Writes one step of the track's ACTIVE pattern (grows the pattern when writing past its end). */
-  public setTrackStep(trackId: string, stepIndex: number, note: SequencerNote | null): void {
+  /**
+   * Writes one step of the track's ACTIVE pattern (grows the pattern when writing past its end).
+   * `sequencerOnly` keeps a step-grid edit out of the structural app render; the editor that made
+   * the edit is already listening to sequencer events and redraws itself.
+   */
+  public setTrackStep(trackId: string, stepIndex: number, note: SequencerNote | null, options?: { sequencerOnly?: boolean }): void {
     const track = this.tracks.find((t) => t.id === trackId);
     if (!track) return;
     const p = syncTrackPatterns(track, this.activePatternIndex);
@@ -3847,7 +4143,8 @@ export class AudioEngine {
       this.sequencer.setPatternLength(track.id, p.id, idx + 1, false);
     }
     track.steps[idx] = note;
-    this.notify();
+    if (options?.sequencerOnly) this.commitSequencerEdit();
+    else this.notify();
   }
 
   public clearTrackSteps(trackId: string): void {

@@ -292,10 +292,15 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
       </svg>
       {inlineValue ? (
         <span className="spec-knob-readout" title={`${def.label}: ${formatParam(def, value)}`}>
-          <span className="spec-knob-readout__label">{displayLabel ?? def.label}</span>
-          <span className="spec-knob-readout__value" style={{ color: active ? accent : text }}>
-            {formatParam(def, value)}
-          </span>
+          {active ? (
+            <span className="spec-knob-readout__value spec-knob-readout__value--solo" style={{ color: accent }}>
+              {formatParam(def, value)}
+            </span>
+          ) : (
+            <span className="spec-knob-readout__label spec-knob-readout__label--solo">
+              {displayLabel ?? def.label}
+            </span>
+          )}
         </span>
       ) : (
         <>

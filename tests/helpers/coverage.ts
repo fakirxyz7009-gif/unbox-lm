@@ -34,8 +34,8 @@ async function canLinkDirectories(): Promise<boolean> {
 
 /** Every environment-gated check that cannot run right now, with the reason the tests say. */
 export async function missingCoverage(): Promise<MissingCoverage[]> {
-  // The hip-hop kit browser probe is not here: it runs as its own command and CI job, never inside
-  // `npm test`, so it is not a skip this run has to account for.
+  // The browser probes run as their own commands and CI jobs, never inside `npm test`, so they
+  // are not skips this run has to account for.
   const missing: MissingCoverage[] = [];
   const tools = await toolStatus().catch(() => ({ ytDlp: false, ffmpeg: false }));
   if (!tools.ytDlp || !tools.ffmpeg) {

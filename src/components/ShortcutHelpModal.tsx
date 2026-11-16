@@ -97,6 +97,11 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
       { key: 'Del · Ctrl+D · M', label: 'Delete · duplicate · mute the selected clips' },
       { key: 'Ctrl+C · Ctrl+X · Ctrl+V', label: 'Copy · cut · paste clips (paste goes to the selected part, at the edit cursor)' },
       { key: 'Drag a clip to another part', label: 'Moves it there with its pattern (Alt = copy)' },
+      { key: 'Shift+D', label: 'Duplicate the looped section after it (clips, automation, markers, blocks, groups)' },
+      { key: 'Shift+Backspace', label: 'Delete the looped section (Ctrl+Z restores it)' },
+      { key: 'Shift+X', label: 'Ripple delete the section: everything after it pulls left' },
+      { key: 'Shift+I', label: 'Ripple insert: open a gap at the loop start, everything pushes right' },
+      { key: 'Alt+Shift+← / →', label: 'Move the looped section left / right by its own length' },
     ],
   },
   {

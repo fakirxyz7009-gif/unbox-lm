@@ -38,10 +38,19 @@ jobs:
       - name: Verify the source
         uses: ./.github/actions/verify
 
-      # The browser probe needs its own job in Checks because it stalls beside the unit suite; a
-      # release build has nothing else running, so it can run here in sequence before packaging.
-      - name: Verify the browser audio probe
+      # The browser probes need their own jobs in Checks because they stall beside the unit suite; a
+      # release build has nothing else running, so they can run here in sequence before packaging.
+      - name: Verify the hip-hop browser probe
         uses: ./.github/actions/verify-browser
+
+      - name: Verify the dense synth label browser probe
+        uses: ./.github/actions/verify-browser-labels
+
+      - name: Verify the split Mixer readout layout
+        uses: ./.github/actions/verify-mixer-readout
+
+      - name: Verify browser interaction performance
+        uses: ./.github/actions/verify-performance
 
       # Verification installs an unsaved browser driver into node_modules. Restore the exact lockfile
       # tree so the installer is packaged from the same dependencies `npm ci` produced.

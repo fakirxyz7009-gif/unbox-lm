@@ -29,6 +29,35 @@ export function useEngineVersion(): number {
   );
 }
 
+// Note edits get their own channel: the whole app does not need to re-render when a note moves.
+let sequencerVersion = 0;
+let sequencerWired = false;
+const sequencerSubs = new Set<() => void>();
+
+function wireSequencer() {
+  if (sequencerWired) return;
+  sequencerWired = true;
+  audioEngine.subscribeSequencer(() => {
+    sequencerVersion++;
+    sequencerSubs.forEach((s) => s());
+  });
+}
+
+/** Re-renders on note / pattern content edits, without subscribing to structural engine events. */
+export function useSequencerVersion(): number {
+  wireSequencer();
+  return useSyncExternalStore(
+    (cb) => {
+      sequencerSubs.add(cb);
+      return () => {
+        sequencerSubs.delete(cb);
+      };
+    },
+    () => sequencerVersion,
+    () => sequencerVersion
+  );
+}
+
 // ---- transport ticks: only components that show the playing step / bar subscribe ----
 interface Tick {
   count: number;
@@ -132,6 +161,7 @@ export function useFrame(cb: (t: number) => void) {
 let meterAt = -Infinity;
 let decidedFor = -1;
 let meterNow = false;
+let meterFrame = 0;
 
 /**
  * True on the shared meter frames (~30 a second). Meters, scopes and readouts redraw only then:
@@ -143,14 +173,23 @@ export function meterDue(t: number): boolean {
   if (t !== decidedFor) {
     decidedFor = t;
     meterNow = t - meterAt >= 30;
-    if (meterNow) meterAt = t;
+    if (meterNow) {
+      meterAt = t;
+      meterFrame++;
+    }
   }
   return meterNow;
 }
 
-/** `useFrame` on the shared meter frames (see `meterDue`). */
-export function useMeterFrame(cb: (t: number) => void) {
+/**
+ * `useFrame` on the shared meter frames (see `meterDue`). A bank of meters can pass a phase and
+ * group count to split its work across consecutive meter frames instead of drawing the whole bank
+ * in one frame.
+ */
+export function useMeterFrame(cb: (t: number) => void, phase = 0, groups = 1) {
   useFrame((t) => {
-    if (meterDue(t)) cb(t);
+    if (!meterDue(t)) return;
+    if (groups > 1 && meterFrame % groups !== phase) return;
+    cb(t);
   });
 }

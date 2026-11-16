@@ -1,0 +1,19 @@
+name: Verify the split Mixer fader readout layout
+description: >-
+  Installs the optional pinned playwright-core and runs the real app at 1280x800 with the keyboard
+  dock open, asserting that every channel, VCA and master fader readout remains above the split
+  divider, including after dragging the divider to its minimum.
+
+runs:
+  using: composite
+  steps:
+    # Chrome ships on the runner image; playwright-core is deliberately not a project dependency, so
+    # install it here without touching package.json or the lockfile. Pinned to the version the probe
+    # was last verified against.
+    - name: Install the probe browser driver
+      shell: pwsh
+      run: npm install --no-save --no-package-lock playwright-core@1.65.1
+
+    - name: Split Mixer readout layout
+      shell: pwsh
+      run: npm run test:browser-mixer-readout

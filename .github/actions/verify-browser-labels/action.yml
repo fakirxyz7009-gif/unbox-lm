@@ -1,0 +1,111 @@
+name: Verify the dense synth label browser probe
+description: >-
+  Installs the optional pinned playwright-core, runs the dense synth label-fit browser probe and
+  uploads the full-rack 1280 px and 1476 px screenshots. Kept in its own CI job so a failure in this
+  layout probe cannot skip the hip-hop audio probe.
+
+runs:
+  using: composite
+  steps:
+    # Chrome ships on the runner image; playwright-core is deliberately not a project dependency, so
+    # install it here without touching package.json or the lockfile. Pinned to the version the probe
+    # was last verified against.
+    - name: Install the probe browser driver
+      shell: pwsh
+      run: npm install --no-save --no-package-lock playwright-core@1.65.1
+
+    # Mounts the real rack and checks every generic dense synth spec at both the 1280 px layout and
+    # the 1476 px design threshold.
+    - name: Dense synth label-fit browser probe
+      id: dense-synth-probe
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path .tmp | Out-Null
+        Remove-Item .tmp/dense-synth-labels-probe.log -Force -ErrorAction SilentlyContinue
+        npm run test:browser-dense-synth-labels 2>&1 | Tee-Object -FilePath .tmp/dense-synth-labels-probe.log
+        $probeExit = $LASTEXITCODE
+        if ($probeExit -ne 0) { exit $probeExit }
+
+    - name: Upload the dense synth probe log
+      if: steps.dense-synth-probe.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: dense-synth-label-probe-log
+        path: .tmp/dense-synth-labels-probe.log
+        if-no-files-found: warn
+        retention-days: 7
+
+    # The probe captures the rack at each checked width. Upload on failure too, so the artifact
+    # shows the layout that failed; missing files are expected only when the probe dies before
+    # it reaches the page.
+    - name: Upload dense synth rack screenshots
+      id: dense-rack-upload
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dense-synth-label-rack-screenshots
+        path: |
+          .tmp/dense-synth-labels-1280.png
+          .tmp/dense-synth-labels-1476.png
+        if-no-files-found: warn
+        retention-days: 7
+
+    - name: Summarize the dense synth rack screenshots
+      if: always()
+      shell: pwsh
+      run: |
+        $url = "${{ steps.dense-rack-upload.outputs.artifact-url }}"
+        $probeOutcome = '${{ steps.dense-synth-probe.outcome }}'
+        $status = if ($probeOutcome -eq 'success') { 'PASS' } else { 'FAIL' }
+        $failure = ''
+        $failureFile = '.tmp/dense-synth-labels-failure.txt'
+        if ($status -eq 'FAIL') {
+          if (Test-Path $failureFile) {
+            $failure = (Get-Content -Raw $failureFile).Trim()
+          }
+          if (-not $failure) {
+            $failure = 'The probe failed before it reported a message.'
+          }
+        }
+        $counts = 'Probe counts unavailable.'
+        $widths = '1280 px and 1476 px'
+        $report = '.tmp/dense-synth-labels-summary.json'
+        if (Test-Path $report) {
+          try {
+            $probe = Get-Content -Raw $report | ConvertFrom-Json
+            $counts = @(
+              "$($probe.specs) dense synth specs",
+              "$($probe.cells) parameter cells",
+              "$($probe.controls) controls",
+              "$($probe.labels) labels",
+              "$($probe.rails) section-rail labels"
+            ) -join ' | '
+            $widths = @($probe.widths | ForEach-Object { "$_ px" }) -join ' and '
+          } catch {
+            # Keep the fallbacks; the probe result is still worth reporting.
+          }
+        }
+        $summary = @(
+          '### Dense synth rack screenshots',
+          '',
+          ('**Status:** ' + $status),
+          ('**Result:** ' + $counts),
+          ('**Checked widths:** ' + $widths),
+          '',
+          'Full-rack captures from the dense synth label-fit probe.'
+        )
+        if ($failure) {
+          $summary += @('', '**Failure:**', '', '```text', $failure, '```')
+        }
+        if ($url) {
+          $summary += @(
+            '',
+            'Artifact: **dense-synth-label-rack-screenshots** (`dense-synth-labels-1280.png`, `dense-synth-labels-1476.png`).',
+            '',
+            "[Open the artifact]($url)"
+          )
+        } else {
+          $summary += @('', 'The screenshot artifact was not uploaded.')
+        }
+        $summary -join "`n" |
+          Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append

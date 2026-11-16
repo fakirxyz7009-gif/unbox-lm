@@ -35,6 +35,58 @@ function peakOf(nodes: readonly AnalyserNode[]): number {
   return peak;
 }
 
+/** Waits until `seconds` of audio have actually been rendered; the wall budget keeps a dead context from hanging. */
+async function waitAudio(seconds: number, wallBudgetMs: number): Promise<number> {
+  const startAudio = audioEngine.ctx.currentTime;
+  const startWall = performance.now();
+  while (audioEngine.ctx.currentTime - startAudio < seconds) {
+    if (performance.now() - startWall > wallBudgetMs) break;
+    await pause(18);
+  }
+  return audioEngine.ctx.currentTime - startAudio;
+}
+
+/** The audio thread rendered almost nothing during a window, so its numbers cannot judge any device. */
+class AudioThreadStarved extends Error {}
+
+/**
+ * Loudest output over a fixed span of *rendered* audio. A wall-clock window is not enough: when the audio thread
+ * stalls (a convolver initialising, a GC pause, a busy machine) a fifth of a second of wall time can contain no
+ * rendered audio at all, and a healthy device then reads as silent. The late RV7000 report in the full sweep was
+ * exactly that — its convolver and dry branch were both fine either side of the measurement window.
+ * The wall budget is deliberately short: a starved window says so instead of stretching every device in the sweep.
+ */
+async function measurePeak(
+  taps: readonly AnalyserNode[],
+  audioSeconds: number,
+  wallBudgetMs: number,
+): Promise<{ peak: number; audioSpan: number }> {
+  const startAudio = audioEngine.ctx.currentTime;
+  const startWall = performance.now();
+  let peak = 0;
+  while (audioEngine.ctx.currentTime - startAudio < audioSeconds) {
+    if (performance.now() - startWall > wallBudgetMs) break;
+    await pause(18);
+    peak = Math.max(peak, peakOf(taps));
+  }
+  const audioSpan = audioEngine.ctx.currentTime - startAudio;
+  if (audioSpan < audioSeconds * 0.5) {
+    throw new AudioThreadStarved(`audio thread rendered ${audioSpan.toFixed(3)} s in ${(performance.now() - startWall).toFixed(0)} ms of wall time (needed ${audioSeconds} s)`);
+  }
+  return { peak, audioSpan };
+}
+
+/** One stalled window is a scheduling artefact; two in a row mean this machine cannot judge audio right now. */
+async function measurePeakWithStallRetry(taps: readonly AnalyserNode[], audioSeconds: number): Promise<{ peak: number; audioSpan: number }> {
+  try {
+    return await measurePeak(taps, audioSeconds, 2_000);
+  } catch (error) {
+    if (!(error instanceof AudioThreadStarved)) throw error;
+    console.info(`DEVICE_SMOKE_STALL_RETRY ${error.message}`);
+    return await measurePeak(taps, audioSeconds, 2_000);
+  }
+}
+
 function tapOutputs(device: BaseDevice): AnalyserNode[] {
   const outputs = [...device.audioOutputs.values()];
   if (!outputs.length) throw new Error('catalog marks this as an audio device, but it has no output node');
@@ -78,15 +130,12 @@ async function probeInstrument(type: string): Promise<number> {
       }
     }
     device.noteOn(note, 0.82, audioEngine.ctx.currentTime + 0.02);
-    const deadline = performance.now() + 350;
-    let peak = 0;
-    while (performance.now() < deadline) {
-      await pause(18);
-      peak = Math.max(peak, peakOf(taps));
-    }
+    const measured = await measurePeakWithStallRetry(taps, 0.35);
     device.noteOff?.(note, audioEngine.ctx.currentTime);
-    if (peak <= 1e-5) throw new Error(`no measurable output (peak ${peak.toExponential(2)})`);
-    return peak;
+    if (measured.peak <= 1e-5) {
+      throw new Error(`no measurable output (peak ${measured.peak.toExponential(2)} over ${measured.audioSpan.toFixed(2)} s of rendered audio)`);
+    }
+    return measured.peak;
   } finally {
     if (device) cleanTaps(device, taps);
   }
@@ -110,27 +159,32 @@ async function probeEffect(type: string): Promise<number> {
     source.connect(inputGain);
     inputs.forEach((input) => inputGain?.connect(input));
     source.start();
-    const deadline = performance.now() + 220;
-    let peak = 0;
-    while (performance.now() < deadline) {
-      await pause(18);
-      peak = Math.max(peak, peakOf(taps));
+    const first = await measurePeakWithStallRetry(taps, 0.3);
+    let peak = first.peak;
+    let audioSpan = first.audioSpan;
+    let windows = 1;
+    if (peak <= 1e-5) {
+      // One more window before calling the device silent: a stalled audio thread can swallow a whole measurement.
+      windows = 2;
+      const retry = await measurePeakWithStallRetry(taps, 0.3);
+      peak = retry.peak;
+      audioSpan += retry.audioSpan;
     }
     if (type === 'rv7000' && peak > 1e-5) {
       const inputTap = audioEngine.ctx.createAnalyser();
       inputTap.fftSize = 2048;
       inputGain.connect(inputTap);
       device.isBypassed = true;
-      await pause(100);
+      await waitAudio(0.1, 2_000);
       const bypassPeak = peakOf(taps);
       device.isBypassed = false;
-      await pause(100);
+      await waitAudio(0.1, 2_000);
       const restoredPeak = peakOf(taps);
       device.isPowered = false;
-      await pause(100);
+      await waitAudio(0.1, 2_000);
       const poweredOffPeak = peakOf(taps);
       device.isPowered = true;
-      await pause(100);
+      await waitAudio(0.1, 2_000);
       const repoweredPeak = peakOf(taps);
       const inputPeak = peakOf([inputTap]);
       inputTap.disconnect();
@@ -153,10 +207,10 @@ async function probeEffect(type: string): Promise<number> {
         inputGain.connect(inputTap);
         if (rawOutput instanceof AudioNode) rawOutput.connect(rawTap);
         device.isBypassed = true;
-        await pause(80);
+        await waitAudio(0.08, 2_000);
         const bypassPeak = peakOf(taps);
         device.isBypassed = false;
-        await pause(100);
+        await waitAudio(0.1, 2_000);
         const inputPeak = peakOf([inputTap]);
         const rawPeak = peakOf([rawTap]);
         const irDuration = convolver instanceof ConvolverNode ? convolver.buffer?.duration ?? 0 : 0;
@@ -166,7 +220,7 @@ async function probeEffect(type: string): Promise<number> {
         inputTap.disconnect();
         rawTap.disconnect();
       }
-      throw new Error(`no measurable output from 440 Hz input (peak ${peak.toExponential(2)}; context ${audioEngine.ctx.state} at ${audioEngine.ctx.currentTime.toFixed(3)} s / ${audioEngine.ctx.sampleRate} Hz; ${audioEngine.devices.size} devices registered${detail})`);
+      throw new Error(`no measurable output from 440 Hz input (peak ${peak.toExponential(2)} over ${audioSpan.toFixed(2)} s of rendered audio in ${windows} window(s); context ${audioEngine.ctx.state} at ${audioEngine.ctx.currentTime.toFixed(3)} s / ${audioEngine.ctx.sampleRate} Hz; ${audioEngine.devices.size} devices registered${detail})`);
     }
     return peak;
   } finally {

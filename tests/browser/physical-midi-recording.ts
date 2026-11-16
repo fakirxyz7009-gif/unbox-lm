@@ -1,6 +1,7 @@
 import { audioEngine } from '../../src/audio/AudioEngine.ts';
 import { waitForAudioTime } from '../../src/audio/audioClockAlarm.ts';
 import { projectManager } from '../../src/project/ProjectManager.ts';
+import { PhysicalMidiUnavailable, reportPhysicalMidiSkip } from './physical-midi-skip.ts';
 
 const result = document.querySelector<HTMLPreElement>('#result');
 const connect = document.querySelector<HTMLButtonElement>('#connect');
@@ -70,17 +71,23 @@ async function run(): Promise<void> {
 
     console.info(`PHYSICAL_MIDI_API available=${midiApiAvailable} origin=${location.origin}`);
     stage('confirm MIDI access');
-    if (!(await withTimeout('Web MIDI access request', midiAccessRequest, 60_000))) {
-      throw new Error(`Browser MIDI access was refused or unavailable (status=${audioEngine.midi.status}, requestMIDIAccess=${midiApiAvailable}, cause=${resultNode.dataset.midiError ?? 'not captured'}, context=${resultNode.dataset.midiContext ?? 'not captured'})`);
+    let accessGranted = false;
+    try {
+      accessGranted = await withTimeout('Web MIDI access request', midiAccessRequest, 60_000);
+    } catch (error) {
+      throw new PhysicalMidiUnavailable(`Browser MIDI access request did not complete (status=${audioEngine.midi.status}, cause=${error instanceof Error ? error.message : String(error)})`);
+    }
+    if (!accessGranted) {
+      throw new PhysicalMidiUnavailable(`Browser MIDI access was refused or unavailable (status=${audioEngine.midi.status}, requestMIDIAccess=${midiApiAvailable}, cause=${resultNode.dataset.midiError ?? 'not captured'}, context=${resultNode.dataset.midiContext ?? 'not captured'})`);
     }
     const portSummary = audioEngine.midi.ports.map((port) => `${port.name}${port.error ? ` (unavailable: ${port.error})` : ''}`).join(', ') || '(none)';
     console.info(`PHYSICAL_MIDI_PORTS ${portSummary}`);
     const inputs = audioEngine.midi.ports.filter((port) => IMPULSE_NAME.test(port.name));
     if (!inputs.length) {
-      throw new Error(`No Novation Impulse input found. Browser inputs: ${audioEngine.midi.ports.map((port) => port.name).join(', ') || '(none)'}`);
+      throw new PhysicalMidiUnavailable(`No Novation Impulse input found. Browser inputs: ${audioEngine.midi.ports.map((port) => port.name).join(', ') || '(none)'}`);
     }
     const input = inputs.find((port) => !port.error);
-    if (!input) throw new Error(`Impulse input is busy: ${inputs.map((port) => port.error).join(', ')}`);
+    if (!input) throw new PhysicalMidiUnavailable(`Impulse input is busy: ${inputs.map((port) => port.error).join(', ')}`);
 
     const receivedNote = new Promise<void>((resolve, reject) => {
       const timer = window.setTimeout(() => reject(new Error('Timed out waiting for one physical Impulse key press and release.')), 60_000);
@@ -161,6 +168,10 @@ async function run(): Promise<void> {
 
 connect.addEventListener('click', () => {
   void run().catch((error: unknown) => {
+    if (error instanceof PhysicalMidiUnavailable) {
+      reportPhysicalMidiSkip(resultNode, error.message);
+      return;
+    }
     resultNode.dataset.status = 'failed';
     resultNode.textContent = `FAIL · ${error instanceof Error ? error.stack ?? error.message : String(error)}`;
   });

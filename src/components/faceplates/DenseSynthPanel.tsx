@@ -25,10 +25,16 @@ const LABEL: Record<string, string> = {
   Resonance: 'Res',
   Velocity: 'Vel',
   Unison: 'Uni',
-  Detune: 'Detune',
-  'Uni Detune': 'Uni Det',
-  'Cross Mod': 'X Mod',
-  'Key Track': 'Track',
+  Detune: 'Det',
+  'Uni Detune': 'UniD',
+  'Cross Mod': 'XMod',
+  'Key Track': 'Trk',
+  Cutoff: 'Cut',
+  Voices: 'Vcs',
+  Motion: 'MOT',
+  Partials: 'Part',
+  'Odd ⇄ Even': 'O/E',
+  'Spec Peak': 'Spec',
   'Filter Type': 'Type',
   'Osc 2 Lvl': '2 Lvl',
   'Osc 3 Lvl': '3 Lvl',
@@ -41,35 +47,16 @@ const LABEL: Record<string, string> = {
   'Mod Sustain': 'M Sus',
   Brightness: 'Bright',
   Hardness: 'Hard',
-  'Vel → Mod': 'Vel Mod',
+  Feedback: 'Fdbk',
+  'Vel → Mod': 'VMod',
   'Spring Rev': 'Spring',
-  'Table A': 'Table A',
-  'Table B': 'Table B',
+  'Table A': 'Tbl A',
+  'Table B': 'Tbl B',
   'Oct A': 'Oct A',
   'Oct B': 'Oct B',
-  'Index A': 'Index A',
-  'Index B': 'Index B',
   'Semi B': 'Semi B',
+  'Semi 2': 'Sem2',
   'Detune B': 'Det B',
-  'A ⇄ B': 'A/B Mix',
-  'Op1 Ratio': 'Op1 Rat',
-  'Op2 Ratio': 'Op2 Rat',
-  'Op3 Ratio': 'Op3 Rat',
-  'Op4 Ratio': 'Op4 Rat',
-  'Op5 Ratio': 'Op5 Rat',
-  'Op6 Ratio': 'Op6 Rat',
-  'Op7 Ratio': 'Op7 Rat',
-  'Op8 Ratio': 'Op8 Rat',
-  'Op9 Ratio': 'Op9 Rat',
-  'Op1 Level': 'Op1 Lvl',
-  'Op2 Level': 'Op2 Lvl',
-  'Op3 Level': 'Op3 Lvl',
-  'Op4 Level': 'Op4 Lvl',
-  'Op5 Level': 'Op5 Lvl',
-  'Op6 Level': 'Op6 Lvl',
-  'Op7 Level': 'Op7 Lvl',
-  'Op8 Level': 'Op8 Lvl',
-  'Op9 Level': 'Op9 Lvl',
   'FM Index': 'FM',
   'Mod Ratio': 'Ratio',
   'Pitch Env': 'Pitch',
@@ -81,12 +68,44 @@ const LABEL: Record<string, string> = {
   'Noise Level': 'Noise',
   'Sub Level': 'Sub',
   'Audio In': 'Audio',
+  Algorithm: 'Algo',
+  'Detune 3': 'Det 3',
+  'To Pitch': 'Pitch',
+  'To Filter': 'Filter',
+  'To Amp': 'Amp',
+  'Index A': 'Idx A',
+  'Index B': 'Idx B',
+  'A ⇄ B': 'A/B',
+  'Hammer/Pick': 'Hammer',
+  'LPG Decay': 'LPG Dec',
+  'Fn → Fold': 'Fn Fold',
+  Symmetry: 'Sym',
+  'Body Size': 'Body',
+  'Vib Depth': 'Vib',
+  Ensemble: 'Ens',
+  'Bow Pressure': 'Bow Pres',
+  'Bow Noise': 'Bow Nz',
+  'Bow Position': 'Bow Pos',
+  'LFO → Index': 'LIdx',
+  Volume: 'Vol',
+  'Delay FX': 'Delay',
+  'Reverb FX': 'Rev',
 };
 
-const compactLabel = (label: string): string => LABEL[label] ?? (label.length > 9 ? label.slice(0, 8) : label);
+const compactLabel = (label: string): string => {
+  const operator = /^Op(\d) (Ratio|Level)$/.exec(label);
+  if (operator) return `Op${operator[1]}${operator[2] === 'Ratio' ? 'R' : 'L'}`;
+  return LABEL[label] ?? (label.length > 9 ? label.slice(0, 8) : label);
+};
 
 const OPTION: Record<string, string> = {
   Saw: 'SAW',
+  Phase: 'PHS',
+  Glass: 'GLS',
+  Bell: 'BEL',
+  Metal: 'MET',
+  'Ladder 24': 'LP24',
+  'Ladder 12': 'LP12',
   Square: 'SQR',
   Triangle: 'TRI',
   Tri: 'TRI',
@@ -127,7 +146,7 @@ const SECTION: Record<string, string> = {
   'Low Pass Gate': 'LPG',
   Function: 'FN',
   Spectrum: 'SPEC',
-  Motion: 'MOTION',
+  Motion: 'MOT',
   Instrument: 'MODEL',
   Exciter: 'EXCITE',
   Resonator: 'RESON',
@@ -150,7 +169,7 @@ const sectionCode = (section: string): string => {
 const rowSections = (row: readonly ParamDef[]): { parts: string[]; full: string; extra: number } => {
   const names = [...new Set(row.map((p) => p.section ?? 'Main'))];
   if (!names.length) return { parts: [], full: '', extra: 0 };
-  if (names.every((n) => /operator/i.test(n))) return { parts: ['OPERATORS'], full: names.join(' · '), extra: 0 };
+  if (names.every((n) => /operator/i.test(n))) return { parts: ['OPS'], full: names.join(' · '), extra: 0 };
   const codes = names.map(sectionCode);
   return {
     parts: codes.slice(0, 2),
@@ -167,7 +186,9 @@ export const DenseSynthPanel: React.FC<Props> = ({ device, onUpdate, accent, tex
   const maxRows = units <= 2 ? 4 : 5;
   const columns = Math.min(10, Math.max(6, Math.ceil(params.length / maxRows)));
   const rows = Math.max(1, Math.ceil(params.length / columns));
-  const bodyHeight = units <= 2 ? 142 : 194;
+  const bodyHeight = units <= 2 ? 142 : 190;
+  const gridGap = units <= 2 ? 2 : 3;
+  const railWidth = units <= 2 && columns <= 7 ? 50 : 44;
 
   useEffect(() => device.subscribe(force), [device]);
 
@@ -280,8 +301,9 @@ export const DenseSynthPanel: React.FC<Props> = ({ device, onUpdate, accent, tex
       <div
         className="synth-dense__grid"
         style={{
-          gridTemplateColumns: `44px repeat(${columns}, minmax(0, 1fr))`,
+          gridTemplateColumns: `${railWidth}px repeat(${columns}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+          gap: gridGap,
         }}
       >
         {chunks.map((row, rowIndex) => {

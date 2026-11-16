@@ -56,7 +56,7 @@ export const NoteClipEditor: React.FC<Props> = ({ audioEngine, track, clip, onCl
       if (loop16) audioEngine.sequencer.setClipLoop(track.id, clip.id, bars, false);
       if (!loop16 || bars > clip.lengthBars) audioEngine.sequencer.resizeClip(track.id, clip.id, 'end', clip.startBar + Math.max(bars, clip.lengthBars), false);
     }
-    audioEngine.commitEdit();
+    audioEngine.commitSequencerEdit();
   };
 
   const getPlayhead = useCallback(() => {

@@ -1,6 +1,7 @@
 import type { audioEngine as AudioEngineInstance } from '../../src/audio/AudioEngine.ts';
 import type { ClipNote, SequencerTrack } from '../../src/audio/types.ts';
 import type { projectManager as ProjectManagerInstance } from '../../src/project/ProjectManager.ts';
+import { PhysicalMidiUnavailable, reportPhysicalMidiSkip } from './physical-midi-skip.ts';
 
 interface ProbeInput extends EventTarget {
   id: string;
@@ -321,7 +322,7 @@ async function waitForImpulse(audioEngine: typeof AudioEngineInstance): Promise<
         ? 'Chrome denied MIDI access; reconnect the controller and allow access when prompted.'
         : 'Check that the Impulse is connected and not held by other MIDI software.';
     const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(`${reason}; MIDI status=${audioEngine.midi.status}; inputs=${JSON.stringify(inputs)}. ${nextStep}`);
+    throw new PhysicalMidiUnavailable(`${reason}; MIDI status=${audioEngine.midi.status}; inputs=${JSON.stringify(inputs)}. ${nextStep}`);
   }
   return names;
 }
@@ -334,7 +335,10 @@ async function waitForPhysicalRecording(audioEngine: typeof AudioEngineInstance)
       ? 'Chrome MIDI permission is pending. Choose Allow in the browser prompt to start recording.'
       : `Starting the armed piano recorder… MIDI status: ${status}.`;
     if (performance.now() >= deadline) {
-      throw new Error(`Transport recording did not start (recorder=${audioEngine.recorder.state}, MIDI=${status}, ports=${JSON.stringify(audioEngine.midi.ports)}, recorderMessage=${audioEngine.recorder.message ?? 'none'}).`);
+      const detail = `Transport recording did not start (recorder=${audioEngine.recorder.state}, MIDI=${status}, ports=${JSON.stringify(audioEngine.midi.ports)}, recorderMessage=${audioEngine.recorder.message ?? 'none'}).`;
+      // A denied Web MIDI permission is the machine's answer, not the app's: report it as missing acceptance.
+      if (status === 'blocked') throw new PhysicalMidiUnavailable(detail);
+      throw new Error(detail);
     }
     await delay(100);
   }
@@ -347,6 +351,10 @@ function notesFrom(track: SequencerTrack): ClipNote[] {
 }
 
 void run().catch((error: unknown) => {
+  if (error instanceof PhysicalMidiUnavailable) {
+    reportPhysicalMidiSkip(resultNode, error.message);
+    return;
+  }
   resultNode.dataset.status = 'failed';
   resultNode.textContent = `FAIL · ${error instanceof Error ? error.stack ?? error.message : String(error)}`;
 });

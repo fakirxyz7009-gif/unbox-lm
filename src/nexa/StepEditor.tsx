@@ -106,7 +106,7 @@ export default function StepEditor({ track, tracks, lanes: drumLanes, onSelectTr
       }
     }
     track.steps[step] = withNotes(cur, notes);
-    audioEngine.commitEdit();
+    audioEngine.commitSequencerEdit();
     force();
   };
 
@@ -122,7 +122,7 @@ export default function StepEditor({ track, tracks, lanes: drumLanes, onSelectTr
   const clearTrack = () => {
     if (!track) return;
     track.steps.fill(null);
-    audioEngine.commitEdit();
+    audioEngine.commitSequencerEdit();
     force();
   };
 

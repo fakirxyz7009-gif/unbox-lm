@@ -90,7 +90,7 @@ export const PatternPianoRoll: React.FC<Props> = ({
     }
     const steps = rollToPattern(next, p.length);
     for (let i = 0; i < p.length; i++) track.steps[i] = steps[i];
-    audioEngine.commitEdit();
+    audioEngine.commitSequencerEdit();
   };
 
   const getPlayhead = useCallback(() => {

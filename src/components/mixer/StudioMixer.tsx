@@ -206,8 +206,8 @@ export function StudioMixer({ onOpenDevice, selectedPart, onSelectPart }: MixerP
       <div className="flex-1 min-h-0 flex">
         {inspectorOpen && <ChannelInspector channelId={inspect} onClose={() => setInspectorOpen(false)} />}
         <div className="flex-1 min-w-0 flex gap-1 p-1.5 overflow-x-auto overflow-y-hidden items-stretch cs-console">
-          {shown.map((c) => (
-            <ConsoleStrip key={c.id} ch={c} buses={buses} onOpenDevice={onOpenDevice} compact={compact} selected={c.id === inspect} onSelect={select} />
+          {shown.map((c, index) => (
+            <ConsoleStrip key={c.id} ch={c} buses={buses} onOpenDevice={onOpenDevice} compact={compact} selected={c.id === inspect} meterPhase={index % 2} onSelect={select} />
           ))}
           {m.vcas.map((v) => (
             <VcaStrip key={v.id} id={v.id} />

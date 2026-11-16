@@ -53,15 +53,28 @@ export const TrackHeader: React.FC<Props> = ({
   const btn = (on: boolean, onCls: string, offCls: string) =>
     `w-5 h-[18px] rounded-[3px] text-[11px] font-bold font-label grid place-items-center ${on ? onCls : offCls}`;
   const off = light ? 'bg-[#2c3137] text-[#c3c9d0] border border-[#4a5057]' : 'bg-slate-800 text-slate-400';
+  const activePattern = t.kind !== 'audio' ? syncTrackPatterns(t, audioEngine.activePatternIndex) : null;
   const patternSelect =
-    t.kind !== 'audio' ? (
+    t.kind !== 'audio' && activePattern ? (
       <select
-        value={syncTrackPatterns(t, audioEngine.activePatternIndex).id}
-        onChange={(e) => seq.selectPattern(t.id, e.target.value)}
+        value={activePattern.id}
+        onChange={(e) => {
+          const value = e.target.value;
+          // Editing a pattern on this lane also makes this lane the active part, so the piano
+          // roll and hardware MIDI follow what was just chosen here.
+          onSelect();
+          if (value === '__new_pattern__') seq.createPattern(t.id);
+          else if (value === '__duplicate_pattern__') seq.duplicatePattern(t.id, activePattern.id);
+          else seq.selectPattern(t.id, value);
+        }}
         onPointerDown={(e) => e.stopPropagation()}
         className={`text-[11px] rounded px-0.5 min-w-0 flex-1 ${light ? 'bg-[#181c20] border border-[#3a4047] text-[#e8e5df]' : 'bg-slate-900 text-amber-200 border border-slate-700'}`}
-        title="Pattern the paint tool places (and the one you edit)"
+        title="Pattern this instrument edits and paints. Open the list to add a new pattern or duplicate the current one."
+        aria-label={`Pattern for ${t.name}`}
+        data-testid="track-pattern-select"
       >
+        <option value="__new_pattern__">+ New pattern</option>
+        <option value="__duplicate_pattern__">+ Duplicate current</option>
         {(t.patternList || []).map((p) => (
           <option key={p.id} value={p.id}>
             {p.name} · {p.length}×{p.division}

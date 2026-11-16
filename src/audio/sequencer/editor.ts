@@ -494,6 +494,126 @@ export class SequencerEditor {
     return copy;
   }
 
+  // ---------------------------------------------------------------- sections
+
+  /** Every clip that starts inside [fromBar, toBar), on all tracks unless one is named. */
+  clipsInRange(fromBar: number, toBar: number, trackId?: string): { track: SequencerTrack; clip: ArrangementClip }[] {
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return [];
+    const out: { track: SequencerTrack; clip: ArrangementClip }[] = [];
+    for (const t of this.host.tracks) {
+      if (trackId && t.id !== trackId) continue;
+      for (const c of t.arrangementClips || []) {
+        if (c.startBar >= from - 1e-9 && c.startBar < to - 1e-9) out.push({ track: t, clip: c });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Shifts every clip that starts inside the range by `deltaBars`: a whole section (every part)
+   * moves as one gesture and one undo step. Clips never land before bar 0.
+   */
+  moveSection(fromBar: number, toBar: number, deltaBars: number, commit = true): number {
+    const delta = snapBarTo16th(Number(deltaBars) || 0, this.host.stepsPerBar);
+    if (Math.abs(delta) < 1e-9) return 0;
+    const items = this.clipsInRange(fromBar, toBar);
+    let moved = 0;
+    for (const { clip } of items) {
+      const next = Math.max(0, this.snap(clip.startBar + delta));
+      if (Math.abs(next - clip.startBar) > 1e-9) {
+        clip.startBar = next;
+        moved++;
+      }
+    }
+    if (moved) this.done(commit);
+    return moved;
+  }
+
+  /**
+   * Removes every clip that starts inside the range (a section delete). Returns how many went.
+   * Clips that only overlap the edge are left alone, the same rule move and copy use.
+   */
+  deleteSectionClips(fromBar: number, toBar: number, commit = true): number {
+    const items = this.clipsInRange(fromBar, toBar);
+    if (!items.length) return 0;
+    for (const { track, clip } of items) {
+      track.arrangementClips = (track.arrangementClips || []).filter((c) => c !== clip);
+    }
+    this.done(commit);
+    return items.length;
+  }
+
+  /** Ripple insert: opens a gap by pushing every clip at or after `atBar` right by `lengthBars`. */
+  rippleInsertClips(atBar: number, lengthBars: number, commit = true): number {
+    const at = Number(atBar);
+    const len = Number(lengthBars);
+    if (!Number.isFinite(at) || !(len > 0)) return 0;
+    let shifted = 0;
+    for (const t of this.host.tracks) {
+      for (const c of t.arrangementClips || []) {
+        if (c.startBar >= at - 1e-9) {
+          c.startBar = this.snap(c.startBar + len);
+          shifted++;
+        }
+      }
+    }
+    if (shifted) this.done(commit);
+    return shifted;
+  }
+
+  /**
+   * Ripple delete: removes the clips that start in the range and pulls every later clip left by
+   * the range length, closing the gap.
+   */
+  rippleSectionClips(fromBar: number, toBar: number, commit = true): { removed: number; shifted: number } {
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return { removed: 0, shifted: 0 };
+    const delta = to - from;
+    const items = this.clipsInRange(from, to);
+    const gone = new Set(items.map((i) => i.clip));
+    let shifted = 0;
+    for (const t of this.host.tracks) {
+      if (!t.arrangementClips) continue;
+      if (gone.size) t.arrangementClips = t.arrangementClips.filter((c) => !gone.has(c));
+      for (const c of t.arrangementClips) {
+        if (c.startBar >= to - 1e-9) {
+          const next = Math.max(0, this.snap(c.startBar - delta));
+          if (Math.abs(next - c.startBar) > 1e-9) {
+            c.startBar = next;
+            shifted++;
+          }
+        }
+      }
+    }
+    if (items.length || shifted) this.done(commit);
+    return { removed: items.length, shifted };
+  }
+
+  /**
+   * Copies every clip that starts inside the range so the section starts again at `toBarStart`
+   * (default: right after the range), keeping each clip's offset inside the section. Pattern
+   * clips keep their pattern. One undo step; returns the new clips.
+   */
+  duplicateSection(fromBar: number, toBar: number, toBarStart?: number, commit = true): ArrangementClip[] {
+    const from = Number(fromBar);
+    const to = Number(toBar);
+    if (!(to > from)) return [];
+    const target = toBarStart === undefined ? to : Number(toBarStart);
+    if (!Number.isFinite(target)) return [];
+    const items = this.clipsInRange(from, to);
+    if (!items.length) return [];
+    const made: ArrangementClip[] = [];
+    for (const { track, clip } of items) {
+      const copy = this.pasteClip(track.id, clip, target + (clip.startBar - from), null, false);
+      if (copy) made.push(copy);
+    }
+    if (made.length) this.done(commit);
+    return made;
+  }
+
   /** Drags one edge. Trimming the start keeps the content in place (offset grows). */
   resizeClip(trackId: string, clipId: string, edge: 'start' | 'end', bar: number, commit = true): void {
     const f = this.clip(trackId, clipId);

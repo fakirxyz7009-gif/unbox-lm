@@ -26,6 +26,7 @@ external folder.
 | Type check + UTF-8 check | `npm run lint` (= `tsc --noEmit`, then `node scripts/check-utf8.mjs`; that check alone is `npm run check:utf8`) |
 | Automated regression suite | `npm test` (= `tsx --test tests/**/*.test.ts`; no browser probe — see the hip-hop kit row). Environment-gated checks (yt-dlp + ffmpeg, a running Ollama, demucs, directory-link permissions) skip through `tests/helpers/skip.ts`, which prints a `!! SKIPPED — not tested in this run: …` banner and a diagnostic, so missing coverage never hides behind a plain skipped count; never call a bare `t.skip()`. `tests/coverage.test.ts` probes every gated tool once and prints one `!! MISSING COVERAGE` list; with `UNBOX_REQUIRE_FULL_COVERAGE=1 npm test` that single check fails with the whole list (the gated tests still skip), for a machine that should have every tool installed; `tests/coverageStrict.test.ts` proves that switch (message lists every gap, strict run exits 1, the same run without the flag exits 0) |
 | Browser Web Audio engine probe | `npm run test:browser-audio` (Chrome + real `OfflineAudioContext`; checks sample selection and rendered output) |
+| Browser interaction performance regression | `npm run test:browser-performance` (builds `dist/`, serves it with Vite preview, drives a real clip drag, piano-roll draw/move, six step-grid clicks and transport playback at 1600×1000, including a second transport run with the split Mixer and its live channel meters visible; fails on frame p95/max, slow-frame count and pointer-handler budgets; also verifies the clip moved and undo restored it, that a drawn note was selected, that the step clicks added notes, that the transport position advanced, and that the Mixer meters moved) |
 | Browser recorded archtop probe | `npm run test:browser-shinyguitar` (loads the bundled CC0 Shinyguitar pack, checks the selected MIDI 60 sample, and measures offline output) |
 | Browser MIDI permission-startup probe | `npm run test:browser-midi-bootstrap` (mounts the app with fake MIDI access; confirms access is requested only after Connect MIDI) |
 | Browser MIDI-to-piano-roll integration probe (simulated controller) | `npm run test:browser-midi` (real `AudioEngine` + Web MIDI adapter + recorder in Chrome; not physical hardware acceptance) |
@@ -81,6 +82,18 @@ clone with `npm run hooks:install` (= `scripts/install-hooks.mjs`: sets `core.ho
   args `--autoplay-policy=no-user-gesture-required --use-fake-ui-for-media-stream
   --use-fake-device-for-media-stream` (recording tests). Look at the screenshots. Check console
   errors (a `favicon.ico` 404 is expected and harmless).
+- **Note/clip/step-grid performance regression**: `npm run test:browser-performance` builds `dist/`,
+  serves it with Vite preview and drives real pointer gestures at 1600×1000: an arrangement clip
+  drag, a piano-roll note draw and move, six step-grid clicks, and two transport runs: one with the
+  Workstation visible and one with the split Mixer and its live channel meters visible. It fails
+  when the old whole-app re-render path comes back (budgets are p95 40-55 ms, worst frame 100-250 ms,
+  at most 1-2 frames over 50 ms, and pointer handlers 18-25 ms; measured production is 16.8-33.3 ms
+  p95 for clip/note, 33.4-50 ms for step-grid paint, 16.8 ms for transport, and 33.3 ms for split
+  Mixer transport with nine channel meters live). It also fails if the clip does not move and undo
+  restore it, if drawing does not select a note, if six steps add fewer than three notes, if the
+  transport position does not advance, or if fewer than two Mixer channel meters move, so a fast
+  broken gesture cannot pass. This is a headless Chrome regression budget, not a physical-GPU
+  guarantee.
 - **Engine audio probe**: `npm run test:browser-audio` starts a temporary Vite server and headless
   Chrome, runs the multisample engine in `OfflineAudioContext`, and checks sample routing plus
   non-silent output. Keep its temporary browser profile outside the Vite watch root.
@@ -97,9 +110,10 @@ clone with `npm run hooks:install` (= `scripts/install-hooks.mjs`: sets `core.ho
 - **Project and endurance probes**: `npm run test:browser-project` saves and reloads a project
   through IndexedDB and checks live plus offline rendering. `npm run test:browser-soak` runs the
   transport for 10 minutes by default; the PowerShell runner accepts `-SoakSeconds N` for shorter
-  diagnostics. These headless-browser probes do not replace physical MIDI-controller acceptance. Both physical-Impulse
-  probes launch Chrome on a persistent profile whose `midi` site setting already allows the probe
-  origin (Chromium refuses `requestMIDIAccess()` with only the CDP grant), so no prompt is needed.
+  diagnostics. These headless-browser probes do not replace physical MIDI-controller acceptance. The two
+  physical-Impulse probes report `SKIP · physical MIDI acceptance not run — <reason>` when Chrome refuses Web
+  MIDI or no Impulse input is enumerated; pass `-RequirePhysicalMidi` (or `UNBOX_REQUIRE_PHYSICAL_MIDI=1`) on a
+  machine that should have the controller, so missing hardware fails instead of skipping.
 - To reach the engine from a test: `await import(url)` where `url` is the exact
   `/src/audio/AudioEngine.ts?...` entry from `performance.getEntriesByType('resource')`; same trick
   for other modules. After an HMR edit, importing the bare path creates a **second** engine.
@@ -181,7 +195,7 @@ src/
   audio/midi/MidiInput.ts Hardware MIDI inputs: ports, status (blocked / busy), live held keys + wheels
   audio/levelTrim.ts      Per-type output calibration of instruments
   project/                ProjectManager (IndexedDB projects, autosave, versions, .unbox zip), templates
-  components/             Faceplates, mixer/ (StudioMixer console, ConsoleStrip, ChannelInspector, EqCurve),
+  components/             Faceplates, mixer/ (StudioMixer console, ConsoleStrip, ChannelMeter, ChannelInspector, EqCurve),
                           sequencer views (piano roll, arrangement, clip launcher), AI Co-Pilot drawer,
                           CV matrix, F8 MIDI tools, palette, shortcut help
   clipEditor/             Tab 3: MixerTab (console + divider + editor), ClipEditorArea (Clip tab + the
@@ -445,6 +459,7 @@ cables (all / selected unit / hidden).
 Sequencer: `Enter` opens the selected clip (Edit Mode) · `Shift+1..6` editor tabs · `1..9` piano-roll
 tools · `Q` snap to scale (piano roll) · `-`/`=` pattern length · `Alt+arrows` length / transpose ·
 `Shift+L` legato · `Ctrl+D` generate.
+Arrangement section (the loop region): `Shift+D` duplicate after it · `Shift+Backspace` delete · `Shift+X` ripple delete · `Shift+I` ripple insert · `Alt+Shift+←/→` move by its length. Each is one undo step and carries automation, markers, block placements, folder regions and the loop.
 `ShortcutHelpModal` lists only real keys — update it with any change here.
 
 ## Environment variables (`.env`, never committed)

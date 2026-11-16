@@ -1,0 +1,22 @@
+name: Verify interaction performance
+description: >-
+  Builds the production app, serves dist/, drives real clip, piano-roll, step-grid and split-Mixer
+  transport interactions in Chrome and enforces frame-time and pointer-handler budgets. Kept in its
+  own CI job because it needs a Chrome launch and a production build, and measures timing rather
+  than functional output.
+
+runs:
+  using: composite
+  steps:
+    # Chrome ships on the runner image; playwright-core is deliberately not a project dependency, so
+    # install it here without touching package.json or the lockfile. Pinned to the version the probe
+    # was last verified against.
+    - name: Install the probe browser driver
+      shell: pwsh
+      run: npm install --no-save --no-package-lock playwright-core@1.65.1
+
+    # The npm script builds dist/ first, then starts Vite preview and drives the real app. It fails
+    # on the old whole-app render path (183-283 ms clip/note frames) and on a broken edit that is fast.
+    - name: Interaction performance regression
+      shell: pwsh
+      run: npm run test:browser-performance

@@ -41,10 +41,10 @@ jobs:
       - name: Verify the source
         uses: ./.github/actions/verify
 
-  browser-audio:
+  browser-hiphop:
     # Its own job: the probe boots a Vite dev server and headless Chrome and renders audio, and it
-    # stalled for minutes when it shared a machine with the unit suite. Running it here keeps the
-    # suite fast and still gates every push on real rendered audio.
+    # stalled for minutes when it shared a machine with the unit suite. The dense layout probe has a
+    # separate job so either browser failure leaves the other probe running.
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
@@ -65,8 +65,88 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Verify the browser audio probe
+      - name: Verify the hip-hop browser probe
         uses: ./.github/actions/verify-browser
+
+  browser-dense-labels:
+    # Separate from browser-hiphop: a failure in either probe must not skip the other. Both still run
+    # outside the unit suite because the browser probes stall when they share its machine.
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify the dense synth label browser probe
+        uses: ./.github/actions/verify-browser-labels
+
+  browser-mixer-readout:
+    # The layout contract runs in its own browser job so a failing performance or audio budget can
+    # never skip the 1280x800 fader-readout check. It runs with every Checks browser suite.
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify the split Mixer readout layout
+        uses: ./.github/actions/verify-mixer-readout
+
+  browser-performance:
+    # Separate from the other browser jobs: this probe builds and serves the production bundle so
+    # React's development runtime cannot distort frame timings. It drives real clip, note, step-grid,
+    # transport and split-Mixer interactions and fails when the whole-app re-render path or another
+    # frame-budget regression returns.
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify browser interaction performance
+        uses: ./.github/actions/verify-performance
 
   vst3-hosting:
     # Real third-party VST3 hosting, proven on the runner. The SDK is not vendored (495 MB of upstream
