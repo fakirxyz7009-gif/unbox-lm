@@ -35,7 +35,12 @@ export const RearPanel: React.FC<RearPanelProps> = ({ deviceId, deviceName, port
   return (
     <div className="rack-rear flex items-stretch gap-3 px-3 py-2.5 min-h-full">
       <div className="rack-rear-label shrink-0 self-center">
-        <div className="text-[11px] font-black tracking-widest uppercase text-neutral-900 leading-tight max-w-[150px] truncate">{deviceName}</div>
+        <div
+          className={`text-[11px] font-black uppercase text-neutral-900 leading-tight ${deviceName.length > 18 ? 'max-w-[165px] tracking-normal break-words line-clamp-2' : 'max-w-[150px] tracking-widest truncate'}`}
+          title={deviceName}
+        >
+          {deviceName}
+        </div>
         <div className="text-[11px] font-mono text-neutral-600 mt-0.5">{serial ?? deviceId.slice(-10).toUpperCase()}</div>
       </div>
       <div className="flex flex-wrap items-start gap-2.5 flex-1">

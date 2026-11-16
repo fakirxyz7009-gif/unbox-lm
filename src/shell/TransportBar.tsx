@@ -13,9 +13,10 @@ import { setText, setWidth } from '../ui/skin/dom.ts';
 import { RingKnob } from '../ui/skin/RingKnob.tsx';
 import { setUi, useUi } from './uiStore.ts';
 import { MIDI_NO_INPUT_GUIDANCE } from '../audio/midi/MidiInput.ts';
+import { takeLengthLabel } from '../audio/recording/takeLabel.ts';
 
 const Readout: React.FC<{ label: string; children: React.ReactNode; className?: string; title?: string }> = ({ label, children, className = '', title }) => (
-  <div className={`us-lcd px-2 h-[40px] flex flex-col justify-center leading-none ${className}`} title={title}>
+  <div className={`us-lcd px-2 h-[38px] flex flex-col justify-center leading-none ${className}`} title={title}>
     <div className="font-lcd text-[18px] leading-[20px] tracking-wide text-lcd-ink">{children}</div>
     <div className="font-label text-[11px] font-bold leading-[12px] tracking-wider text-lcd-dim">{label}</div>
   </div>
@@ -155,10 +156,12 @@ function MidiLed({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <button
       type="button"
-      onClick={() => (midi.status === 'blocked' || midi.status === 'off' ? void midi.enable() : onOpenSettings())}
+      // Only the idle state requests access here; a refusal or a missing port opens the diagnosis
+      // (Settings · MIDI) instead of repeating a request the browser will not ask again for.
+      onClick={() => (midi.status === 'off' ? void midi.enable() : onOpenSettings())}
       title={title}
       aria-label={title}
-      className="us-btn h-[34px] max-w-[170px] px-2 rounded-[6px] flex items-center gap-1.5 font-label font-bold text-[13px]"
+      className="us-btn h-[38px] max-w-[170px] px-2 rounded-[6px] flex items-center gap-1.5 font-label font-bold text-[13px]"
       data-testid="transport-midi"
     >
       <span ref={led} data-on="false" className={`w-2 h-2 shrink-0 rounded-full ${color} opacity-40 data-[on=true]:opacity-100 data-[on=true]:shadow-[0_0_6px_rgba(255,255,255,0.75)]`} />
@@ -176,7 +179,7 @@ const TBtn: React.FC<{ onClick: () => void; title: string; active?: boolean; col
     aria-label={title}
     aria-pressed={active}
     data-testid={testId}
-    className="us-btn h-[34px] min-w-[34px] px-2 rounded-[6px] grid place-items-center disabled:opacity-45"
+    className="us-btn h-[38px] min-w-[38px] px-2 rounded-[6px] grid place-items-center disabled:opacity-45"
     style={active ? { background: `linear-gradient(180deg, ${color}, ${color}aa)`, color: '#111', boxShadow: `0 0 10px ${color}88` } : undefined}
   >
     {children}
@@ -191,6 +194,17 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
   const posRef = useRef<HTMLSpanElement>(null);
   const timeRef = useRef<HTMLSpanElement>(null);
   const rec = audioEngine.recorder;
+  // A take that begins after a count-in gets one green flash, so the hand-off to recording is unmistakable.
+  const [takeFlash, setTakeFlash] = useState(false);
+  const prevRecState = useRef(rec.state);
+  useEffect(() => {
+    const was = prevRecState.current;
+    prevRecState.current = rec.state;
+    if (was !== 'count-in' || rec.state !== 'recording') return;
+    setTakeFlash(true);
+    const timer = setTimeout(() => setTakeFlash(false), 900);
+    return () => clearTimeout(timer);
+  }, [rec.state]);
   const loop = audioEngine.getLoopRange();
   // readouts on the shared meter frames, so the frames in between paint nothing (see meterDue)
   useMeterFrame(() => {
@@ -201,9 +215,19 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
     setText(timeRef.current, `${String(Math.floor(sec / 60)).padStart(2, '0')}:${(sec % 60).toFixed(1).padStart(4, '0')}`);
   });
   const rerender = () => force((n) => n + 1);
+  const countIn = rec.state === 'count-in' ? rec.countInTiming : null;
+  const countLeftRef = useRef<HTMLSpanElement>(null);
+  const takeLengthRef = useRef<HTMLSpanElement>(null);
+  // Countdown and take length tick on the shared frame loop; React state would repaint every frame.
+  useFrame(() => {
+    const timing = rec.countInTiming;
+    const elapsed = rec.takeElapsed;
+    if (takeLengthRef.current) setText(takeLengthRef.current, elapsed === null ? '' : takeLengthLabel(elapsed));
+    if (!countLeftRef.current || !timing) return;
+    setText(countLeftRef.current, String(Math.max(1, Math.ceil((timing.end - audioEngine.ctx.currentTime) / timing.beat))));
+  });
   return (
-    <div className="us-chrome unbox-transport h-[50px] shrink-0 flex items-center gap-1.5 px-3 text-chrome-ink relative" data-testid="transport-bar" onClick={() => void audioEngine.resumeContext()}>
-      <span className="us-screw shrink-0 mr-1.5" aria-hidden />
+    <div className="us-chrome unbox-transport h-[54px] shrink-0 flex items-center gap-1.5 px-3 text-chrome-ink relative" data-testid="transport-bar" onClick={() => void audioEngine.resumeContext()}>
       <TBtn onClick={() => audioEngine.rewindToStart()} title="Go to start">
         <SkipBack className="w-4 h-4" />
       </TBtn>
@@ -229,13 +253,42 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
         >
           <span className={`w-3 h-3 rounded-full ${rec.isFinalizing ? 'bg-amber-300 animate-pulse' : rec.state !== 'idle' ? 'bg-black' : 'bg-red-500'}`} />
         </TBtn>
-        <button type="button" className="us-btn h-[34px] w-4 rounded-r text-[11px]" title="Record settings: count-in, punch, input…" aria-label="Record settings" onClick={() => setRecOpen((v) => !v)}>
+        <button type="button" className="us-btn h-[38px] w-4 rounded-r text-[11px]" title="Record settings: count-in, punch, input…" aria-label="Record settings" onClick={() => setRecOpen((v) => !v)}>
           ▾
         </button>
         {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
       </div>
       {rec.isFinalizing && <span className="text-[11px] text-amber-200 max-w-40 leading-tight" role="status">Finishing take…</span>}
       {!rec.isFinalizing && rec.message && <span className="text-[11px] text-red-300 max-w-40 leading-tight" role="status">{rec.message}</span>}
+      {(countIn || rec.state === 'recording') && (
+        <span
+          className={
+            countIn
+              ? 'flex shrink-0 items-center gap-1.5 rounded border border-amber-300/60 bg-amber-300/15 px-2 py-1 text-[11px] font-bold text-amber-200'
+              : `flex shrink-0 items-center gap-1.5 rounded border border-emerald-400/60 bg-emerald-400/15 px-2 py-1 text-[11px] font-bold text-emerald-200${takeFlash ? ' us-take-start' : ''}`
+          }
+          role="status"
+          data-testid="count-in-badge"
+          data-take-start={countIn ? undefined : '1'}
+          title={countIn ? `Recording starts at bar ${rec.takeStartBar} when the count-in ends` : `Take running since bar ${rec.takeStartBar}`}
+        >
+          {countIn ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse" />
+              COUNT-IN · bar {rec.takeStartBar}
+              <span ref={countLeftRef} aria-hidden="true" className="min-w-[10px] text-center font-lcd text-[15px] leading-none text-amber-100">–</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              RECORDING
+              <span ref={takeLengthRef} className="min-w-[34px] text-right font-lcd text-[15px] leading-none text-emerald-100">
+                {takeLengthLabel(rec.takeElapsed ?? 0)}
+              </span>
+            </>
+          )}
+        </span>
+      )}
 
       <div className="w-px h-8 bg-chrome-line mx-1" />
       <TBtn onClick={() => audioEngine.toggleLoop()} title="Loop between L and R (L)" active={audioEngine.loopEnabled} color="#d7ad6f" testId="transport-loop">
@@ -309,7 +362,6 @@ export function TransportBar({ onOpenSettings }: { onOpenSettings: () => void })
           <KeyboardIcon className="w-4 h-4" /> KEYS
         </span>
       </TBtn>
-      <span className="us-screw shrink-0 ml-1.5" aria-hidden />
     </div>
   );
 }

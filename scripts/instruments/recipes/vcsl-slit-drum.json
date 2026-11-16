@@ -1,0 +1,75 @@
+{
+  "id": "vcsl-slit-drum",
+  "name": "VCSL Slit Drum",
+  "kind": "drums",
+  "category": "world",
+  "description": "Recorded wooden slit drum with high and low strokes at three dynamics.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Slit%20Drum",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides high and low log-drum strokes at three dynamics. They are mapped to two pads with the three velocity layers preserved."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-slit-drum/samples",
+  "lanes": [
+    {
+      "name": "High",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "LogDrumHi_MedM_v1_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "LogDrumHi_MedM_v2_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "LogDrumHi_MedM_v3_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Low",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "LogDrumLo_MedM_v1_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "LogDrumLo_MedM_v2_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "LogDrumLo_MedM_v3_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    }
+  ],
+  "maxSeconds": 2,
+  "release": 0.2,
+  "notePolyphony": 2
+}

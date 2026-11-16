@@ -1,0 +1,36 @@
+{
+  "id": "vcsl-agogo-bells",
+  "name": "VCSL Agogo Bells",
+  "kind": "drums",
+  "category": "world",
+  "description": "High and low agogo bell strokes from the VCSL CC0 library, with three dynamic levels on the high bell and two on the low bell, mapped to MIDI notes 60 and 62.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Agogo%20Bells",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual agogo performer. Uses the current High/Low recordings, not the Legacy folder."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-agogo-bells/samples",
+  "lanes": [
+    {
+      "name": "Agogo High",
+      "note": 60,
+      "samples": [
+        { "file": "Agogo_High_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "Agogo_High_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "Agogo_High_v3_rr1_Mid.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Agogo Low",
+      "note": 62,
+      "samples": [
+        { "file": "Agogo_Low_v1_rr1_Mid.wav", "vel": [1, 63] },
+        { "file": "Agogo_Low_v2_rr1_Mid.wav", "vel": [64, 127] }
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 4
+}

@@ -49,9 +49,9 @@ export function ClipEditorArea({ request, renderSequencer, onSelectPart }: Props
   };
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-[#0b0e12]" data-testid="clip-editor-area">
+    <div className="flex-1 min-h-0 flex flex-col bg-[#c6d2b9]" data-testid="clip-editor-area">
       <div className="rack-toolbar">
-        <span className="font-label font-bold text-[13px] tracking-[0.2em] text-white mr-1">CLIP EDITOR</span>
+        <span className="font-label font-bold text-[13px] tracking-[0.2em] text-ink mr-1">CLIP EDITOR</span>
         <div className="rack-seg" role="tablist" aria-label="Editors">
           {TABS.map((t) => (
             <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} aria-pressed={tab === t.id} title={t.title} onClick={() => open(t.id)}>

@@ -131,7 +131,10 @@ function meterProcessorSource(): void {
         this.hist[1][this.hpos] = r;
         this.hpos = (this.hpos + 1) % 48;
         let tp = Math.max(al, ar);
-        if ((i & 1) === 0 || tp > this.tpHop * 0.5) {
+        // Inter-sample peaks can only matter for a sample that can still beat the held true peak
+        // (interpolation overshoot stays well under 2x the sample value), so silence and quiet
+        // passages skip the 3 x 48-tap convolution entirely: metering an idle rack costs nothing.
+        if (tp > this.tpMax * 0.5 || tp > this.tpHop * 0.5) {
           for (let ch = 0; ch < 2; ch++) {
             const h = this.hist[ch];
             for (const k of this.kernel) {

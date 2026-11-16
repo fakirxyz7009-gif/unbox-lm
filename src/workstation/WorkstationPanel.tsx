@@ -13,6 +13,7 @@ import { PartList } from './PartList.tsx';
 import { LcdEditor, type LcdPage } from './LcdEditor.tsx';
 import { QuickControls } from './QuickControls.tsx';
 import { WorkstationKeyboard } from './WorkstationKeyboard.tsx';
+import { MidiHealth } from './MidiHealth.tsx';
 import { PatchBrowser } from './PatchBrowser.tsx';
 import { EditWindow } from './EditWindow.tsx';
 
@@ -80,8 +81,12 @@ export const WorkstationPanel: React.FC<Props> = ({ selectedId, onSelect, onOpen
           <PanelButton label="SETUP" title="Settings: audio output, MIDI, monitor" onClick={onOpenSettings} testId="ws-setup" />
         </div>
       </div>
-      <div className="h-[90px] shrink-0 px-1">
-        <WorkstationKeyboard dev={dev} track={track} />
+      {/* The keyboard says why keys may be silent, without a trip to Settings. */}
+      <div className="h-[112px] shrink-0 px-1 flex flex-col gap-1">
+        <MidiHealth compact />
+        <div className="flex-1 min-h-0">
+          <WorkstationKeyboard dev={dev} track={track} />
+        </div>
       </div>
       {load && (
         <PatchBrowser

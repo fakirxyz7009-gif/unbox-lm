@@ -1221,7 +1221,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                             onClick={() => audioEngine.toggleTrackSolo(track.id)}
                             className={`w-5 h-4 rounded text-[11px] font-mono font-bold flex items-center justify-center transition-colors ${
                               track.solo
-                                ? 'bg-emerald-600 text-white shadow-[0_0_8px_#10b981]'
+                                ? 'bg-[#5f7a6e] text-white shadow-[0_0_8px_#7f9a8e]'
                                 : 'bg-neutral-800 text-neutral-400 hover:text-white'
                             }`}
                             title="Solo Channel (Play Separately)"
@@ -1303,7 +1303,7 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                           >
                             <span
                               className="w-2.5 h-2.5 rounded-xs flex-shrink-0"
-                              style={{ backgroundColor: track.color || '#10b981' }}
+                              style={{ backgroundColor: track.color || '#7f9a8e' }}
                             />
                             <span className="text-xs font-mono font-bold text-white truncate">
                               {track.name}
@@ -1699,13 +1699,13 @@ export const SequencerView: React.FC<SequencerViewProps> = ({
                           window.addEventListener('mouseup', onUp);
                         }}
                       >
-                        <span className="text-[11px] font-mono text-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1 whitespace-nowrap">
+                        <span className="text-[11px] font-mono text-[#a3b3ab] opacity-0 group-hover:opacity-100 transition-opacity mb-1 whitespace-nowrap">
                           {v === null ? '—' : label(v)}
                         </span>
                         <div className={`w-2.5 h-full rounded-full relative flex items-end justify-center border ${editable ? 'bg-[#151922] border-neutral-800' : 'bg-[#0f1218] border-neutral-900'}`}>
                           {v !== null && (
                             <>
-                              <div className={`w-full rounded-full ${hasNote ? 'bg-gradient-to-t from-[#065f46] via-[#10b981] to-[#34d399]' : 'bg-neutral-600'}`} style={{ height: `${Math.max(4, h)}%` }} />
+                              <div className={`w-full rounded-full ${hasNote ? 'bg-gradient-to-t from-[#35443e] via-[#7f9a8e] to-[#a3b3ab]' : 'bg-neutral-600'}`} style={{ height: `${Math.max(4, h)}%` }} />
                               <div className="absolute w-4 h-2 rounded bg-white shadow-md border border-neutral-300 pointer-events-none" style={{ bottom: `calc(${h}% - 4px)` }} />
                             </>
                           )}

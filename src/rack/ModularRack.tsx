@@ -20,6 +20,9 @@ import { snapshotFromItem } from '../vst/VstPluginDevice.ts';
 import { isMountable, type MountableItem } from '../../shared/vst/manifestTypes.ts';
 import { getUi, setUi, useUi } from '../shell/uiStore.ts';
 import { CombinatorFrame } from './CombinatorFrame.tsx';
+import { DeviceEmblem } from './DeviceEmblem.tsx';
+import { DeviceSignatureStrip } from './DeviceSignatureStrip.tsx';
+import { deviceIdentity } from './deviceIdentity.ts';
 import { suggestedCombinerName, toggleCombinerSelection, validCombinerSelection } from './combinerSelection.ts';
 import { JackRegistry } from './jackRegistry.ts';
 import { Browser, type BrowserAction } from '../browser/Browser.tsx';
@@ -63,7 +66,7 @@ const EXAMPLES = [
 ];
 
 /** Cable colours by meaning (the "by type" colour mode). */
-const TYPE_COLORS = { master: '#e5484d', chain: '#22c55e', sidechain: '#f59e0b', cv: '#eab308', group: '#3b82f6' } as const;
+const TYPE_COLORS = { master: '#e5484d', chain: '#7f9a8e', sidechain: '#f59e0b', cv: '#eab308', group: '#3b82f6' } as const;
 const CABLE_MODES: CableMode[] = ['show', 'focus', 'hide'];
 const CABLE_MODE_LABEL: Record<CableMode, string> = { show: 'all', focus: 'selected', hide: 'hidden' };
 
@@ -79,7 +82,7 @@ function MasterMeter({ engine }: { engine: AudioEngine }) {
     <div className="flex flex-col gap-1 w-36" aria-hidden="true">
       {[l, r].map((ref, i) => (
         <div key={i} className="h-1.5 rounded-full bg-black/70 overflow-hidden">
-          <div ref={ref} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
+          <div ref={ref} className="h-full bg-gradient-to-r from-slate-400 via-amber-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
         </div>
       ))}
     </div>
@@ -489,35 +492,41 @@ export const ModularRack: React.FC<ModularRackProps> = ({
   const rearActive = shownFace === 'rear' && phase === 'idle';
 
   const hardwareInterface = (
-    <section className="rack-unit rack-unit--hw" data-unit-id={MASTER_ID} data-nav="hw" aria-label="Hardware interface (master bus)">
+    <section className="rack-unit rack-unit--hw" data-unit-id={MASTER_ID} data-nav="hw" data-family="utility" aria-label="Hardware interface (master bus)">
       <div className="rack-ear rack-ear--left" aria-hidden="true">
         <div className="rack-screw" />
         <div className="rack-screw" />
       </div>
       {shownFace === 'front' ? (
-        <div className="rack-face flex-1 min-w-0 flex items-center gap-3 px-3 py-2 hw-face">
-          <div className="min-w-0">
-            <div className="text-[11px] font-black tracking-[0.2em] uppercase">Hardware Interface</div>
-            <div className="text-[11px] text-slate-400 truncate">Master bus → speakers · each chain plays through its own channel</div>
+        <div className="rack-face flex-1 min-w-0 flex flex-col hw-face">
+          <div className="flex items-center gap-3 px-3 py-2 flex-1 min-w-0">
+            <span className="rack-unit-crest" title="Unbox Audio Works · System">
+              <DeviceEmblem family="utility" size={19} />
+            </span>
+            <div className="min-w-0">
+              <div className="text-[11px] font-black tracking-[0.2em] uppercase">Hardware Interface</div>
+              <div className="text-[11px] text-slate-400 truncate">Master bus → speakers · each chain plays through its own channel</div>
+            </div>
+            <MasterMeter engine={engine} />
+            <Knob
+              label="Master"
+              value={engine.masterSpectrumState.mix}
+              min={0}
+              max={1}
+              step={0.005}
+              size="xs"
+              variant="dark"
+              formatValue={(v) => `${Math.round(v * 100)}%`}
+              onChange={(v) => {
+                engine.setMasterSpectrumParam('mix', v);
+                force();
+              }}
+            />
+            <span className="ml-auto text-[11px] font-mono text-slate-400 whitespace-nowrap">
+              {unitCount} units · {audioConnections.length} audio · {cvConnections.length} CV
+            </span>
           </div>
-          <MasterMeter engine={engine} />
-          <Knob
-            label="Master"
-            value={engine.masterSpectrumState.mix}
-            min={0}
-            max={1}
-            step={0.005}
-            size="xs"
-            variant="dark"
-            formatValue={(v) => `${Math.round(v * 100)}%`}
-            onChange={(v) => {
-              engine.setMasterSpectrumParam('mix', v);
-              force();
-            }}
-          />
-          <span className="ml-auto text-[11px] font-mono text-slate-400 whitespace-nowrap">
-            {unitCount} units · {audioConnections.length} audio · {cvConnections.length} CV
-          </span>
+          <DeviceSignatureStrip identity={deviceIdentity('hardware_interface', undefined, 'utility', 'utility', MASTER_ID)} />
         </div>
       ) : (
         <div className="rack-back flex-1 min-w-0">
@@ -587,7 +596,7 @@ export const ModularRack: React.FC<ModularRackProps> = ({
             onClick={() => setUi({ cableColors: ui.cableColors === 'type' ? 'cable' : 'type' })}
             title={
               ui.cableColors === 'type'
-                ? 'Colours by type: red = into a mixer channel, green = between units, orange = sidechain, yellow = CV, blue = inside a Combiner. Click for each cable’s own colour.'
+                ? 'Colours by type: red = into a mixer channel, sage = between units, orange = sidechain, yellow = CV, blue = inside a Combiner. Click for each cable’s own colour.'
                 : 'Each cable keeps its own colour. Click to colour by type.'
             }
           >

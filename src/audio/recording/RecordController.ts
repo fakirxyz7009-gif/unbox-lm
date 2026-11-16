@@ -16,6 +16,7 @@ import { userRecordingProvenance } from '../../../shared/audio/provenance.ts';
 import { InputManager } from './InputManager.ts';
 import { WorkletCapture, ensureRecorderWorklet } from './recorderWorklet.ts';
 import { ActiveRecordingJournal, type RecordingJournalTrack } from './recordingJournal.ts';
+import { takeLengthLabel } from './takeLabel.ts';
 import { toast } from '../../shell/toast.ts';
 import type { ProjectTimeMap } from '../time/ProjectTimeMap.ts';
 
@@ -114,6 +115,8 @@ export class RecordController {
   private punchAlarm: { node: ConstantSourceNode | null; endPos: number; endTime: number } | null = null;
   /** Silent native alarm that flips the visible count-in state at the audio-clock boundary. */
   private countInAlarm: ConstantSourceNode | null = null;
+  /** Count-in timing in AudioContext seconds, captured when its clicks were scheduled. */
+  private countInSpan: { start: number; end: number; beat: number } | null = null;
   private midiPending = new Map<string, Pending>();
   private midiNotes = new Map<string, { deviceId: string; patternId: string | null; notes: ClipNote[]; startTick: number }>();
   private recordingPlaybackMode: PlaybackMode = 'song_arrangement';
@@ -166,6 +169,27 @@ export class RecordController {
 
   get isFinalizing(): boolean {
     return this.state === 'finalizing' || this.masterFinalizing;
+  }
+
+  /** Seconds elapsed in the running take — the length a RECORDING badge shows. */
+  get takeElapsed(): number | null {
+    if (this.state !== 'recording') return null;
+    return Math.max(0, this.host.ctx.currentTime - this.startTime);
+  }
+
+  /** The running count-in, in AudioContext seconds: when it ends and one beat's length. */
+  get countInTiming(): { start: number; end: number; beat: number } | null {
+    return this.state === 'count-in' ? this.countInSpan : null;
+  }
+
+  /** The bar the running take begins on (1-based) — what a count-in badge can name. */
+  get takeStartBar(): number {
+    return Math.floor(Math.max(0, this.startPos) / Math.max(1, this.host.stepsPerBar)) + 1;
+  }
+
+  /** True while the take writes microphone/audio jobs — losing a controller must not truncate those. */
+  get hasAudioJobs(): boolean {
+    return this.jobs.length > 0 || !!this.masterJob;
   }
 
   /** Start a journal before worklet capture so the first audio block is eligible for recovery. */
@@ -412,7 +436,10 @@ export class RecordController {
         const t0 = h.ctx.currentTime + 0.12 + countBeats * beat;
         for (let b = 0; b < countBeats; b++) h.clickAt(t0 - (countBeats - b) * beat, b % beatsPerBar === 0);
         h.seekToSongPosition(transportStart);
-        if (countBeats) this.state = 'count-in';
+        if (countBeats) {
+          this.state = 'count-in';
+          this.countInSpan = { start: t0 - countBeats * beat, end: t0, beat };
+        }
         await h.startTransport(t0);
         if (this.startToken !== token || (this.state !== 'arming' && this.state !== 'count-in')) return false;
         this.startTime = h.timeOfSongPosition(this.startPos) ?? t0;
@@ -509,6 +536,7 @@ export class RecordController {
   private beginRecordingAfterCountIn(): void {
     if (this.state !== 'count-in' || this.host.ctx.currentTime < this.startTime) return;
     this.clearCountInAlarm();
+    this.countInSpan = null;
     this.state = 'recording';
     this.host.changed();
   }
@@ -582,7 +610,7 @@ export class RecordController {
         Promise.all(jobs.map(async (j) => ({ j, data: await j.capture.stop() }))),
         midiJournal?.finish(endPos),
       ]);
-      placedMidiTrackIds = this.finishMidi();
+      placedMidiTrackIds = this.finishMidi(endPos);
       if (midiJournal) {
         if (placedMidiTrackIds.length) await midiJournal.markMidiCompleted(placedMidiTrackIds);
         else if (!midiJournal.snapshot.hasMidiNotes) await midiJournal.discard();
@@ -608,6 +636,7 @@ export class RecordController {
       this.midiNotes.clear();
       this.patternTargets.clear();
     } finally {
+      await Promise.all([journal?.release(), midiJournal?.release()]);
       this.journal = null;
       this.midiJournal = null;
       this.state = 'idle';
@@ -671,7 +700,9 @@ export class RecordController {
     const posSec = h.timeMap
       ? Math.max(0.01, h.timeMap.sixteenthToSeconds(1) - h.timeMap.sixteenthToSeconds(0))
       : 60 / h.bpm / 4;
-    const name = `${j.track.name} take ${this.takeCounter}`;
+    // The label carries the take's real length, so a clip is identifiable without opening it.
+    const takeSeconds = Math.max(0, endTime - this.startTime);
+    const name = `${j.track.name} take ${this.takeCounter} · ${takeLengthLabel(takeSeconds)}`;
     const loopStart = loop ? Math.round(loop.start * spb) : 0;
     const loopEnd = loop ? Math.round(loop.end * spb) : 0;
     const cycling = loop && this.startPos >= loopStart && this.startPos < loopEnd;
@@ -848,17 +879,21 @@ export class RecordController {
     this.midiNotes.set(recordKey, rec);
   }
 
-  private finishMidi(endPos = this.host.getPlayheadPosition()): string[] {
+  private finishMidi(endPos: number): string[] {
     const h = this.host;
     const recordedClips: RecordedMidiClipRef[] = [];
     const targetIds = new Set<string>();
     const spb = h.stepsPerBar;
+    // The take's length follows the tempo map, so a clip's name matches what was recorded.
+    const secondsAt = (pos16: number): number => (h.timeMap ? h.timeMap.sixteenthToSeconds(pos16) : pos16 * (60 / h.bpm / 4));
+    const takeSeconds = Math.max(0, secondsAt(endPos) - secondsAt(this.startPos));
     for (const rec of this.midiNotes.values()) {
       const track = h.tracks.find((t) => t.deviceId === rec.deviceId);
       if (!track || !rec.notes.length) continue;
       targetIds.add(track.id);
       if (this.midiJournal) {
-        const receipts = (track.midiTakeIds ??= []);
+        if (!Array.isArray(track.midiTakeIds)) track.midiTakeIds = [];
+        const receipts = track.midiTakeIds;
         if (!receipts.includes(this.midiJournal.sessionId)) receipts.push(this.midiJournal.sessionId);
       }
       if (this.recordingPlaybackMode === 'pattern_loop') {
@@ -888,7 +923,7 @@ export class RecordController {
           startBar,
           lengthBars: Math.max(1 / spb, endBar - startBar),
           notes: local,
-          name: `${track.name} rec ${this.takeCounter}`,
+          name: `${track.name} rec ${this.takeCounter} · ${takeLengthLabel(takeSeconds)}`,
           color: track.color,
         });
         recordedClips.push({ trackId: track.id, clipId });
@@ -962,6 +997,7 @@ export class RecordController {
         toast(this.message, 'error');
         return false;
       } finally {
+        await job.journal?.release();
         this.masterFinalizing = false;
         h.changed();
       }

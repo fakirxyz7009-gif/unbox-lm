@@ -13,8 +13,8 @@ if errorlevel 1 goto :err
 call npm run dist:win
 if errorlevel 1 goto :err
 echo.
-echo DONE. Your app is here:  release\Unbox-Studio.exe
-echo (portable - double-click it, no installer needed)
+echo DONE. Your installer is here:  release\Unbox-Studio-Setup-1.0.0.exe
+echo (run it once to install; afterwards the app starts without unpacking itself)
 pause
 exit /b 0
 :err

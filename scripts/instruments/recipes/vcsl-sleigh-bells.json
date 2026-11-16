@@ -1,0 +1,46 @@
+{
+  "id": "vcsl-sleigh-bells",
+  "name": "VCSL Sleigh Bells",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded sleigh bells with hit, shake and louder bell variations.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Sleigh%20Bells",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The two hit takes are grouped as round robins; both recorded shakes and the two second-bell strikes are mapped separately."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-sleigh-bells/samples",
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Sleigh Bells Hit",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "Sleighbells_Hit_rr1_Mid.wav",
+        "Sleighbells_Hit_rr2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Sleigh Bells Shake",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "sleighbell1_shake1.wav",
+        "sleighbell2_shake1.wav"
+      ]
+    },
+    {
+      "name": "Sleigh Bell 2 Hit",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "sleighbell2_hit_2.wav",
+        "sleighbell2_hit_loud.wav"
+      ]
+    }
+  ]
+}

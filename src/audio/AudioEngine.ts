@@ -91,7 +91,7 @@ import { MixerController } from './mixer/MixerController.ts';
 import { MonitorController } from './mixer/MonitorController.ts';
 import { MixBusDevice } from './mixer/MixBusDevice.ts';
 import { installBypassShim } from './mixer/bypassShim.ts';
-import { installExpression, setModWheel, setPitchBend } from './expression.ts';
+import { installExpression, setModWheel, setPitchBend, updateNoteDetune, setPerNotePressure, setPerNoteTimbre } from './expression.ts';
 import { installLevelTrim, levelTrimOf } from './levelTrim.ts';
 import { deviceParams, isMacroMappableDeviceParam } from './deviceParams.ts';
 import { deviceSamplesSection, installSampleVoice } from './deviceSamples.ts';
@@ -115,9 +115,11 @@ import type { StripNodes } from './mixer/channelStrip.ts';
 import { currentDeviceName } from './legacyNames.ts';
 import { undoJournal } from './undoJournal.ts';
 import { MidiInput } from './midi/MidiInput.ts';
+import { loadMidiAutoResumeSeconds, saveMidiAutoResumeSeconds } from './midi/midiResume.ts';
 import { MidiNoteLifecycle } from './midi/MidiNoteLifecycle.ts';
 import { supportsDeviceType } from './deviceRegistry.ts';
 import { parseImportableProject, PROJECT_FORMAT_VERSION } from '../project/projectFormat.ts';
+import { graphiteAccent } from './graphiteColors.ts';
 import { anyDucking, applyDucks, isDrumBeat, type DuckHit } from './mixer/duck.ts';
 import {
   ProjectTimeMap,
@@ -133,6 +135,15 @@ export interface NoteRouting {
   /** Earliest allowed note time (the context's current time). */
   now(): number;
 }
+
+interface LiveNoteRoute {
+  note: number;
+  players: readonly SpecDevice[];
+  sink: NoteSink;
+}
+
+/** UI keys use a separate range from the 16 hardware channels. */
+const liveNoteKey = (note: number, channel?: number): number => ((channel ?? -1) + 1) * 128 + note;
 
 /** A module that stores its own block in project files (mixer, automation, audio clips, …). */
 export interface ProjectSection {
@@ -501,6 +512,8 @@ export class AudioEngine {
     };
 
     this.cvEngine = new CVEngine((callback) => this.requestRealtime(callback));
+    // A controller pulled out mid-take must not leave the take (or its notes) open.
+    this.midi.subscribe(() => this.handleMidiPortsChanged());
 
     // Master Bus Nodes
     this.masterBusL = this.ctx.createGain();
@@ -1245,6 +1258,13 @@ export class AudioEngine {
         .map((t: any) => ({
           ...t,
           name: typeof t.name === 'string' ? currentDeviceName(t.name) : t.name,
+          color: graphiteAccent(t.color) ?? t.color,
+          patternList: Array.isArray(t.patternList)
+            ? t.patternList.map((pattern: any) => ({ ...pattern, color: graphiteAccent(pattern.color) ?? pattern.color }))
+            : t.patternList,
+          arrangementClips: Array.isArray(t.arrangementClips)
+            ? t.arrangementClips.map((clip: any) => ({ ...clip, color: graphiteAccent(clip.color) ?? clip.color }))
+            : t.arrangementClips,
           deviceId: idMap.get(t.deviceId) || t.deviceId,
           folderId: validFolderIds.has(t.folderId) ? t.folderId : undefined,
           duck: t.duck?.source ? { ...t.duck, source: idMap.get(t.duck.source) ?? t.duck.source } : t.duck,
@@ -1269,7 +1289,7 @@ export class AudioEngine {
               id: b.id,
               name: b.name,
               patternIndex: b.patternIndex,
-              color: typeof b.color === 'string' && /^#[0-9a-f]{6}$/i.test(b.color) ? b.color : PATTERN_COLORS[b.patternIndex % PATTERN_COLORS.length],
+              color: graphiteAccent(typeof b.color === 'string' && /^#[0-9a-f]{6}$/i.test(b.color) ? b.color : PATTERN_COLORS[b.patternIndex % PATTERN_COLORS.length]),
               lengthBars: Number.isFinite(b.lengthBars) && b.lengthBars > 0 ? b.lengthBars : 4,
               audioClipsByTrack: b.audioClipsByTrack && typeof b.audioClipsByTrack === 'object'
                 ? Object.fromEntries(Object.entries(b.audioClipsByTrack).map(([trackId, clips]) => [
@@ -1332,13 +1352,13 @@ export class AudioEngine {
           (x) => x.sourceDeviceId === src && x.sourcePortId === c.sp && x.targetDeviceId === tgt && x.targetPortId === c.tp
         );
         if (!exists) {
-          try { this.connectAudio(src, c.sp, tgt, c.tp, typeof c.col === 'string' ? c.col : undefined); } catch {}
+          try { this.connectAudio(src, c.sp, tgt, c.tp, graphiteAccent(typeof c.col === 'string' ? c.col : undefined)); } catch {}
         }
       });
       (p.cvConnections || []).forEach((c: any) => {
         const src = idMap.get(c.s);
         const tgt = idMap.get(c.t);
-        if (src && tgt) this.connectCV(src, c.sp, tgt, c.tp, typeof c.a === 'number' ? c.a : 1, typeof c.col === 'string' ? c.col : undefined);
+        if (src && tgt) this.connectCV(src, c.sp, tgt, c.tp, typeof c.a === 'number' ? c.a : 1, graphiteAccent(typeof c.col === 'string' ? c.col : undefined));
       });
       const restoredGroupIds = new Set<string>();
       (Array.isArray(p.rackGroups) ? p.rackGroups : []).forEach((g: RackGroup) => {
@@ -1562,6 +1582,121 @@ export class AudioEngine {
     return (['kick', 'snare', 'hatC', 'hatO', 'clap', 'perc'] as const).map((role) => this.drumNoteFor(kit, role));
   }
 
+  /** Handled once per port change; the first change (controller discovered) is a no-op here. */
+  private midiChangeSeq = 0;
+  /** Port change whose MIDI take this engine closed, so the notification is announced once. */
+  public lastMidiTakeCloseSeq = 0;
+  /** Port change that announced the resume offer, so the plain "connected" notice stays quiet. */
+  public lastMidiResumeNoticeSeq = 0;
+  /** Seconds after the loss in which a returned controller continues the closed take (0 = manual offer only). */
+  public midiAutoResumeSeconds = loadMidiAutoResumeSeconds();
+  /**
+   * The MIDI take a lost controller closed: offered back once the controller returns, so the
+   * musician continues from where the take ended instead of starting a new one at the playhead.
+   * `ports` holds the inputs that vanished, which is how a quick replug is recognised.
+   */
+  public resumableTake: { trackId: string; deviceId: string; endPos: number; label: string; ports: string[]; closedAt: number } | null = null;
+
+  /**
+   * A controller that disappears takes its notes with it: MidiInput has already sent their note-offs
+   * (so the recorder knows their real lengths). A MIDI-only take is then closed — transport keeps
+   * playing — instead of running on with notes that can never be released by the missing hardware.
+   */
+  private handleMidiPortsChanged(): void {
+    const change = this.midi.lastChange;
+    if (!change || change.seq === this.midiChangeSeq) return;
+    this.midiChangeSeq = change.seq;
+    if (change.added.length && this.resumableTake) {
+      const take = this.resumableTake;
+      this.lastMidiResumeNoticeSeq = change.seq;
+      // The same controller back within moments: pick the take up instead of making the player ask.
+      const windowMs = this.midiAutoResumeSeconds * 1000;
+      if (windowMs > 0 && change.added.some((name) => take.ports.includes(name)) && Date.now() - take.closedAt <= windowMs) {
+        toast(`Controller back — continuing ${take.label} after a count-in`, 'success');
+        this.notify();
+        void this.resumeClosedTake(true).then((resumed) => {
+          // A take already running (or a part that vanished) leaves the manual offer in place.
+          if (!resumed && this.resumableTake) {
+            toast(`Press Resume to continue ${this.resumableTake.label} from bar ${this.barOf(this.resumableTake.endPos)}`, 'info');
+          }
+        });
+        return;
+      }
+      toast(`Controller back — press Resume to continue ${take.label} from bar ${this.barOf(take.endPos)}`, 'success');
+      this.notify();
+      return;
+    }
+    if (!change.removed.length) return;
+    const rec = this.recorder;
+    if (rec.state === 'idle' || rec.hasAudioJobs) return;
+    const track = this.tracks.find((t) => t.armed && t.kind !== 'audio');
+    if (!track) return;
+    const endPos = this.getPlayheadPosition();
+    void rec.stop();
+    this.lastMidiTakeCloseSeq = change.seq;
+    this.resumableTake = { trackId: track.id, deviceId: track.deviceId, endPos, label: this.devices.get(track.deviceId)?.name ?? track.name, ports: [...change.removed], closedAt: Date.now() };
+    this.notify();
+    toast(`Take closed — MIDI input lost (${change.removed.join(', ')})`, 'info');
+  }
+
+  /** 1-based bar of a song position, for the resume offer text. */
+  private barOf(pos16: number): number {
+    return Math.floor(Math.max(0, pos16) / this.stepsPerBar) + 1;
+  }
+
+  /**
+   * Continue the take a lost controller closed: same part armed, from the position where it ended.
+   * `auto` (the controller came straight back) stops the transport and counts one bar in, because a
+   * take cannot be joined mid-flight where it stopped.
+   */
+  public async resumeClosedTake(auto = false): Promise<boolean> {
+    const take = this.resumableTake;
+    if (!take) return false;
+    // Never interrupt a take that is already being prepared or recorded.
+    if (this.recorder.state !== 'idle') return false;
+    const track = this.tracks.find((t) => t.id === take.trackId);
+    if (!track || !this.devices.has(take.deviceId)) {
+      this.resumableTake = null;
+      this.notify();
+      return false;
+    }
+    await this.resumeContext();
+    this.midiTargetDeviceId = take.deviceId;
+    if (!track.armed) this.setTrackArmed(track.id, true);
+    // stopTransport rewinds, so the seek has to come after it.
+    if (auto && this.isPlaying) this.stopTransport();
+    this.seekToSongPosition(take.endPos);
+    const countInBars = this.recorder.settings.countInBars;
+    // The count-in is what makes an automatic restart playable; the player's own setting comes back after.
+    if (auto && countInBars === 0) this.recorder.settings.countInBars = 1;
+    let started = false;
+    try {
+      started = await this.recorder.start();
+    } finally {
+      if (auto && countInBars === 0) this.recorder.settings.countInBars = countInBars;
+    }
+    if (started) {
+      this.resumableTake = null;
+      this.notify();
+    }
+    return started;
+  }
+
+  /** Settings · MIDI: how long a returning controller continues a closed take (0 = offer only). */
+  public setMidiAutoResumeSeconds(seconds: number): void {
+    const value = Math.max(0, Math.min(60, Math.round(Number(seconds) || 0)));
+    this.midiAutoResumeSeconds = value;
+    saveMidiAutoResumeSeconds(value);
+    this.notify();
+  }
+
+  /** Drop the resume offer without recording. */
+  public dismissResumableTake(): void {
+    if (!this.resumableTake) return;
+    this.resumableTake = null;
+    this.notify();
+  }
+
   /** All Notes Off (CC 123) or System Reset: the held and sustained keys end; a reset also clears every channel's pedal. */
   private allMidiNotesOff(channel: number | undefined): void {
     this.midiNoteLifecycle.allOff(
@@ -1570,7 +1705,7 @@ export class AudioEngine {
         if (target instanceof SpecDevice) target.keyRelease(releasedNote, this.ctx.currentTime);
         this.recorder.noteOff(target.id, releasedNote, releasedChannel);
       },
-      (target, releasedNote) => this.releaseLiveSound(target, releasedNote)
+      (target, releasedNote, releasedChannel) => this.releaseLiveSound(target, releasedNote, releasedChannel)
     );
     if (channel === undefined) this.midiSustainChannels.clear();
     else this.midiSustainChannels.delete(channel);
@@ -1582,7 +1717,8 @@ export class AudioEngine {
     const channel = data[0] & 0x0f;
     const note = data[1];
     const vel = data.length > 2 ? data[2] : 0;
-    if (cmd === 0xb0 && note === 123) {
+    // All Sound Off (120) and All Notes Off (123): the controller's panic must end every note.
+    if (cmd === 0xb0 && (note === 120 || note === 123)) {
       this.allMidiNotesOff(channel);
       return;
     }
@@ -1599,7 +1735,7 @@ export class AudioEngine {
           if (target instanceof SpecDevice) target.keyRelease(releasedNote, this.ctx.currentTime);
           this.recorder.noteOff(target.id, releasedNote, releasedChannel);
         },
-        (target, releasedNote) => this.releaseLiveSound(target, releasedNote)
+        (target, releasedNote, releasedChannel) => this.releaseLiveSound(target, releasedNote, releasedChannel)
       );
       return;
     }
@@ -1608,7 +1744,7 @@ export class AudioEngine {
       if (vel >= 64) this.midiSustainChannels.add(channel);
       else {
         this.midiSustainChannels.delete(channel);
-        this.midiNoteLifecycle.sustainReleased((target, releasedNote) => this.releaseLiveSound(target, releasedNote), channel);
+        this.midiNoteLifecycle.sustainReleased((target, releasedNote, releasedChannel) => this.releaseLiveSound(target, releasedNote, releasedChannel), channel);
       }
       return;
     }
@@ -1621,7 +1757,12 @@ export class AudioEngine {
     if (canPlay && this.ctx.state === 'suspended') void this.ctx.resume();
     const targets = this.liveFanout(dev);
     if (cmd === 0x90 && vel > 0) {
-      this.midiNoteLifecycle.noteOn(channel, note, targets);
+      const previousTargets = this.midiNoteLifecycle.noteOn(channel, note, targets);
+      for (const target of previousTargets) {
+        if (targets.includes(target)) continue;
+        this.recorder.noteOff(target.id, note, channel);
+        this.releaseLiveSound(target, note, channel);
+      }
       // MIDI capture is independent from the instrument's audio power/bypass state.
       if (canPlay) targets.forEach((d) => this.liveNoteOn(d, note, vel / 127, channel));
       else targets.forEach((d) => this.recorder.noteOn(d.id, note, vel / 127, channel));
@@ -1632,6 +1773,10 @@ export class AudioEngine {
     } else if (cmd === 0xb0 && note === 1) {
       if (!canPlay) return;
       targets.forEach((d) => setModWheel(d, vel / 127));
+    } else if (cmd === 0xd0) {
+      // Channel pressure (aftertouch) drives the same expression bus as the mod wheel.
+      if (!canPlay) return;
+      targets.forEach((d) => setModWheel(d, note / 127));
     }
   }
 
@@ -2161,6 +2306,9 @@ export class AudioEngine {
   private removeDeviceInner(deviceId: string, skipBridge: boolean = false): void {
     const dev = this.devices.get(deviceId);
     if (!dev) return;
+    this.releaseLiveRoutesFor(dev);
+    if (dev instanceof SpecDevice && dev.engine.player) this.clearPlayerActivity(dev);
+    else this.playersFor(deviceId).forEach((player) => this.clearPlayerActivity(player));
 
     // If this device sits inline in a chain, reconnect upstream -> downstream so the track keeps playing
     if (!skipBridge) {
@@ -2300,7 +2448,7 @@ export class AudioEngine {
 
     try {
       srcOut.connect(targetIn);
-      const cableColors = ['#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6'];
+      const cableColors = ['#f59e0b', '#7f9a8e', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6'];
       const chosenColor = color || cableColors[this.audioConnections.length % cableColors.length];
       const connId = `aud_conn_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
 
@@ -2580,13 +2728,18 @@ export class AudioEngine {
 
   /**
    * Puts an audio asset on an audio track as a clip at `startBar` (a new audio track when
-   * `trackId` is not an audio track). The clip covers the audio at its natural speed.
+   * `trackId` is not an audio track). By default an asset with a declared source tempo
+   * follows the project tempo. Rendered copies can opt out and mute their new track.
    */
-  public addAudioClip(assetId: string, startBar: number, trackId?: string): { trackId: string; clipId: string } | null {
+  public addAudioClip(assetId: string, startBar: number, trackId?: string,
+    options: { followTempo?: boolean; muteNewTrack?: boolean } = {}): { trackId: string; clipId: string } | null {
     const asset = audioStore.get(assetId);
     if (!asset) return null;
     let track = trackId ? this.tracks.find((t) => t.id === trackId && t.kind === 'audio') : undefined;
-    if (!track) track = this.createAudioTrack(asset.name);
+    if (!track) {
+      track = this.createAudioTrack(asset.name);
+      if (options.muteNewTrack) this.toggleTrackMute(track.id);
+    }
     const spb = this.stepsPerBar;
     const clip: ArrangementClip = {
       id: newSeqId('clip'),
@@ -2599,7 +2752,7 @@ export class AudioEngine {
       audioOffset: 0,
       sourceBpm: asset.sourceBpm ?? asset.detectedBpm,
       // Keep analysis estimates informational until the producer explicitly enables tempo follow.
-      warp: asset.sourceBpm ? 'repitch' : 'off',
+      warp: asset.sourceBpm && options.followTempo !== false ? 'repitch' : 'off',
     };
     if (clip.warp === 'repitch' && asset.sourceBpm) clip.lengthBars = barsForSeconds((asset.buffer.duration * asset.sourceBpm) / this.bpm, this.bpm, spb);
     (track.arrangementClips ??= []).push(clip);
@@ -2783,9 +2936,11 @@ export class AudioEngine {
   /** Stop releases every instrument now, not when the note-offs already scheduled for the song come round. */
   private silenceInstruments(): void {
     const now = this.ctx.currentTime;
+    this.releaseLiveRoutesFor();
     for (const dev of this.devices.values()) {
       if (dev instanceof SpecDevice) {
-        dev.allNotesOff();
+        if (dev.engine.player) this.clearPlayerActivity(dev);
+        else dev.allNotesOff();
         continue;
       }
       // Legacy instruments have no all-off: a note-off for a note that is not sounding does nothing.
@@ -3595,7 +3750,7 @@ export class AudioEngine {
     if (!dev || (!force && !this.isPlayableInstrument(dev.type))) return null;
     let track = this.tracks.find((t) => t.deviceId === deviceId);
     if (!track) {
-      const colors = ['#10b981', '#059669', '#34d399', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
+      const colors = ['#7f9a8e', '#6d8b7f', '#9a9a72', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
       const specEngine = dev instanceof SpecDevice ? dev.spec.engine : null;
       const isDrum =
         dev.type === 'redrum' ||
@@ -4265,7 +4420,7 @@ export class AudioEngine {
         bar: bar + 1,
         step: hit.stepIdx + 1,
         clipName: src.kind === 'notes' ? src.clip.name || 'Note clip' : src.pattern.name,
-        color: track.color || '#10b981',
+        color: graphiteAccent(track.color) || '#7f9a8e',
         timestamp: Date.now(),
       });
     }
@@ -4343,9 +4498,9 @@ export class AudioEngine {
   };
 
   /** Note sink for link `from` of a player chain (past the last player: the instrument). */
-  public sinkFor(dev: BaseDevice, players: SpecDevice[], from: number, routing: NoteRouting = this.liveRouting): NoteSink {
+  public sinkFor(dev: BaseDevice, players: readonly SpecDevice[], from: number, routing: NoteRouting = this.liveRouting, output?: NoteSink): NoteSink {
     if (from >= players.length) {
-      return {
+      return output ?? {
         on: (n, v, t, d) => {
           dev.noteOn?.(n, v, Math.max(routing.now(), t));
           if (d !== undefined && dev.type !== 'redrum' && dev.type !== 'mimic') dev.noteOff?.(n, Math.max(routing.now(), t) + d);
@@ -4354,7 +4509,7 @@ export class AudioEngine {
       };
     }
     const p = players[from].engine.player!;
-    const next = this.sinkFor(dev, players, from + 1, routing);
+    const next = this.sinkFor(dev, players, from + 1, routing, output);
     return { on: (n, v, t, d) => p.noteOn(n, v, t, d, next), off: (n, t) => p.noteOff(n, t, next) };
   }
 
@@ -4403,23 +4558,30 @@ export class AudioEngine {
   }
 
   private liveNoteListeners = new Set<(deviceId: string, note: number, velocity: number) => void>();
+  private readonly liveNoteRoutes = new Map<BaseDevice, Map<number, LiveNoteRoute>>();
+  private readonly liveOutputOwners = new Map<BaseDevice, Map<number, number>>();
   public onLiveNote(cb: (deviceId: string, note: number, velocity: number) => void): () => void {
     this.liveNoteListeners.add(cb);
     return () => this.liveNoteListeners.delete(cb);
   }
 
   /** Live (keyboard / MIDI / pad) note into an instrument, through its players. */
-  public liveNoteOn(dev: BaseDevice, note: number, velocity = 0.85, channel = 0): void {
+  public liveNoteOn(dev: BaseDevice, note: number, velocity = 0.85, channel?: number): void {
     if (this.ctx.state === 'suspended') void this.ctx.resume();
     this.liveNoteListeners.forEach((cb) => {
       try { cb(dev.id, note, velocity); } catch {}
     });
-    this.recorder.noteOn(dev.id, note, velocity, channel);
+    this.recorder.noteOn(dev.id, note, velocity, channel ?? 0);
+    const notes = this.liveNoteRoutes.get(dev) ?? new Map<number, LiveNoteRoute>();
+    const key = liveNoteKey(note, channel);
+    const now = this.ctx.currentTime;
+    notes.get(key)?.sink.off(note, now);
     const players = this.playersFor(dev.id);
-    if (players.length) {
-      this.sinkFor(dev, players, 0).on(note, velocity, this.ctx.currentTime, undefined);
-      this.ensurePlayerClock();
-    } else dev.noteOn?.(note, velocity, this.ctx.currentTime);
+    const sink = this.liveNoteSink(dev, players);
+    notes.set(key, { note, players, sink });
+    this.liveNoteRoutes.set(dev, notes);
+    sink.on(note, velocity, now);
+    if (players.length) this.ensurePlayerClock();
   }
 
   public liveNoteOff(dev: BaseDevice, note: number): void {
@@ -4428,19 +4590,94 @@ export class AudioEngine {
     this.releaseLiveSound(dev, note);
   }
 
-  private releaseLiveSound(dev: BaseDevice, note: number): void {
-    const players = this.playersFor(dev.id);
-    if (players.length) this.sinkFor(dev, players, 0).off(note, this.ctx.currentTime);
-    else dev.noteOff?.(note, this.ctx.currentTime);
+  private releaseLiveSound(dev: BaseDevice, note: number, channel?: number): void {
+    const notes = this.liveNoteRoutes.get(dev);
+    const key = liveNoteKey(note, channel);
+    const route = notes?.get(key);
+    if (!notes || !route) return;
+    notes.delete(key);
+    if (!notes.size) this.liveNoteRoutes.delete(dev);
+    route.sink.off(note, this.ctx.currentTime);
+  }
+
+  /** Different live keys can converge on one output pitch, including through old and new Player chains. */
+  private liveNoteSink(dev: BaseDevice, players: readonly SpecDevice[]): NoteSink {
+    const heldPitches = new Set<number>();
+    const endpoint = this.sinkFor(dev, [], 0);
+    const output: NoteSink = {
+      on: (pitch, velocity, time, duration) => {
+        if (duration !== undefined) {
+          endpoint.on(pitch, velocity, time, duration);
+          return;
+        }
+        if (heldPitches.has(pitch)) return;
+        heldPitches.add(pitch);
+        const pitches = this.liveOutputOwners.get(dev) ?? new Map<number, number>();
+        const count = pitches.get(pitch) ?? 0;
+        pitches.set(pitch, count + 1);
+        this.liveOutputOwners.set(dev, pitches);
+        if (!count) endpoint.on(pitch, velocity, time);
+      },
+      off: (pitch, time) => {
+        if (!heldPitches.delete(pitch)) return;
+        const pitches = this.liveOutputOwners.get(dev)!;
+        const count = pitches.get(pitch)!;
+        if (count > 1) {
+          pitches.set(pitch, count - 1);
+          return;
+        }
+        pitches.delete(pitch);
+        if (!pitches.size) this.liveOutputOwners.delete(dev);
+        endpoint.off(pitch, time);
+      },
+    };
+    const sink = this.sinkFor(dev, players, 0, this.liveRouting, output);
+    return {
+      on: sink.on,
+      off: (pitch, time) => {
+        sink.off(pitch, time);
+        // Shared intermediate pitches can consume a Player's mapping on the first
+        // key-up. The last key still owns its final pitch and must release it.
+        heldPitches.forEach((note) => output.off(note, time));
+      },
+    };
+  }
+
+  /** Flush the routes that use a removed/retargeted unit, or all live routes on Stop. */
+  private releaseLiveRoutesFor(device?: BaseDevice): void {
+    const now = this.ctx.currentTime;
+    for (const [instrument, notes] of this.liveNoteRoutes) {
+      for (const [key, route] of notes) {
+        if (device && instrument !== device && !route.players.some((player) => player === device)) continue;
+        notes.delete(key);
+        route.sink.off(route.note, now);
+      }
+      if (!notes.size) this.liveNoteRoutes.delete(instrument);
+    }
+  }
+
+  /** Clear generator/timed state, sending any residual note-offs through later Players. */
+  private clearPlayerActivity(player: SpecDevice): void {
+    const target = player.target ? this.devices.get(player.target) : undefined;
+    const chain = target ? this.playersFor(target.id) : [];
+    const index = chain.indexOf(player);
+    const output: NoteSink = {
+      on: () => {},
+      off: (pitch, time) => {
+        if (target && !this.liveOutputOwners.get(target)?.has(pitch)) target.noteOff(pitch, time);
+      },
+    };
+    const sink = target && index >= 0 ? this.sinkFor(target, chain, index + 1, this.liveRouting, output) : output;
+    player.engine.player?.allOff(this.ctx.currentTime, sink);
+    this.playerUntil.delete(player.id);
   }
 
   /** Points a player at an instrument (null = unassigned). */
   public setPlayerTarget(playerId: string, targetId: string | null): void {
     const p = this.devices.get(playerId);
-    if (!(p instanceof SpecDevice) || !p.engine.player) return;
-    const old = p.target ? this.devices.get(p.target) : undefined;
-    // release whatever the player was holding on its old instrument
-    if (old) p.engine.player.allOff(this.ctx.currentTime, { on: () => undefined, off: (n, t) => old.noteOff?.(n, t) });
+    if (!(p instanceof SpecDevice) || !p.engine.player || p.target === targetId) return;
+    this.releaseLiveRoutesFor(p);
+    this.clearPlayerActivity(p);
     p.setParam('target', targetId ?? '');
     // A stopped generator has no work until a live key is held. Starting its
     // service here can let it retire between target assignment and note-on;
@@ -4648,6 +4885,14 @@ export class AudioEngine {
     this.exportUncompressedWav(undefined, 'wav');
   }
 
+  /**
+   * Builds a device on another context (offline renders, level calibration and its probe). The
+   * device is not registered, so the rack and the project are untouched.
+   */
+  public createDeviceOnContext(ctx: BaseAudioContext, type: DeviceType, id: string, name: string): BaseDevice {
+    return this.instantiateDeviceOnContext(ctx as AudioContext, type, id, name);
+  }
+
   private instantiateDeviceOnContext(ctx: AudioContext, type: DeviceType, id: string, name: string, subVoiceId?: string): BaseDevice {
     const spec = createSpecDevice(ctx, type, id, name);
     if (spec) return spec;
@@ -4809,7 +5054,7 @@ export class AudioEngine {
     this.applyStarterGroove();
 
     // Assign vibrant reference colors to tracks
-    const colorPalette = ['#f43f5e', '#0ea5e9', '#22c55e', '#a855f7', '#f97316', '#06b6d4', '#8b5cf6'];
+    const colorPalette = ['#f43f5e', '#0ea5e9', '#7f9a8e', '#a855f7', '#f97316', '#06b6d4', '#8b5cf6'];
     this.tracks.forEach((t, idx) => {
       t.color = colorPalette[idx % colorPalette.length];
       (t.arrangementClips || []).forEach((c) => {

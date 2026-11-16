@@ -1,0 +1,21 @@
+name: Verify the source
+description: >-
+  Type check, UTF-8 check, optional browser driver, and the automated regression suite. Shared by the
+  Checks workflow and the Windows release workflow so a tag cannot package untested code.
+
+runs:
+  using: composite
+  steps:
+    # `npm run lint` is tsc --noEmit followed by the UTF-8 check, so a type error or a mangled
+    # character fails here before anything is built or packaged.
+    - name: Type check and UTF-8 check
+      shell: pwsh
+      run: npm run lint
+
+    # Environment-gated checks skip instead of failing when a runner lacks the tool (link import and
+    # separation need yt-dlp / ffmpeg / demucs, the local assistant needs Ollama). Each skip prints a
+    # `!! SKIPPED` banner and `tests/coverage.test.ts` prints one `!! MISSING COVERAGE` list, so what
+    # went untested is visible in the log rather than implied.
+    - name: Automated regression suite
+      shell: pwsh
+      run: npm test

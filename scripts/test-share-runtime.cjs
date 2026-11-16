@@ -4,6 +4,15 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { createWelcomeProject } = require('./electron-welcome-fixture.cjs');
+
+// Mirror shared/instruments/catalogTypes.ts `isRedistributable`; this CommonJS probe cannot import TS directly.
+const CLEARED_LICENSE = /^(CC0-1\.0|CC-BY-(1\.0|2\.0|2\.5|3\.0|4\.0))$/i;
+function clearedPacks(root) {
+  const raw = JSON.parse(fs.readFileSync(path.join(root, 'public/instruments/index.json'), 'utf8'));
+  if (!raw || !Array.isArray(raw.packs)) throw new Error('Public instrument index has no packs array');
+  return raw.packs.filter((pack) => typeof pack?.spdx === 'string' && CLEARED_LICENSE.test(pack.spdx.trim()));
+}
 
 function run(root, args) {
   const result = spawnSync(process.execPath, args, { cwd: root, stdio: 'inherit' });
@@ -46,8 +55,11 @@ async function main() {
   const privateRoute = await fetch(`${origin}/api/stems/list`);
   assert.equal(privateRoute.status, 404, 'Share API exposed the private stems route');
   const index = await (await fetch(`${origin}/instruments/index.json`)).json();
-  assert.equal(index.packs.length, 42, 'Share runtime did not serve all 42 cleared packs');
-  assert(index.packs.every((pack) => pack.spdx !== 'Custom'), 'Share runtime served private packs');
+  const expected = clearedPacks(root);
+  assert(Array.isArray(index.packs), 'Share runtime returned an invalid instrument index');
+  assert.equal(index.packs.length, expected.length, `Share runtime served ${index.packs.length} packs; expected ${expected.length} cleared packs`);
+  assert.deepEqual(index.packs.map((pack) => pack.id).sort(), expected.map((pack) => pack.id).sort(), 'Share runtime pack set differs from the cleared catalog');
+  assert(index.packs.every((pack) => CLEARED_LICENSE.test(pack.spdx.trim())), 'Share runtime served private packs');
   const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--no-proxy-server', '--autoplay-policy=no-user-gesture-required'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
@@ -57,6 +69,7 @@ async function main() {
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('request', (request) => { if (/chamkila|tumbi-folk|dholak-folk|\/stems\//i.test(request.url())) forbiddenRequests.push(request.url()); });
     await page.goto(origin, { waitUntil: 'load', timeout: 60_000 });
+    await createWelcomeProject(page);
     await page.getByTestId('tab-rack').click();
     const browserPanel = page.getByTestId('browser');
     if (!(await browserPanel.count())) await page.getByRole('button', { name: 'Browser', exact: true }).click();
@@ -99,7 +112,7 @@ async function main() {
     assert.deepEqual(errors, [], 'Compiled share app raised JavaScript errors');
     assert.deepEqual(forbiddenRequests, [], 'Compiled share app requested private audio');
     await page.screenshot({ path: path.join(scratch, 'compiled-share-rack.png'), fullPage: true });
-    console.log(`PASS · Compiled share app boots, serves 42 cleared packs, hides private catalog rows, plays recorded marimba at ${peak.toFixed(5)} master peak, requests no private audio, and returns 404 for the private stems API.`);
+    console.log(`PASS · Compiled share app boots, serves ${expected.length} cleared packs, hides private catalog rows, plays recorded marimba at ${peak.toFixed(5)} master peak, requests no private audio, and returns 404 for the private stems API.`);
   } finally { await browser.close(); }
 }
 

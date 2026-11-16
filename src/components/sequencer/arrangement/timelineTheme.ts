@@ -1,4 +1,4 @@
-/** Colours of the arrangement timeline: the dark editor and the light Workstation sequencer. */
+/** Colours of the arrangement timeline: the dark editor and the graphite Workstation sequencer. */
 export interface TimelinePalette {
   root: string;
   toolbar: string;
@@ -59,33 +59,33 @@ export const DARK_TIMELINE: TimelinePalette = {
   addRow: '#0d0b09',
 };
 
-/** Light sequencer from the Workstation mockup: grey lanes, grey clips with dark note lines. */
+/** Workstation sequencer: graphite lanes with neutral ink. */
 export const LIGHT_TIMELINE: TimelinePalette = {
-  root: '#e4dfd5',
-  toolbar: '#d8d1c5',
-  rulerBg: '#f3efe7',
-  rulerLoopBand: '#eee3d1',
-  rulerMarkerBand: '#e5ddd0',
-  rulerMajor: '#7c7160',
-  rulerMinor: '#c7beaf',
-  rulerText: '#373027',
-  rulerBeat: '#bdb3a2',
-  rulerLetter: '#fbf8f1',
-  markerText: '#30271d',
-  headerBg: '#ddd6c9',
-  headerActive: '#f3eee5',
-  headerBorder: '#b9ae9d',
-  headerText: '#28231c',
-  laneA: '#f1eee7',
-  laneB: '#e9e4da',
-  laneBorder: '#c9c0b2',
-  grid: ['rgba(74,62,45,0.30)', 'rgba(74,62,45,0.16)', 'rgba(74,62,45,0.07)'],
-  clipInk: '#2b3036',
-  clipBody: () => 'linear-gradient(180deg, #d9dce0, #cdd1d6)',
-  clipBorder: () => '#8f959c',
-  clipBar: () => 'linear-gradient(180deg, #9aa0a7, #868c94)',
-  clipBarInk: '#ffffff',
-  muted: 'repeating-linear-gradient(45deg,#c9c1b3 0 6px,#e4dfd6 6px 12px)',
-  loopShade: 'rgba(177,127,55,0.08)',
-  addRow: '#ded8cd',
+  root: '#14171a',
+  toolbar: '#1b1f23',
+  rulerBg: '#101316',
+  rulerLoopBand: '#2a2318',
+  rulerMarkerBand: '#1a1e22',
+  rulerMajor: '#7d858e',
+  rulerMinor: '#343a40',
+  rulerText: '#d5d9de',
+  rulerBeat: '#23282d',
+  rulerLetter: '#101316',
+  markerText: '#f0ede6',
+  headerBg: '#1b1f23',
+  headerActive: '#2c3137',
+  headerBorder: '#3a4047',
+  headerText: '#e8e5df',
+  laneA: '#181c20',
+  laneB: '#15181b',
+  laneBorder: '#2f343a',
+  grid: ['rgba(200,205,212,0.14)', 'rgba(200,205,212,0.07)', 'rgba(200,205,212,0.03)'],
+  clipInk: '#f0ede6',
+  clipBody: (c) => `linear-gradient(180deg, ${c}55, ${c}2e)`,
+  clipBorder: (c) => c,
+  clipBar: (c) => `${c}cc`,
+  clipBarInk: '#171a1d',
+  muted: 'repeating-linear-gradient(45deg,#3a3f45 0 6px,#24282d 6px 12px)',
+  loopShade: 'rgba(201,160,108,0.08)',
+  addRow: '#1a1e22',
 };

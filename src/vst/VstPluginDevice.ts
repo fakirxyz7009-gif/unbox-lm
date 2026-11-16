@@ -177,10 +177,16 @@ export class VstPluginDevice extends BaseDevice {
 
   private buildPorts(): PortDefinition[] {
     const layout = vstPortLayout(this.role);
+    // Rear labels drop the " CV" suffix, so a macro called Pitch/Gate/Envelope would read the
+    // same as the fixed port beside it; number those macros so every jack stays identifiable.
+    const fixedNames = new Set(['gate', 'pitch', 'envelope', 'dry/wet']);
     const label = (port: string): string => {
       const macro = /^cv_m(\d)$/.exec(port);
-      if (macro) return `${this.snapshot.macros[Number(macro[1]) - 1]?.label ?? `Macro ${macro[1]}`} CV`;
-      return ({ cv_mix: 'Mix CV', cv_gate: 'Gate CV', cv_pitch: 'Pitch CV', env_out: 'Envelope CV Out' } as Record<string, string>)[port] ?? port;
+      if (macro) {
+        const base = this.snapshot.macros[Number(macro[1]) - 1]?.label ?? `Macro ${macro[1]}`;
+        return `${base}${fixedNames.has(base.trim().toLowerCase()) ? ` ${macro[1]}` : ''} CV`;
+      }
+      return ({ cv_mix: 'Dry/Wet CV', cv_gate: 'Gate CV', cv_pitch: 'Pitch CV', env_out: 'Env Out CV' } as Record<string, string>)[port] ?? port;
     };
     const ports: PortDefinition[] = [];
     if (layout.audioIn) {

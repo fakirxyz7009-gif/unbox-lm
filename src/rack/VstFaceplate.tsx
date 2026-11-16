@@ -27,7 +27,7 @@ function OutputMeter({ device }: { device: VstPluginDevice }) {
   });
   return (
     <div className="h-1.5 w-full rounded-full bg-black/60 overflow-hidden" aria-hidden="true">
-      <div ref={bar} className="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
+      <div ref={bar} className="h-full bg-gradient-to-r from-slate-400 via-amber-400 to-red-500 will-change-transform" style={{ width: '0%' }} />
     </div>
   );
 }
@@ -69,7 +69,7 @@ export const VstFaceplate: React.FC<VstFaceplateProps> = ({ device, onUpdate, on
     <div className="flex flex-wrap items-stretch gap-3" onClick={(e) => e.stopPropagation()}>
       <div className="w-[200px] shrink-0 flex flex-col gap-1.5">
         <div>
-          <div className="text-base font-black leading-tight truncate" title={s.name}>{s.name}</div>
+          <div className="text-base font-black leading-tight break-words" title={s.name}>{s.name}</div>
           <div className="text-[11px] opacity-70 truncate">{s.vendor ?? 'Unknown vendor'}{s.engine ? ` · ${s.engine}` : ''}</div>
         </div>
         <div className="flex flex-wrap gap-1">

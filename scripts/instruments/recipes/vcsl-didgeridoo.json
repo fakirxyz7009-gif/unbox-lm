@@ -1,0 +1,31 @@
+{
+  "id": "vcsl-didgeridoo",
+  "name": "VCSL Didgeridoo",
+  "kind": "drums",
+  "category": "world",
+  "description": "Recorded didgeridoo articulations: three sustained drones, barks, short calls, taps and five performance phrases.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Lip%20Aerophones/Didgeridoo",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual didgeridoo performer. These are the sustained drones, barks, short calls, taps and phrase recordings; they are mapped as performance articulations rather than as pitched notes."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-didgeridoo/samples",
+  "lanes": [
+    { "name": "Sustain 2", "note": 48, "role": "perc", "samples": ["Didgeridoo1_Sus2_Main.wav"] },
+    { "name": "Sustain 3", "note": 49, "role": "perc", "samples": ["Didgeridoo1_Sus3_Main.wav"] },
+    { "name": "Sustain 8", "note": 50, "role": "perc", "samples": ["Didgeridoo1_Sus8_Main.wav"] },
+    { "name": "Bark", "note": 51, "role": "perc", "samples": ["Didgeridoo1_Bark1_Main_rr3.wav"] },
+    { "name": "Bark Down", "note": 52, "role": "perc", "samples": ["Didgeridoo1_BarkDown2_Main.wav"] },
+    { "name": "Short Call", "note": 53, "role": "perc", "samples": ["Didgeridoo1_Short1_Main_rr2.wav"] },
+    { "name": "Tap", "note": 54, "role": "rim", "samples": ["Didgeridoo1_Tap1_Main_rr16.wav"] },
+    { "name": "Phrase 1", "note": 55, "role": "perc", "samples": ["Didgeridoo1_Phrase1_Main.wav"] },
+    { "name": "Phrase 3", "note": 56, "role": "perc", "samples": ["Didgeridoo1_Phrase3_Main.wav"] },
+    { "name": "Phrase 5", "note": 57, "role": "perc", "samples": ["Didgeridoo1_Phrase5_Main.wav"] },
+    { "name": "Phrase 6", "note": 58, "role": "perc", "samples": ["Didgeridoo1_Phrase6_Main.wav"] },
+    { "name": "Phrase 8", "note": 59, "role": "perc", "samples": ["Didgeridoo1_Phrase8_Main.wav"] }
+  ],
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2
+}

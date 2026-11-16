@@ -1,0 +1,39 @@
+{
+  "id": "vcsl-balafon",
+  "name": "VCSL Balafon",
+  "kind": "melodic",
+  "category": "world",
+  "description": "Recorded West African balafon from the VCSL CC0 library, with hard-mallet strikes at three dynamic levels across six pitched bars.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Balafon/Hard%20Mallet",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual balafon performer. Filename octave labels are one below measured pitch, so roots are mapped +12 semitones. Each of the six recorded bars keeps its three dynamic layers."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-balafon/samples",
+  "keyRange": [61, 89],
+  "oneShot": true,
+  "notePolyphony": 4,
+  "loop": false,
+  "maxSeconds": 4,
+  "notes": [
+    { "file": "EthnicXylo_hardM_C#3_vl1_rr1_Mid.wav", "root": 61, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_C#3_vl2_rr1_Mid.wav", "root": 61, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_C#3_vl3_rr1_Mid.wav", "root": 61, "vel": [85, 127] },
+    { "file": "EthnicXylo_hardM_F3_vl1_rr1_Mid.wav", "root": 65, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_F3_vl2_rr1_Mid.wav", "root": 65, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_F3_vl3_rr1_Mid.wav", "root": 65, "vel": [85, 127] },
+    { "file": "EthnicXylo_hardM_C4_vl1_rr1_Mid.wav", "root": 72, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_C4_vl2_rr1_Mid.wav", "root": 72, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_C4_vl3_rr1_Mid.wav", "root": 72, "vel": [85, 127] },
+    { "file": "EthnicXylo_hardM_F4_vl1_rr1_Mid.wav", "root": 77, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_F4_vl2_rr1_Mid.wav", "root": 77, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_F4_vl3_rr1_Mid.wav", "root": 77, "vel": [85, 127] },
+    { "file": "EthnicXylo_hardM_C5_vl1_rr1_Mid.wav", "root": 84, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_C5_vl2_rr1_Mid.wav", "root": 84, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_C5_vl3_rr1_Mid.wav", "root": 84, "vel": [85, 127] },
+    { "file": "EthnicXylo_hardM_F5_vl1_rr1_Mid.wav", "root": 89, "vel": [1, 42] },
+    { "file": "EthnicXylo_hardM_F5_vl2_rr1_Mid.wav", "root": 89, "vel": [43, 84] },
+    { "file": "EthnicXylo_hardM_F5_vl3_rr1_Mid.wav", "root": 89, "vel": [85, 127] }
+  ]
+}

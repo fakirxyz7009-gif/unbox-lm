@@ -151,20 +151,20 @@ export function StudioMixer({ onOpenDevice, selectedPart, onSelectPart }: MixerP
   );
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-[#07090c] text-[#d5dae0]" aria-label="Mixer" data-testid="mixer-console">
+    <div className="flex-1 min-h-0 flex flex-col bg-[#aebaa3] text-[#22301c]" aria-label="Mixer" data-testid="mixer-console">
       <div className="rack-toolbar">
         <button type="button" className="rack-tool" aria-pressed={inspectorOpen} onClick={() => setInspectorOpen((v) => !v)} title="Show / hide the channel inspector (EQ and dynamics)">
           <PanelLeft className="w-3.5 h-3.5" /> Inspector
         </button>
-        <span className="font-label font-bold text-[13px] tracking-[0.2em] text-white ml-1">MIXER</span>
+        <span className="font-label font-bold text-[13px] tracking-[0.2em] text-ink ml-1">MIXER</span>
         <span className="font-label text-[13px] text-chrome-ink mr-2">{channels.length} channels</span>
         {tool('+ Bus', 'New group / submix bus', () => newBus('bus'))}
         {tool('+ Return', 'New effect return (fed by sends)', () => newBus('return'))}
         {tool('+ VCA', 'New VCA fader', () => m.createVca(`VCA ${m.vcas.length + 1}`))}
         {tool('+ Group', 'New mixer group (linked faders / mute / solo)', () => m.createGroup(`Group ${m.groups.length + 1}`))}
         {m.groups.map((g) => (
-          <span key={g.id} className="flex items-center gap-1 h-6 px-1.5 rounded bg-black/40 border border-chrome-line font-label text-[13px]">
-            <input defaultValue={g.name} aria-label="Group name" onBlur={(e) => m.setGroup(g.id, { name: e.target.value || g.name })} className="w-16 bg-transparent outline-none text-white" />
+          <span key={g.id} className="flex items-center gap-1 h-6 px-1.5 rounded bg-[#d7e0cc] border border-chrome-line font-label text-[13px]">
+            <input defaultValue={g.name} aria-label="Group name" onBlur={(e) => m.setGroup(g.id, { name: e.target.value || g.name })} className="w-16 bg-transparent outline-none text-ink" />
             <label title="Link faders">
               <input type="checkbox" checked={g.linkVolume} onChange={(e) => m.setGroup(g.id, { linkVolume: e.target.checked })} /> vol
             </label>

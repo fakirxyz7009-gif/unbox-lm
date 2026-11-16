@@ -1,0 +1,23 @@
+{
+  "id": "vcsl-saxello",
+  "name": "VCSL Saxello",
+  "kind": "melodic",
+  "category": "saxophone",
+  "description": "Recorded saxello, the straight soprano saxophone variant, with non-vibrato sustains, two dynamics and seamless loops.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Reed%20Aerophones/Saxello",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the non-vibrato sustains only; staccato and vibrato recordings remain in the source. The whole-tone roots span A#2-E5, with two recorded dynamics and auto-detected loops."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-saxello/samples",
+  "notes": "*.wav",
+  "keyRange": [
+    46,
+    76
+  ],
+  "maxSeconds": 3,
+  "release": 0.3,
+  "notePolyphony": 3,
+  "loop": "auto"
+}

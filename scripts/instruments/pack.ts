@@ -106,15 +106,18 @@ export function thinLayers(zones: DraftZone[], max: number): DraftZone[] {
   const slots = new Map<string, DraftZone[]>();
   for (const z of zones) if (z.layers.length) (slots.get(slotKey(z)) ?? slots.set(slotKey(z), []).get(slotKey(z))!).push(z);
   for (const list of slots.values()) {
-    const ranges = [...new Map(list.map((z) => [`${z.lovel}-${z.hivel}`, [z.lovel, z.hivel] as const])).values()].sort((a, b) => a[1] - b[1]);
+    const ranges = [...new Map(list.map((z) => [`${z.lovel}-${z.hivel}`, [z.lovel, z.hivel] as const])).values()]
+      .filter(([lo, hi]) => lo >= 0 && hi <= 127 && lo <= hi)
+      .sort((a, b) => a[1] - b[1]);
     if (ranges.length <= max) {
       out.push(...list);
       continue;
     }
     const keep = Array.from({ length: max }, (_, k) => ranges[Math.round(((k + 1) * ranges.length) / max) - 1]);
     keep.forEach(([lo, hi], k) => {
-      const newLo = k === 0 ? 1 : keep[k - 1][1] + 1;
-      const newHi = k === keep.length - 1 ? 127 : hi;
+      const newLo = k === 0 ? 1 : Math.min(127, keep[k - 1][1] + 1);
+      const newHi = k === keep.length - 1 ? 127 : Math.min(127, hi);
+      if (newLo > newHi) return;
       for (const z of list) if (z.lovel === lo && z.hivel === hi) out.push({ ...z, lovel: newLo, hivel: newHi, velCurve: undefined });
     });
   }
@@ -345,6 +348,8 @@ export function buildPack(meta: PackMeta, draft: DraftZone[], o: BuildOptions = 
       if (k % 50 === 0 || k === renders.size) log(`  encoded ${k}/${renders.size} (${MB(bytes)})`);
     }
 
+    // A silent SFZ region has no audio and cannot create a voice; keeping it would write an
+    // empty sample path into the manifest (the hat program uses silent choke regions).
     const packZones: PackZone[] = zones.map((z, i) => {
       const f = zoneRender[i] ? files.get(zoneRender[i])! : null;
       const pz: PackZone = { file: f?.file ?? '', lokey: z.lokey, hikey: z.hikey, root: z.root, lovel: z.lovel, hivel: z.hivel };
@@ -367,7 +372,7 @@ export function buildPack(meta: PackMeta, draft: DraftZone[], o: BuildOptions = 
       if (z.velocityFadeCurve) pz.velocityFadeCurve = z.velocityFadeCurve;
       if (z.modWheelFade) pz.modWheelFade = z.modWheelFade;
       return pz;
-    });
+    }).filter((z) => z.file);
 
     const lanes = meta.lanes?.filter((l) => packZones.some((z) => z.file && l.note >= z.lokey && l.note <= z.hikey));
     const dropped = meta.lanes?.filter((l) => !lanes?.includes(l)).map((l) => l.name);

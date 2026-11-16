@@ -123,6 +123,11 @@ async function run(): Promise<void> {
       import(/* @vite-ignore */ projectManagerUrl) as Promise<{ projectManager: typeof ProjectManagerInstance }>,
     ]);
     activeEngine = audioEngine;
+    const welcomeProject = (): HTMLButtonElement | undefined => [...document.querySelectorAll<HTMLButtonElement>(
+      '[role="dialog"][aria-label="Welcome to Unbox Studio"] button',
+    )].find((button) => button.textContent?.trim().startsWith('Empty project'));
+    await waitFor(() => !!projectManager.currentId || !!welcomeProject(), 'initial project or first-run chooser');
+    if (!projectManager.currentId) welcomeProject()?.click();
     await waitFor(() => !!projectManager.currentId, 'initial project setup');
     if (!physicalMidi && midiRequestCount() !== 0) throw new Error('The app requested MIDI permission during startup.');
 
@@ -229,7 +234,7 @@ async function run(): Promise<void> {
         armed: track.armed,
       };
       recordButton().click();
-      await waitFor(() => !audioEngine.isRecording, 'transport Record stop');
+      await waitFor(() => !audioEngine.recorder.busy, 'recorded MIDI take finalization');
       const recorded = notesFrom(track).find((note) => note.note === noteNumber && Math.abs(note.velocity - noteVelocity / 127) < 1e-6);
       if (!recorded || !(recorded.length > 0)) {
         throw new Error(`The Impulse sent MIDI but the workstation Record button did not write a piano-roll note: ${JSON.stringify({ noteNumber, noteVelocity, noteChannel, notes: notesFrom(track), recorderAtRelease })}.`);
@@ -251,7 +256,7 @@ async function run(): Promise<void> {
       port.dispatchEvent(new MessageEvent('midimessage', { data: new Uint8Array([0x80, 60, 0]) }));
       await delay(100);
       recordButton().click();
-      await waitFor(() => !audioEngine.isRecording, 'transport Record stop');
+      await waitFor(() => !audioEngine.recorder.busy, 'recorded MIDI take finalization');
     }
 
     const noteFrom = (candidate: SequencerTrack | undefined) => candidate?.arrangementClips

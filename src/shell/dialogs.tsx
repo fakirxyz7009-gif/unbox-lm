@@ -9,7 +9,7 @@ import { AlertTriangle, Disc3, FolderOpen, Music2 } from 'lucide-react';
 import { setDialogListener, type DialogRequest } from './dialogService.ts';
 
 const inputClass =
-  'w-full rounded border border-[#2b3442] bg-[#070a0f] px-2 py-1.5 text-[13px] text-slate-100 outline-none focus:border-orange-500';
+  'w-full rounded border border-[#41474e] bg-[#15181b] px-2 py-1.5 text-[13px] text-[#e8e5df] outline-none focus:border-[#c9a53c]';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -124,7 +124,7 @@ function Frame({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4"
+      className="fixed inset-0 z-[100] grid place-items-center bg-black/65 p-4"
       onPointerDown={(e) => {
         if (e.target !== e.currentTarget) return;
         if (onClose) onClose();
@@ -137,11 +137,11 @@ function Frame({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className={`w-full ${wide ? 'max-w-[620px]' : 'max-w-[460px]'} rounded-lg border border-[#2b3442] bg-[#0d1119] p-4 text-slate-200 shadow-2xl outline-none`}
+        className={`unbox-dialog w-full ${wide ? 'max-w-[620px]' : 'max-w-[460px]'} rounded-lg border p-4 text-[#e2dfd8] outline-none`}
       >
         <div className="mb-3">
-          <h2 className="text-[18px] font-black leading-tight text-white">{title}</h2>
-          {subtitle && <p className="mt-1 text-[13px] leading-snug text-slate-400">{subtitle}</p>}
+          <h2 className="text-[18px] font-black leading-tight text-[#f2f0eb]">{title}</h2>
+          {subtitle && <p className="mt-1 text-[13px] leading-snug text-[#a6acb4]">{subtitle}</p>}
         </div>
         {children}
         {footer && <div className="mt-4 flex flex-wrap items-center justify-end gap-2">{footer}</div>}
@@ -181,7 +181,7 @@ export function ConfirmDialog({
             autoFocus
             disabled={busy}
             className={`rounded px-3 py-1.5 font-label font-bold text-[13px] disabled:opacity-50 ${
-              tone === 'danger' ? 'bg-red-600 text-white hover:bg-red-500' : 'bg-orange-500 text-black hover:bg-orange-400'
+              tone === 'danger' ? 'bg-red-600 text-white hover:bg-red-500' : 'bg-[#c9a53c] text-[#14210d] hover:bg-[#d8b45c]'
             }`}
             onClick={() => {
               setBusy(true);
@@ -193,7 +193,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <div className="flex items-start gap-2.5 rounded border border-[#2b3442] bg-[#070a0f] p-3 text-[13px] leading-snug">
+      <div className="flex items-start gap-2.5 rounded border border-[#3a4047] bg-[#15181b] p-3 text-[13px] leading-snug text-[#e2dfd8]">
         {tone === 'danger' && <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />}
         <span>{message}</span>
       </div>
@@ -220,14 +220,14 @@ export function AlertDialog({
         <button
           type="button"
           autoFocus
-          className="rounded bg-orange-500 px-3 py-1.5 font-label font-bold text-[13px] text-black hover:bg-orange-400"
+          className="rounded bg-[#c9a53c] px-3 py-1.5 font-label font-bold text-[13px] text-[#14210d] hover:bg-[#d8b45c]"
           onClick={onClose}
         >
           {confirmLabel}
         </button>
       }
     >
-      <div className="rounded border border-[#2b3442] bg-[#070a0f] p-3 text-[13px] leading-snug">{message}</div>
+      <div className="rounded border border-[#3a4047] bg-[#15181b] p-3 text-[13px] leading-snug text-[#e2dfd8]">{message}</div>
     </Frame>
   );
 }
@@ -329,7 +329,7 @@ export function PromptDialog({
           <button
             type="button"
             disabled={!trimmed || busy}
-            className="rounded bg-orange-500 px-3 py-1.5 font-label font-bold text-[13px] text-black hover:bg-orange-400 disabled:opacity-50"
+            className="rounded bg-[#c9a53c] px-3 py-1.5 font-label font-bold text-[13px] text-[#14210d] hover:bg-[#d8b45c] disabled:opacity-50"
             onClick={submit}
           >
             {busy ? 'Working…' : confirmLabel}
@@ -391,7 +391,7 @@ export function ProjectStartDialog({
           {onOpen && (
             <button
               type="button"
-              className="mr-auto flex items-center gap-1.5 rounded px-2 py-1.5 font-label font-bold text-[13px] text-slate-300 hover:bg-white/5 hover:text-white"
+              className="mr-auto flex items-center gap-1.5 rounded px-2 py-1.5 font-label font-bold text-[13px] text-[#b6bdc5] hover:bg-white/10 hover:text-white"
               onClick={onOpen}
             >
               <FolderOpen className="h-3.5 w-3.5" /> Open an existing project…
@@ -405,7 +405,7 @@ export function ProjectStartDialog({
         </>
       }
     >
-      <label className="mb-3 block text-[11px] font-label font-bold uppercase tracking-wider text-slate-400">
+      <label className="mb-3 block text-[11px] font-label font-bold uppercase tracking-wider text-[#a6acb4]">
         Project name
         <input
           autoFocus
@@ -422,26 +422,26 @@ export function ProjectStartDialog({
           type="button"
           disabled={busy !== null}
           onClick={() => choose('empty')}
-          className="group rounded-lg border border-[#2b3442] bg-[#070a0f] p-3 text-left transition-colors hover:border-orange-500 disabled:opacity-50"
+          className="group rounded-lg border border-[#3a4047] bg-[#202429] p-3 text-left transition-colors hover:border-[#c9a53c] disabled:opacity-50"
         >
-          <Disc3 className="mb-2 h-5 w-5 text-slate-400 group-hover:text-orange-400" />
-          <div className="text-[13px] font-bold text-slate-100">{busy === 'empty' ? 'Starting…' : 'Empty project'}</div>
-          <div className="mt-0.5 text-[11px] leading-snug text-slate-500">No tracks. A clean rack, master and returns.</div>
+          <Disc3 className="mb-2 h-5 w-5 text-[#aab1b9] group-hover:text-[#d8b45c]" />
+          <div className="text-[13px] font-bold text-[#f2f0eb]">{busy === 'empty' ? 'Starting…' : 'Empty project'}</div>
+          <div className="mt-0.5 text-[11px] leading-snug text-[#a6acb4]">No tracks. A clean rack, master and returns.</div>
         </button>
         <button
           type="button"
           disabled={busy !== null}
           onClick={() => choose('default')}
-          className="group rounded-lg border border-[#2b3442] bg-[#070a0f] p-3 text-left transition-colors hover:border-orange-500 disabled:opacity-50"
+          className="group rounded-lg border border-[#3a4047] bg-[#202429] p-3 text-left transition-colors hover:border-[#c9a53c] disabled:opacity-50"
         >
-          <Music2 className="mb-2 h-5 w-5 text-slate-400 group-hover:text-orange-400" />
-          <div className="text-[13px] font-bold text-slate-100">{busy === 'default' ? 'Starting…' : 'Starter groove'}</div>
-          <div className="mt-0.5 text-[11px] leading-snug text-slate-500">
+          <Music2 className="mb-2 h-5 w-5 text-[#aab1b9] group-hover:text-[#d8b45c]" />
+          <div className="text-[13px] font-bold text-[#f2f0eb]">{busy === 'default' ? 'Starting…' : 'Starter groove'}</div>
+          <div className="mt-0.5 text-[11px] leading-snug text-[#a6acb4]">
             7 tracks, 128 BPM C minor. Drums, bass, lead and pad are ready to edit.
           </div>
         </button>
       </div>
-      <p className="mt-3 text-[11px] leading-snug text-slate-500">
+      <p className="mt-3 text-[11px] leading-snug text-[#a6acb4]">
         {mode === 'welcome'
           ? 'You can start empty and add instruments from the browser; the starter groove is the quickest way to hear the engine.'
           : 'Both choices create a new project immediately; the current one is saved or confirmed first.'}

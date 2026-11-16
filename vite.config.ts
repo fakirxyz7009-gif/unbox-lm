@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
-import { shareInstrumentCatalog } from './scripts/shareInstrumentCatalog.ts';
+import { shareInstrumentCatalog, shareLevelCalibrationTable } from './scripts/shareInstrumentCatalog.ts';
 
 export default defineConfig(({ mode }) => {
   return {
@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
       enforce: 'pre' as const,
       load(id: string) {
         if (path.resolve(id.split('?')[0]) === path.resolve(__dirname, 'shared/instruments/catalog.ts')) return shareInstrumentCatalog(__dirname);
+        if (path.resolve(id.split('?')[0]) === path.resolve(__dirname, 'src/audio/levelCalibrationTable.ts')) return shareLevelCalibrationTable(__dirname);
         return undefined;
       },
     }] : [])],
@@ -70,7 +71,9 @@ export default defineConfig(({ mode }) => {
       watch:
         process.env.DISABLE_HMR === 'true'
           ? null
-          : { ignored: ['**/.tmp/**', '**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release/**', '**/dist/**'] },
+          // Every desktop build output folder is ignored, not just `release/`: the others hold thousands of
+          // locked binaries, and watching release-local/win-unpacked/electron.exe crashed the dev server with EBUSY.
+          : { ignored: ['**/.tmp/**', '**/public/library/**', '**/public/instruments/**', '**/public/samples/**', '**/data/**', '**/release*/**', '**/release/**', '**/dist/**'] },
     },
   };
 });

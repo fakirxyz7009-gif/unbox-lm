@@ -18,6 +18,11 @@ import { automateMenuAt } from '../AutomateMenu.tsx';
 import { SpecControl, SpecKnob } from './specKnob.tsx';
 import { setText, setWidth } from '../../ui/skin/dom.ts';
 import { meterDue, useDeviceAutomation } from '../../nexa/useEngine.ts';
+import { facePaletteForSpec, faceSignatureForSpec } from '../../ui/skin/facePalette.ts';
+import { PanelEtching } from '../../rack/PanelEtching.tsx';
+import { DeviceEmblem } from '../../rack/DeviceEmblem.tsx';
+import { functionFaceForSpec } from './functionFace.ts';
+import { DenseSynthPanel } from './DenseSynthPanel.tsx';
 import {
   isHeroDisplay,
   HeaderBadge,
@@ -36,6 +41,8 @@ import {
 interface Props {
   device: SpecDevice;
   onUpdate: () => void;
+  /** Rendered on the dark rack faceplate, where the spec's cream-panel ink would disappear. */
+  dark?: boolean;
 }
 
 const FINISH: Record<string, (c: string) => string> = {
@@ -52,14 +59,48 @@ const FINISH: Record<string, (c: string) => string> = {
 };
 const background = (spec: DeviceSpec) => (FINISH[spec.panel.finish] ?? ((c: string) => `linear-gradient(180deg, ${c}, rgba(0,0,0,0.85))`))(spec.panel.color);
 
+/** Parse the six-digit panel colours into a dark cabinet tint (specs use hex). */
+const rgbOf = (hex: string): [number, number, number] | null => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = Number.parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+const alphaOf = (hex: string, alpha: number): string => {
+  const c = rgbOf(hex) ?? [201, 160, 108];
+  return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
+};
+
+/** Keep each model's own finish, but pull it into the graphite cabinet instead of flattening it. */
+const darkBackground = (spec: DeviceSpec, face: ReturnType<typeof facePaletteForSpec>): string => {
+  const glow = `radial-gradient(120% 85% at 50% 0%, ${face.glow}, transparent 64%)`;
+  const grain =
+    spec.panel.finish === 'wood'
+      ? 'repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0 2px, transparent 2px 7px)'
+      : spec.panel.finish === 'retro'
+        ? 'repeating-linear-gradient(0deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 6px)'
+        : 'repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)';
+  return `${glow}, ${grain}, linear-gradient(180deg, ${face.top}, ${face.bottom})`;
+};
+
 const WOOD = 'linear-gradient(90deg, #4a2a12, #7a4a24 40%, #5a3418)';
 
-export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
+export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate, dark = false }) => {
   const [, force] = useReducer((x: number) => x + 1, 0);
   useDeviceAutomation(device.id);
   const spec = device.spec;
   const accent = spec.panel.accent;
-  const text = spec.panel.text ?? '#f2f2f2';
+  const fn = functionFaceForSpec(spec);
+  const signature = faceSignatureForSpec(spec.engine, spec.kind, spec.type);
+  const face = dark
+    ? facePaletteForSpec({ type: spec.type, finish: spec.panel.finish, color: spec.panel.color, accent, engine: spec.engine, kind: spec.kind })
+    : null;
+  const text = dark ? '#e9e6df' : spec.panel.text ?? '#f2f2f2';
+  const badge = {
+    borderColor: alphaOf(accent, 0.72),
+    color: dark ? '#f4efe2' : accent,
+    backgroundColor: dark ? 'rgba(0,0,0,0.35)' : undefined,
+  };
   const knob = spec.panel.knob ?? 'cap';
   useEffect(() => device.subscribe(force), [device]);
 
@@ -87,7 +128,7 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
     return fn;
   };
 
-  const ctl = (def: ParamDef, size = 38) =>
+  const ctl = (def: ParamDef, size = 44) =>
     def.control === undefined && !def.options ? (
       <SpecKnob
         key={def.key}
@@ -105,6 +146,9 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
     );
 
   const body = (() => {
+    if (fn.id === 'synthesis') {
+      return <DenseSynthPanel device={device} onUpdate={onUpdate} accent={accent} text={text} knob={knob} />;
+    }
     switch (spec.engine) {
       case 'drums':
         return <DrumsPanel device={device} ctl={ctl} accent={accent} text={text} />;
@@ -124,37 +168,71 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
   return (
     <div
       className="relative flex-1 flex flex-col min-h-0 font-sans"
-      style={{ background: background(spec), color: text, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 6px rgba(0,0,0,0.5)' }}
+      style={{
+        background: dark && face ? darkBackground(spec, face) : background(spec),
+        color: text,
+        borderTop: face ? `1px solid ${face.edge}` : undefined,
+        boxShadow: face
+          ? `inset 0 1px 0 ${alphaOf(face.edge, 0.5)}, inset 0 -2px 6px rgba(0,0,0,0.5)`
+          : 'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 6px rgba(0,0,0,0.5)',
+        '--sig-accent': signature.accent,
+        '--face-phase': `${fn.variant * 7}px`,
+        '--face-angle': `${-9 + fn.variant * 4}deg`,
+      } as React.CSSProperties}
       data-testid="spec-faceplate"
       data-device-type={spec.type}
+      data-signature={signature.id}
+      data-face-function={fn.id}
+      data-face-variant={fn.variant}
     >
+      <PanelEtching type={spec.type} engine={spec.engine} accent={signature.accent} className="spec-panel-etching" />
+      <div className="spec-function-surface" aria-hidden="true">
+        <span className="spec-function-stages">{fn.stages.join('  /  ')}</span>
+        <span className="spec-function-stamp">
+          {fn.code} · ED-{fn.edition}
+        </span>
+      </div>
+      <span className="spec-screw spec-screw--tl" aria-hidden="true" />
+      <span className="spec-screw spec-screw--tr" aria-hidden="true" />
       {spec.panel.finish === 'wood' && (
         <>
           <div className="absolute left-0 top-0 bottom-0 w-3" style={{ background: WOOD }} />
           <div className="absolute right-0 top-0 bottom-0 w-3" style={{ background: WOOD }} />
         </>
       )}
-      <div className={`flex items-center gap-3 px-4 pt-1.5 pb-1 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>
-        <div className="flex flex-col leading-none">
-          <span className="font-black tracking-wider text-[13px]" style={{ color: text, fontFamily: spec.family === 'hardware' ? 'ui-sans-serif, system-ui' : 'ui-monospace, monospace' }}>
+      <div className={`spec-header flex items-center gap-3 px-4 pt-1.5 pb-1 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>
+        <div className="spec-brand-plate flex flex-col leading-none" style={{ borderLeftColor: signature.accent }}>
+          <span
+            className="spec-logo font-black tracking-wider"
+            style={{
+              color: text,
+              fontSize: (spec.panel.logo ?? spec.short).length > 18 ? 13 : 18,
+              lineHeight: 1.05,
+              fontFamily: spec.family === 'hardware' ? 'ui-sans-serif, system-ui' : 'ui-monospace, monospace',
+            }}
+          >
             {spec.panel.logo ?? spec.short}
           </span>
-          <span className="text-[11px] opacity-75 mt-0.5" style={{ color: text }}>
-            {spec.panel.tagline ?? spec.name}
+          <span className="spec-tagline text-[11px] opacity-75 mt-0.5" style={{ color: text }}>
+            <b className="spec-family-kicker" title={`${fn.stages.join(' → ')} · ${spec.panel.tagline ?? spec.name}`}>
+              <DeviceEmblem engine={spec.engine} family={spec.kind} size={13} className="spec-function-crest" />
+              <span>{fn.label}</span>
+            </b>
+            <span className="spec-tagline-text">{spec.panel.tagline ?? spec.name}</span>
           </span>
         </div>
         {spec.engine === 'multisample' ? (
           <span
-            className="text-[11px] font-bold px-1.5 py-0.5 rounded border"
-            style={{ borderColor: `${accent}88`, color: accent }}
+            className="spec-badge text-[11px] font-bold px-1.5 py-0.5 rounded border"
+            style={badge}
             title="Real recordings (multisampled instrument pack)"
           >
             RECORDED SAMPLES
           </span>
         ) : (
           <span
-            className="text-[11px] font-bold px-1.5 py-0.5 rounded border"
-            style={{ borderColor: `${accent}88`, color: accent }}
+            className="spec-badge text-[11px] font-bold px-1.5 py-0.5 rounded border"
+            style={badge}
             title="Modelled with Web Audio in this app — not the manufacturer's code or samples"
           >
             WEB AUDIO MODEL
@@ -172,12 +250,17 @@ export const SpecFaceplate: React.FC<Props> = ({ device, onUpdate }) => {
         )}
         {(spec.engine === 'sampler' || spec.engine === 'granular' || spec.engine === 'loops') && <SampleLoader device={device} accent={accent} text={text} />}
       </div>
+      <div
+        className="spec-accent-rule shrink-0"
+        style={{ background: `linear-gradient(90deg, ${signature.accent} 0%, ${alphaOf(signature.accent, 0.16)} 58%, transparent 100%)` }}
+        aria-hidden="true"
+      />
       {isHeroDisplay(spec.panel.display) && spec.panel.display && (
         <div className={`px-3 pt-1 pb-2 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>
           {renderHeroDisplay(spec.panel.display, device, val, set)}
         </div>
       )}
-      <div className={`flex-1 min-h-0 px-3 pb-2 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>{body}</div>
+      <div className={`spec-body spec-body--${fn.id}${fn.id === 'synthesis' ? ' spec-body--synthesis' : ''} flex-1 min-h-0 px-3 pb-2 ${spec.panel.finish === 'wood' ? 'mx-3' : ''}`}>{body}</div>
     </div>
   );
 };
@@ -194,8 +277,11 @@ const Sections: React.FC<{ spec: DeviceSpec; ctl: Ctl; text: string; exclude: Se
   }
   return (
     <div className="flex flex-wrap gap-1.5 items-stretch">
-      {[...groups.entries()].map(([title, params]) => (
-        <section key={title} className="rounded-md px-2 py-1 bg-black/25 border border-black/40 flex flex-col">
+      {[...groups.entries()].map(([title, params], index) => (
+        <section key={title} className="relative rounded-md px-2 py-1 bg-black/25 border border-black/40 flex flex-col">
+          <span className="spec-module-index" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
           <h4 className="text-[11px] font-black uppercase tracking-widest opacity-80 mb-0.5" style={{ color: text }}>
             {title}
           </h4>
@@ -337,13 +423,13 @@ const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set:
     );
   if (kind === 'vu')
     return (
-      <svg width={86} height={46} className="rounded border border-[#54432d] shadow-inner" style={{ background: 'linear-gradient(180deg, #faf0d2 0%, #ebd49d 70%, #d8be82 100%)' }} aria-label="VU meter">
-        <path d="M 10 32 A 36 36 0 0 1 76 32" stroke="#3d3020" fill="none" strokeWidth={1.2} />
+      <svg width={86} height={46} className="rounded border border-[#3d714c] shadow-inner" style={{ background: 'linear-gradient(180deg, #163726 0%, #0d2115 70%, #0a1a10 100%)' }} aria-label="VU meter">
+        <path d="M 10 32 A 36 36 0 0 1 76 32" stroke="#9fbd8a" fill="none" strokeWidth={1.2} />
         <path d="M 60 14 A 36 36 0 0 1 76 32" stroke="#dc2626" fill="none" strokeWidth={2.4} />
-        <text x={43} y={43} fontSize={6.5} textAnchor="middle" fill="#3d3020" fontFamily="monospace" fontWeight="bold">
+        <text x={43} y={43} fontSize={6.5} textAnchor="middle" fill="#e9e6df" fontFamily="monospace" fontWeight="bold">
           VU
         </text>
-        <line ref={needle} x1={43} y1={36} x2={43} y2={6} stroke="#1c1917" strokeWidth={1.4} strokeLinecap="round" transform="rotate(-50 43 36)" />
+        <line ref={needle} x1={43} y1={36} x2={43} y2={6} stroke="#e8cd7c" strokeWidth={1.4} strokeLinecap="round" transform="rotate(-50 43 36)" />
         <circle cx={43} cy={36} r={3} fill="#292524" />
       </svg>
     );
@@ -357,7 +443,7 @@ const Display: React.FC<{ device: SpecDevice; accent: string; text: string; set:
     );
   if (kind === 'lcd')
     return (
-      <span ref={label} className="px-2 py-1 rounded font-mono text-[11px] min-w-[120px]" style={{ background: '#0d1f12', color: '#7dff9b', border: '1px solid #000' }}>
+      <span ref={label} className="px-2 py-1 rounded font-mono text-[11px] min-w-[120px]" style={{ background: '#0b0c0e', color: '#e8e4dc', border: '1px solid #000' }}>
         {device.spec.short}
       </span>
     );
@@ -560,7 +646,7 @@ const PackPanel: React.FC<{ device: SpecDevice; ctl: Ctl; accent: string; text: 
               </button>
               {(['Level', 'Tune', 'Decay'] as const).map((k) => {
                 const def = paramDef(spec, `p${i + 1}${k}`);
-                return def ? ctl(def, 24) : null;
+                return def ? ctl(def, 28) : null;
               })}
             </section>
           ))}
@@ -589,7 +675,7 @@ const DrumsPanel: React.FC<{ device: SpecDevice; ctl: Ctl; accent: string; text:
             </span>
             {(['Tune', 'Decay', 'Tone', 'Level'] as const).map((k) => {
               const def = paramDef(spec, `p${i + 1}${k}`);
-              return def ? ctl(def, 26) : null;
+              return def ? ctl(def, 30) : null;
             })}
           </section>
         ))}
@@ -690,7 +776,7 @@ const GroovePanel: React.FC<{ device: SpecDevice; ctl: Ctl; accent: string; text
           <div className="flex flex-wrap gap-1 items-end">
             {(['Tune', 'Decay', 'Tone', 'Level', 'Pan'] as const).map((k) => {
               const def = paramDef(spec, `p${sel + 1}${k}`);
-              return def ? ctl(def, 34) : null;
+              return def ? ctl(def, 37) : null;
             })}
             <button
               type="button"
@@ -727,7 +813,7 @@ const MixerPanel: React.FC<{ device: SpecDevice; ctl: Ctl; text: string }> = ({ 
             <span className="text-[11px] font-black" style={{ color: text }}>
               {spec.ports?.inLabels?.[i] ?? `CH ${k}`}
             </span>
-            {rest.map((p) => ctl(p, 24))}
+            {rest.map((p) => ctl(p, 28))}
             {fader && ctl(fader)}
           </section>
         );

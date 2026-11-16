@@ -1,0 +1,67 @@
+{
+  "id": "vcsl-toy-train-whistle",
+  "name": "VCSL Toy Train Whistle",
+  "kind": "drums",
+  "category": "winds",
+  "description": "Recorded toy train whistle with sustained, medium, short, double and falling calls.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Train%20Whistle%2C%20Toy",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The six source performances are mapped as separate pads: sustained, medium, short, double, falling and medium-short calls."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-toy-train-whistle/samples",
+  "lanes": [
+    {
+      "name": "Sustain",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "Main_TrainLow_Sus-001.wav"
+      ]
+    },
+    {
+      "name": "Medium",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "Main_TrainLow_Med-001.wav"
+      ]
+    },
+    {
+      "name": "Short",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "Main_TrainLow_Short-001.wav"
+      ]
+    },
+    {
+      "name": "Double",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "Main_TrainLow_Double-001.wav"
+      ]
+    },
+    {
+      "name": "Fall",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "Main_TrainLow_Fall-001.wav"
+      ]
+    },
+    {
+      "name": "Medium Short",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "Main_TrainMed_Short-001.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

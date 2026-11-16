@@ -164,7 +164,7 @@ export const ThirdWaveFaceplate: React.FC<ThirdWaveFaceplateProps> = ({ device, 
             onClick={handleAudition}
             className={`flex items-center space-x-1 px-3 py-1 bg-gradient-to-r ${
               isAuditioning
-                ? 'from-emerald-400 to-cyan-300 text-black shadow-[0_0_14px_rgba(52,211,153,0.8)]'
+                ? 'from-sky-400 to-cyan-300 text-black shadow-[0_0_14px_rgba(56,189,248,0.65)]'
                 : 'from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-black shadow-[0_0_8px_rgba(6,182,212,0.5)]'
             } font-mono font-bold text-[11px] rounded transition duration-200 cursor-pointer`}
           >

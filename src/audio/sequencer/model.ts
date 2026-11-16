@@ -53,7 +53,7 @@ export function divisionTicks(division: string | undefined): number {
 }
 
 export const PATTERN_COLORS = [
-  '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899', '#ef4444', '#84cc16', '#3b82f6',
+  '#f59e0b', '#7f9a8e', '#06b6d4', '#8b5cf6', '#ec4899', '#ef4444', '#9a9a72', '#3b82f6',
   '#f97316', '#14b8a6', '#a855f7', '#eab308',
 ] as const;
 

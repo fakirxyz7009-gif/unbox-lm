@@ -33,9 +33,11 @@ async function run(): Promise<void> {
   if (new Set(pack.zones.map((zone) => zone.file)).size !== 14) {
     throw new Error('Bagpipe zones do not retain all 14 distinct recorded notes and drones.');
   }
-  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_bagpipe');
+  // The GM "Bagpipes" program is rewritten onto this device too, so match the recorded pack entry by name
+  // instead of taking the first item that carries the pack's device type.
+  const device = ALL_PLAYABLE_INSTRUMENTS.find((item) => item.type === 'rec_freepats_bagpipe' && item.name === 'FreePats Bagpipe in G');
   const spec = DEVICE_SPECS.find((item) => item.type === 'rec_freepats_bagpipe');
-  if (device?.name !== 'FreePats Bagpipe in G' || spec?.engineConfig?.pack !== PACK_ID) {
+  if (!device || spec?.engineConfig?.pack !== PACK_ID) {
     throw new Error('The playable-instrument and rack-device catalogs are missing the bagpipe pack.');
   }
 

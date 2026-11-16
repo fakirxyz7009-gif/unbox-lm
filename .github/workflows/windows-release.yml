@@ -1,0 +1,121 @@
+name: Windows release build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ci/windows-release-smoke
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # The same gate the Checks workflow runs: type check, UTF-8, the optional browser driver and the
+      # regression suite. A tag that does not pass these never reaches the packaging steps below.
+      - name: Verify the source
+        uses: ./.github/actions/verify
+
+      # The browser probe needs its own job in Checks because it stalls beside the unit suite; a
+      # release build has nothing else running, so it can run here in sequence before packaging.
+      - name: Verify the browser audio probe
+        uses: ./.github/actions/verify-browser
+
+      # Verification installs an unsaved browser driver into node_modules. Restore the exact lockfile
+      # tree so the installer is packaged from the same dependencies `npm ci` produced.
+      - name: Restore the lockfile dependency tree
+        run: npm ci --no-audit --no-fund
+
+      # build/ is git-ignored, but electron-builder reads build/icon.png. Keep the app icon in
+      # .github/ci so CI packages the same icon as a local build.
+      - name: Prepare app icon
+        run: |
+          New-Item -ItemType Directory -Force -Path build | Out-Null
+          Copy-Item -Force .github/ci/icon.png build/icon.png
+
+      # public/library is git-ignored because it contains machine-specific local content. A clean
+      # runner still needs a valid manifest so the full build packages the local-library surface;
+      # this empty fixture exercises packaging and the endpoint, not a developer's library.
+      - name: Seed clean-runner library manifest
+        run: |
+          $library = [ordered]@{
+            schemaVersion = 1
+            generatedAt = [DateTime]::UtcNow.ToString('o')
+            source = 'bundled'
+            roots = @()
+            scan = [ordered]@{
+              durationMs = 0
+              filesSeen = 0
+              dirsSeen = 0
+              bytesSeen = 0
+              otherFiles = 0
+              duplicates = 0
+              issues = @()
+            }
+            stats = [ordered]@{
+              plugin = 0
+              instrument = 0
+              preset = 0
+              sample = 0
+              'sample-pack' = 0
+              installer = 0
+              archive = 0
+              document = 0
+            }
+            products = @()
+            items = @()
+          }
+          New-Item -ItemType Directory -Force -Path public/library | Out-Null
+          $json = $library | ConvertTo-Json -Depth 8
+          [IO.File]::WriteAllText(
+            (Join-Path (Get-Location) 'public/library/library.json'),
+            $json,
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Build full Windows installer
+        run: npm run dist:win
+
+      - name: Smoke-test installed full app
+        run: node scripts/test-installed-full.cjs release\Unbox-Studio-Setup-1.0.0.exe
+
+      - name: Record installer checksum
+        run: |
+          $installer = 'release/Unbox-Studio-Setup-1.0.0.exe'
+          $hash = (Get-FileHash -Algorithm SHA256 $installer).Hash.ToLowerInvariant()
+          "$hash  Unbox-Studio-Setup-1.0.0.exe" |
+            Set-Content -Encoding ascii 'release/Unbox-Studio-Setup-1.0.0.exe.sha256'
+
+      # This installer contains the empty CI library fixture above, not a developer's local
+      # library or stems collection. Keep it clearly labeled as CI smoke output.
+      - name: Upload CI smoke installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: unbox-studio-windows-ci-smoke
+          path: |
+            release/Unbox-Studio-Setup-1.0.0.exe
+            release/Unbox-Studio-Setup-1.0.0.exe.sha256
+          if-no-files-found: error
+          retention-days: 7

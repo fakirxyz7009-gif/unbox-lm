@@ -1,0 +1,203 @@
+{
+  "id": "vcsl-tom-1",
+  "name": "VCSL Tom",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded rack tom with mallet and stick hits, rolls and rim strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Tom%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-tom-1/samples",
+  "lanes": [
+    {
+      "name": "Tom Mallet",
+      "note": 36,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "TomH_HitM_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "TomH_HitM_v2_rr2_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "TomH_HitM_v3_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "TomH_HitM_v3_rr2_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "TomH_HitM_v4_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "TomH_HitM_v4_rr2_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tom Stick",
+      "note": 37,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "TomH_HitS_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "TomH_HitS_v2_rr2_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "TomH_HitS_v3_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "TomH_HitS_v3_rr2_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "TomH_HitS_v4_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "TomH_HitS_v4_rr2_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mallet Roll",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "TomH_RollM_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "TomH_RollM_v2_rr1_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stick Roll",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "TomH_RollS_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "TomH_RollS_v2_rr1_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tom Rim",
+      "note": 40,
+      "role": "rim",
+      "samples": [
+        {
+          "file": "TomH_rimS_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "TomH_rimS_v2_rr2_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "TomH_rimS_v4_rr1_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        },
+        {
+          "file": "TomH_rimS_v4_rr2_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tom Rim Alternate",
+      "note": 41,
+      "role": "rim",
+      "samples": [
+        "TomH_rimFLS_rr2_Mid.wav",
+        "TomH_rimFLS_rr4_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2
+}

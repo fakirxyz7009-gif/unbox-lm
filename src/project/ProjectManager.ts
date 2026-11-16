@@ -5,17 +5,30 @@
  */
 import { audioEngine } from '../audio/AudioEngine.ts';
 import { audioStore } from '../audio/clips/audioStore.ts';
-import { deleteRecordingJournal, discardCompletedRecordingJournals, listRecordingJournals, loadRecordingJournal, type RecordingJournalChunk, type RecordingJournalManifest } from '../audio/recording/recordingJournal.ts';
+import { deleteRecordingJournal, discardCompletedRecordingJournals, heldRecordingJournalIds, listRecordingJournals, loadRecordingJournal, withRecordingJournalLock, type RecordingJournalChunk, type RecordingJournalManifest } from '../audio/recording/recordingJournal.ts';
+import { recoveredMidiTakeId, restoreMidiJournalNotes } from '../audio/recording/recoverMidiTake.ts';
 import { newSeqId } from '../audio/sequencer/model.ts';
+import type { SequencerTrack } from '../audio/types.ts';
 import { encodeWav, safeFileName } from '../audio/export/wav.ts';
 import { toast } from '../shell/toast.ts';
 import { showConfirm } from '../shell/dialogService.ts';
-import { dbAll, dbByIndex, dbDelete, dbGet, dbPut, requestPersistence } from './db.ts';
+import { dbAll, dbByIndex, dbDelete, dbDeleteIf, dbGet, dbPut, dbPutIf, requestPersistence } from './db.ts';
 import { parseImportableProject } from './projectFormat.ts';
 import { GENRE_TEMPLATES, applyTemplate } from './templates.ts';
 import { readZip, writeZip } from './zip.ts';
 import { projectAudioIds } from '../../shared/project/audioAssets.ts';
 import { parseAudioProvenance, userFileProvenance, userRecordingProvenance, type AudioProvenance } from '../../shared/audio/provenance.ts';
+
+function savedMidiTakeReceipts(json: string): Map<string, ReadonlySet<string>> {
+  const result = new Map<string, ReadonlySet<string>>();
+  const tracks = parseImportableProject(json)?.tracks;
+  if (!Array.isArray(tracks)) return result;
+  for (const track of tracks) {
+    if (typeof track.id !== 'string' || !Array.isArray(track.midiTakeIds)) continue;
+    result.set(track.id, new Set(track.midiTakeIds.filter((id: unknown) => typeof id === 'string')));
+  }
+  return result;
+}
 
 export interface ProjectMeta {
   title: string;
@@ -60,6 +73,23 @@ export interface RecoveryRecord {
   at: number;
   name: string;
   projectId: string | null;
+}
+
+interface RecoveryRow { key: 'recovery'; value: string }
+
+function readRecovery(row: RecoveryRow | undefined): RecoveryRecord | null {
+  if (!row?.value) return null;
+  try {
+    const rec = JSON.parse(row.value) as RecoveryRecord;
+    return typeof rec?.json === 'string' && rec.json && Number.isFinite(rec.at) ? rec : null;
+  } catch {
+    return null;
+  }
+}
+
+function sameRecovery(left: RecoveryRecord | null, right: RecoveryRecord): boolean {
+  return left !== null && left.at === right.at && left.projectId === right.projectId &&
+    left.name === right.name && left.json === right.json;
 }
 
 export const EMPTY_META: ProjectMeta = { title: '', artist: '', album: '', genre: '', year: '', isrc: '', upc: '', comment: '', tags: [] };
@@ -119,7 +149,7 @@ class ProjectManager {
   /** Cheap UI marker: any structural engine notification means the saved copy is behind. */
   private dirtyMarker = false;
   private lastVersionAt = 0;
-  private lastRecoveryJson = '';
+  private lastRecovery: RecoveryRecord | null = null;
   private timer: number | null = null;
   private recoveryTimer: number | null = null;
   private listeners = new Set<() => void>();
@@ -252,13 +282,14 @@ class ProjectManager {
     const json = audioEngine.exportProjectJSON();
     // Nothing changed since the last save: drop any stale recovery copy.
     if (json === this.lastSavedJson) {
-      const persistedRecoveryIsCurrentSave = this.recovery?.projectId === this.currentId && this.recovery.json === json;
-      const sessionRecoveryIsStale = !this.recovery && !!this.lastRecoveryJson;
-      if (persistedRecoveryIsCurrentSave || sessionRecoveryIsStale) await this.clearRecovery();
+      const snapshot = this.recovery ?? this.lastRecovery;
+      if (snapshot?.projectId === this.currentId && (!this.recovery || snapshot.json === json)) {
+        await this.clearRecovery(snapshot);
+      }
       return;
     }
-    await this.writeRecovery(json);
-    if (!this.currentId || audioEngine.recorder.busy) return;
+    // Queue both snapshots together while the project and JSON still belong to the same edit.
+    void this.writeRecovery(json);
     await this.write(json, Date.now() - this.lastVersionAt > this.versionMin * 60000 ? 'Autosave' : undefined, true);
   }
 
@@ -290,19 +321,22 @@ class ProjectManager {
   }
 
   private writeRecovery(json: string): Promise<void> {
+    const projectId = this.currentId;
+    const tracks = audioEngine.tracks;
+    const snapshot: RecoveryRecord = { json, at: Date.now(), name: this.currentName, projectId };
     return this.enqueue(async () => {
-      if (audioEngine.recorder.busy) return;
-      if (json === this.lastRecoveryJson) return;
-      this.lastRecoveryJson = json;
+      if (this.currentId !== projectId || audioEngine.tracks !== tracks || audioEngine.recorder.busy) return;
+      if (this.lastRecovery?.projectId === projectId && this.lastRecovery.json === json) return;
       try {
-        await dbPut('settings', {
-          key: 'recovery',
-          value: JSON.stringify({ json, at: Date.now(), name: this.currentName, projectId: this.currentId } satisfies RecoveryRecord),
-        });
+        const own = this.lastRecovery;
+        // Keep the legacy single-slot format. An unresolved snapshot can occupy
+        // the slot while this project's normal autosave commits separately.
+        const stored = await dbPutIf<RecoveryRow>('settings', 'recovery', { key: 'recovery', value: JSON.stringify(snapshot) }, (row) =>
+          row === undefined || (own?.projectId === projectId && !sameRecovery(this.recovery, own) && sameRecovery(readRecovery(row), own)));
+        if (stored) this.lastRecovery = snapshot;
         this.recoveryFailing = false;
       } catch (e) {
         // Retried on the next tick. Only the first failure of a streak toasts, so a full quota is not silent.
-        this.lastRecoveryJson = '';
         if (!this.recoveryFailing) {
           this.recoveryFailing = true;
           toast(`Recovery copy could not be written (${(e as Error).message}). Unsaved changes are not protected against a crash.`, 'error');
@@ -311,40 +345,45 @@ class ProjectManager {
     });
   }
 
-  private clearRecovery(): Promise<void> {
+  private clearRecovery(snapshot: RecoveryRecord): Promise<boolean> {
+    return this.enqueue(() => this.clearRecoveryNow(snapshot));
+  }
+
+  private async clearRecoveryNow(snapshot: RecoveryRecord): Promise<boolean> {
+    try {
+      const removed = await dbDeleteIf<RecoveryRow>('settings', 'recovery', (row) => sameRecovery(readRecovery(row), snapshot));
+      if (sameRecovery(this.lastRecovery, snapshot)) this.lastRecovery = null;
+      if (sameRecovery(this.recovery, snapshot)) {
+        this.recovery = removed ? null : readRecovery(await dbGet<RecoveryRow>('settings', 'recovery'));
+      }
+      return removed;
+    } catch {
+      return false;
+    }
+  }
+
+  private keepRecovery(original: RecoveryRecord, retained: RecoveryRecord): Promise<void> {
     return this.enqueue(async () => {
-      this.lastRecoveryJson = '';
-      this.recovery = null;
       try {
-        await dbDelete('settings', 'recovery');
+        const stored = await dbPutIf<RecoveryRow>('settings', 'recovery', { key: 'recovery', value: JSON.stringify(retained) },
+          (row) => sameRecovery(readRecovery(row), original));
+        this.recovery = stored ? retained : readRecovery(await dbGet<RecoveryRow>('settings', 'recovery'));
       } catch {
-        // ignore
+        // Keep the in-memory recovery banner when IndexedDB is unavailable.
+        if (sameRecovery(this.recovery, original)) this.recovery = retained;
       }
     });
   }
 
-  private async keepRecovery(rec: RecoveryRecord): Promise<void> {
-    this.recovery = rec;
-    try {
-      await dbPut('settings', { key: 'recovery', value: JSON.stringify(rec) });
-    } catch {
-      // Keep the in-memory recovery banner when IndexedDB is unavailable.
-    }
-  }
-
   private async checkRecovery(): Promise<void> {
     try {
-      const row = await dbGet<{ key: string; value: string }>('settings', 'recovery');
-      if (!row?.value) return;
-      const rec = JSON.parse(row.value) as RecoveryRecord;
-      if (typeof rec?.json !== 'string' || !rec.json || typeof rec.at !== 'number') return;
-      if ((rec.projectId === this.currentId && rec.json === this.lastSavedJson) ||
-          Date.now() - rec.at > 7 * 24 * 60 * 60 * 1000) {
-        await this.clearRecovery();
-        return;
+      this.recovery = readRecovery(await dbGet<RecoveryRow>('settings', 'recovery'));
+      const rec = this.recovery;
+      if (rec && ((rec.projectId === this.currentId && rec.json === this.lastSavedJson) ||
+          Date.now() - rec.at > 7 * 24 * 60 * 60 * 1000)) {
+        await this.clearRecovery(rec);
       }
-      this.recovery = rec;
-      this.emit('Recovered unsaved work from your last session');
+      if (this.recovery) this.emit('Recovered unsaved work from your last session');
     } catch {
       // unreadable recovery data is ignored
     }
@@ -389,7 +428,7 @@ class ProjectManager {
           // Keep the original recovery identity if the project store cannot be read.
         }
       }
-      await this.keepRecovery(retainedRec);
+      await this.keepRecovery(rec, retainedRec);
       this.emit('Recovery is still available; saving it failed');
       return false;
     }
@@ -398,27 +437,32 @@ class ProjectManager {
       try {
         await dbPut('settings', { key: 'lastProjectId', value: target.id });
       } catch {
-        await this.keepRecovery({ ...rec, projectId: target.id, name: this.currentName });
+        await this.keepRecovery(rec, { ...rec, projectId: target.id, name: this.currentName });
         this.emit('Recovered session saved, but startup selection failed; recovery copy retained');
         return false;
       }
     }
+    await this.clearRecovery(rec);
     this.emit('Last session restored');
     return true;
   }
 
   async discardRecovery(): Promise<void> {
-    await this.clearRecovery();
-    this.emit('Recovery copy discarded');
+    const rec = this.recovery ?? this.lastRecovery;
+    if (!rec) return;
+    const discarded = await this.clearRecovery(rec);
+    this.emit(discarded ? 'Recovery copy discarded' : 'Recovery copy changed or could not be discarded');
   }
 
   /** Refresh durable audio-take journals left by a browser/Electron crash or an unconfirmed save. */
   async refreshRecordingJournals(): Promise<void> {
     try {
       const journals = await listRecordingJournals();
+      const held = await heldRecordingJournalIds();
       // An unconfirmed manifest may still be arming in another window. A list operation must
       // never delete it or race its first worklet batch.
-      this.recordingJournals = journals.filter((journal) => journal.recordEdgeConfirmed && journal.startFrame !== null);
+      this.recordingJournals = journals.filter((journal) => !held.has(journal.sessionId) &&
+        journal.recordEdgeConfirmed && journal.startFrame !== null && (!journal.midiMode || journal.hasMidiNotes));
     } catch {
       this.recordingJournals = [];
     }
@@ -429,7 +473,14 @@ class ProjectManager {
     if (this.journalOperations.has(sessionId)) return;
     this.journalOperations.add(sessionId);
     try {
-      await deleteRecordingJournal(sessionId);
+      const discarded = await withRecordingJournalLock(sessionId, async () => {
+        await deleteRecordingJournal(sessionId);
+        return true;
+      });
+      if (!discarded) {
+        toast('This take is in use in another Unbox Studio window.', 'info');
+        return;
+      }
       await this.refreshRecordingJournals();
       this.emit('Recorded-take recovery discarded');
     } finally {
@@ -437,12 +488,30 @@ class ProjectManager {
     }
   }
 
-  /** Rebuild one journalled audio take as new audio tracks in the currently open project. */
+  /** Recover a recorded take in the project that owned the capture. */
   async recoverRecordingJournal(sessionId: string): Promise<boolean> {
     if (this.journalOperations.has(sessionId)) return false;
     this.journalOperations.add(sessionId);
     try {
-      if (!this.ensureRecorderIdle('recovering an audio take')) return false;
+      const result = await withRecordingJournalLock(sessionId, () => this.restoreRecordingJournal(sessionId));
+      if (result === undefined) {
+        toast('This take is in use in another Unbox Studio window.', 'info');
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const message = `Could not recover recorded take: ${(error as Error).message}`;
+      this.emit(message);
+      toast(message, 'error');
+      return false;
+    } finally {
+      this.journalOperations.delete(sessionId);
+    }
+  }
+
+  private async restoreRecordingJournal(sessionId: string): Promise<boolean> {
+    try {
+      if (!this.ensureRecorderIdle('recovering a recorded take')) return false;
       const projectId = this.currentId;
       const projectTracks = audioEngine.tracks;
       const loaded = await loadRecordingJournal(sessionId);
@@ -461,6 +530,50 @@ class ProjectManager {
         this.emit(message);
         toast(message, 'info');
         return false;
+      }
+      if (manifest.midiMode) {
+        if (!projectId || this.currentId !== projectId || audioEngine.tracks !== projectTracks ||
+            !this.ensureRecorderIdle('recovering a recorded take')) return false;
+        const byTrack = new Map<string, typeof loaded.midiNotes>();
+        for (const row of loaded.midiNotes) {
+          const rows = byTrack.get(row.trackId) ?? [];
+          rows.push(row);
+          byTrack.set(row.trackId, rows);
+        }
+        const targets = [...byTrack].map(([id, rows]) => ({
+          track: projectTracks.find((track) => track.id === id && track.kind !== 'audio'), rows,
+        }));
+        if (!targets.length || targets.some(({ track }) => !track)) {
+          toast('MIDI recovery needs the original instrument tracks. The take is still available.', 'info');
+          return false;
+        }
+        let changed = false;
+        const expected = new Set<string>();
+        for (const { track, rows } of targets) {
+          if (!track || track.midiTakeIds?.includes(sessionId)) continue;
+          const id = recoveredMidiTakeId(sessionId, track.id);
+          const hasTake = track.arrangementClips?.some((clip) => clip.id === id) || track.patternList?.some((pattern) => pattern.id === id);
+          if (!restoreMidiJournalNotes(track, rows, manifest)) return false;
+          expected.add(id);
+          changed ||= !hasTake;
+        }
+        if (changed) audioEngine.commitEdit();
+        if (!await this.save('Recovered MIDI take')) return false;
+        const saved = await dbGet<ProjectRecord>('projects', projectId);
+        if (!saved) return false;
+        const tracks = parseImportableProject(saved.json)?.tracks as SequencerTrack[] | undefined;
+        if (!Array.isArray(tracks)) return false;
+        const evidence = new Set(tracks.flatMap((track) => [
+          ...(track.arrangementClips ?? []).map((clip) => clip.id),
+          ...(track.patternList ?? []).map((pattern) => pattern.id),
+        ]));
+        const receipts = savedMidiTakeReceipts(saved.json);
+        if ([...expected].some((id) => !evidence.has(id)) ||
+            targets.some(({ track }) => track?.midiTakeIds?.includes(sessionId) && !receipts.get(track.id)?.has(sessionId))) return false;
+        await deleteRecordingJournal(sessionId);
+        await this.refreshRecordingJournals();
+        this.emit('Recovered MIDI take');
+        return true;
       }
       const byTrack = new Map<string, RecordingJournalChunk[]>();
       loaded.chunks.forEach((chunk) => {
@@ -539,8 +652,6 @@ class ProjectManager {
       this.emit(message);
       toast(message, 'error');
       return false;
-    } finally {
-      this.journalOperations.delete(sessionId);
     }
   }
 
@@ -613,9 +724,10 @@ class ProjectManager {
   private write(json: string, versionLabel?: string, auto = false): Promise<boolean> {
     const projectId = this.currentId;
     if (!projectId) return Promise.resolve(false);
+    const tracks = audioEngine.tracks;
     this.pendingWrites += 1;
     return this.enqueue(() => {
-      const writeSnapshot = () => this.writeNow(projectId, json, versionLabel, auto);
+      const writeSnapshot = () => this.writeNow(projectId, tracks, json, versionLabel, auto);
       if (typeof navigator !== 'undefined' && 'locks' in navigator && typeof navigator.locks?.request === 'function') {
         return navigator.locks.request(`unbox_project_${projectId}`, writeSnapshot);
       }
@@ -625,10 +737,10 @@ class ProjectManager {
     });
   }
 
-  private async writeNow(projectId: string, json: string, versionLabel: string | undefined, auto: boolean): Promise<boolean> {
-    if (this.currentId !== projectId) return false;
-    const tracks = audioEngine.tracks;
+  private async writeNow(projectId: string, tracks: SequencerTrack[], json: string, versionLabel: string | undefined, auto: boolean): Promise<boolean> {
     const isCurrent = () => this.currentId === projectId && audioEngine.tracks === tracks;
+    if (!isCurrent()) return false;
+    const coveredRecovery = this.lastRecovery;
     if (!this.ensureRecorderIdle('saving this project', auto)) return false;
     if (projectId === this.protectedId) {
       return this.saveFailed(`saving is paused for "${this.currentName}" because some of its parts could not be loaded. Use Save as… to keep a copy.`, auto);
@@ -640,21 +752,16 @@ class ProjectManager {
       await dbPut('projects', record);
       // Cleanup uses the committed record's destination and asset references even if the user
       // has since opened a different project.
-      try { await discardCompletedRecordingJournals(projectId, record.audioIds); } catch { /* best effort */ }
+      try { await discardCompletedRecordingJournals(projectId, record.audioIds, savedMidiTakeReceipts(json)); } catch { /* best effort */ }
       if (!isCurrent()) return true;
       this.lastSavedJson = json;
       this.dirtyMarker = false;
       this.lastSavedAt = Date.now();
       this.autosaveFailing = false;
-      // The project record is now the recovery copy.
-      if (this.lastRecoveryJson || this.recovery) {
-        this.lastRecoveryJson = '';
-        this.recovery = null;
-        try {
-          await dbDelete('settings', 'recovery');
-        } catch {
-          // ignore
-        }
+      // Consume only this session's older snapshot. A banner remains a choice
+      // until the user restores or discards the exact snapshot it offers.
+      if (coveredRecovery?.projectId === projectId && !sameRecovery(this.recovery, coveredRecovery)) {
+        await this.clearRecoveryNow(coveredRecovery);
       }
       if (versionLabel) await this.addVersion(projectId, json, versionLabel, auto);
       if (isCurrent()) this.emit(auto ? 'Autosaved' : 'Saved');
@@ -681,6 +788,7 @@ class ProjectManager {
     if (this.needsWelcome) return false;
     if (!this.ensureRecorderIdle('saving this project as a new copy')) return false;
     const previous = { id: this.currentId, name: this.currentName, protectedId: this.protectedId };
+    const previousRecovery = this.lastRecovery;
     const projectId = uid('prj');
     this.currentId = projectId;
     this.currentName = name.trim() || 'Untitled';
@@ -699,6 +807,9 @@ class ProjectManager {
     } catch (e) {
       this.emit(`Project saved, but startup selection failed: ${(e as Error).message}`);
       return false;
+    }
+    if (previousRecovery?.projectId === previous.id && !sameRecovery(this.recovery, previousRecovery)) {
+      await this.clearRecovery(previousRecovery);
     }
     return true;
   }

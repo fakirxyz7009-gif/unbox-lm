@@ -21,6 +21,16 @@ export abstract class BaseDevice {
   public params: Record<string, any> = {};
   public isPowered: boolean = true;
   public isBypassed: boolean = false;
+  /** Current pitch bend (−1..1), persisted so offline clones can reproduce it. */
+  public pitchBend = 0;
+  /** Current mod wheel (0..1), persisted so offline clones can reproduce it. */
+  public modWheel = 0;
+  /** MPE per-note pitch bend in cents, note → cents. */
+  public readonly perNoteDetune = new Map<number, number>();
+  /** MPE per-note pressure, note → 0..1. */
+  public readonly perNotePressure = new Map<number, number>();
+  /** MPE per-note timbre / CC74, note → 0..1. */
+  public readonly perNoteTimbre = new Map<number, number>();
   public analyser: AnalyserNode;
 
   constructor(ctx: AudioContext, id: string, name: string, type: DeviceType, heightUnits: number = 2) {

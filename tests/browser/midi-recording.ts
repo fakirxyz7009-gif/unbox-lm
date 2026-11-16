@@ -13,6 +13,9 @@ type FakePort = EventTarget & {
 };
 
 async function run(): Promise<void> {
+  if (!(await projectManager.create('empty', 'MIDI Record Integration Probe'))) {
+    throw new Error('The simulated MIDI recording project could not be created');
+  }
   resultNode.textContent = 'Preparing simulated Impulse MIDI input…';
   const port = Object.assign(new EventTarget(), {
     id: 'simulated-impulse-25',

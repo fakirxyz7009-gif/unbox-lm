@@ -1,0 +1,119 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    # The product and several suite paths (NSIS packaging, junction handling) are Windows-specific,
+    # so the gate runs where the app ships.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # Lint and the regression suite live in one composite action, so the release workflow runs
+      # exactly these checks before it packages anything.
+      - name: Verify the source
+        uses: ./.github/actions/verify
+
+  browser-audio:
+    # Its own job: the probe boots a Vite dev server and headless Chrome and renders audio, and it
+    # stalled for minutes when it shared a machine with the unit suite. Running it here keeps the
+    # suite fast and still gates every push on real rendered audio.
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify the browser audio probe
+        uses: ./.github/actions/verify-browser
+
+  vst3-hosting:
+    # Real third-party VST3 hosting, proven on the runner. The SDK is not vendored (495 MB of upstream
+    # source), so this job fetches the pinned tag, caches it, builds the host fixtures plus Steinberg's
+    # ADelay sample, then loads that plugin through the generic out-of-process host.
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # The SDK pin is the tag the probes were verified against.
+      - name: Restore the pinned VST3 SDK
+        id: sdk
+        uses: actions/cache@v4
+        with:
+          path: third_party/vst3sdk
+          key: vst3sdk-v3.8.1_build_84
+
+      # The SDK is not in the repository (third_party/ is generated and ignored), so a clean checkout has
+      # nothing to build; clone the pinned tag and only what the build reads (cmake holds the SMTG
+      # helpers the configure step needs).
+      - name: Fetch the VST3 SDK
+        if: steps.sdk.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 --branch v3.8.1_build_84 https://github.com/steinbergmedia/vst3sdk third_party/vst3sdk
+          git -C third_party/vst3sdk submodule update --init --depth 1 base cmake pluginterfaces public.sdk
+
+      # Built outside the checkout so the job writes no generated files into the working tree; the path
+      # is stable, so it can be cached and Ninja then rebuilds only what changed.
+      - name: Restore the host build directory
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/vst3-build
+          key: vst3-host-build-${{ hashFiles('scripts/vst3/CMakeLists.txt') }}
+
+      - name: Build the host fixtures and run the VST3 smoke tests
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/smoke.ps1 -BuildRoot "${{ runner.temp }}/vst3-build"
+
+      - name: Host a third-party VST3 module
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/third-party-probe.ps1 -BuildRoot "${{ runner.temp }}/vst3-build"

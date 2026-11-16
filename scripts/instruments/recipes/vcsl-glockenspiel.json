@@ -1,0 +1,193 @@
+{
+  "id": "vcsl-glockenspiel",
+  "name": "VCSL Glockenspiel",
+  "kind": "melodic",
+  "category": "percussion",
+  "description": "Recorded orchestral glockenspiel with soft, medium and loud mallet strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Glockenspiel",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Seven sampled roots keep their soft, medium and loud strikes; the source labels G4-C7."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-glockenspiel/samples",
+  "notes": [
+    {
+      "file": "glock_loud_C5_01.wav",
+      "root": 84,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_loud_C6_01.wav",
+      "root": 96,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_loud_C7_01.wav",
+      "root": 108,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_loud_G#6_01.wav",
+      "root": 104,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_loud_G#6_01.wav",
+      "root": 104,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_loud_G#6_01.wav",
+      "root": 104,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_loud_G4_01.wav",
+      "root": 79,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_loud_G5_01.wav",
+      "root": 91,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_medium_C5_01.wav",
+      "root": 84,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_C6_01.wav",
+      "root": 96,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_C7_01.wav",
+      "root": 108,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_G4_01.wav",
+      "root": 79,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_G5_01.wav",
+      "root": 91,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_G6_01.wav",
+      "root": 103,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "glock_medium_G6_01.wav",
+      "root": 103,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "glock_soft_C5_02.wav",
+      "root": 84,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_soft_C6_01.wav",
+      "root": 96,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_soft_C7_03.wav",
+      "root": 108,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_soft_G4_01.wav",
+      "root": 79,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_soft_G5_01.wav",
+      "root": 91,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "glock_soft_G6_01.wav",
+      "root": 103,
+      "vel": [
+        1,
+        42
+      ]
+    }
+  ],
+  "keyRange": [
+    79,
+    108
+  ],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 3
+}

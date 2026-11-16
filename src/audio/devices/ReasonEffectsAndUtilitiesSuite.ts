@@ -101,6 +101,24 @@ export class ReasonEffectBase extends BaseDevice {
         this.setParam('mix', Math.max(0, Math.min(1, (Number(this.params.mix) || 0.5) + amount * 0.4)));
       },
     });
+
+    // Rear "Follower / Mod CV Out": the level of this unit's own output. Without a source every
+    // cable from that jack read a constant 0.
+    this.cvOutputs.set('cv_out', { getter: () => this.followerLevel() });
+  }
+
+  private followerEnv = 0;
+  private followerBuf?: Float32Array<ArrayBuffer>;
+
+  /** Smoothed envelope follower of the processed output, 0..1. */
+  private followerLevel(): number {
+    const buf = (this.followerBuf ??= new Float32Array(this.analyser.fftSize));
+    this.analyser.getFloatTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+    const rms = Math.sqrt(sum / buf.length);
+    this.followerEnv += (Math.min(1, rms * 3) - this.followerEnv) * 0.35;
+    return this.followerEnv;
   }
 
   protected makeDriveCurve(amount: number): Float32Array<ArrayBuffer> {

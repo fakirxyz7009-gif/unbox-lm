@@ -1,0 +1,153 @@
+{
+  "id": "vcsl-xylophone",
+  "name": "VCSL Xylophone",
+  "kind": "melodic",
+  "category": "percussion",
+  "description": "Recorded xylophone with hard mallets and soft and loud strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Xylophone",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Eight sampled roots keep the hard-mallet soft and loud strokes; the medium and soft mallets remain in the source."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-xylophone/samples",
+  "notes": [
+    {
+      "file": "Xylo_Hard_C4_ff_01_far.wav",
+      "root": 72,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C4_pp_01_far.wav",
+      "root": 72,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C5_ff_01_far.wav",
+      "root": 84,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C5_pp_01_far.wav",
+      "root": 84,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C6_ff_01_far.wav",
+      "root": 96,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C6_pp_01_far.wav",
+      "root": 96,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C7_ff_01_far.wav",
+      "root": 108,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_C7_pp_01_far.wav",
+      "root": 108,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G3_ff_01_far.wav",
+      "root": 67,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G3_pp_01_far.wav",
+      "root": 67,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G4_ff_01_far.wav",
+      "root": 79,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G4_pp_01_far.wav",
+      "root": 79,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G5_ff_01_far.wav",
+      "root": 91,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G5_pp_01_far.wav",
+      "root": 91,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G6_ff_01_far.wav",
+      "root": 103,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "Xylo_Hard_G6_pp_01_far.wav",
+      "root": 103,
+      "vel": [
+        1,
+        63
+      ]
+    }
+  ],
+  "keyRange": [
+    67,
+    108
+  ],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 2.5,
+  "release": 0.2,
+  "notePolyphony": 3
+}

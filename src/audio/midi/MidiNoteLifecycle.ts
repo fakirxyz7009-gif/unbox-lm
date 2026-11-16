@@ -3,8 +3,11 @@ export class MidiNoteLifecycle<T> {
   private readonly heldTargets = new Map<number, readonly T[]>();
   private readonly sustainedTargets = new Map<number, Set<T>>();
 
-  noteOn(channel: number, note: number, targets: readonly T[]): void {
-    this.heldTargets.set(this.key(channel, note), [...targets]);
+  noteOn(channel: number, note: number, targets: readonly T[]): readonly T[] {
+    const key = this.key(channel, note);
+    const previous = this.heldTargets.get(key) ?? [];
+    this.heldTargets.set(key, [...targets]);
+    return previous;
   }
 
   noteOff(
@@ -13,7 +16,7 @@ export class MidiNoteLifecycle<T> {
     fallbackTargets: readonly T[],
     sustainDown: boolean,
     recordKeyRelease: (target: T, note: number, channel: number) => void,
-    releaseSound: (target: T, note: number) => void
+    releaseSound: (target: T, note: number, channel: number) => void
   ): void {
     const key = this.key(channel, note);
     const targets = this.heldTargets.get(key) ?? fallbackTargets;
@@ -21,7 +24,7 @@ export class MidiNoteLifecycle<T> {
     targets.forEach((target) => recordKeyRelease(target, note, channel));
 
     if (!sustainDown) {
-      targets.forEach((target) => releaseSound(target, note));
+      targets.forEach((target) => releaseSound(target, note, channel));
       return;
     }
 
@@ -30,12 +33,15 @@ export class MidiNoteLifecycle<T> {
     this.sustainedTargets.set(key, sustained);
   }
 
-  sustainReleased(releaseSound: (target: T, note: number) => void, channel?: number): void {
+  sustainReleased(releaseSound: (target: T, note: number, channel: number) => void, channel?: number): void {
     for (const [key, targets] of this.sustainedTargets) {
       const heldChannel = key >> 7;
       if (channel !== undefined && heldChannel !== (channel & 0x0f)) continue;
       const note = key & 0x7f;
-      targets.forEach((target) => releaseSound(target, note));
+      const held = this.heldTargets.get(key);
+      targets.forEach((target) => {
+        if (!held?.includes(target)) releaseSound(target, note, heldChannel);
+      });
       this.sustainedTargets.delete(key);
     }
   }
@@ -44,14 +50,14 @@ export class MidiNoteLifecycle<T> {
   allOff(
     channel: number | undefined,
     recordKeyRelease: (target: T, note: number, channel: number) => void,
-    releaseSound: (target: T, note: number) => void
+    releaseSound: (target: T, note: number, channel: number) => void
   ): void {
     for (const [key, targets] of [...this.heldTargets]) {
       const heldChannel = key >> 7;
       if (channel !== undefined && heldChannel !== (channel & 0x0f)) continue;
       const note = key & 0x7f;
       targets.forEach((target) => recordKeyRelease(target, note, heldChannel));
-      targets.forEach((target) => releaseSound(target, note));
+      targets.forEach((target) => releaseSound(target, note, heldChannel));
       this.heldTargets.delete(key);
     }
     this.sustainReleased(releaseSound, channel);

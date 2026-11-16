@@ -1,0 +1,69 @@
+{
+  "id": "vcsl-ratchet",
+  "name": "VCSL Ratchets",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Two recorded ratchets with slow, fast and crank articulations.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Ratchet",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Both ratchets retain slow and fast turns; each crank pad keeps its two recorded round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-ratchet/samples",
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Ratchet 1 Slow",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "Ratchet1_Slow_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Ratchet 1 Fast",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "Ratchet1_Fast_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Ratchet 1 Crank",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "Ratchet1_Crank_rr1_Mid.wav",
+        "Ratchet1_Crank_rr3_Mid.wav"
+      ]
+    },
+    {
+      "name": "Ratchet 2 Slow",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "Ratchet2_Slow_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Ratchet 2 Fast",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "Ratchet2_Fast_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Ratchet 2 Crank",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "Ratchet2_Crank_v1_rr1_Mid.wav",
+        "Ratchet2_Crank_v1_rr2_Mid.wav"
+      ]
+    }
+  ]
+}

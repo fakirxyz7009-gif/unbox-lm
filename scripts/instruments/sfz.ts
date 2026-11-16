@@ -419,9 +419,11 @@ export function readSfz(rootFile: string, read: (rel: string) => string | null, 
       }
     } else {
       sample = path.posix.normalize(path.posix.join(defaultPath.replace(/\\/g, '/'), sampleRaw));
-      // A sample outside the program's folder would read a file the pack does not own.
-      if (path.posix.isAbsolute(sample) || /^[a-zA-Z]:/.test(sample) || sample === '..' || sample.startsWith('../')) {
-        drop('sample outside its folder');
+      // Keep parent-relative paths for repository sources: `Programs/../Samples/x.wav`
+      // resolves inside the repository. Local folder sources still reject paths that
+      // escape their instrument folder when the files are fetched.
+      if (path.posix.isAbsolute(sample) || /^[a-zA-Z]:/.test(sample)) {
+        drop('absolute sample path');
         continue;
       }
     }
@@ -532,14 +534,22 @@ export function readSfz(rootFile: string, read: (rel: string) => string | null, 
       ];
     };
     const velocityFadeCurve = (ops.xf_velcurve ?? 'power').toLowerCase();
+    const rawLovel = f('lovel', 1);
+    const rawHivel = f('hivel', 127);
+    if (rawLovel < 0 || rawLovel > 127 || rawHivel < 0 || rawHivel > 127 || rawLovel > rawHivel) {
+      drop('invalid velocity range');
+      continue;
+    }
+    const lovel = Math.round(rawLovel);
+    const hivel = Math.round(rawHivel);
     regions.push({
       sample,
       lokey: Math.max(0, lokey),
       hikey: Math.min(127, hikey),
       keycenter,
       keytrack: f('pitch_keytrack', 100),
-      lovel: f('lovel', 1),
-      hivel: f('hivel', 127),
+      lovel,
+      hivel,
       seqLength: Math.max(1, Math.round(f('seq_length', 1))),
       seqPosition: Math.max(1, Math.round(f('seq_position', 1))),
       lorand: f('lorand', 0),

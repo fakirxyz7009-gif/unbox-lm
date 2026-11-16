@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import express from 'express';
 import { createLocalAiRouter, ollamaUrl, readContext } from '../server/routes/localAiRoutes.ts';
+import { announceSkip } from './helpers/skip.ts';
 
 const context = {
   bpm: 120,
@@ -95,7 +96,7 @@ test('the status route reports the installed models, or that Ollama is offline',
   const { server, base } = await listen();
   try {
     const status = (await (await fetch(`${base}/api/local-ai/status`)).json()) as { online: boolean; models: string[] };
-    if (!status.online) return t.skip('Ollama is not running on this computer');
+    if (!status.online) return announceSkip(t, 'the Ollama status route', 'Ollama is not running on this computer');
     assert.ok(Array.isArray(status.models));
     assert.ok(status.models.length > 0, 'expected at least one installed model');
   } finally {
@@ -105,7 +106,7 @@ test('the status route reports the installed models, or that Ollama is offline',
 
 test('a live request returns only checked actions', { timeout: 420_000 }, async (t) => {
   const ready = await fetch('http://127.0.0.1:11434/api/tags', { signal: AbortSignal.timeout(3000) }).then((r) => r.ok).catch(() => false);
-  if (!ready) return t.skip('Ollama is not running on this computer');
+  if (!ready) return announceSkip(t, 'a live Ollama action request', 'Ollama is not running on this computer');
   const { server, base } = await listen();
   try {
     const { status, data } = await post(base, { model: 'qwen2.5-coder:3b', message: 'Reverse the notes of the bass pattern.', context });

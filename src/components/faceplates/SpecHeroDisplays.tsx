@@ -34,8 +34,8 @@ export const isHeroDisplay = (kind: PanelDisplay | undefined): boolean =>
 export const HeaderBadge: React.FC<{ kind: PanelDisplay; accent: string }> = ({ kind, accent }) => {
   if (kind === 'dual_quantum') {
     return (
-      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-950/80 border border-emerald-500/60 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-950/80 border border-emerald-500/60 shadow-[0_0_10px_rgba(201,160,108,0.28)]">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#c9a06c] animate-pulse" />
         <span className="text-[11px] font-mono font-black text-emerald-300 tracking-wider">ON</span>
       </div>
     );
@@ -226,7 +226,7 @@ export const DualQuantumHero: React.FC<{
             // Bar gradient (Teal -> Amber)
             const grad = ctx.createLinearGradient(0, h, 0, y);
             grad.addColorStop(0, '#00e5ff');
-            grad.addColorStop(0.7, '#10b981');
+            grad.addColorStop(0.7, '#c9a06c');
             grad.addColorStop(1, '#f59e0b');
             ctx.fillStyle = grad;
             ctx.fillRect(x, y, barWidth, barH);
@@ -385,25 +385,24 @@ export const TripleVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
     needleRef: React.RefObject<SVGLineElement | null>,
     isGr = false
   ) => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center flex-1 min-w-0 max-w-[146px]">
       <div
-        className="relative rounded-md border-2 border-[#54432d] overflow-hidden shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.5)]"
+        className="vu-bezel relative w-full rounded-md border-2 border-[#3d714c] overflow-hidden shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.5)]"
         style={{
-          background: 'linear-gradient(180deg, #faf0d2 0%, #ebd49d 70%, #d8be82 100%)',
-          width: 146,
-          height: 82,
+          background: 'linear-gradient(180deg, #163726 0%, #0d2115 70%, #0a1a10 100%)',
+          aspectRatio: '146 / 82',
         }}
       >
         <svg viewBox="0 0 130 72" className="w-full h-full">
           {/* Subtle paper grain / glow */}
           <radialGradient id="paperGlow" cx="50%" cy="30%" r="70%">
-            <stop offset="0%" stopColor="#fff8e7" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#ebd49d" stopOpacity="0" />
+            <stop offset="0%" stopColor="#3e7753" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#0d2115" stopOpacity="0" />
           </radialGradient>
           <rect width="130" height="72" fill="url(#paperGlow)" />
 
           {/* Scale Arch */}
-          <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#3d3020" strokeWidth="1.2" />
+          <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#9fbd8a" strokeWidth="1.2" />
           {/* Overload red zone */}
           <path d="M 88 20 A 52 52 0 0 1 112 52" fill="none" stroke="#dc2626" strokeWidth="2.5" />
 
@@ -415,26 +414,26 @@ export const TripleVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
               y1={13}
               x2={65}
               y2={17}
-              stroke={deg > 20 ? '#dc2626' : '#3d3020'}
+              stroke={deg > 20 ? '#dc2626' : '#9fbd8a'}
               strokeWidth={deg % 20 === 0 ? 1.5 : 0.8}
               transform={`rotate(${deg} 65 62)`}
             />
           ))}
 
           {/* Decibel markings */}
-          <text x={26} y={42} fontSize={6.5} fill="#3d3020" fontFamily="sans-serif" fontWeight="bold">
+          <text x={26} y={42} fontSize={6.5} fill="#e9e6df" fontFamily="sans-serif" fontWeight="bold">
             -20
           </text>
-          <text x={42} y={30} fontSize={6.5} fill="#3d3020" fontFamily="sans-serif" fontWeight="bold">
+          <text x={42} y={30} fontSize={6.5} fill="#e9e6df" fontFamily="sans-serif" fontWeight="bold">
             -10
           </text>
-          <text x={65} y={24} fontSize={6.5} fill="#3d3020" textAnchor="middle" fontFamily="sans-serif" fontWeight="bold">
+          <text x={65} y={24} fontSize={6.5} fill="#e9e6df" textAnchor="middle" fontFamily="sans-serif" fontWeight="bold">
             {isGr ? '-6' : '0'}
           </text>
-          <text x={88} y={30} fontSize={6.5} fill="#3d3020" fontFamily="sans-serif" fontWeight="bold">
+          <text x={88} y={30} fontSize={6.5} fill="#e9e6df" fontFamily="sans-serif" fontWeight="bold">
             {isGr ? '0' : '+1'}
           </text>
-          <text x={104} y={42} fontSize={6.5} fill="#dc2626" fontFamily="sans-serif" fontWeight="bold">
+          <text x={104} y={42} fontSize={6.5} fill="#f87171" fontFamily="sans-serif" fontWeight="bold">
             +3
           </text>
 
@@ -443,7 +442,7 @@ export const TripleVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
             x={65}
             y={50}
             fontSize={7}
-            fill="#3d3020"
+            fill="#e9e6df"
             textAnchor="middle"
             fontFamily="monospace"
             fontWeight="bold"
@@ -459,7 +458,7 @@ export const TripleVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
             y1={62}
             x2={65}
             y2={11}
-            stroke="#1c1917"
+            stroke="#e8cd7c"
             strokeWidth={1.5}
             strokeLinecap="round"
             transform={isGr ? 'rotate(36 65 62)' : 'rotate(-45 65 62)'}
@@ -474,7 +473,7 @@ export const TripleVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
   );
 
   return (
-    <div className="flex items-center justify-around gap-3 p-3 rounded-lg border border-amber-900/50 bg-gradient-to-b from-[#1c1813] via-[#120f0c] to-[#0a0806] shadow-inner">
+    <div className="flex items-center justify-center gap-2 p-2 rounded-lg border border-amber-900/50 bg-gradient-to-b from-[#1c1813] via-[#120f0c] to-[#0a0806] shadow-inner">
       {renderMeter('INPUT', needleIn)}
       {renderMeter('GAIN REDUCTION', needleGr, true)}
       {renderMeter('OUTPUT', needleOut)}
@@ -528,44 +527,42 @@ export const DualVuHero: React.FC<{ device: SpecDevice }> = ({ device }) => {
   }, [device]);
 
   return (
-    <div className="flex items-center justify-center gap-6 p-3 rounded-lg border border-neutral-700/50 bg-gradient-to-b from-[#181a1d] to-[#0c0d0f] shadow-inner">
-      <div className="flex flex-col items-center">
+    <div className="flex items-center justify-center gap-3 p-2 rounded-lg border border-neutral-700/50 bg-gradient-to-b from-[#181a1d] to-[#0c0d0f] shadow-inner">
+      <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px]">
         <div
-          className="relative rounded-md border-2 border-[#54432d] overflow-hidden shadow-md"
+          className="vu-bezel relative w-full rounded-md border-2 border-[#3d714c] overflow-hidden shadow-md"
           style={{
-            background: 'linear-gradient(180deg, #faf0d2 0%, #ebd49d 70%, #d8be82 100%)',
-            width: 170,
-            height: 90,
+            background: 'linear-gradient(180deg, #163726 0%, #0d2115 70%, #0a1a10 100%)',
+            aspectRatio: '170 / 90',
           }}
         >
           <svg viewBox="0 0 130 72" className="w-full h-full">
-            <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#3d3020" strokeWidth="1.2" />
+            <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#9fbd8a" strokeWidth="1.2" />
             <path d="M 88 20 A 52 52 0 0 1 112 52" fill="none" stroke="#dc2626" strokeWidth="2.5" />
-            <text x={65} y={50} fontSize={7} fill="#3d3020" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
+            <text x={65} y={50} fontSize={7} fill="#e9e6df" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
               CHANNEL A (LEFT)
             </text>
-            <line ref={needleL} x1={65} y1={62} x2={65} y2={11} stroke="#1c1917" strokeWidth={1.5} strokeLinecap="round" transform="rotate(-45 65 62)" />
+            <line ref={needleL} x1={65} y1={62} x2={65} y2={11} stroke="#e8cd7c" strokeWidth={1.5} strokeLinecap="round" transform="rotate(-45 65 62)" />
             <circle cx={65} cy={62} r={6} fill="#292524" />
             <circle cx={65} cy={62} r={2} fill="#d97706" />
           </svg>
         </div>
       </div>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px]">
         <div
-          className="relative rounded-md border-2 border-[#54432d] overflow-hidden shadow-md"
+          className="vu-bezel relative w-full rounded-md border-2 border-[#3d714c] overflow-hidden shadow-md"
           style={{
-            background: 'linear-gradient(180deg, #faf0d2 0%, #ebd49d 70%, #d8be82 100%)',
-            width: 170,
-            height: 90,
+            background: 'linear-gradient(180deg, #163726 0%, #0d2115 70%, #0a1a10 100%)',
+            aspectRatio: '170 / 90',
           }}
         >
           <svg viewBox="0 0 130 72" className="w-full h-full">
-            <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#3d3020" strokeWidth="1.2" />
+            <path d="M 18 52 A 52 52 0 0 1 112 52" fill="none" stroke="#9fbd8a" strokeWidth="1.2" />
             <path d="M 88 20 A 52 52 0 0 1 112 52" fill="none" stroke="#dc2626" strokeWidth="2.5" />
-            <text x={65} y={50} fontSize={7} fill="#3d3020" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
+            <text x={65} y={50} fontSize={7} fill="#e9e6df" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
               CHANNEL B (RIGHT)
             </text>
-            <line ref={needleR} x1={65} y1={62} x2={65} y2={11} stroke="#1c1917" strokeWidth={1.5} strokeLinecap="round" transform="rotate(-45 65 62)" />
+            <line ref={needleR} x1={65} y1={62} x2={65} y2={11} stroke="#e8cd7c" strokeWidth={1.5} strokeLinecap="round" transform="rotate(-45 65 62)" />
             <circle cx={65} cy={62} r={6} fill="#292524" />
             <circle cx={65} cy={62} r={2} fill="#d97706" />
           </svg>
@@ -614,7 +611,7 @@ export const DistressorLedsHero: React.FC<{
             const active = grDb >= threshold;
             const isRed = threshold >= 16;
             const isYellow = threshold >= 7 && threshold < 16;
-            const activeColor = isRed ? '#ef4444' : isYellow ? '#eab308' : '#22c55e';
+            const activeColor = isRed ? '#ef4444' : isYellow ? '#eab308' : '#c9a06c';
             return (
               <div key={threshold} className="flex flex-col items-center gap-1">
                 <span
@@ -1050,7 +1047,7 @@ export const VectorscopeHero: React.FC<{ device: SpecDevice }> = ({ device }) =>
           ctx.fillRect(0, 0, w, h);
 
           // Circular phosphorescent grid
-          ctx.strokeStyle = 'rgba(34, 197, 94, 0.25)';
+          ctx.strokeStyle = 'rgba(201, 160, 108, 0.22)';
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(w / 2, h / 2, 40, 0, Math.PI * 2);
@@ -1061,8 +1058,8 @@ export const VectorscopeHero: React.FC<{ device: SpecDevice }> = ({ device }) =>
           ctx.stroke();
 
           // Lissajous Stereo Field Plot
-          ctx.strokeStyle = '#4ade80';
-          ctx.shadowColor = '#4ade80';
+          ctx.strokeStyle = '#d7b586';
+          ctx.shadowColor = '#d7b586';
           ctx.shadowBlur = 6;
           ctx.lineWidth = 1.4;
           ctx.beginPath();
@@ -1085,7 +1082,7 @@ export const VectorscopeHero: React.FC<{ device: SpecDevice }> = ({ device }) =>
   }, [device]);
 
   return (
-    <div className="flex items-center justify-center p-3 rounded-lg border border-emerald-900/40 bg-gradient-to-b from-[#0c140e] to-[#040805] shadow-inner">
+    <div className="flex items-center justify-center p-3 rounded-lg border border-emerald-900/40 bg-gradient-to-b from-[#121417] to-[#08090b] shadow-inner">
       <div className="flex flex-col items-center">
         <canvas ref={canvasRef} width={260} height={90} className="rounded-md border border-emerald-800/60 block shadow" />
         <span className="text-[10px] font-mono font-bold text-emerald-400 mt-1 uppercase tracking-wider">

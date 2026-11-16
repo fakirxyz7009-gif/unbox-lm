@@ -1,0 +1,165 @@
+{
+  "id": "vcsl-suspended-cymbal-2",
+  "name": "VCSL Suspended Cymbal",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded suspended cymbal with five hit dynamics, bell and stick strokes, bowed tones, crescendos, rolls and a scrape.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Suspended%20Cymbal%202",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This is the second suspended cymbal in the source. Five stick hits, two bell hits, three stick-tip dynamics, three bowed takes, three crescendos, three rolls and a scrape are retained."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-suspended-cymbal-2/samples",
+  "maxSeconds": 7,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Hit pp",
+      "note": 36,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_pp1.wav"
+      ]
+    },
+    {
+      "name": "Hit mp",
+      "note": 37,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_mp1.wav"
+      ]
+    },
+    {
+      "name": "Hit mf",
+      "note": 38,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_mf1.wav"
+      ]
+    },
+    {
+      "name": "Hit f",
+      "note": 39,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_f1.wav"
+      ]
+    },
+    {
+      "name": "Hit fff",
+      "note": 40,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_fff1.wav"
+      ]
+    },
+    {
+      "name": "Bell p",
+      "note": 41,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_bell_p1.wav"
+      ]
+    },
+    {
+      "name": "Bell f",
+      "note": 42,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_bell_f1.wav"
+      ]
+    },
+    {
+      "name": "Stick pp",
+      "note": 43,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_stick_pp1.wav"
+      ]
+    },
+    {
+      "name": "Stick mp",
+      "note": 44,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_stick_mp1.wav"
+      ]
+    },
+    {
+      "name": "Stick mf",
+      "note": 45,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_hit_stick_mf1.wav"
+      ]
+    },
+    {
+      "name": "Bowed",
+      "note": 46,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_bowed_2.wav",
+        "susCymb2_bowed_4.wav",
+        "susCymb2_bowed_6.wav"
+      ]
+    },
+    {
+      "name": "Crescendo 2.5s",
+      "note": 47,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_cresc_2.5s2.wav"
+      ]
+    },
+    {
+      "name": "Crescendo 4s",
+      "note": 48,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_cresc_4s.wav"
+      ]
+    },
+    {
+      "name": "Crescendo 7s",
+      "note": 49,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_cresc_7s.wav"
+      ]
+    },
+    {
+      "name": "Roll pp",
+      "note": 50,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_roll_pp1_nloop.wav"
+      ]
+    },
+    {
+      "name": "Roll f",
+      "note": 51,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_roll_f1_nloop.wav"
+      ]
+    },
+    {
+      "name": "Roll fff",
+      "note": 52,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_roll_fff1_nloop.wav"
+      ]
+    },
+    {
+      "name": "Scrape",
+      "note": 53,
+      "role": "cymbal",
+      "samples": [
+        "susCymb2_scrape_2.wav"
+      ]
+    }
+  ]
+}

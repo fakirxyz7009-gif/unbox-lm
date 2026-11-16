@@ -671,7 +671,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
       aria-modal="true"
       aria-labelledby="sample-browser-title"
     >
-      <div className={`w-full max-w-[1280px] h-[760px] max-h-[94vh] bg-chrome-0 border ${isDragging ? 'border-sel ring-2 ring-sel/50' : 'border-chrome-line'} rounded-md shadow-2xl flex flex-col overflow-hidden text-chrome-ink relative transition-all`}>
+      <div className={`unbox-dialog-shell w-full max-w-[1280px] h-[760px] max-h-[94vh] bg-chrome-0 border ${isDragging ? 'border-sel ring-2 ring-sel/50' : 'border-chrome-line'} rounded-md shadow-2xl flex flex-col overflow-hidden text-chrome-ink relative transition-all`}>
         {/* Drag and Drop Banner */}
         {isDragging && (
           <div className="absolute inset-0 bg-sel/15 backdrop-blur-[2px] z-50 pointer-events-none flex flex-col items-center justify-center gap-2 border-2 border-dashed border-sel rounded-md text-white font-bold text-[16px]">
@@ -862,7 +862,7 @@ export function SampleBrowser({ isOpen, onClose, onMessage }: Props) {
               <p className="text-[11px] leading-snug text-[#b0b8bf]">
                 Derive <strong>vocals, drums, bass and the other instruments</strong> from the audio you selected, then mute, solo and rebalance them. The built-in separator is quick signal processing with some bleed; the trained model is cleaner and can also give guitar and piano.
               </p>
-              <p className="text-[11px] leading-snug text-[#7fe1bd]">
+              <p                         className="text-[11px] leading-snug text-[#9fb3c2]">
                 Uses only your source audio. It does not generate a new song, performer, instrument, or replacement sound.
               </p>
 

@@ -69,7 +69,7 @@ export async function dbGet<T>(store: StoreName, key: string): Promise<T | undef
   return done(db.transaction(store).objectStore(store).get(key)) as Promise<T | undefined>;
 }
 
-/** Resolves once the transaction has committed, so a write that reports success is on disk. */
+/** Resolves when IndexedDB commits. The write's durability hint controls storage flushing. */
 const committed = (tx: IDBTransaction, req: IDBRequest) =>
   new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
@@ -77,10 +77,57 @@ const committed = (tx: IDBTransaction, req: IDBRequest) =>
     tx.onabort = () => reject(tx.error ?? req.error ?? new Error('Database write was aborted'));
   });
 
+function singleWrite(db: IDBDatabase, store: StoreName): IDBTransaction {
+  // Saved audio and its project/recovery pointers can become the sole copies
+  // after journal cleanup. Await a strict commit for these stores.
+  const critical = store === 'audio' || store === 'projects' || store === 'settings';
+  return db.transaction(store, 'readwrite', critical ? { durability: 'strict' } : undefined);
+}
+
 export async function dbPut<T>(store: StoreName, value: T): Promise<void> {
   const db = await openDb();
-  const tx = db.transaction(store, 'readwrite');
+  const tx = singleWrite(db, store);
   await committed(tx, tx.objectStore(store).put(value));
+}
+
+/** Compare and mutate while holding one IndexedDB transaction's writer lock. */
+async function dbChangeIf<T>(store: StoreName, key: string, change: (objectStore: IDBObjectStore, current: T | undefined) => boolean): Promise<boolean> {
+  const db = await openDb();
+  const tx = singleWrite(db, store);
+  const objectStore = tx.objectStore(store);
+  const read = objectStore.get(key);
+  return new Promise<boolean>((resolve, reject) => {
+    let changed = false;
+    let error: unknown;
+    tx.oncomplete = () => resolve(changed);
+    tx.onabort = () => reject(error ?? tx.error ?? new Error('Conditional database write was aborted'));
+    read.onsuccess = () => {
+      try {
+        changed = change(objectStore, read.result as T | undefined);
+      } catch (reason) {
+        error = reason;
+        tx.abort();
+      }
+    };
+  });
+}
+
+export function dbPutIf<T extends object>(store: StoreName, key: string, value: T, shouldPut: (current: T | undefined) => boolean): Promise<boolean> {
+  return dbChangeIf<T>(store, key, (objectStore, current) => {
+    if (!shouldPut(current)) return false;
+    const keyPath = objectStore.keyPath;
+    if (typeof keyPath !== 'string' || Reflect.get(value, keyPath) !== key) throw new Error('Conditional write must keep the checked database key');
+    objectStore.put(value);
+    return true;
+  });
+}
+
+export function dbDeleteIf<T>(store: StoreName, key: string, shouldDelete: (current: T | undefined) => boolean): Promise<boolean> {
+  return dbChangeIf<T>(store, key, (objectStore, current) => {
+    if (!shouldDelete(current) || current === undefined) return false;
+    objectStore.delete(key);
+    return true;
+  });
 }
 
 /** Writes a bounded batch in one transaction (used for non-realtime recovery journaling). */

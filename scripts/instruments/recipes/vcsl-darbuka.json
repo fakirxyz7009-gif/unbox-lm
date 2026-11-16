@@ -1,0 +1,69 @@
+{
+  "id": "vcsl-darbuka",
+  "name": "VCSL Darbuka",
+  "kind": "drums",
+  "category": "world",
+  "description": "Five darbuka strokes from the VCSL CC0 library, each with two dynamic levels and two round robins, mapped to MIDI notes 60–64.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Darbuka",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual darbuka performer. All five current hit types are included with both velocity layers and both round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-darbuka/samples",
+  "lanes": [
+    {
+      "name": "Darbuka 1",
+      "note": 60,
+      "samples": [
+        { "file": "Darbuka_1_hit_vl1_rr1.wav", "vel": [1, 63] },
+        { "file": "Darbuka_1_hit_vl1_rr2.wav", "vel": [1, 63] },
+        { "file": "Darbuka_1_hit_vl2_rr1.wav", "vel": [64, 127] },
+        { "file": "Darbuka_1_hit_vl2_rr2.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Darbuka 2",
+      "note": 61,
+      "samples": [
+        { "file": "Darbuka_2_hit_vl1_rr1.wav", "vel": [1, 63] },
+        { "file": "Darbuka_2_hit_vl1_rr2.wav", "vel": [1, 63] },
+        { "file": "Darbuka_2_hit_vl2_rr1.wav", "vel": [64, 127] },
+        { "file": "Darbuka_2_hit_vl2_rr2.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Darbuka 3",
+      "note": 62,
+      "samples": [
+        { "file": "Darbuka_3_hit_vl1_rr1.wav", "vel": [1, 63] },
+        { "file": "Darbuka_3_hit_vl1_rr2.wav", "vel": [1, 63] },
+        { "file": "Darbuka_3_hit_vl2_rr1.wav", "vel": [64, 127] },
+        { "file": "Darbuka_3_hit_vl2_rr2.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Darbuka 4",
+      "note": 63,
+      "samples": [
+        { "file": "Darbuka_4_hit_vl1_rr1.wav", "vel": [1, 63] },
+        { "file": "Darbuka_4_hit_vl1_rr2.wav", "vel": [1, 63] },
+        { "file": "Darbuka_4_hit_vl2_rr1.wav", "vel": [64, 127] },
+        { "file": "Darbuka_4_hit_vl2_rr2.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Darbuka 5",
+      "note": 64,
+      "samples": [
+        { "file": "Darbuka_5_hit_vl1_rr1.wav", "vel": [1, 63] },
+        { "file": "Darbuka_5_hit_vl1_rr2.wav", "vel": [1, 63] },
+        { "file": "Darbuka_5_hit_vl2_rr1.wav", "vel": [64, 127] },
+        { "file": "Darbuka_5_hit_vl2_rr2.wav", "vel": [64, 127] }
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

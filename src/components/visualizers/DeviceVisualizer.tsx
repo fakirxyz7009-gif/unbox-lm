@@ -209,7 +209,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
               const segY = h - (s + 1) * (h / segments);
               const isActive = (h - segY) <= meterHeight;
               ctx.fillStyle = isActive
-                ? s > 4 ? '#ef4444' : s > 3 ? '#f59e0b' : '#22c55e'
+                ? s > 4 ? '#ef4444' : s > 3 ? '#f59e0b' : '#c9a06c'
                 : '#121418';
               ctx.fillRect(x + 1, segY + 1, colW - 2, (h / segments) - 2);
             }
@@ -368,7 +368,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
           const mclass = device as MClassMasterSuite;
 
           // FFT fill
-          ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+          ctx.fillStyle = 'rgba(201, 160, 108, 0.14)';
           ctx.beginPath();
           ctx.moveTo(0, h);
           for (let i = 0; i < bufferLength / 2; i += 2) {
@@ -382,7 +382,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
 
           // 4-Band EQ Composite Curve
           ctx.beginPath();
-          ctx.strokeStyle = '#10b981';
+          ctx.strokeStyle = '#c9a06c';
           ctx.lineWidth = 2;
 
           const lowGain = mclass.params.eqLowGain || 0;
@@ -471,7 +471,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
 
           // Voltage bar R (Out)
           const outH = outVal * (h * 0.42);
-          ctx.fillStyle = outVal >= 0 ? '#10b981' : '#ec4899';
+          ctx.fillStyle = outVal >= 0 ? '#c9a06c' : '#ec4899';
           ctx.fillRect(w * 0.52, h / 2, barW, -outH);
 
           // Text labels for In & Out voltages
@@ -485,10 +485,10 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
         // 15. 3X OSC: Triple-Oscillator Vector Scope (Emerald & Amber Phosphor)
         case 'three_osc': {
           ctx.beginPath();
-          ctx.strokeStyle = '#10b981';
+          ctx.strokeStyle = '#c9a06c';
           ctx.lineWidth = 2;
           ctx.shadowBlur = 8;
-          ctx.shadowColor = '#10b981';
+          ctx.shadowColor = '#c9a06c';
 
           const sliceWidth = w / bufferLength;
           let x = 0;
@@ -503,7 +503,7 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
           ctx.shadowBlur = 0;
 
           // Osc 3 Sub marker
-          ctx.fillStyle = '#34d399';
+          ctx.fillStyle = '#c9a06c';
           ctx.font = '7px monospace';
           ctx.fillText('TRI-OSC // FAT ANALOG', 4, 10);
           break;
@@ -521,14 +521,14 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
             const y = h - barH;
 
             const grad = ctx.createLinearGradient(x, h, x, y);
-            grad.addColorStop(0, '#064e3b');
-            grad.addColorStop(0.7, '#10b981');
-            grad.addColorStop(1, '#6ee7b7');
+            grad.addColorStop(0, '#2b2117');
+            grad.addColorStop(0.7, '#c9a06c');
+            grad.addColorStop(1, '#e3c79e');
 
             ctx.fillStyle = grad;
             ctx.fillRect(x, y, barWidth, barH);
           }
-          ctx.fillStyle = '#10b981';
+          ctx.fillStyle = '#c9a06c';
           ctx.font = '7px monospace';
           ctx.fillText('FM OPERATORS 1-2', 4, 10);
           break;
@@ -537,10 +537,10 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
         // 17. FLEX: Multi-Engine Rompler Macro Envelope
         case 'flex': {
           ctx.beginPath();
-          ctx.strokeStyle = '#34d399';
+          ctx.strokeStyle = '#c9a06c';
           ctx.lineWidth = 2;
           ctx.shadowBlur = 6;
-          ctx.shadowColor = '#34d399';
+          ctx.shadowColor = '#c9a06c';
           const sliceWidth = w / bufferLength;
           let x = 0;
           for (let i = 0; i < bufferLength; i++) {
@@ -586,10 +586,10 @@ export const DeviceVisualizer: React.FC<DeviceVisualizerProps> = ({
         default: {
           // Standard audio oscilloscope fallback with emerald glow
           ctx.beginPath();
-          ctx.strokeStyle = '#10b981';
+          ctx.strokeStyle = '#c9a06c';
           ctx.lineWidth = 1.8;
           ctx.shadowBlur = 6;
-          ctx.shadowColor = '#10b981';
+          ctx.shadowColor = '#c9a06c';
           const sliceWidth = w / bufferLength;
           let x = 0;
           for (let i = 0; i < bufferLength; i++) {

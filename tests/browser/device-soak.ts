@@ -20,6 +20,18 @@ async function waitReady(device: BaseDevice): Promise<void> {
   }
 }
 
+/**
+ * Pattern mode restarts the transport at 0 every pattern cycle (AudioEngine.patternCycle16ths), so a
+ * raw position cannot be compared with the AudioContext clock directly — it wraps where the clock
+ * keeps counting. Anchor it to the cycle the clock says we are in; a reading that still disagrees
+ * has genuinely lost its place. `cycle` is null when the patterns have no common loop, and then the
+ * position must only ever move forward on its own.
+ */
+function anchoredPosition(raw: number, expected: number, cycle: number | null): number {
+  if (!cycle) return raw;
+  return raw + Math.round((expected - raw) / cycle) * cycle;
+}
+
 function patternSteps(track: SequencerTrack, values: (SequencerNote | null)[]): void {
   const pattern = track.patternList?.find((entry) => entry.id === track.activePatternId);
   if (!pattern) throw new Error(`${track.name} has no active pattern`);
@@ -136,6 +148,7 @@ async function run(): Promise<void> {
 
     engine.setBpm(120);
     engine.setPlaybackMode('pattern_loop');
+    const cycle = engine.patternCycle16ths();
     engine.loopEnabled = false;
     engine.seekToSongPosition(0);
     await engine.startTransport();
@@ -144,6 +157,7 @@ async function run(): Promise<void> {
     const startPerf = performance.now();
     const startAudioTime = engine.ctx.currentTime;
     const startPosition = engine.getPlayheadPosition();
+    const sixteenthsPerSecond = (engine.bpm / 60) * 4;
     let lastPosition = startPosition;
     let samples = 0;
     let nonSilent = 0;
@@ -151,8 +165,12 @@ async function run(): Promise<void> {
       await pause(1000);
       samples++;
       if (!engine.isPlaying || engine.ctx.state !== 'running') throw new Error('transport or AudioContext stopped during the soak');
-      const position = engine.getPlayheadPosition();
-      if (position + 0.1 < lastPosition) throw new Error(`transport moved backwards (${lastPosition.toFixed(2)} → ${position.toFixed(2)})`);
+      const rawPosition = engine.getPlayheadPosition();
+      const expectedPosition = startPosition + (engine.ctx.currentTime - startAudioTime) * sixteenthsPerSecond;
+      const position = anchoredPosition(rawPosition, expectedPosition, cycle);
+      if (Math.abs(position - expectedPosition) > 2) {
+        throw new Error(`transport lost its place: read ${rawPosition.toFixed(2)} (${position.toFixed(2)} anchored) against an expected ${expectedPosition.toFixed(2)} sixteenths`);
+      }
       lastPosition = position;
       const levels = engine.masterLevels();
       if (Math.max(levels.peakL, levels.peakR) > 1e-4) nonSilent++;
@@ -161,10 +179,9 @@ async function run(): Promise<void> {
 
     const elapsedSec = (performance.now() - startPerf) / 1000;
     const audioElapsedSec = engine.ctx.currentTime - startAudioTime;
-    const finalPosition = engine.getPlayheadPosition();
-    const actualSixteenths = finalPosition - startPosition;
-    const sixteenthsPerSecond = (engine.bpm / 60) * 4;
     const expectedAudioSixteenths = audioElapsedSec * sixteenthsPerSecond;
+    const finalPosition = anchoredPosition(engine.getPlayheadPosition(), startPosition + expectedAudioSixteenths, cycle);
+    const actualSixteenths = finalPosition - startPosition;
     const audioTransportErrorPct = Math.abs(actualSixteenths - expectedAudioSixteenths) / expectedAudioSixteenths * 100;
     const expectedWallSixteenths = elapsedSec * sixteenthsPerSecond;
     const wallTransportErrorPct = Math.abs(actualSixteenths - expectedWallSixteenths) / expectedWallSixteenths * 100;
@@ -172,7 +189,9 @@ async function run(): Promise<void> {
     const finalHeap = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ?? null;
     const heapDelta = frameBytes !== null && finalHeap !== null ? `${((finalHeap - frameBytes) / 1_048_576).toFixed(1)} MB` : 'unavailable';
     const signalPct = samples ? (nonSilent / samples) * 100 : 0;
-    const summary = `${elapsedSec.toFixed(0)}s · ${devices.length - 2} instruments + delay/reverb · song/context drift ${audioTransportErrorPct.toFixed(3)}% · song/wall drift ${wallTransportErrorPct.toFixed(2)}% · audio-vs-wall clock delta ${clockRateDeltaPct.toFixed(2)}% · signal ${signalPct.toFixed(1)}% of 1s windows · render gap max ${maxRenderGapMs.toFixed(1)} ms (${renderGapCount500ms} >500ms) · long tasks ${longTaskCount} / max ${maxLongTaskMs.toFixed(1)} ms · heap Δ ${heapDelta}`;
+    // How many times the pattern cycle came round, which is what the transport actually did.
+    const wraps = cycle ? Math.floor((finalPosition - startPosition) / cycle) : 0;
+    const summary = `${elapsedSec.toFixed(0)}s · ${wraps} pattern wrap(s) · ${devices.length - 2} instruments + delay/reverb · song/context drift ${audioTransportErrorPct.toFixed(3)}% · song/wall drift ${wallTransportErrorPct.toFixed(2)}% · audio-vs-wall clock delta ${clockRateDeltaPct.toFixed(2)}% · signal ${signalPct.toFixed(1)}% of 1s windows · render gap max ${maxRenderGapMs.toFixed(1)} ms (${renderGapCount500ms} >500ms) · long tasks ${longTaskCount} / max ${maxLongTaskMs.toFixed(1)} ms · heap Δ ${heapDelta}`;
     const failures: string[] = [];
     if (elapsedSec < seconds * 0.98) failures.push('soak ended before its requested duration');
     if (audioTransportErrorPct > 1) failures.push('song position drifted more than 1% from the AudioContext clock');

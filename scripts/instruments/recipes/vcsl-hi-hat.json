@@ -1,0 +1,110 @@
+{
+  "id": "vcsl-hi-hat",
+  "name": "VCSL Hi-Hat",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded hi-hat with closed, open, loose, pedal-close and accent variations.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Hi-Hat%20Cymbal",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-hi-hat/samples",
+  "lanes": [
+    {
+      "name": "Pedal Close",
+      "note": 44,
+      "role": "hatP",
+      "samples": [
+        "HiHat_Close_rr1_Mid.wav",
+        "HiHat_Close_rr2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Closed Hit",
+      "note": 42,
+      "role": "hatC",
+      "samples": [
+        {
+          "file": "HiHat_HitC_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v1_rr2_Mid.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v2_rr1_Mid.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v2_rr2_Mid.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v3_rr1_Mid.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v3_rr2_Mid.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v4_rr1_Mid.wav",
+          "vel": [
+            96,
+            127
+          ]
+        },
+        {
+          "file": "HiHat_HitC_v4_rr2_Mid.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Loose Hit",
+      "note": 43,
+      "role": "hatC",
+      "samples": [
+        "HiHat_HitLoose_rr1_Mid.wav",
+        "HiHat_HitLoose_rr2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Open Hit",
+      "note": 46,
+      "role": "hatO",
+      "samples": [
+        "HiHat_HitO_rr1_Mid.wav",
+        "HiHat_HitO_rr2_Mid.wav",
+        "HiHat_HitOC_rr5_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

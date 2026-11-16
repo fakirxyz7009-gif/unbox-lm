@@ -1,0 +1,59 @@
+{
+  "id": "vcsl-siren",
+  "name": "VCSL Siren",
+  "kind": "drums",
+  "category": "winds",
+  "description": "Recorded hand-cranked siren whistle with five rising and falling takes, mapped as performance pads.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Siren",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All five source takes are mapped to separate pads so their different sweep shapes remain playable."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-siren/samples",
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Siren 1",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "Main_SirenWhistle-002.wav"
+      ]
+    },
+    {
+      "name": "Siren 2",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "Main_SirenWhistle-005.wav"
+      ]
+    },
+    {
+      "name": "Siren 3",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "Main_SirenWhistle-008.wav"
+      ]
+    },
+    {
+      "name": "Siren 4",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "Main_SirenWhistle-009.wav"
+      ]
+    },
+    {
+      "name": "Siren 5",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "Main_SirenWhistle-010.wav"
+      ]
+    }
+  ]
+}

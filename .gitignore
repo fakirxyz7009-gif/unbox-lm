@@ -23,18 +23,13 @@ data/instrument-cache/
 /release-dist/
 /release-pack-v2/
 
+# Third-party checkouts and every CMake build tree under them: all generated. The VST3 SDK is fetched
+# at a pinned tag and scripts/vst3/smoke.ps1 rebuilds the fixtures, so none of it belongs in git.
+/third_party/
+
 # Canonical release baseline: generated bundles and unreferenced demo masters
 /release-build-v5/
 /public/songs/off_topic/
 /public/songs/love_ya/
 /shots/review-instruments-1600.png
 /.vs/
-/third_party/unbox-vst3-host-smoke-build/
-/third_party/vst3sdk-ninja-release/
-
-# Private local recordings and Custom packs; never publish these.
-/public/stems/
-/public/instruments/chamkila-harmonium/
-/public/instruments/chamkila-vocal/
-/public/instruments/dholak-folk/
-/public/instruments/tumbi-folk/

@@ -25,13 +25,13 @@ test('share builds keep redistributable recordings and exclude custom-license pa
   const sharePacks = redistributablePacks(INSTRUMENT_PACKS);
   const privatePacks = INSTRUMENT_PACKS.filter((pack) => !isRedistributable(pack.spdx)).map((pack) => pack.id).sort();
 
-  assert.equal(sharePacks.length, 48);
+  assert.equal(sharePacks.length, 196);
   assert.ok(sharePacks.every((pack) => isRedistributable(pack.spdx)));
-  assert.deepEqual(privatePacks, []);
+  assert.deepEqual(privatePacks, ['chamkila-harmonium', 'chamkila-vocal', 'dholak-folk', 'tumbi-folk']);
 });
 
 test('every recorded instrument pack keeps contributor, source, and license metadata', () => {
-  assert.equal(INSTRUMENT_PACKS.length, 48);
+  assert.equal(INSTRUMENT_PACKS.length, 200);
   assert.ok(INSTRUMENT_PACKS.every((pack) => pack.author.trim() && pack.source.trim() && pack.spdx.trim()));
   const creditsPath = fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url));
   const credits = readCredits(creditsPath);
@@ -769,4 +769,381 @@ test('VSCO cello ensemble pack ships four CC0 articulations with keyswitch and s
   assert.equal(samples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/vsco-cello-ensemble-articulations/samples/${file}`, import.meta.url))).size, 0), entry.bytes);
   const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
   assert.match(credits, /## VSCO Cello Ensemble Articulations\n\n- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler \/ Soundemote\n- License: CC0-1\.0/);
+});
+
+test('first 20-instrument batch ships pinned CC0 recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-claves', 'vcsl-darbuka', 'vcsl-agogo-bells', 'vcsl-kalimba-kenya', 'vcsl-woodblock',
+    'vsco-marimba', 'vsco-upright-piano', 'vsco-organ-loud', 'vsco-french-horn-mute', 'vsco-harmon-trumpet',
+    'freepats-ukulele', 'freepats-spanish-classical-guitar', 'freepats-hang-d-minor', 'freepats-old-piano-fb', 'freepats-glass-harp',
+    'karoryfer-war-tuba', 'karoryfer-weresax', 'karoryfer-bigcat-cello', 'karoryfer-body-percussion', 'karoryfer-cajon',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more first-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    assert.equal(packEntry.spdx, 'CC0-1.0');
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/[^/]+\/[^/]+\/tree\/[0-9a-f]{40}(?:\/|$)/i);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: CC0-1.0`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, 'CC0-1.0');
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('second 20-instrument batch ships pinned recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-bongos', 'vcsl-conga', 'vcsl-balafon', 'vcsl-tambourine', 'vcsl-vibraphone',
+    'vsco-straight-mute-trumpet', 'vsco-flute-vibrato', 'vsco-organ-quiet', 'vsco-viola-pizzicato', 'vsco-timpani-rolls',
+    'freepats-upright-piano-kw', 'freepats-picked-electric-bass', 'freepats-clean-electric-guitar', 'freepats-world-percussion', 'freepats-muldjordkit',
+    'karoryfer-ergo', 'karoryfer-horsepulse', 'karoryfer-black-and-green-guitars', 'karoryfer-frankensnare', 'karoryfer-hat-with-the-phat',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more second-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = packEntry.id === 'freepats-muldjordkit' ? 'CC-BY-4.0' : 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/[^/]+\/[^/]+\/tree\/[0-9a-f]{40}(?:\/|$)/i);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+    if (packEntry.id === 'freepats-muldjordkit') {
+      assert.match(pack.license.notes ?? '', /Drum samples provided by DrumGizmo\.org/);
+    }
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('third 20-instrument batch ships pinned recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-harmonica', 'vcsl-dan-tranh', 'vcsl-harpsichord', 'vcsl-psaltery', 'vcsl-frame-drum',
+    'vsco-gm-percussion', 'vsco-violin-pizz', 'vsco-contrabass-pizz', 'vsco-cello-spiccato', 'vsco-oboe-vibrato',
+    'freepats-timpani', 'freepats-tubular-bells', 'freepats-synth-percussion', 'freepats-fm-piano', 'freepats-lately-bass',
+    'karoryfer-scarypiano', 'karoryfer-string-cyborgs', 'karoryfer-squidpipes', 'karoryfer-caveman-cosmonaut', 'karoryfer-unruly-drums',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more third-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/[^/]+\/[^/]+\/tree\/[0-9a-f]{40}(?:\/|$)/i);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('fourth 20-instrument batch ships pinned recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-didgeridoo', 'vcsl-strumstick', 'vcsl-wine-glasses', 'vcsl-mbira-dzavadzimu', 'vcsl-clash-cymbals',
+    'vsco-bassoon-staccato', 'vsco-contrabass-spiccato', 'vsco-flute-staccato', 'vsco-trombone-staccato', 'vsco-tuba-staccato',
+    'freepats-jazz-electric-guitar', 'freepats-distorted-electric-guitar', 'freepats-synth-strings', 'freepats-synth-brass', 'freepats-synth-bass',
+    'karoryfer-bobobo', 'karoryfer-gogodze-drum-kit', 'karoryfer-sneakybass', 'karoryfer-cowsynth-pad', 'karoryfer-swirly-drums',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more fourth-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/[^/]+\/[^/]+\/tree\/[0-9a-f]{40}(?:\/|$)/i);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('fifth 20-instrument batch ships pinned recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-saxello', 'vcsl-tenor-saxophone', 'vcsl-folk-harp', 'vcsl-baroque-bass-recorder',
+    'vcsl-kalimba-tanzania', 'vcsl-mbira-mavembe', 'vcsl-nyunga-nyunga', 'vcsl-anvil',
+    'vcsl-bell-tree', 'vcsl-brake-drum', 'vcsl-flexatone', 'vcsl-gong',
+    'vcsl-hand-chimes', 'vcsl-ocean-drum', 'vcsl-slit-drum', 'vcsl-toy-train-whistle',
+    'freepats-jaw-harp', 'freepats-drawbar-organ', 'freepats-square-lead', 'freepats-sweep-pad',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more fifth-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    if (packEntry.id.startsWith('vcsl-')) {
+      assert.match(packEntry.source, /^https:\/\/github\.com\/sgossner\/VCSL\/tree\/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e\//);
+    } else if (packEntry.id === 'freepats-jaw-harp' || packEntry.id === 'freepats-drawbar-organ') {
+      assert.match(packEntry.source, /^https:\/\/freepats\.zenvoid\.org\//);
+      assert.match(packEntry.source, /\.html$/);
+    } else {
+      assert.match(packEntry.source, /^https:\/\/github\.com\/freepats\/[^/]+\/tree\/[0-9a-f]{40}$/);
+    }
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('sixth 20-instrument batch ships pinned VCSL recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-baroque-soprano-recorder', 'vcsl-baroque-tenor-recorder', 'vcsl-ocarina-typical',
+    'vcsl-renaissance-organ', 'vcsl-siren', 'vcsl-bass-drum-1', 'vcsl-cabasa', 'vcsl-claps',
+    'vcsl-cowbells', 'vcsl-guiro', 'vcsl-hand-bells-nepalese', 'vcsl-mark-trees', 'vcsl-ratchet',
+    'vcsl-shaker-large', 'vcsl-slapstick', 'vcsl-sleigh-bells', 'vcsl-suspended-cymbal-2',
+    'vcsl-triangles', 'vcsl-tubular-glockenspiel', 'vcsl-vibraslap',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more sixth-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/sgossner\/VCSL\/tree\/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e\//);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
+});
+
+test('seventh 20-instrument batch ships pinned VCSL recordings, complete files, credits, and rack devices', () => {
+  const expected = [
+    'vcsl-ball-whistle',
+    'vcsl-baroque-alto-recorder',
+    'vcsl-ocarina-small',
+    'vcsl-concert-harp',
+    'vcsl-cajon',
+    'vcsl-finger-cymbals',
+    'vcsl-glockenspiel',
+    'vcsl-hi-hat',
+    'vcsl-shaker-small',
+    'vcsl-xylophone',
+    'vcsl-snare-modern-1',
+    'vcsl-snare-modern-2',
+    'vcsl-snare-rope-tension',
+    'vcsl-timpani-1',
+    'vcsl-tom-1',
+    'vcsl-tubular-bells-1',
+    'vcsl-harpsichord-flemish',
+    'vcsl-harpsichord-english',
+    'vcsl-harmonica-chromatic',
+    'vcsl-grand-piano',
+  ];
+  const entries = expected.map((id) => INSTRUMENT_PACKS.find((entry) => entry.id === id));
+  assert.ok(entries.every(Boolean), 'one or more seventh-batch packs are missing');
+  const credits = readCredits(fileURLToPath(new URL('../public/instruments/CREDITS.md', import.meta.url)));
+
+  for (const entry of entries) {
+    const packEntry = entry!;
+    const expectedLicense = 'CC0-1.0';
+    assert.equal(packEntry.spdx, expectedLicense);
+    assert.ok(packEntry.author.trim());
+    assert.match(packEntry.source, /^https:\/\/github\.com\/sgossner\/VCSL\/tree\/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e\//);
+    assert.ok(packEntry.bytes > 0);
+    assert.ok(credits.includes(`## ${packEntry.name}\n\n- Attribution: ${packEntry.author}\n- License: ${expectedLicense}`), `${packEntry.id} is missing generated credits`);
+
+    const manifestPath = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/instrument.json`, import.meta.url));
+    const sampleDirectory = fileURLToPath(new URL(`../public/instruments/${packEntry.id}/samples/`, import.meta.url));
+    const pack = parsePack(JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown);
+    assert.ok(pack);
+    assert.equal(pack.id, packEntry.id);
+    assert.equal(pack.license.spdx, expectedLicense);
+    assert.equal(pack.license.author, packEntry.author);
+    assert.equal(pack.license.source, packEntry.source);
+    assert.ok(pack.zones.length > 0);
+    assert.ok(pack.zones.every((zone) => zone.file.startsWith('samples/')));
+
+    for (const lane of pack.lanes ?? []) {
+      assert.ok(pack.zones.some((zone) => zone.lokey <= lane.note && zone.hikey >= lane.note), `${packEntry.id} lane ${lane.name} has no zone`);
+    }
+
+    const zoneSamples = [...new Set(pack.zones.map((zone) => zone.file))].sort();
+    const encodedSamples = readdirSync(sampleDirectory).filter((file) => file.endsWith('.ogg')).map((file) => `samples/${file}`).sort();
+    assert.deepEqual(zoneSamples, encodedSamples, `${packEntry.id} zones and encoded samples differ`);
+    assert.equal(encodedSamples.reduce((bytes, file) => bytes + statSync(fileURLToPath(new URL(`../public/instruments/${packEntry.id}/${file}`, import.meta.url))).size, 0), packEntry.bytes);
+
+    const deviceType = `rec_${packEntry.id.replace(/-/g, '_')}`;
+    assert.ok(ALL_PLAYABLE_INSTRUMENTS.some((device) => device.type === deviceType), `${packEntry.id} is missing its playable instrument`);
+    const spec = DEVICE_SPECS.find((device) => device.type === deviceType);
+    assert.equal(spec?.engine, 'multisample');
+    assert.equal(spec?.engineConfig?.pack, packEntry.id);
+  }
+
+  assert.equal(INSTRUMENT_PACKS.length, 200);
 });

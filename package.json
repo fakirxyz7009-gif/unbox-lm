@@ -9,11 +9,16 @@
     "start": "node scripts/start-production.mjs",
     "preview": "node scripts/local-temp.mjs vite preview",
     "clean": "node scripts/clean-build.mjs",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && node scripts/check-utf8.mjs",
+    "check:utf8": "node scripts/check-utf8.mjs",
+    "hooks:install": "node scripts/install-hooks.mjs",
     "fetch:samples": "tsx scripts/fetch-real-samples.ts",
     "generate:30gb": "node scripts/local-temp.mjs tsx scripts/generate-30gb-library.ts",
     "test": "node scripts/local-temp.mjs tsx --test tests/**/*.test.ts",
+    "calibrate:levels": "node scripts/calibrate-levels.mjs",
     "test:browser-audio": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1",
+    "test:browser-level-spread": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe level-spread",
+    "test:browser-hiphop-kits": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe hiphop-kits",
     "test:browser-recorded-pack": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe recorded-pack",
     "test:browser-ocarina-pack": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe ocarina-pack",
     "test:browser-button-accordion-pack": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe button-accordion-pack",
@@ -25,6 +30,8 @@
     "test:browser-freepats-bagpipe-pack": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe freepats-bagpipe-pack",
     "test:browser-organ-pack": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe vcsl-pipe-organ-pack",
     "test:browser-share": "node scripts/test-share-runtime.cjs",
+    "test:share-installed": "node scripts/test-installed-share.cjs",
+    "test:full-installed": "node scripts/test-installed-full.cjs",
     "test:browser-undo": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe undo-chain",
     "test:browser-note-audio": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe note-audio-editing",
     "test:browser-sample-browser-a11y": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe sample-browser-accessibility",
@@ -40,6 +47,7 @@
     "test:browser-realtime-bounce": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe realtime-bounce-clock",
     "test:browser-recorder-frame-stop": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe recorder-frame-stop",
     "test:browser-recording-journal": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe recording-journal-recovery",
+    "test:browser-take-name": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe audio-take-name",
     "test:browser-vst-faceplate-preview-ui": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe vst-faceplate-preview-ui",
     "test:browser-vst-macro-replay": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe vst-macro-replay",
     "test:browser-instrument-selection": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe instrument-selection-event",
@@ -49,6 +57,7 @@
     "test:browser-pulsar-audio-clock": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe pulsar-audio-clock",
     "test:browser-advanced-synthesis": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe advanced-synthesis-live-offline",
     "test:browser-marimba": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe vcsl-marimba-pack",
+    "test:browser-batch-007": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe batch-007",
     "test:browser-cello-articulations": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe vsco-cello-articulations-pack",
     "test:browser-shinyguitar": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe shinyguitar-pack",
     "test:browser-ganjo": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-browser-audio.ps1 -Probe ganjo-pack",
@@ -80,6 +89,8 @@
     "test:vst3-boundary": "node scripts/vst3/run-electron-boundary-probe.cjs",
     "test:vst3-ipc-transport": "node scripts/vst3/run-ipc-transport-probe.cjs",
     "test:vst3-process-transport": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/run-process-transport-probe.ps1",
+    "test:vst3-clip-render": "node scripts/vst3/run-clip-render-probe.cjs",
+    "test:vst3-third-party": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/third-party-probe.ps1",
     "test:vst3-shared-memory": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/run-shared-memory-transport-probe.ps1",
     "test:vst3-shared-memory-stability": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/run-shared-memory-transport-probe.ps1 -PacedRuns 5",
     "test:vst3-midi-process-transport": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/vst3/run-midi-process-transport-probe.ps1",
@@ -91,24 +102,28 @@
     "test:electron-packaged-crash-recovery": "node scripts/test-electron-packaged-smoke.cjs --crash-recovery",
     "test:electron-packaged-recording-recovery": "node scripts/test-electron-packaged-smoke.cjs --recording-crash-recovery",
     "test:electron-packaged-master-recording-recovery": "node scripts/test-electron-packaged-smoke.cjs --master-recording-crash-recovery",
+    "test:electron-packaged-midi-recovery": "node scripts/test-electron-packaged-smoke.cjs --midi-recording-crash-recovery",
     "test:electron-portable-smoke": "node scripts/test-electron-packaged-smoke.cjs --portable",
+    "test:electron-portable-recording-matrix": "node scripts/test-electron-packaged-smoke.cjs --portable --recording-crash-matrix --require-x64-7zip",
     "scan:vsr": "node scripts/local-temp.mjs tsx scripts/scan-vsr.ts",
     "build:api": "node scripts/local-temp.mjs tsx scripts/build-api.ts",
     "standalone": "node scripts/standalone-runner.js",
     "manual": "node scripts/generate-manual.js",
     "reference:devices": "node scripts/local-temp.mjs tsx scripts/generate-device-reference.ts",
     "electron": "npm run build && npm run build:api && electron .",
-    "dist:win": "npm run build && npm run build:api && electron-builder --win portable",
+    "preflight:packaging": "node scripts/electron-builder-x64.cjs --preflight-only",
+    "dist:win": "npm run preflight:packaging && npm run build && npm run build:api && node scripts/electron-builder-x64.cjs --win nsis",
     "bundle:library": "node scripts/local-temp.mjs tsx scripts/bundle-library.ts",
     "instrument": "node scripts/local-temp.mjs tsx scripts/instruments/cli.ts",
     "fetch:instrument:vcsl-pipe-organ": "node scripts/instruments/fetch-vcsl-pipe-organ.mjs",
     "fetch:instrument:vcsl-marimba": "node scripts/instruments/fetch-vcsl-marimba.mjs",
+    "fetch:instrument:vcsl-batch-007": "node scripts/instruments/fetch-vcsl-batch-007.mjs",
     "fetch:instrument:freepats-clarinet": "node scripts/instruments/fetch-freepats-clarinet.mjs",
     "fetch:instrument:freepats-harp": "node scripts/instruments/fetch-freepats-harp.mjs",
     "fetch:instrument:freepats-bass": "node scripts/instruments/fetch-freepats-bass.mjs",
     "fetch:instrument:freepats-recorder": "node scripts/instruments/fetch-freepats-recorder.mjs",
     "fetch:instrument:freepats-bagpipe": "node scripts/instruments/fetch-freepats-bagpipe.mjs",
-    "dist:win:share": "node scripts/local-temp.mjs vite build --mode share && node scripts/local-temp.mjs tsx scripts/prune-share-build.ts && npm run build:api:share && electron-builder --win portable --config scripts/electron-builder-share.cjs",
+    "dist:win:share": "npm run preflight:packaging && npm run test:browser-share && node scripts/local-temp.mjs vite build --mode share && node scripts/local-temp.mjs tsx scripts/prune-share-build.ts && npm run build:api:share && node scripts/electron-builder-x64.cjs --win nsis --config scripts/electron-builder-share.cjs",
     "build:api:share": "node scripts/local-temp.mjs tsx scripts/build-api.ts --share",
     "prune:share-build": "node scripts/local-temp.mjs tsx scripts/prune-share-build.ts",
     "audit:share-package": "node scripts/local-temp.mjs tsx scripts/audit-share-package.ts"
@@ -155,14 +170,27 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "win": {
       "target": [
-        "portable"
+        "nsis"
       ],
-      "artifactName": "Unbox-Studio.exe",
       "icon": "build/icon.png"
+    },
+    "portable": {
+      "artifactName": "Unbox-Studio.exe"
+    },
+    "nsis": {
+      "artifactName": "Unbox-Studio-Setup-${version}.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Unbox Studio",
+      "deleteAppDataOnUninstall": false
     }
   },
   "overrides": {

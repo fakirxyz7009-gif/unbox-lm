@@ -69,7 +69,7 @@ export function SongBlockEditor({ audioEngine, block, onClose }: Props) {
               <div className="space-y-3">
                 {audioGroups.map(([trackId, clips]) => {
                   const track = audioEngine.tracks.find((item) => item.id === trackId);
-                  const color = track?.color ?? '#34d399';
+                  const color = track?.color ?? '#8ea99e';
                   return (
                     <div key={trackId} className="rounded border border-slate-800 bg-slate-950/40 p-2">
                       <div className="mb-2 text-[11px] font-black uppercase tracking-wide" style={{ color }}>{track?.name ?? 'Missing audio track'}</div>

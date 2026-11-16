@@ -16,6 +16,7 @@ import { ClipVoices } from '../clips/clipVoices.ts';
 import { anyDucking, applyDucks, isDrumBeat, type DuckHit } from '../mixer/duck.ts';
 import { audioStore } from '../clips/audioStore.ts';
 import { deviceSample, deviceSampleAudioIds, installSampleVoice } from '../deviceSamples.ts';
+import { installExpression, setModWheel, setPitchBend } from '../expression.ts';
 import { applyStrip, buildStrip, routeStrip, stripValues, syncSends, type StripNodes } from '../mixer/channelStrip.ts';
 import { computeAudibility, type RouteNode } from '../mixer/routing.ts';
 import { denorm } from '../automation/model.ts';
@@ -91,6 +92,14 @@ export async function renderSong(engine: AudioEngine, req: RenderRequest): Promi
   // instruments playing a loaded audio file ("Load audio") get the same sample voice offline
   await audioStore.ensure(deviceSampleAudioIds());
   off.forEach((d, id) => deviceSample(id) && installSampleVoice(d));
+  // expression (pitch bend / mod wheel) survives into offline renders: wire it on instrument clones
+  // and replay the live bend/wheel position so exports match what the musician hears.
+  off.forEach((d) => {
+    if (!d.isPlayableInstrument()) return;
+    installExpression(d);
+    if (d.pitchBend !== 0) setPitchBend(d, d.pitchBend);
+    if (d.modWheel !== 0) setModWheel(d, d.modWheel);
+  });
   const liveOf = (id: string) => engine.devices.get(id);
   const silent = (id: string) => liveOf(id)?.isPowered === false;
   const bypassed = (id: string) => !!liveOf(id)?.isBypassed && !(liveOf(id) instanceof MixBusDevice);

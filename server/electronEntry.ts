@@ -1,13 +1,14 @@
 /**
  * Desktop server: the same Express app as server.ts plus the built dist/ folder.
  * Bundled by esbuild into electron/api-server.cjs (`npm run build:api`) and started by
- * electron/main.cjs on a random loopback port.
+ * electron/main.cjs on the loopback address assigned to the desktop profile.
  */
 import { existsSync } from 'node:fs';
-import type { AddressInfo } from 'node:net';
+import { createServer } from 'node:http';
 import path from 'node:path';
 import dotenv from 'dotenv';
 import express from 'express';
+import { listenOnFixedPort } from '../electron/listenOnFixedPort.cjs';
 import { createApp } from './createApp.ts';
 
 export interface DesktopServerOptions {
@@ -21,8 +22,8 @@ export interface DesktopServerOptions {
   bundleDir?: string;
 }
 
-/** Listens on the first free port of `ports` (a stable origin keeps IndexedDB data), else any port. */
-export async function startDesktopServer(opts: DesktopServerOptions, ports: number[] = []): Promise<number> {
+/** Uses only the supplied ordered candidates. Passing zero opts in to an ephemeral port. */
+export async function startDesktopServer(opts: DesktopServerOptions, ports: number[] = [0]): Promise<number> {
   for (const file of opts.envFiles) {
     if (existsSync(file)) dotenv.config({ path: file, quiet: true });
   }
@@ -36,17 +37,5 @@ export async function startDesktopServer(opts: DesktopServerOptions, ports: numb
   app.use(express.static(opts.distDir));
   app.get('*', (_req, res) => res.sendFile(path.join(opts.distDir, 'index.html')));
 
-  const listen = (port: number) =>
-    new Promise<number>((resolve, reject) => {
-      const server = app.listen(port, '127.0.0.1', () => resolve((server.address() as AddressInfo).port));
-      server.once('error', reject);
-    });
-  for (const port of ports) {
-    try {
-      return await listen(port);
-    } catch {
-      // port busy: try the next one
-    }
-  }
-  return listen(0);
+  return listenOnFixedPort(createServer(app), ports);
 }

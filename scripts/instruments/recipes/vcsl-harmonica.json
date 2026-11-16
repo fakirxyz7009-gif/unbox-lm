@@ -1,0 +1,19 @@
+{
+  "id": "vcsl-harmonica",
+  "name": "VCSL Harmonica",
+  "kind": "melodic",
+  "category": "winds",
+  "description": "Recorded diatonic harmonica with a warm reed tone, sampled across C3–C6 and looped for sustained notes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Harmonica-Hohner-Special20-C/Sustains/Normal",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual harmonica performer. These are the normal-tone sustained recordings, looped for held notes; the release and vibrato takes are omitted."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-harmonica/samples",
+  "notes": "*.wav",
+  "keyRange": [48, 84],
+  "loop": "auto",
+  "length": 4,
+  "release": 0.2
+}

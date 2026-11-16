@@ -11,7 +11,7 @@ import { PatchBrowser } from '../../src/workstation/PatchBrowser.tsx';
 
 interface ProbeState {
   chosenId: string;
-  exercise: () => Promise<{ deviceName: string; sampleZoneCount: number; sampleLoaded: boolean; sampleWasPlayed: boolean; loop: boolean; loopUntilRelease: boolean; scaleTuning: number; playbackRate: number; expectedPlaybackRate: number; filterCutoffHz: number; expectedFilterCutoffHz: number; offlineFilterCutoffHz: number; velocityPeakGain: number; expectedVelocityPeakGain: number; offlineVelocityPeakGain: number; exclusiveClass: number; exclusiveChokeFade: number; exclusiveTailChokeFade: number; offlineChokeFade: number; offlineTailChokeFade: number; releaseTailOffset: number; sustainRms: number; releaseRms: number; offlineSustainRms: number; offlineReleaseRms: number; offlineTailRms: number; offlineEarlyRms: number; offlineLateRms: number; lowKeyEnvelopeRms: number; highKeyEnvelopeRms: number; archiveSampleCount: number; roundTripZoneCount: number; roundTripVelocityAttenuation: boolean; roundTripRms: number }>;
+  exercise: () => Promise<{ deviceName: string; sampleZoneCount: number; sampleLoaded: boolean; sampleWasPlayed: boolean; loop: boolean; loopUntilRelease: boolean; scaleTuning: number; playbackRate: number; expectedPlaybackRate: number; filterCutoffHz: number; expectedFilterCutoffHz: number; offlineFilterCutoffHz: number; velocityPeakGain: number; expectedVelocityPeakGain: number; offlineVelocityPeakGain: number; exclusiveClass: number; exclusiveChokeFade: number; exclusiveTailChokeFade: number; offlineChokeFade: number; offlineTailChokeFade: number; releaseTailOffset: number; sustainRms: number; releaseRms: number; offlineSustainRms: number; offlineReleaseRms: number; offlineTailRms: number; offlineTailEndRms: number; offlineEarlyRms: number; offlineLateRms: number; lowKeyEnvelopeRms: number; highKeyEnvelopeRms: number; archiveSampleCount: number; roundTripZoneCount: number; roundTripVelocityAttenuation: boolean; roundTripRms: number }>;
 }
 
 declare global {
@@ -208,13 +208,17 @@ const state: ProbeState = {
       const rendered = await offlineCtx.startRendering();
       const offlineSustainRms = bufferRms(rendered, 0.1, 0.35);
       const offlineReleaseRms = bufferRms(rendered, 0.8, 0.95);
-      const offlineTailRms = bufferRms(rendered, 0.46, 0.52);
+      // The mode-3 tail is release-shaped: it is audible for a few tens of milliseconds after key-up and
+      // then decays to silence, so measure its onset and its end separately instead of a flat average.
+      const offlineTailRms = bufferRms(rendered, 0.45, 0.47);
+      const offlineTailEndRms = bufferRms(rendered, 0.56, 0.62);
       const offlineEarlyRms = bufferRms(rendered, 0.1, 0.15);
       const offlineLateRms = bufferRms(rendered, 0.32, 0.37);
       offlineDevice.dispose();
       if (!(offlineSustainRms > 0.002)) throw new Error(`Offline SF2 render was too quiet (RMS ${offlineSustainRms})`);
       if (!(offlineReleaseRms < offlineSustainRms * 0.2)) throw new Error(`Offline SF2 render did not release: sustain RMS ${offlineSustainRms}, release RMS ${offlineReleaseRms}`);
-      if (!(offlineTailRms > 0.002)) throw new Error(`Offline SF2 mode-3 tail was not audible after key-up (RMS ${offlineTailRms}; starts ${JSON.stringify(offlineStarts)})`);
+      if (!(offlineTailRms > 0.0015)) throw new Error(`Offline SF2 mode-3 tail was not audible after key-up (RMS ${offlineTailRms}; starts ${JSON.stringify(offlineStarts)})`);
+      if (!(offlineTailEndRms < offlineTailRms * 0.05)) throw new Error(`The SF2 mode-3 tail kept sounding instead of ending (onset RMS ${offlineTailRms}, end RMS ${offlineTailEndRms})`);
       if (!(offlineLateRms < offlineEarlyRms * 0.9)) throw new Error(`SF2 decay/sustain generators did not shape audio: early RMS ${offlineEarlyRms}, late RMS ${offlineLateRms}`);
 
       const offlineChokeCtx = new OfflineAudioContext(2, 24_000, 48_000);
@@ -369,6 +373,7 @@ const state: ProbeState = {
         offlineSustainRms,
         offlineReleaseRms,
         offlineTailRms,
+        offlineTailEndRms,
         offlineEarlyRms,
         offlineLateRms,
         lowKeyEnvelopeRms,

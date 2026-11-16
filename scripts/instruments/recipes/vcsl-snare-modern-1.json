@@ -1,0 +1,240 @@
+{
+  "id": "vcsl-snare-modern-1",
+  "name": "VCSL Modern Snare 1",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded modern snare drum with open and muted hits, rolls, stick and taps.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Snare%20Drum%2C%20Modern%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-snare-modern-1/samples",
+  "lanes": [
+    {
+      "name": "Snare Open",
+      "note": 38,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "Snare2_HitSN_v3_rr1_Mid.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v3_rr2_Mid.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v5_rr1_Mid.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v5_rr2_Mid.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v6_rr1_Mid.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v6_rr2_Mid.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v7_rr1_Mid.wav",
+          "vel": [
+            96,
+            111
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v7_rr2_Mid.wav",
+          "vel": [
+            96,
+            111
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v9_rr1_Mid.wav",
+          "vel": [
+            112,
+            127
+          ]
+        },
+        {
+          "file": "Snare2_HitSN_v9_rr2_Mid.wav",
+          "vel": [
+            112,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Snare Muted",
+      "note": 40,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "Snare2_HitNS_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v2_rr2_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v4_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v4_rr2_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v5_rr1_Mid.wav",
+          "vel": [
+            85,
+            105
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v5_rr2_Mid.wav",
+          "vel": [
+            85,
+            105
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v6_rr1_Mid.wav",
+          "vel": [
+            106,
+            127
+          ]
+        },
+        {
+          "file": "Snare2_HitNS_v6_rr2_Mid.wav",
+          "vel": [
+            106,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Open Roll",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Snare2_rollSN_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Snare2_rollSN_v4_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Snare2_rollSN_v5_rr2_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Muted Roll",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Snare2_rollNS_v2_rr1_Mid.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "Snare2_rollNS_v3_rr1_Mid.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "Snare2_rollNS_v4_rr1_Mid.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "Snare2_rollNS_v5_rr1_Mid.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stick",
+      "note": 43,
+      "role": "rim",
+      "samples": [
+        "Snare2_stick_v1_rr1_Mid.wav",
+        "Snare2_stick_v1_rr2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Taps",
+      "note": 44,
+      "role": "snare",
+      "samples": [
+        "Snare2_taps_v4_rr1_Mid.wav",
+        "Snare2_taps_v4_rr2_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

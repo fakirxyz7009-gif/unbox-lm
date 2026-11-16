@@ -8,6 +8,9 @@ if (!result) throw new Error('Missing result node');
 const resultNode: HTMLPreElement = result;
 const pause = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
+/** Both sides of the comparison cover this much audio, counted from the first audible sample. */
+const PARITY_WINDOW_SECONDS = 0.64;
+
 interface ParityCase {
   type: string;
   label: string;
@@ -77,17 +80,40 @@ async function measureParity(test: ParityCase): Promise<{
     engine.setPlaybackMode('song_arrangement');
     await engine.startTransport(0);
 
+    // The live window is measured in AudioContext time, not wall time: a loaded machine drops timers and its
+    // audio clock does not tick at the same rate as the wall clock, so a fixed count of sleeps covers a
+    // different slice of audio on every run. Weight each level snapshot by the audio time it stands for and
+    // start counting at the note's first audible sample, which is where the offline window starts too.
+    const wallDeadline = Date.now() + 15_000;
     let livePeak = 0;
-    let liveRmsEnergy = 0;
+    let weightedEnergy = 0;
+    let covered = 0;
+    let onsetAt: number | null = null;
     let deepestGainReduction = 0;
-    for (let i = 0; i < 32; i++) {
-      await pause(20);
+    while (covered < PARITY_WINDOW_SECONDS) {
+      await pause(16);
+      const now = engine.ctx.currentTime;
       const levels = engine.getTrackStereoLevels(device.id);
       livePeak = Math.max(livePeak, levels.peakL, levels.peakR);
-      liveRmsEnergy += (levels.rmsL ** 2 + levels.rmsR ** 2) / 2;
       if (effectDevice instanceof SpecDevice && test.effect?.sidechainKey) {
         deepestGainReduction = Math.min(deepestGainReduction, effectDevice.meter().gr ?? 0);
       }
+      if (onsetAt === null) {
+        if (levels.peakL > 1e-4 || levels.peakR > 1e-4) onsetAt = now;
+        else if (Date.now() > wallDeadline) {
+          throw new Error(`${test.label} produced no live onset within 15 s of transport start.`);
+        }
+        continue;
+      }
+      const span = Math.min(now - onsetAt - covered, PARITY_WINDOW_SECONDS - covered);
+      if (span <= 0) {
+        if (Date.now() > wallDeadline) {
+          throw new Error(`${test.label} live capture stalled: ${covered.toFixed(2)} s of audio in 15 s of wall time.`);
+        }
+        continue;
+      }
+      weightedEnergy += ((levels.rmsL ** 2 + levels.rmsR ** 2) / 2) * span;
+      covered += span;
     }
     const gainReduction = effectDevice instanceof SpecDevice && test.effect?.sidechainKey ? deepestGainReduction : undefined;
     engine.stopTransport();
@@ -111,8 +137,8 @@ async function measureParity(test: ParityCase): Promise<{
       for (const sample of offline.getChannelData(channel)) offlinePeak = Math.max(offlinePeak, Math.abs(sample));
     }
     if (offlinePeak <= 1e-4) throw new Error(`${test.label} offline output was silent (peak ${offlinePeak.toExponential(2)}).`);
-    const liveRms = Math.sqrt(liveRmsEnergy / 32);
-    const comparisonFrames = Math.min(offline.length, Math.floor(engine.ctx.sampleRate * 0.64));
+    const liveRms = Math.sqrt(weightedEnergy / covered);
+    const comparisonFrames = Math.min(offline.length, Math.floor(engine.ctx.sampleRate * PARITY_WINDOW_SECONDS));
     let squareSum = 0;
     for (let channel = 0; channel < offline.numberOfChannels; channel++) {
       const samples = offline.getChannelData(channel);

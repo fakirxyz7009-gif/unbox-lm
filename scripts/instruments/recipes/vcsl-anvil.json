@@ -1,0 +1,103 @@
+{
+  "id": "vcsl-anvil",
+  "name": "VCSL Anvil",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded anvil strikes in three sizes, each with three dynamics; a hard, ringing metal percussion set.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Anvil",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides three anvils with three dynamics each. They are mapped as three pads; the single mid-position microphone recording is used."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-anvil/samples",
+  "lanes": [
+    {
+      "name": "Small Anvil",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Anvil_Hit1_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Anvil_Hit1_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Anvil_Hit1_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Medium Anvil",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Anvil_Hit2_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Anvil_Hit2_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Anvil_Hit2_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Large Anvil",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Anvil_Hit3_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Anvil_Hit3_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Anvil_Hit3_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

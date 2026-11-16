@@ -62,6 +62,10 @@ samples. The compact pack maps MIDI 38–72 and keeps up to two round robins per
 probe verifies license/credit metadata, complete key coverage, both MIDI 58 round robins, sample
 decoding and audible offline output.
 
+```bash
+npm run instrument -- sfz "github:sfzinstruments/ganjo@ccff5cd5cd3b513873a48994c07724d9d3c39e1c/ganjo.sfz" --id ganjo --name "Ganjo Six-String Banjo" --kind melodic --category guitar --spdx CC0-1.0 --author "itsclipping (recorded, edited and mapped)" --source "https://github.com/sfzinstruments/ganjo/tree/ccff5cd5cd3b513873a48994c07724d9d3c39e1c" --description "Recorded SX-brand six-string guitar banjo with round-robin performances; CC0." --notes "The source README credits itsclipping with recording, editing and mapping the samples. CC0-1.0. Source SFZ covers MIDI 38–72; this compact pack keeps up to two round robins and MIDI 38–72." --keys 38-72 --max-rr 2 --max-seconds 3
+```
+
 The VCSL Marimba pack uses 30 acoustic recordings from the official
 [VCSL source](https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Marimba).
 Its fetcher pins revision `c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e`, verifies every source SHA-256
@@ -77,9 +81,220 @@ npm run instrument -- recipe scripts/instruments/recipes/vcsl-marimba.json
 npm run test:browser-marimba
 ```
 
+## First 20-instrument batch
+
+The first approved batch adds five VCSL, five VSCO 2 CE, five FreePats and five
+Karoryfer packs. Every pack is CC0-1.0, records its pinned source and attribution
+in `instrument.json`/`CREDITS.md`, and is covered by the batch browser probe.
+See [`docs/FREE_INSTRUMENT_BATCH_001.md`](../../docs/FREE_INSTRUMENT_BATCH_001.md)
+for the full source table, sizes and verification result.
+
 ```bash
-npm run instrument -- sfz "github:sfzinstruments/ganjo@ccff5cd5cd3b513873a48994c07724d9d3c39e1c/ganjo.sfz" --id ganjo --name "Ganjo Six-String Banjo" --kind melodic --category guitar --spdx CC0-1.0 --author "itsclipping (recorded, edited and mapped)" --source "https://github.com/sfzinstruments/ganjo/tree/ccff5cd5cd3b513873a48994c07724d9d3c39e1c" --description "Recorded SX-brand six-string guitar banjo with round-robin performances; CC0." --notes "The source README credits itsclipping with recording, editing and mapping the samples. CC0-1.0. Source SFZ covers MIDI 38–72; this compact pack keeps up to two round robins and MIDI 38–72." --keys 38-72 --max-rr 2 --max-seconds 3
+npm run fetch:instrument:vcsl-batch-001
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-claves.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-darbuka.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-agogo-bells.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-kalimba-kenya.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-woodblock.json
+npm run test:browser-batch-001
 ```
+
+The VCSL fetcher downloads the exact WAV folders into `data/instrument-cache`;
+the recipes map them into playable drums and a one-shot kalimba. The SFZ-based
+packs use the pinned revisions in the batch document; each manifest records the
+exact source and provenance notes.
+
+## Second 20-instrument batch
+
+The second approved batch adds five more VCSL packs, five VSCO 2 CE programs,
+five FreePats packs and five Karoryfer packs. Nineteen are CC0-1.0 and the
+FreePats MuldjordKit is CC-BY-4.0, with the required DrumGizmo.org credit. Every
+pack records its pinned source and attribution and is covered by the batch
+browser probe. See [`docs/FREE_INSTRUMENT_BATCH_002.md`](../../docs/FREE_INSTRUMENT_BATCH_002.md).
+
+```bash
+npm run fetch:instrument:vcsl-batch-002
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-bongos.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-conga.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-balafon.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-tambourine.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-vibraphone.json
+npm run test:browser-batch-002
+```
+
+The VSCO, FreePats and Karoryfer packs are imported from the pinned revisions
+recorded in the batch document. The five VSCO additions are alternate
+articulations/timbres of instruments already represented in the catalog; they
+are additional playable devices, not separate entries in the distinct-instrument
+count.
+
+## Third 20-instrument batch
+
+The third approved batch adds five VCSL packs, five VSCO 2 CE programs, five
+FreePats packs and five Karoryfer packs. All 20 are CC0-1.0. The VSCO additions
+are one GM-style percussion kit plus four articulation/timbre programs for
+instruments already represented in the catalog. Every pack records its pinned
+source and attribution and is covered by the batch browser probe. See
+[`docs/FREE_INSTRUMENT_BATCH_003.md`](../../docs/FREE_INSTRUMENT_BATCH_003.md).
+
+```bash
+npm run fetch:instrument:vcsl-batch-003
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-harmonica.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-dan-tranh.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-harpsichord.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-psaltery.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-frame-drum.json
+npm run test:browser-batch-003
+```
+
+The VSCO, FreePats and Karoryfer packs are imported from the pinned revisions
+recorded in the batch document. The four VSCO articulation programs are
+alternate playable devices, not separate distinct instruments.
+
+## Fourth 20-instrument batch
+
+The fourth approved batch adds five VCSL packs, five VSCO 2 CE programs, five
+FreePats packs and five Karoryfer packs. All 20 are CC0-1.0. The VCSL additions
+are a didgeridoo, strumstick, wine glasses, mbira dzaVadzimu and clash cymbals.
+The VSCO additions are five alternate staccato/spiccato articulations, and the
+FreePats additions include two guitar timbres and three synthesized banks.
+Every pack records its pinned source and attribution and is covered by the
+batch browser probe. See
+[`docs/FREE_INSTRUMENT_BATCH_004.md`](../../docs/FREE_INSTRUMENT_BATCH_004.md).
+
+```bash
+npm run fetch:instrument:vcsl-batch-004
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-didgeridoo.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-strumstick.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-wine-glasses.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-mbira-dzavadzimu.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-clash-cymbals.json
+npm run test:browser-batch-004
+```
+
+The VSCO, FreePats and Karoryfer packs are imported from the pinned revisions
+recorded in the batch document. The five VSCO articulation programs and the two
+FreePats guitar timbres are alternate playable devices, not separate distinct
+instruments.
+
+## Fifth 20-instrument batch
+
+The fifth approved batch adds 16 VCSL recordings and four FreePats instruments,
+all CC0-1.0 and all distinct: no VSCO articulation alternates and no repeated
+Karoryfer basses. The VCSL side covers saxello, tenor saxophone, folk harp,
+baroque bass recorder, Tanzanian kalimba, Mavembe and Nyunga Nyunga mbiras, hand
+chimes, anvil, bell tree, brake drum, flexatone, gong, ocean drum, slit drum and
+a toy train whistle. The FreePats side adds jaw harp, drawbar organ, square lead
+and sweep pad. See
+[`docs/FREE_INSTRUMENT_BATCH_005.md`](../../docs/FREE_INSTRUMENT_BATCH_005.md)
+for the source table, archive hashes and the distinction between recorded and
+synthesized voices.
+
+```bash
+npm run fetch:instrument:vcsl-batch-005
+npm run fetch:instrument:freepats-batch-005
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-saxello.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-tenor-saxophone.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-folk-harp.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-baroque-bass-recorder.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-kalimba-tanzania.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-mbira-mavembe.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-nyunga-nyunga.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-anvil.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-bell-tree.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-brake-drum.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-flexatone.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-gong.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-hand-chimes.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-ocean-drum.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-slit-drum.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-toy-train-whistle.json
+npm run test:browser-batch-005
+```
+
+The FreePats packs are imported from the pinned local/GitHub SFZ sources in the
+batch document. `fetch:instrument:freepats-batch-005` verifies the Jaw Harp and
+Drawbar Organ archive SHA-256 values before extraction.
+
+## Sixth 20-instrument batch
+
+The sixth batch adds 20 more VCSL folders, all CC0-1.0 and all distinct: two
+baroque recorders, an ocarina, a Renaissance organ, a siren, an orchestral bass
+drum, and fourteen rare or orchestral percussion voices. Every folder is
+separate from the 38 VCSL packs already shipped; no articulation-only alternate
+is counted as a new instrument. See
+[`docs/FREE_INSTRUMENT_BATCH_006.md`](../../docs/FREE_INSTRUMENT_BATCH_006.md)
+for the source table and selection notes.
+
+```bash
+npm run fetch:instrument:vcsl-batch-006
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-baroque-soprano-recorder.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-baroque-tenor-recorder.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-ocarina-typical.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-renaissance-organ.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-siren.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-bass-drum-1.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-cabasa.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-claps.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-cowbells.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-guiro.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-hand-bells-nepalese.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-mark-trees.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-ratchet.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-shaker-large.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-slapstick.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-sleigh-bells.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-suspended-cymbal-2.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-triangles.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-tubular-glockenspiel.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-vibraslap.json
+npm run test:browser-batch-006
+```
+
+The downloader pins VCSL revision
+`c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e`; the recipes record the same revision
+and the exact source folder for each instrument.
+
+## Seventh 20-instrument batch
+
+The seventh batch adds 20 more VCSL folders, all CC0-1.0 and all distinct from
+the 58 VCSL packs already shipped. It adds four aerophones, four string or
+keyboard instruments, and twelve orchestral or hand-percussion instruments.
+Every entry is a different source folder; the three snares are three different
+drums and the two harpsichords are different historical instruments. See
+[`docs/FREE_INSTRUMENT_BATCH_007.md`](../../docs/FREE_INSTRUMENT_BATCH_007.md)
+for the source table and selection notes.
+
+```bash
+npm run fetch:instrument:vcsl-batch-007
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-ball-whistle.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-baroque-alto-recorder.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-ocarina-small.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-concert-harp.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-cajon.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-finger-cymbals.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-glockenspiel.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-hi-hat.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-shaker-small.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-xylophone.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-snare-modern-1.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-snare-modern-2.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-snare-rope-tension.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-timpani-1.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-tom-1.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-tubular-bells-1.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-harpsichord-flemish.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-harpsichord-english.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-harmonica-chromatic.json
+npm run instrument -- recipe scripts/instruments/recipes/vcsl-grand-piano.json
+npm run test:browser-batch-007
+```
+
+The downloader pins VCSL revision
+`c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e`; the recipes record the same revision
+and the exact source folder for each instrument. The melodic source labels sit
+one octave below sounding pitch; the recipes apply the documented +12-semitone
+root correction.
 
 ## Commands
 

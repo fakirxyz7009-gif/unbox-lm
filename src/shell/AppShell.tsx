@@ -12,6 +12,7 @@ import { TransportBar } from './TransportBar.tsx';
 import { setUi, getUi, useUi } from './uiStore.ts';
 import { toast } from './toast.ts';
 import { UnboxLogo } from '../ui/skin/UnboxLogo.tsx';
+import { UnboxSeal } from '../rack/DeviceEmblem.tsx';
 import { HardwareStatusBar } from '../components/HardwareStatusBar.tsx';
 import { ProjectStartDialog } from './dialogs.tsx';
 import { showPrompt } from './dialogService.ts';
@@ -75,9 +76,20 @@ function SaveIndicator({ onSave }: { onSave: () => void }) {
       className="hidden md:flex items-center gap-1.5 h-[34px] px-2 rounded-[6px] us-btn font-label text-[11px] font-bold"
       data-testid="save-state"
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dirty ? 'bg-amber-400' : 'bg-emerald-400/80'}`} />
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dirty ? 'bg-amber-400' : 'bg-[#9aa3ac]'}`} />
       <span className="max-w-[128px] truncate">{label}</span>
     </button>
+  );
+}
+
+/** Current project name, kept in step with ProjectManager (create / open / save as). */
+function ProjectName() {
+  const [, force] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => projectManager.subscribe(() => force()), []);
+  return (
+    <span className="truncate font-label text-[13px] text-ink" title={projectManager.currentName} data-testid="project-name">
+      {projectManager.currentName}
+    </span>
   );
 }
 
@@ -207,6 +219,7 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
         ['Samples & Stems…', actions.openStems, 'Alt+S'],
         ['Instruments…', () => onPage('instruments')],
         ['Drums…', () => onPage('drums')],
+        ['Hip-Hop Kits…', () => onPage('hiphop'), 'Alt+P'],
         ['Synths…', () => onPage('synths')],
         ['Samplers…', () => onPage('sampler')],
         ['Effects…', () => onPage('effects')],
@@ -239,7 +252,6 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
     <div className="unbox-cabinet h-screen w-screen overflow-hidden flex flex-col bg-chrome-0 text-chrome-ink text-xs" onPointerDown={() => void audioEngine.resumeContext()}>
       {/* title bar */}
       <div className="us-chrome unbox-titlebar h-[46px] shrink-0 flex items-stretch relative" data-testid="title-bar">
-        <span className="us-screw shrink-0 ml-2.5 my-auto" aria-hidden />
         <button
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
@@ -301,7 +313,17 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
             </div>
           </div>
         )}
-        <div className="flex-1 border-l border-black/60" />
+        <div className="flex-1 min-w-0 border-l border-black/60 flex items-center gap-2 px-3">
+          <span className="shrink-0 font-label font-bold text-[11px] uppercase tracking-[0.18em] text-[#7f8b93]">Project</span>
+          <ProjectName />
+        </div>
+        <div className="unbox-series-plate hidden 2xl:flex" title="Unbox Audio Works · Signature Series Mk I">
+          <UnboxSeal size={19} />
+          <span className="unbox-series-text">
+            <b>MK I</b>
+            <span>SIGNATURE SERIES</span>
+          </span>
+        </div>
         <SaveIndicator onSave={saveNow} />
         <div className="flex items-center gap-1 pr-2">
           {([
@@ -314,13 +336,12 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
               <Icon className="w-4 h-4" />
             </button>
           ))}
-          <span className="us-screw shrink-0 ml-1.5 my-auto" aria-hidden />
         </div>
 
         {menuOpen && (
           <>
             <div className="fixed inset-0 z-40" onPointerDown={() => setMenuOpen(false)} />
-            <div className="absolute left-2 top-[44px] z-50 flex gap-0 rounded-md border border-chrome-line bg-chrome-1 shadow-2xl p-2" role="menu">
+            <div className="unbox-main-menu absolute left-2 top-[44px] z-50 flex gap-0 rounded-md border shadow-2xl p-2" role="menu">
               {MENU.map(([title, items]) => (
                 <div key={title} className="w-[190px] px-1">
                   <div className="font-label font-bold text-[13px] text-sel px-2 pb-1 tracking-wide">{title}</div>
@@ -329,7 +350,7 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
                       key={label}
                       type="button"
                       role="menuitem"
-                      className="w-full flex items-center justify-between gap-2 px-2 py-1 rounded text-left text-[13px] text-[#d5dae0] hover:bg-sel hover:text-black"
+                      className="w-full flex items-center justify-between gap-2 px-2 py-1 rounded text-left text-[13px] text-ink hover:bg-sel hover:text-black"
                       onClick={() => {
                         fn();
                         setMenuOpen(false);
@@ -357,7 +378,7 @@ export function AppShell({ tab, onTab, page, onPage, renderPage, content, action
               <button type="button" onClick={() => onPage(null)} className="us-btn rounded px-2 py-1 flex items-center gap-1 font-label font-bold text-[13px]" data-testid="page-back">
                 <ArrowLeft className="w-3.5 h-3.5" /> {TABS.find((t) => t.id === tab)?.label}
               </button>
-              <span className="font-label font-bold text-[18px] text-white tracking-wide">{pageLabel(page)}</span>
+              <span className="font-label font-bold text-[18px] text-ink tracking-wide">{pageLabel(page)}</span>
             </div>
             <div className="flex-1 min-h-0 flex flex-col us-page">{renderPage(page)}</div>
           </div>

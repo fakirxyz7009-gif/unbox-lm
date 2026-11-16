@@ -23,6 +23,10 @@ export function RecoveryBanner() {
   const label = when ? `${when.toLocaleDateString()} ${when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '';
   const takeLabel = take ? new Date(take.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
   const takeMatchesOpenProject = !take?.projectId || take.projectId === projectManager.currentId;
+  const midi = !!take?.midiMode;
+  const destination = midi
+    ? (take?.midiMode === 'pattern_loop' ? 'new inactive patterns' : 'new muted note clips')
+    : `new audio track${take?.tracks.length === 1 ? '' : 's'}`;
 
   return (
     <div className="fixed left-1/2 bottom-16 z-50 -translate-x-1/2 flex max-w-[min(96vw,860px)] flex-col gap-2 text-[13px]">
@@ -63,8 +67,8 @@ export function RecoveryBanner() {
       {take && <div className="flex items-center gap-3 rounded border border-[#3f6170] bg-[#102029] px-3 py-2 shadow-2xl" role="status">
         <span className="text-cyan-200 font-label font-bold uppercase tracking-wider text-[11px]">Recorded take</span>
         <span className="text-[#d5dade]">
-          {take.completedAt ? 'Audio was placed before the last confirmed project save' : 'Interrupted audio take'} from {takeLabel}; {takeMatchesOpenProject
-            ? `recover it as new audio track${take.tracks.length === 1 ? '' : 's'}.`
+          {take.completedAt ? 'Take from an unconfirmed project save' : `Interrupted ${midi ? 'MIDI' : 'audio'} take`} from {takeLabel}. {takeMatchesOpenProject
+            ? `Recover it as ${destination}.`
             : `open “${take.projectName}” before recovering it.`}
         </span>
         <button
@@ -76,7 +80,7 @@ export function RecoveryBanner() {
           }}
           className="rounded bg-cyan-300 px-2 py-1 text-[11px] font-bold text-black disabled:opacity-50"
         >
-          Recover audio
+          {midi ? 'Recover MIDI' : 'Recover audio'}
         </button>
         <button
           type="button"
@@ -84,7 +88,7 @@ export function RecoveryBanner() {
           onClick={() => {
             void showConfirm({
               title: 'Discard recorded take?',
-              message: 'Its durable audio chunks cannot be restored afterwards.',
+              message: midi ? 'The saved recovery notes will be permanently removed.' : 'Its durable audio chunks cannot be restored afterwards.',
               confirmLabel: 'Discard take',
             }).then((ok) => {
               if (ok) void projectManager.discardRecordingJournal(take.sessionId);

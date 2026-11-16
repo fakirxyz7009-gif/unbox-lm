@@ -17,7 +17,7 @@ export const TrackFolderMenu: React.FC<Props> = ({ folders, activeTrackId, activ
   const buttonClass = light
     ? 'us-btn-light text-[#2c3137]'
     : 'bg-slate-800 text-amber-200 hover:bg-slate-700';
-  const itemClass = 'w-full px-2 py-1 text-left hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed';
+  const itemClass = 'w-full px-2 py-1 text-left hover:bg-[#34393f] disabled:opacity-40 disabled:cursor-not-allowed';
   const run = (fn: () => void) => {
     fn();
     setOpen(false);
@@ -39,20 +39,20 @@ export const TrackFolderMenu: React.FC<Props> = ({ folders, activeTrackId, activ
         <ChevronDown className="w-3 h-3" />
       </button>
       {open && (
-        <div className="absolute z-50 top-[32px] left-0 min-w-[190px] rounded border border-slate-600 bg-[#111826] shadow-xl py-1 text-[11px] text-slate-200" role="menu">
+        <div className="absolute z-50 top-[32px] left-0 min-w-[190px] rounded border border-[#4a5057] bg-[#20242a] shadow-xl py-1 text-[11px] text-[#e8e5df]" role="menu">
           <button type="button" className={itemClass} disabled={!activeTrackId || !!activeFolderId} onClick={() => run(onCreate)} role="menuitem">
             Create folder from selected track
           </button>
-          {folders.length > 0 && <div className="my-1 border-t border-slate-700" />}
+          {folders.length > 0 && <div className="my-1 border-t border-[#3a4047]" />}
           {folders.map((folder) => (
             <button key={folder.id} type="button" className={`${itemClass} flex items-center justify-between gap-3`} disabled={!activeTrackId || activeFolderId === folder.id} onClick={() => run(() => onAssign(folder.id))} role="menuitem">
               <span className="truncate">Move track into {folder.name}</span>
-              {activeFolderId === folder.id && <Check className="w-3 h-3 text-emerald-300" />}
+              {activeFolderId === folder.id && <Check className="w-3 h-3 text-[#d8b45c]" />}
             </button>
           ))}
           {activeFolderId && (
             <>
-              <div className="my-1 border-t border-slate-700" />
+              <div className="my-1 border-t border-[#3a4047]" />
               <button type="button" className={itemClass} onClick={() => run(() => onAssign(undefined))} role="menuitem">Remove from folder</button>
             </>
           )}

@@ -55,6 +55,14 @@ async function run(): Promise<void> {
   }
   await journal.finish(4);
 
+  await projectManager.refreshRecordingJournals();
+  expect(!projectManager.recordingJournals.some((entry) => entry.sessionId === journal.sessionId),
+    'Recovery offered a take while its capture window still owned it');
+  expect(!await projectManager.recoverRecordingJournal(journal.sessionId), 'Recovery acquired an owned take');
+  await projectManager.discardRecordingJournal(journal.sessionId);
+  expect(!!await loadRecordingJournal(journal.sessionId), 'Discard removed a take still owned by its capture window');
+  await journal.release();
+
   const durable = await loadRecordingJournal(journal.sessionId);
   expect(!!durable, 'The active audio journal was not committed to IndexedDB');
   expect(durable!.chunks.length === blockCount, `Expected ${blockCount} durable chunks, found ${durable!.chunks.length}`);
@@ -88,8 +96,35 @@ async function run(): Promise<void> {
     IDBObjectStore.prototype.put = originalPut;
   }
 
-  expect(await projectManager.recoverRecordingJournal(journal.sessionId),
-    'The durable journal could not be rebuilt into the open project');
+  const originalTransaction = IDBDatabase.prototype.transaction;
+  const originalDelete = IDBObjectStore.prototype.delete;
+  const strictCommits = new Set<string>();
+  let clearedAfterStrictCommits = false;
+  IDBDatabase.prototype.transaction = function (...args: Parameters<IDBDatabase['transaction']>) {
+    const transaction = originalTransaction.apply(this, args);
+    const [store] = args;
+    if (typeof store === 'string' && (store === 'audio' || store === 'projects') && transaction.mode === 'readwrite' && transaction.durability === 'strict') {
+      const committedStore = store;
+      transaction.addEventListener('complete', () => strictCommits.add(committedStore), { once: true });
+    }
+    return transaction;
+  };
+  IDBObjectStore.prototype.delete = function (...args: Parameters<IDBObjectStore['delete']>) {
+    if (this.name === 'recordingJournal') {
+      expect(strictCommits.has('audio') && strictCommits.has('projects'),
+        'Recovery began deleting the journal before strict audio and project commits completed');
+      clearedAfterStrictCommits = true;
+    }
+    return originalDelete.apply(this, args);
+  };
+  try {
+    expect(await projectManager.recoverRecordingJournal(journal.sessionId),
+      'The durable journal could not be rebuilt into the open project');
+    expect(clearedAfterStrictCommits, 'Recovery never attempted to clear the replaced journal');
+  } finally {
+    IDBDatabase.prototype.transaction = originalTransaction;
+    IDBObjectStore.prototype.delete = originalDelete;
+  }
   expect(audioEngine.tracks.filter((track) => track.name === 'Recovered — Journal Input').length === 1,
     'Retrying recovery after a failed project save created duplicate tracks');
   const recoveredTrack = audioEngine.tracks.find((track) =>
@@ -144,6 +179,7 @@ async function run(): Promise<void> {
   completed.append('completed-track', 0, [block(0, framesPerBlock, 0), block(0, framesPerBlock, 1)]);
   await completed.finish(1);
   await completed.markCompleted([asset!.id]);
+  await completed.release();
   expect((await listRecordingJournals()).some((entry) => entry.sessionId === completed.sessionId),
     'The completed take journal was not retained until a project save');
   await discardCompletedRecordingJournals(projectId, []);
@@ -156,15 +192,16 @@ async function run(): Promise<void> {
 
   const masterFrames = await verifyMasterCaptureRecovery(projectId);
   const midiNotes = await verifyMidiCaptureRecovery(projectId);
+  const patternNotes = await verifyMidiCaptureRecovery(projectId, 'pattern_loop');
   resultNode.dataset.status = 'passed';
-  resultNode.textContent = `PASS · recovered ${expectedFrames} stereo input frames after injected storage failures, ${masterFrames} stereo master frames, and ${midiNotes} MIDI notes after renderer removal; restored clips survived project reopen.`;
+  resultNode.textContent = `PASS · recovered ${expectedFrames} stereo input frames after injected storage failures, ${masterFrames} stereo master frames, and ${midiNotes} Song / ${patternNotes} Pattern MIDI notes after renderer removal; recovered clips and patterns survived project reopen.`;
 }
 
 const params = new URL(location.href).searchParams;
 const interruptedMasterProject = params.get('interruptedMasterProject');
 const interruptedMidiProject = params.get('interruptedMidiProject');
 const childCapture = interruptedMasterProject ? runInterruptedMasterCapture(interruptedMasterProject)
-  : interruptedMidiProject ? runInterruptedMidiCapture(interruptedMidiProject) : undefined;
+  : interruptedMidiProject ? runInterruptedMidiCapture(interruptedMidiProject, params.get('interruptedMidiTrack') ?? undefined) : undefined;
 const probe = childCapture ? childCapture.then((sessionId) => { resultNode.dataset.sessionId = sessionId; }) : run();
 void probe.catch((error: unknown) => {
   resultNode.dataset.status = 'failed';

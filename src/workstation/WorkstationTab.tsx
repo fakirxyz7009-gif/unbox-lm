@@ -1,5 +1,5 @@
 /**
- * Tab 1 — Workstation & Sequencer: the workstation panel on top and the light song sequencer
+ * Tab 1 — Workstation & Sequencer: the workstation panel on top and the graphite song sequencer
  * below, split by a draggable divider (its position is remembered).
  */
 import React, { useRef, useState } from 'react';
@@ -38,7 +38,7 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
         </div>
       )}
       <div
-        className="h-[14px] shrink-0 cursor-row-resize flex items-center justify-between px-3 group bg-[#16120d] border-y border-[#3a2f22]"
+        className="h-[14px] shrink-0 cursor-row-resize flex items-center justify-between px-3 group bg-[#20242a] border-y border-[#3a4047]"
         role="separator"
         aria-orientation="horizontal"
         aria-label="Resize workstation and sequencer"
@@ -60,7 +60,7 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
-            className="text-[11px] font-mono text-[#d69b50] hover:text-[#fde2b4] flex items-center gap-1 font-bold select-none py-0.5 px-1.5 rounded hover:bg-black/40 cursor-pointer"
+            className="text-[11px] font-mono text-[#c9a53c] hover:text-[#f6e6b0] flex items-center gap-1 font-bold select-none py-0.5 px-1.5 rounded hover:bg-black/40 cursor-pointer"
           >
             {collapsed ? '▼ SHOW WORKSTATION' : '▲ MAX PIANO ROLL / TIMELINE'}
           </button>
@@ -69,7 +69,7 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
               <button
                 type="button"
                 onClick={() => setUi({ split: 0.25 })}
-                className="text-[11px] font-mono text-[#a8957e] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
+                className="text-[11px] font-mono text-[#aab1b9] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
                 title="75% Piano Roll & Sequencer / 25% Workstation"
               >
                 75% ROLL
@@ -77,7 +77,7 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
               <button
                 type="button"
                 onClick={() => setUi({ split: 0.35 })}
-                className="text-[11px] font-mono text-[#a8957e] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
+                className="text-[11px] font-mono text-[#aab1b9] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
                 title="65% Piano Roll & Sequencer / 35% Workstation (Balanced)"
               >
                 BALANCED
@@ -85,7 +85,7 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
               <button
                 type="button"
                 onClick={() => setUi({ split: 0.58 })}
-                className="text-[11px] font-mono text-[#a8957e] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
+                className="text-[11px] font-mono text-[#aab1b9] hover:text-white px-1 py-0.2 rounded hover:bg-white/10"
                 title="58% Workstation / 42% Sequencer"
               >
                 SYNTH FOCUS
@@ -94,11 +94,11 @@ export const WorkstationTab: React.FC<Props> = ({ tracks, selectedId, onSelect, 
           )}
         </div>
 
-        <div className="w-16 h-[3px] rounded bg-[#504030] group-hover:bg-[#d69b50]" />
+        <div className="w-16 h-[3px] rounded bg-[#4a5057] group-hover:bg-[#c9a06c]" />
 
-        <span className="text-[11px] font-mono text-[#a8957e]">Drag to resize · Double-click: Balanced 35%</span>
+        <span className="text-[11px] font-mono text-[#aab1b9]">Drag to resize · Double-click: Balanced 35%</span>
       </div>
-      <div className="flex-1 min-h-[140px] flex flex-col mx-1 mb-1 rounded-sm overflow-hidden border border-[#796d5b]/60 shadow-inner">
+      <div className="flex-1 min-h-[140px] flex flex-col mx-1 mb-1 rounded-sm overflow-hidden border border-[#3a4047] shadow-inner">
         <ArrangementTimeline
           theme="light"
           audioEngine={audioEngine}

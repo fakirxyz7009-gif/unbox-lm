@@ -10,7 +10,8 @@ external folder.
   `public/favicon.svg` (rendered to `build/icon.png` for electron-builder).
 - Server: Express 4 run with `tsx` (`server.ts`), hosts `/api/*` (Gemini AI + library) and serves
   the app (Vite middleware in dev, `dist/` in production) and the library bundle at `/library`.
-- Desktop: Electron 45 (`electron/main.cjs`) → portable `release/Unbox-Studio.exe`; it embeds the
+- Desktop: Electron 45 (`electron/main.cjs`) → NSIS installer `release/Unbox-Studio-Setup-1.0.0.exe`
+  (installed once; no per-launch self-extraction); it embeds the
   same API via the esbuild bundle `electron/api-server.cjs` (fixed loopback ports 47821–47825 so
   IndexedDB projects survive restarts).
 - AI provider: Google Gemini via `@google/genai` (server-side only, key in `.env`). Every AI
@@ -22,15 +23,19 @@ external folder.
 | Task | Command |
 | --- | --- |
 | Dev server (app + API) on http://localhost:3000 | `npm run dev` (`PORT=3123 npx tsx server.ts` for a spare port) |
-| Type check | `npm run lint` (= `tsc --noEmit`) |
-| Automated regression suite | `npm test` (= `tsx --test tests/**/*.test.ts`) |
+| Type check + UTF-8 check | `npm run lint` (= `tsc --noEmit`, then `node scripts/check-utf8.mjs`; that check alone is `npm run check:utf8`) |
+| Automated regression suite | `npm test` (= `tsx --test tests/**/*.test.ts`; no browser probe — see the hip-hop kit row). Environment-gated checks (yt-dlp + ffmpeg, a running Ollama, demucs, directory-link permissions) skip through `tests/helpers/skip.ts`, which prints a `!! SKIPPED — not tested in this run: …` banner and a diagnostic, so missing coverage never hides behind a plain skipped count; never call a bare `t.skip()`. `tests/coverage.test.ts` probes every gated tool once and prints one `!! MISSING COVERAGE` list; with `UNBOX_REQUIRE_FULL_COVERAGE=1 npm test` that single check fails with the whole list (the gated tests still skip), for a machine that should have every tool installed; `tests/coverageStrict.test.ts` proves that switch (message lists every gap, strict run exits 1, the same run without the flag exits 0) |
 | Browser Web Audio engine probe | `npm run test:browser-audio` (Chrome + real `OfflineAudioContext`; checks sample selection and rendered output) |
 | Browser recorded archtop probe | `npm run test:browser-shinyguitar` (loads the bundled CC0 Shinyguitar pack, checks the selected MIDI 60 sample, and measures offline output) |
 | Browser MIDI permission-startup probe | `npm run test:browser-midi-bootstrap` (mounts the app with fake MIDI access; confirms access is requested only after Connect MIDI) |
 | Browser MIDI-to-piano-roll integration probe (simulated controller) | `npm run test:browser-midi` (real `AudioEngine` + Web MIDI adapter + recorder in Chrome; not physical hardware acceptance) |
+| Browser audio take naming probe (fake microphone) | `npm run test:browser-take-name` (records two takes through the real recorder worklet from Chrome's fake input and checks each clip name is `<part> take <n> · m:ss.d` with the take's own length) |
 | Browser all-device audio sweep | `npm run test:browser-devices` (instantiates each playable built-in and audio effect in Chrome and checks for non-silent output) |
 | Browser effect behavior probe | `npm run test:browser-effects` (checks dry bypass and power-off for all 64 audio effects; verifies active signal response for 42 processors, including clocked, gate-driven and vocoder/pitch units) |
 | Browser pitch correction probe | `npm run test:browser-pitch-correction` (measures monophonic scale correction, correction-off behavior, tracking meter, and OfflineAudioContext clone output) |
+| Level-spread regression probe | `npm run test:browser-level-spread` (renders **every** calibrated type — all instruments and all 200 recorded types, ~70 s — compares each post-trim level with the target, and fails when the typical type is more than 2 dB off, when any type is more than 8 dB off, when a calibrated type renders silence, or when the run cannot finish inside its ~400 s budget. Packs are measured first and a pack reading far under target is re-read once, because a still-decoding pack can only read low. `?limit=<dB>` on the probe page overrides the typical-deviation limit; this is the only check that catches a stale calibration table, because `npm test` cannot render audio. Needs `playwright-core` resolvable from the project — `npm install --no-save --no-package-lock playwright-core`, since it is deliberately not a project dependency; a runtime of ~160 s leaves the 480 s ceiling plenty of room) |
+| Hip-hop kit probe | `npm run test:browser-hiphop-kits` (renders a three-pad chord from each of the 8 generated hip-hop banks offline and requires every one to be audible, then mounts the Hip-Hop Kits page, starts WALK, and measures the AudioContext times it schedules: every step must sit on the pace in force at the project tempo (1/8 at 128 BPM = 0.2344 s, ±10 ms), pads must advance in order, and the transport must stay stopped. Step spacing comes from the scheduled times, not wall clock, so a busy or hidden page cannot fake it. CI runs it as its own `browser-audio` job (`.github/actions/verify-browser`, driver pinned in that action); it is deliberately **not** part of `npm test`, where it stalled past its 300 s result timeout whenever the unit suite shared the machine (~47 s standalone) |
+| Re-measure instrument output levels → `src/audio/levelCalibrationTable.ts` | `npm run calibrate:levels` (Chrome + the probe server; measures every playable built-in type and rewrites the generated table. `npm run calibrate:levels -- <type>` measures one type and prints it without writing. Every recorded pack gets its own entry, measured on notes it actually samples (pack key maps are thinned and can have gaps where 60/64/67 fall); the melodic / kit family trim is only the fallback for a pack added after the table was written. `-- <types…> --merge` re-measures just those and keeps the rest of the table, which is how to recover packs lost to a batch that aborted) |
 | Browser project save/reopen probe | `npm run test:browser-project` (IndexedDB round-trip for devices, parameters, cables, metadata and notes; checks live and offline render output) |
 | Browser transport/audio soak | `npm run test:browser-soak` (10-minute scheduled playback and worklet cadence check; optional `-SoakSeconds N` in the PowerShell runner) |
 | Production web build → `dist/` | `npm run build` |
@@ -40,12 +45,19 @@ external folder.
 | Bundle the API for Electron → `electron/api-server.cjs` | `npm run build:api` |
 | Run desktop app from source | `npm run electron` or `run-app.bat` |
 | Run standalone GPU app (no Electron) | `npm run standalone` or `Start-Unbox-Standalone.bat` |
-| Build portable exe (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio.exe` |
-| Build the exe to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
-| Build and validate the project-owned VST3 host fixtures | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\vst3\smoke.ps1` (Windows x64; tests only the source-built delay and MIDI synth fixtures, never plugins from `D:\vsr`) |
+| Build the Windows installer (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio-Setup-1.0.0.exe` |
+| Build the installer to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share-Setup-1.0.0.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
+| Build and validate the project-owned VST3 host fixtures | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\vst3\smoke.ps1` (Windows x64; tests only the source-built delay and MIDI synth fixtures, never plugins from `D:\vsr`; it also builds the generic `unbox-vst3-third-party-host` and the third-party `adelay` the hosting probe loads. `third_party/` is generated and git-ignored: on a fresh checkout clone `github.com/steinbergmedia/vst3sdk` at tag `v3.8.1_build_84` with the `base`, `cmake`, `pluginterfaces` and `public.sdk` submodules into `third_party/vst3sdk` first, which is what the CI `vst3-hosting` job does) |
+| Real third-party VST3 hosting proof | `npm run test:vst3-third-party` (= `scripts/vst3/third-party-probe.ps1`; loads Steinberg's `adelay.vst3` — built by `smoke.ps1` as the `third-party-adelay` target — through the generic host, prints the factory's classes and vendor, pushes a click through it and checks it lands on the parameter's delay. `scripts/vst3/run-third-party-host-probe.cjs` takes any module path plus `--class` / `--param ID=VALUE`. Development only — the shipping host stays locked to the fixture, and `docs/vst3-hosting-scope.md` says what packaged hosting still needs. CI runs it in the `vst3-hosting` job, which fetches the pinned SDK tag `v3.8.1_build_84` because the 495 MB SDK is not vendored) |
 
 **Type-check baseline: 0 errors**, and `npx tsc --noEmit --noUnusedLocals` reports only unused
 `React` default imports (harmless with the JSX transform). Keep both clean.
+
+**Git hooks:** `.githooks/pre-commit` runs `scripts/check-utf8.mjs --staged`, so a commit whose staged
+text is not valid UTF-8 (or carries a U+FFFD) is rejected. The hooks are tracked: enable them once per
+clone with `npm run hooks:install` (= `scripts/install-hooks.mjs`: sets `core.hooksPath` and refuses when
+`.githooks/pre-commit` is missing, so an old checkout cannot silently end up with no hooks); `git commit
+--no-verify` skips the check.
 
 ## Verifying changes
 
@@ -85,7 +97,9 @@ external folder.
 - **Project and endurance probes**: `npm run test:browser-project` saves and reloads a project
   through IndexedDB and checks live plus offline rendering. `npm run test:browser-soak` runs the
   transport for 10 minutes by default; the PowerShell runner accepts `-SoakSeconds N` for shorter
-  diagnostics. These headless-browser probes do not replace physical MIDI-controller acceptance.
+  diagnostics. These headless-browser probes do not replace physical MIDI-controller acceptance. Both physical-Impulse
+  probes launch Chrome on a persistent profile whose `midi` site setting already allows the probe
+  origin (Chromium refuses `requestMIDIAccess()` with only the CDP grant), so no prompt is needed.
 - To reach the engine from a test: `await import(url)` where `url` is the exact
   `/src/audio/AudioEngine.ts?...` entry from `performance.getEntriesByType('resource')`; same trick
   for other modules. After an HMR edit, importing the bare path creates a **second** engine.
@@ -263,8 +277,11 @@ browser's "Audio file" source (+ "keys" on library samples).
 `installExpression(dev)` wraps an instrument's `noteOn`: oscillators and buffer sources it creates
 during that call get the device's expression bus on their `detune` (summed with the engine's own
 detune; disconnected on `ended`). `setPitchBend(dev, −1..1)` = ±2 semitones on held and new notes;
-`setModWheel` drives `cv_mod` when the device has one, else vibrato. Hardware MIDI: pitch bend,
-CC1, CC64 sustain are handled in `handleMidiMessage`.
+`setModWheel` drives `cv_mod` when the device has one, else vibrato. Hardware MIDI: pitch bend, CC1, channel pressure (aftertouch), CC64 sustain and CC 120 / 123 panic are
+handled in `handleMidiMessage`. MPE (MIDI Polyphonic Expression) per-note bend, pressure and CC74
+timbre are tracked in `MidiInput` (`perNoteBend`, `perNotePressure`, `perNoteTimbre` maps) and
+available via `getPerNoteBend(note)`, `getPerNotePressure(note)`, `getPerNoteTimbre(note)`;
+instrument engines can consume them for per-note expression.
 
 ### Hardware MIDI
 `audioEngine.midi` (`audio/midi/MidiInput.ts`) opens every input port explicitly (a port held by
@@ -278,7 +295,10 @@ The UI never gets an event per message: it polls `midi.version` / `midiControlCh
 `midi.lastActivity` in `useFrame` (Workstation keys + wheels, quick knobs, part level, LCD, the
 transport MIDI LED). Pressing Record with an armed instrument track also requests MIDI access;
 recording continues with an on-screen keyboard fallback if permission is unavailable. Settings ·
-MIDI shows ports, the map with Learn / Clear, and an activity log.
+MIDI shows ports, the map with Learn / Clear, and an activity log. If the controller disappears during a MIDI-only
+take, the take is closed (transport keeps running) and its notes are released; the same controller back inside the auto-continue window
+(Settings · MIDI, default 8 s, can be Off) continues that take after a one-bar count-in, and later replugs leave a
+Resume offer in the MIDI strip instead. The window is a device preference in localStorage (`unbox.midiAutoResumeSeconds`).
 
 ### Workspace and skin (Unbox Studios look)
 - Three tabs (`shell/AppShell.tsx`): **Workstation & Sequencer** (workstation panel + light song
@@ -303,7 +323,7 @@ MIDI shows ports, the map with Learn / Clear, and an activity log.
 - Pages render inside `.us-page` (raw text fields / checkboxes take the skin there) and build on
   `src/studio/ui/controls.tsx`: `Panel` (dark chassis, metal name plate, screws), `Btn` (lit when on),
   `Sel`, `NumField` (LCD), `Slide` (skinned range + LCD readout).
-- The arrangement timeline takes `theme="light"` (Workstation) or dark; colours in `timelineTheme.ts`.
+- The arrangement timeline renders the light palette in the Workstation (`theme="light"`); `timelineTheme.ts` also keeps the dark palette for editors that ask for it.
 
 ### Rack UI (Reason workflow)
 - Three columns with wood rails in ONE scroll container (`.rack-content`): jacks and the cable SVG
@@ -406,12 +426,13 @@ through the unit's own output. Samples can be put in the song (Studio → Sample
 
 ## Keyboard map
 
-Global (App.tsx): `Space` play/stop · `R` back to bar 1 · `M` metronome · `[` `]` tempo ·
+Global (App.tsx): `Space` play/stop (on the Hip-Hop kits page it starts / stops the pad walk instead) ·
+`R` back to bar 1 · `M` metronome · `[` `]` tempo ·
 `F7`/`F1`/`Alt+1` Workstation & Sequencer · `F6`/`F3`/`Alt+3` Rack · `F5`/`F2`/`Alt+2` Mixer & Clip
 Editor · `F4`/`Alt+4` song editors above the rack · `Tab`/`Alt+F` rack front/rear · `F8` MIDI tools ·
 `Ctrl+K` command search · `Ctrl+S` save · `Ctrl+E` export WAV · `Ctrl+Shift+E` Export page ·
 `Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y` undo/redo (sequencer edits) · `Alt+C` AI Co-Pilot · `Alt+M` CV matrix ·
-`Alt+K` keyboard dock (Rack / Mixer tabs) · `Alt+Q` / `` ` `` pie menu · `F11`/`Alt+G` stage mode ·
+`Alt+K` keyboard dock (Rack / Mixer tabs) · `Alt+P` Hip-Hop kits (pad audition) · `Alt+Q` / `` ` `` pie menu · `F11`/`Alt+G` stage mode ·
 `?`/`Alt+H` shortcut help.
 KEYS (transport button, `uiStore.qwertyPiano`): on = letters play the selected part (`A W S E D F T G
 Y H U J K O L P ;`, `Z`/`X` octave); off = letters are commands: `Q W E R T Y U` sequencer tools
@@ -436,7 +457,8 @@ then the user-data folder.
 - Removing an inline effect re-bridges upstream → downstream; deleting a Combinator removes members
   one by one so chains re-bridge naturally.
 - Offline renders clone each device (`cloneForOfflineContext` for devices with extra state) and copy
-  its level trim; anything a device does only on its live context (e.g. expression) is live-only.
+  its level trim; expression (pitch bend / mod wheel) is now installed on offline instrument clones
+  and the live bend/wheel position is replayed, so exports match what is heard live.
 - `'master'` is not a DeviceType.
 - Electron without `electron/api-server.cjs` serves static files only (no AI, no rescan) — the
   bundled library still works. Run `npm run build:api` after server changes.

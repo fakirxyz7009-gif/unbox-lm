@@ -74,11 +74,9 @@ export function Panel({ title, right, children, className = '' }: { title?: Reac
     <section className={`us-panel ${className}`}>
       {(title || right) && (
         <header className="us-panel-head">
-          <span className="us-screw shrink-0" aria-hidden="true" />
           {title && <h3 className="us-plate">{title}</h3>}
           <div className="flex-1" />
           {right}
-          <span className="us-screw shrink-0" aria-hidden="true" />
         </header>
       )}
       <div className="p-3">{children}</div>

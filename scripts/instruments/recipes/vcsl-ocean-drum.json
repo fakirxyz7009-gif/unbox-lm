@@ -1,0 +1,43 @@
+{
+  "id": "vcsl-ocean-drum",
+  "name": "VCSL Ocean Drum",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded ocean drum with three long, rolling swells of shifting beads.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Other%20Membranophones/Ocean%20Drum",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides three sustained ocean-drum swells. They are mapped as three one-shot pads, with the natural tail preserved."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-ocean-drum/samples",
+  "lanes": [
+    {
+      "name": "Swell 1",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "OceanDrum_Sus_1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Swell 2",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "OceanDrum_Sus_2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Swell 3",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "OceanDrum_Sus_3_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 5,
+  "release": 0.2,
+  "notePolyphony": 2
+}

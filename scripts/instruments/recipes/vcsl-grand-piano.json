@@ -1,0 +1,265 @@
+{
+  "id": "vcsl-grand-piano",
+  "name": "VCSL Grand Piano",
+  "kind": "melodic",
+  "category": "piano",
+  "description": "Recorded studio grand piano with two velocity layers across its keyboard.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Grand%20Piano%2C%20Kawai/Sustains",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The selection spans A#0-C8 at two dynamics; the remaining notes, release and pedal takes remain in the source."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-grand-piano/samples",
+  "notes": [
+    {
+      "file": "GPiano_sus_A#-1_v3_rr1_Player.wav",
+      "root": 22,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_A#-1_v4_rr1_Player.wav",
+      "root": 22,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C0_v3_rr1_Player.wav",
+      "root": 24,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C0_v4_rr1_Player.wav",
+      "root": 24,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#0_v3_rr1_Player.wav",
+      "root": 30,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#0_v4_rr1_Player.wav",
+      "root": 30,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C1_v3_rr1_Player.wav",
+      "root": 36,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C1_v4_rr1_Player.wav",
+      "root": 36,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#1_v3_rr1_Player.wav",
+      "root": 42,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#1_v4_rr1_Player.wav",
+      "root": 42,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C2_v3_rr1_Player.wav",
+      "root": 48,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C2_v4_rr1_Player.wav",
+      "root": 48,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#2_v3_rr1_Player.wav",
+      "root": 54,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#2_v4_rr1_Player.wav",
+      "root": 54,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C3_v3_rr1_Player.wav",
+      "root": 60,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C3_v4_rr1_Player.wav",
+      "root": 60,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#3_v3_rr1_Player.wav",
+      "root": 66,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#3_v4_rr1_Player.wav",
+      "root": 66,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C4_v3_rr1_Player.wav",
+      "root": 72,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C4_v4_rr1_Player.wav",
+      "root": 72,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#4_v3_rr1_Player.wav",
+      "root": 78,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#4_v4_rr1_Player.wav",
+      "root": 78,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C5_v3_rr1_Player.wav",
+      "root": 84,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C5_v4_rr1_Player.wav",
+      "root": 84,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#5_v3_rr1_Player.wav",
+      "root": 90,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_F#5_v4_rr1_Player.wav",
+      "root": 90,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C6_v3_rr1_Player.wav",
+      "root": 96,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C6_v4_rr1_Player.wav",
+      "root": 96,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "GPiano_sus_C7_v3_rr1_Player.wav",
+      "root": 108,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "GPiano_sus_C7_v4_rr1_Player.wav",
+      "root": 108,
+      "vel": [
+        64,
+        127
+      ]
+    }
+  ],
+  "keyRange": [
+    22,
+    108
+  ],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 6,
+  "release": 0.4,
+  "notePolyphony": 4
+}

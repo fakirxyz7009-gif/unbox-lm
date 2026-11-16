@@ -1,0 +1,55 @@
+{
+  "id": "vcsl-tambourine",
+  "name": "VCSL Tambourine",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded tambourine from the VCSL CC0 library, mapped as a hit, alternating shakes and three roll dynamics on MIDI notes 54–58.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tambourine%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual tambourine performer. The source has two hit dynamics, two shake round robins and three roll dynamics; each is mapped to its own MIDI note."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-tambourine/samples",
+  "lanes": [
+    {
+      "name": "Tambourine Hit",
+      "note": 54,
+      "role": "perc",
+      "samples": [
+        { "file": "Tamb1_Hit_v1_rr1_Mid.wav", "vel": [1, 63] },
+        { "file": "Tamb1_Hit_v2_rr1_Mid.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Tambourine Shake",
+      "note": 56,
+      "role": "perc",
+      "samples": [
+        { "file": "Tamb1_Shake_rr1_Mid.wav" },
+        { "file": "Tamb1_Shake_rr2_Mid.wav" }
+      ]
+    },
+    {
+      "name": "Tambourine Roll Soft",
+      "note": 57,
+      "role": "perc",
+      "samples": [{ "file": "Tamb1_Roll_v1_rr1_Mid.wav" }]
+    },
+    {
+      "name": "Tambourine Roll Medium",
+      "note": 58,
+      "role": "perc",
+      "samples": [{ "file": "Tamb1_Roll_v2_rr1_Mid.wav" }]
+    },
+    {
+      "name": "Tambourine Roll Loud",
+      "note": 59,
+      "role": "perc",
+      "samples": [{ "file": "Tamb1_Roll_v3_rr1_Mid.wav" }]
+    }
+  ],
+  "release": 0.25,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

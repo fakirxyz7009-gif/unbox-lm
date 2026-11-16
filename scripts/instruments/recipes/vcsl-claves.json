@@ -1,0 +1,37 @@
+{
+  "id": "vcsl-claves",
+  "name": "VCSL Claves",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Two paired claves recorded for the VCSL CC0 library, mapped as high and low strokes with three dynamic levels on MIDI notes 60 and 62.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Claves",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual claves performer. Uses the current three-level Claves 1/2 hits, not the Legacy folder."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-claves/samples",
+  "lanes": [
+    {
+      "name": "Claves 1",
+      "note": 60,
+      "samples": [
+        { "file": "Claves1_Hit_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "Claves1_Hit_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "Claves1_Hit_v3_rr1_Mid.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Claves 2",
+      "note": 62,
+      "samples": [
+        { "file": "Claves2_Hit_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "Claves2_Hit_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "Claves2_Hit_v3_rr1_Mid.wav", "vel": [85, 127] }
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

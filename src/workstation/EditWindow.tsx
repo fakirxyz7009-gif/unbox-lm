@@ -13,7 +13,7 @@ export const EditWindow: React.FC<{ dev: BaseDevice; onClose: () => void; onMess
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   return (
     <div
-      className="fixed z-40 w-[960px] max-w-[96vw] max-h-[80vh] flex flex-col rounded-lg border border-chrome-line bg-chrome-1 shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
+      className="unbox-dialog-shell fixed z-40 w-[960px] max-w-[96vw] max-h-[80vh] flex flex-col rounded-lg border border-chrome-line bg-chrome-1 shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
       style={{ left: pos.x, top: pos.y }}
       role="dialog"
       aria-label={`Edit ${dev.name}`}

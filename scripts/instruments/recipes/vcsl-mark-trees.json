@@ -1,0 +1,67 @@
+{
+  "id": "vcsl-mark-trees",
+  "name": "VCSL Mark Trees",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded mark-tree chime cluster with ascending, descending, slow, fast and random strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Mark%20Trees",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All six legacy chime-cluster performances are mapped to separate pads; the source does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-mark-trees/samples",
+  "maxSeconds": 5,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Ascending",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "windchimes_asc1.wav"
+      ]
+    },
+    {
+      "name": "Descending",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "windchimes_desc1.wav"
+      ]
+    },
+    {
+      "name": "Fast Ascending",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "windchimes_fastAsc1.wav"
+      ]
+    },
+    {
+      "name": "Slow Ascending",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "windchimes_slowAsc1.wav"
+      ]
+    },
+    {
+      "name": "Slow Descending",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "windchimes_slowDesc1.wav"
+      ]
+    },
+    {
+      "name": "Random",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "windchimes_random.wav"
+      ]
+    }
+  ]
+}

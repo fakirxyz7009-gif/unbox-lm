@@ -43,6 +43,31 @@ Attribution names can identify a library creator, mapper, curator, or uploader. 
 - Source: https://freesound.org/people/cabled_mess/packs/29512/
 - Notes: Freesound sounds 523851-523889 by cabled_mess (cut from donyaquick's 'Harmonium Samples - All Keys and Drones', sound 330410). CC0; built from Freesound's high-quality Ogg previews (lossy).
 
+## Tumbi Folk Pluck
+
+- Attribution: Chamkila Stems
+- License: Custom
+- Source: D:/audio stems/daw_instruments/Playable_Patches
+- Notes: Root measured from the recording: B4 (about 494 Hz, +1 cent). The source SFZ had pitch_keycenter=60 from the auto-generated patch.
+
+## Punjabi Dholak
+
+- Attribution: Chamkila Stems
+- License: Custom
+- Source: D:/audio stems/daw_instruments/Playable_Patches
+
+## Chamkila Harmonium
+
+- Attribution: Chamkila Stems
+- License: Custom
+- Source: D:/audio stems/daw_instruments/Playable_Patches
+
+## Chamkila Vocal Chops
+
+- Attribution: Chamkila Stems
+- License: Custom
+- Source: D:/audio stems/daw_instruments/Playable_Patches
+
 ## Meta Piano
 
 - Attribution: Meta Creative Audio team (collection creator; individual performer not identified)
@@ -318,3 +343,1039 @@ Attribution names can identify a library creator, mapper, curator, or uploader. 
 - License: CC0-1.0
 - Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
 - Notes: VSCO 2 CE is CC0; the source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VCSL Claves
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Claves
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual claves performer. Uses the current three-level Claves 1/2 hits, not the Legacy folder.
+
+## VCSL Darbuka
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Darbuka
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual darbuka performer. All five current hit types are included with both velocity layers and both round robins.
+
+## VCSL Agogo Bells
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Agogo%20Bells
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual agogo performer. Uses the current High/Low recordings, not the Legacy folder.
+
+## VCSL Kenyan Kalimba
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Kalimba%2C%20Kenya
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The folder is called Kalimba, Kenya; the recordings are labelled Mbira6. Pitches are taken from the file-name note labels. Repeated tine labels (B3, D#3, F#3, G#3) remain alternate takes rather than separate notes.
+
+## VCSL Woodblock
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Woodblock
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual woodblock performer. All ten current recordings are used as round-robin takes on one note; the source does not document separate high/low blocks for this folder.
+
+## VSCO Marimba
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0. The source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Upright Piano
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0. The source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Loud Organ
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0. The source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Muted French Horn
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0. The source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## VSCO Harmon-Muted Trumpet
+
+- Attribution: Sam Gossner and Simon Dalzell; Elan Hickler / Soundemote
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 CE is CC0. The source README credits recordings to Sam Gossner and Simon Dalzell, and sample cutting to Elan Hickler / Soundemote. Pinned source revision 6dd651d55dde97fd4028699be9d4481f26917891.
+
+## FreePats Ukulele
+
+- Attribution: Mateusz Dąbrowski (recorded); FreePats
+- License: CC0-1.0
+- Source: https://github.com/freepats/ukulele1/tree/86d345f6f7b79a106ace98eca0da19b087786dba
+- Notes: Source README credits Mateusz Dąbrowski with recording the Flight Fireball tenor ukulele in August 2026 and dedicates the bank to CC0-1.0. Pinned revision 86d345f6f7b79a106ace98eca0da19b087786dba.
+
+## FreePats Spanish Classical Guitar
+
+- Attribution: Roberto (recorded and processed); FreePats
+- License: CC0-1.0
+- Source: https://github.com/freepats/spanish-classical-guitar/tree/6f4eb1b092acc88f5448cea1a0001bd07b971af8
+- Notes: Source README credits the 2008 recordings and processing to Roberto at FreePats and dedicates the bank to CC0-1.0. Pinned revision 6f4eb1b092acc88f5448cea1a0001bd07b971af8.
+
+## FreePats Hang in D Minor
+
+- Attribution: Mar (performer); Gonzalo and Roberto (recording); FreePats
+- License: CC0-1.0
+- Source: https://github.com/freepats/hang-D-minor/tree/fdeca2ec981ab374607f250bccb1452b531ac13a
+- Notes: Source README credits Mar for the performance, Gonzalo and Roberto for recording, and Roberto for editing and processing; the bank is CC0-1.0. Pinned revision fdeca2ec981ab374607f250bccb1452b531ac13a.
+
+## FreePats Francis Bacon Piano
+
+- Attribution: Piotr Barcz (recorded); Roberto (sound bank); FreePats
+- License: CC0-1.0
+- Source: https://github.com/freepats/old-piano-FB/tree/9707673c65d8a52d7b374af807384005564a89f2
+- Notes: Source README credits Piotr Barcz with recording the historic Francis Bacon player piano and Roberto with assembling the bank; it is CC0-1.0. Pinned revision 9707673c65d8a52d7b374af807384005564a89f2.
+
+## FreePats Glasses of Water
+
+- Attribution: Roberto (recorded); FreePats
+- License: CC0-1.0
+- Source: https://github.com/freepats/glass/tree/8b2fd2c0dfc334b6c16eaac418c8e73020be1105
+- Notes: Source README credits Roberto with recording the tuned glasses at Medialab-Prado and dedicates the bank to CC0-1.0. Pinned revision 8b2fd2c0dfc334b6c16eaac418c8e73020be1105.
+
+## Karoryfer War Tuba
+
+- Attribution: Jakub Lewicki (tuba); Drogomir Smolken (recording and mapping); Karoryfer Samples
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.war-tuba/tree/5b62dd6ef6b00281bb734769e44a63f5e013018a
+- Notes: The source README credits Jakub Lewicki (Ignacy Woland of Hañba!) for the tuba performance and Drogomir Smolken for recording and mapping; the library is CC0. Pinned revision 5b62dd6ef6b00281bb734769e44a63f5e013018a. This pack uses the solo polyphonic program; the duo and trio instruments are transposed derivatives and are not included.
+
+## Karoryfer Weresax
+
+- Attribution: Karoryfer Samples
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.weresax/tree/a4d756b21d2a573aca0d840cce7e71ba5effd4c6
+- Notes: The source README describes Weresax as an open-source Karoryfer alto saxophone library; GitHub publishes it under CC0-1.0. Pinned revision a4d756b21d2a573aca0d840cce7e71ba5effd4c6. This pack uses the saxophone program, not the saxcordion or sxnth derivatives.
+
+## Karoryfer x bigcat Cello
+
+- Attribution: Kamila Borowiak (cello); Karoryfer x bigcat (library)
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer-bigcat.cello/tree/6fd75fbfc1dbb3109bf26220ba1adea46188a18b
+- Notes: The source README credits Kamila Borowiak with the cello performance and describes the library as open source; GitHub publishes it under CC0-1.0. Pinned revision 6fd75fbfc1dbb3109bf26220ba1adea46188a18b. This pack uses the bowed velocity-layer program.
+
+## Karoryfer Body Percussion
+
+- Attribution: Karoryfer Samples
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/body_percussion/tree/4ac9d8966679c648b62fa10a188179e186b97f24
+- Notes: The source README identifies the body percussion recordings as a Karoryfer library; GitHub publishes it under CC0-1.0. Pinned revision 4ac9d8966679c648b62fa10a188179e186b97f24. Lane names follow the source key map: heel, half stomp, stomp, belly side/center, chest thump/side, shoulder, head, cheek, snap, pinky snap and clap.
+
+## Karoryfer Cajon
+
+- Attribution: Karoryfer Samples
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.gogodze-phu-vol-i/tree/7452f62060cd3a468c78bc361d96a4dfb30879c9
+- Notes: The source README identifies the Cajon samples in Karoryfer's Gogodze Phu Vol. I library; GitHub publishes the repository under CC0-1.0. Pinned revision 7452f62060cd3a468c78bc361d96a4dfb30879c9. This pack uses the Cajon program, not the Bobobo kit; the source does not publish descriptive labels for its ten hit keys, so the lanes are numbered after its slots, with 57 labelled as the roll.
+
+## VCSL Bongos
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Bongos
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual bongo performer. The open and muted high/low hits retain all three recorded dynamics and both round robins; the long roll takes are omitted.
+
+## VCSL Conga Set
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Conga
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual conga performer. The conga, quinto and tumba open/slap voices retain their recorded dynamics and both round robins.
+
+## VCSL Balafon
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Balafon/Hard%20Mallet
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual balafon performer. Filename octave labels are one below measured pitch, so roots are mapped +12 semitones. Each of the six recorded bars keeps its three dynamic layers.
+
+## VCSL Tambourine
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tambourine%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual tambourine performer. The source has two hit dynamics, two shake round robins and three roll dynamics; each is mapped to its own MIDI note.
+
+## VCSL Vibraphone
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Vibraphone/Hard%20Mallets
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual vibraphone performer. Filename octave labels are one below measured pitch, so roots are mapped +12 semitones. The source's medium and loud hard-mallet recordings remain separate velocity layers.
+
+## FreePats Upright Piano KW
+
+- Attribution: Gonzalo and Roberto (recorded and processed); Inma Martínez de Miguel (instrument access)
+- License: CC0-1.0
+- Source: https://github.com/freepats/upright-piano-KW/tree/570f6c60ed2eff67accad3b85d5b452e57a3ad28
+- Notes: FreePats Upright Piano KW, version 2022-02-21. Gonzalo and Roberto recorded and processed the instrument in January 2017; Inma Martínez de Miguel provided access to her home and instrument. CC0-1.0. Two recorded velocity layers and the source's sustain loops are preserved; every second sampled key is retained for a compact pack.
+
+## FreePats Picked Electric Bass
+
+- Attribution: Andrea Biasior (recordings); Roberto (sample and bank edits)
+- License: CC0-1.0
+- Source: https://github.com/freepats/electric-bass-YR/tree/8dcb7ea9116f417273ef8c030d15e7b3aa654301
+- Notes: FreePats Picked Bass YR, version 2019-09-30. Andrea Biasior created the recordings and Roberto made small sample and sound-bank edits for FreePats. CC0-1.0. The source maps the picked bass across MIDI 26–46.
+
+## FreePats Clean Electric Guitar
+
+- Attribution: FreePats (recordings and sound bank; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/freepats/electric-guitar-FSBS-clean/tree/192cf0d9bf2c4ba6ead8e3524ba3f78818e4fe91
+- Notes: FreePats Electric Guitar FSBS (clean), version 2026-08-07. The included README says the bank was made by direct sampling a solid-body electric guitar through an audio interface, amplifier and effects rack. The individual performer is not identified. CC0-1.0. The bridge-position small program and its source loops are retained.
+
+## FreePats World Percussion
+
+- Attribution: Xavimart (performance and recording); Gonzalo and Roberto (recording and processing); Versilian Studios LLC (VCSL claves and conga source)
+- License: CC0-1.0
+- Source: https://github.com/freepats/world-percussion/tree/e54eb2912a0d6d4444ab205d52f778e27da0fc96
+- Notes: FreePats World percussion, version 2020-09-05. Xavimart (Javier) provided and performed the instruments; Xavimart, Gonzalo and Roberto recorded in January 2019, and Roberto processed the samples. Claves and conga source recordings come from Versilian Studios LLC's CC0 VCSL. MIDI 48–71 retains one or two takes per sound for a compact kit.
+
+## FreePats MuldjordKit
+
+- Attribution: Lars Muldjord (recordings); Roberto (FreePats stereo assembly); DrumGizmo.org (required sample credit)
+- License: CC-BY-4.0
+- Source: https://github.com/freepats/muldjordkit/tree/719fe72bc6693b94f1229674e202881145ab44ed
+- Notes: Drum samples provided by DrumGizmo.org. FreePats version 2020-10-18, assembled by Roberto for a stereo kit. Lars Muldjord recorded the original kit and released it under CC-BY-4.0; attribution is required in album credits or similar linear notes. Source keys 48–64 are remapped to a General MIDI-style kit, keeping three dynamics and two takes per sound.
+
+## Karoryfer Ergo Pizzicato
+
+- Attribution: D. Smolken (performance and mapping); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.ergo/tree/c3232f03608e07e4e274c8ad9a1a4c32885f75c4
+- Notes: Ergo electric upright bass, played and mapped by D. Smolken; readme copyright 2014 Karoryfer Lecolds; repository licensed CC0-1.0. The pizzicato program is used; every second sampled semitone and up to three dynamics are retained for a compact pack.
+
+## Karoryfer Horse Pulse Pluck
+
+- Attribution: D. Smolken (performance and mapping); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/Karoryfer.HorsePulse/tree/6f4749d54512d762098ca726a3cbd13444562904
+- Notes: Horse Pulse bass tagelharpa, a free bonus created alongside the Three Tagelharpas library. D. Smolken performed and mapped the instrument; Karoryfer Lecolds released the repository under CC0-1.0. The pluck program is used with every second sampled key, two dynamics and two takes for a compact pack.
+
+## Karoryfer Black and Green Guitars
+
+- Attribution: Brian Wood (guitars and recordings); D. Smolken (mapping); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.black-and-green-guitars/tree/b3b3249d37dc977a1a297bd2dc053e6d9b6b805c
+- Notes: Black And Green Guitars. Brian Wood recorded and photographed the green and black hollowbody electric guitars; Karoryfer Lecolds released the library under CC0-1.0. The green twang program is used, retaining two dynamics, every second sampled key and up to three seconds per note.
+
+## Karoryfer Frankensnare
+
+- Attribution: D. Smolken (recordings and mapping); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.frankensnare/tree/9151c2d79fcbb73c65d63f78918d4ba7abc91a81
+- Notes: Frankensnare is Karoryfer Samples' collection of acoustic snare drums, released under CC0-1.0. This pack uses the 10x6 ash snare with brush program, keeping three dynamics and two takes for side stick, snare and rimshot.
+
+## Karoryfer Hat With The Phat
+
+- Attribution: D. Smolken (recordings and mapping); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/Karoryfer.TheHatWithThePhat/tree/afa76f2c9c88e2e27d72a0c2216b1eae3c47b835
+- Notes: The Hat With The Phat combines two ride cymbals into a giant hi-hat. D. Smolken performed and mapped the instrument; Karoryfer Lecolds released the library under CC0-1.0. The basic program is used with two dynamics and two takes for closed, pedal and open hats.
+
+## VSCO Straight-Mute Trumpet
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the straight-mute trumpet sustain program with every second sampled key and up to three dynamics.
+
+## VSCO Flute Vibrato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the concert flute vibrato sustain program with every second sampled key and up to three dynamics.
+
+## VSCO Quiet Organ
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the quiet organ program with every second sampled key and its recorded sustain loops.
+
+## VSCO Viola Pizzicato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the viola ensemble pizzicato program with every second sampled key and up to three dynamics.
+
+## VSCO Timpani Rolls
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the timpani rolls program and keeps every sampled drum.
+
+## VCSL Harmonica
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Harmonica-Hohner-Special20-C/Sustains/Normal
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual harmonica performer. These are the normal-tone sustained recordings, looped for held notes; the release and vibrato takes are omitted.
+
+## VCSL Dan Tranh
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Dan%20Tranh/Normal
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the loud normal plucks, preserving the instrument's pentatonic key layout; glissandi, tremolo and vibrato are omitted.
+
+## VCSL Harpsichord
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Harpsichord%2C%20French/Sustains
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the normal-register sustained manual recordings, including the source's additional round-robin takes; the lute stop and separate release recordings are omitted. Strikes are one-shot so the plucked decay is not cut off.
+
+## VCSL Psaltery
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Psaltery%2C%20Bowed%20and%20Plucked/Pluck
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the plucked program; the long-bow and spiccato articulations are omitted. The source recordings are one-shot strikes and are allowed to ring after key-up.
+
+## VCSL Frame Drum
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Frame%20Drum
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual frame-drum performer. The open and muted hits of both drums retain their two dynamics and two takes; the separate hand-only recordings are omitted.
+
+## VSCO GM Percussion
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. The source's GM-StylePerc program is reduced to 20 core General MIDI percussion lanes; two dynamics and the first take per sound are retained.
+
+## VSCO Violin Pizzicato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the violin ensemble pizzicato program with every second sampled key and two dynamics.
+
+## VSCO Contrabass Pizzicato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the contrabass pizzicato program with every second sampled key and two dynamics.
+
+## VSCO Cello Spiccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the cello ensemble spiccato program with every second sampled key and two dynamics.
+
+## VSCO Oboe Vibrato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This pack uses the oboe vibrato sustain program with every second sampled key and two dynamics.
+
+## FreePats Timpani
+
+- Attribution: Versilian Studios LLC (VCSL recordings); Roberto (FreePats sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/timpani/tree/21e505407fc6c43bdaa801ce57ff6a3a16dbe8b0
+- Notes: FreePats Timpani, version 2024-08-10. Made with recordings from Versilian Studios LLC's CC0 VCSL and assembled by Roberto for FreePats. The source program's 24 regions are retained across the drums' sampled range.
+
+## FreePats Tubular Bells
+
+- Attribution: Versilian Studios LLC (VCSL recordings); Roberto (FreePats sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/tubular-bells1/tree/7809b71545dab785a424280c67642a4b8c7b1cdd
+- Notes: FreePats Tubular Bells, version 2024-11-30. Made with edited recordings from Versilian Studios LLC's CC0 VCSL and assembled by Roberto for FreePats. The full 19-region program is retained.
+
+## FreePats Synth Percussion
+
+- Attribution: Roberto (FreePats; synthesized and edited)
+- License: CC0-1.0
+- Source: https://github.com/freepats/synthesizer-percussion/tree/39bbabce8e0e10aa259d5d94fca329f668733185
+- Notes: FreePats synthesizer percussion, version 2022-07-18. Roberto created and edited these sounds with free software synthesizers for FreePats; the repository and release are CC0-1.0. All 19 source lanes are retained.
+
+## FreePats FM Piano
+
+- Attribution: Roberto (FreePats; FM synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/fm-piano1/tree/89a92d10b47aea841597408f5cf2e9c8164ecb00
+- Notes: FreePats FM Synthesized Piano #1, version 2019-09-16. Roberto created the samples and sound bank for FreePats using FM synthesis; the repository and release are CC0-1.0. The source README describes a classic 1980s FM electric piano patch. The 36-region source program is reduced to two layers and 24 encoded samples.
+
+## FreePats Lately Bass
+
+- Attribution: Yingchun Soul (synthesis); Roberto (FreePats sound-bank adaptation)
+- License: CC0-1.0
+- Source: https://github.com/freepats/lately-bass/tree/e27530dec05161ec3b661e86f4feb2065e0675aa
+- Notes: FreePats Lately Bass, version 2024-03-21. Yingchun Soul created the FM synthesis with Dexed and Roberto adapted it for FreePats SFZ; the repository and release are CC0-1.0. The source README describes a classic 1980s FM synth bass patch.
+
+## Karoryfer Scarypiano
+
+- Attribution: Karoryfer Samples (processing and programming); University of Iowa Musical Instrument Samples (source piano)
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.scarypiano/tree/46305e8cb71239bfa861fbe8487dd12b8d8de40c
+- Notes: Scarypiano is Karoryfer Samples' processed version of the public-domain University of Iowa Musical Instrument Samples piano, released by Karoryfer for Halloween 2015 and licensed CC0-1.0 in this repository. This pack keeps every second sampled key and up to two of the processed voices; notes are capped at six seconds.
+
+## Karoryfer String Cyborgs
+
+- Attribution: Karoryfer Samples (recordings and programming; source string performers not identified)
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.string-cyborgs/tree/f2238b3e36ae64c6383356221dc89c9c476c7b11
+- Notes: String Cyborgs is Karoryfer Samples' library of bowed string recordings used as oscillators in a subtractive synthesizer architecture. The Zinc one-voice program uses double-bass samples; the repository is licensed CC0-1.0. The source string performers are not individually identified. All 49 one-voice samples are retained.
+
+## Karoryfer Squidpipes
+
+- Attribution: Karoryfer Samples (recordings and programming); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.squidpipes/tree/b258528c8f49d6389ec2b4ec04a8b10013169dd9
+- Notes: Squidpipes is a Karoryfer Samples library of bagpipe recordings made with a large squid's mantle used as the bag, released under CC0-1.0 by Karoryfer Lecolds in 2019. This pack uses the polyphonic Squidotron program with every second key and up to two layers.
+
+## Karoryfer Caveman Cosmonaut
+
+- Attribution: Karoryfer Samples (recordings and programming); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.caveman-cosmonaut/tree/9de9bcfcbc6d2b20bea5c1116cd07a310febc339
+- Notes: Caveman Cosmonaut is Karoryfer Samples' sample-based virtual-analog instrument built from a Polish transistor organ, released under CC0-1.0 by Karoryfer Lecolds. This pack uses the main program with every second key and up to two layers; the source samples are retained at up to four seconds.
+
+## Karoryfer Unruly Drums
+
+- Attribution: Karoryfer Samples (recordings and programming); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.unruly-drums/tree/9bf75c2a1392f190cd1c264645653629f0b3a097
+- Notes: Unruly Drums is Karoryfer Samples' acoustic kit in which every drum has snare wires, including the kick. The repository is licensed CC0-1.0. This pack uses the complete kit program with 18 core lanes, two dynamics and one take per sound.
+
+## VCSL Didgeridoo
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Lip%20Aerophones/Didgeridoo
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual didgeridoo performer. These are the sustained drones, barks, short calls, taps and phrase recordings; they are mapped as performance articulations rather than as pitched notes.
+
+## VCSL Strumstick
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Composite%20Chordophones/Strumstick
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual strumstick performer. The fingerstyle folder has three dynamic takes for each pitch; this pack keeps all three recordings as alternate takes rather than pruning them.
+
+## VCSL Wine Glasses
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Friction%20Idiophones/Wine%20Glasses
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source has four tuned glasses (D#4, F#4, A#4 and D5) played with fast and slow rubbing. Fast rubs are mapped to velocities 64–127 and slow rubs to 1–63; the separate release-trigger decay recordings are omitted.
+
+## VCSL Mbira dzaVadzimu
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Mbira%20dzaVadzimu%20Nyamaropa%2C%20Zimbabwe%2C%20Low%20B
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual mbira performer. This is the Nyamaropa-tuned mbira dzaVadzimu in low B. The source's two B3 and two C#4 tines remain separate alternate takes for those pitches.
+
+## VCSL Clash Cymbals
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Clash%20Cymbals%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual percussionist. The four crash dynamics and the short choked stroke each keep both recorded takes as round robins.
+
+## VSCO Bassoon Staccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This is an alternate staccato articulation for the bassoon already represented by the sustain pack; every second sampled key and two dynamics are retained.
+
+## VSCO Contrabass Spiccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This is an alternate spiccato articulation for the contrabass already represented in the catalog; every second sampled key and two dynamics are retained.
+
+## VSCO Flute Staccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This is an alternate staccato articulation for the flute already represented in the catalog; every second sampled key and two dynamics are retained.
+
+## VSCO Trombone Staccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This is an alternate staccato articulation for the trombone already represented in the catalog; every second sampled key and two dynamics are retained.
+
+## VSCO Tuba Staccato
+
+- Attribution: Sam Gossner, Simon Dalzell, Elan Hickler / Versilian Studios
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VSCO-2-CE/tree/6dd651d55dde97fd4028699be9d4481f26917891
+- Notes: VSCO 2 Community Edition. Sam Gossner, Simon Dalzell and Elan Hickler / Versilian Studios released the library under CC0-1.0. This is an alternate staccato articulation for the tuba already represented in the catalog; every second sampled key and two dynamics are retained.
+
+## FreePats Jazz Electric Guitar
+
+- Attribution: FreePats (recordings and sound bank; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/freepats/electric-guitar-FSBS-jazz/tree/9a5430a220725ee26f272f62de1381de8da982ed
+- Notes: FreePats electric guitar FSBS jazz bank, 2026-08-07. The repository and release are CC0-1.0. The source README does not identify the individual guitarist. This is a compact bridge-pickup program; all 13 recorded regions are retained.
+
+## FreePats Distorted Electric Guitar
+
+- Attribution: FreePats (recordings and sound bank; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/freepats/electric-guitar-FSBS-dist1/tree/bbae17f0ad16f5edd7ec22178d181f3e3f6696fa
+- Notes: FreePats electric guitar FSBS distortion variant 1, 2022-09-11. The repository and release are CC0-1.0. The source README does not identify the individual guitarist. This compact pack keeps every second sampled key and up to two dynamics; the source distorted program contains 120 regions.
+
+## FreePats Synth Strings
+
+- Attribution: Roberto (FreePats; synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/synth-strings-1/tree/c0ecbfd69cc242703c6342fcb3a7ffe8cd493ec7
+- Notes: FreePats Synth Strings 1, 2020-05-28. Roberto created the synthesized samples and sound bank for FreePats; the repository and release are CC0-1.0. All 12 source regions are retained.
+
+## FreePats Synth Brass
+
+- Attribution: Roberto (FreePats; synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/synth-brass-1/tree/a2d2111daae3e45761c5cabd480f4c60258bd645
+- Notes: FreePats Synth Brass 1, 2021-04-26. Roberto created the synthesized samples and sound bank for FreePats; the repository and release are CC0-1.0. All 12 source regions are retained.
+
+## FreePats Synth Bass
+
+- Attribution: Roberto (FreePats; synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/synth-bass-1/tree/17095d4d23e960b0566489dc506cc858e3b50e0b
+- Notes: FreePats Synth Bass 1, 2019-07-23. Roberto created the synthesized samples and sound bank for FreePats; the repository and release are CC0-1.0. All 15 source regions are retained.
+
+## Karoryfer Bobobo Drums
+
+- Attribution: Karoryfer Samples / Karoryfer Lecolds (recordings and programming)
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.gogodze-phu-vol-i/tree/7452f62060cd3a468c78bc361d96a4dfb30879c9
+- Notes: Gogodze Phu Vol I, released by Karoryfer Lecolds in 2018 and licensed CC0-1.0 in this repository. The source readme describes five bobobo drums from Ghana: one bass drum and long/short strokes on the tenor and treble drums. This pack keeps two dynamics and one take per lane.
+
+## Karoryfer Gogodze Drum Kit
+
+- Attribution: Karoryfer Samples / Karoryfer Lecolds (recordings and programming)
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.gogodze-phu-vol-ii/tree/69a0274cdc39c99c3098cde1bc3789690de86d62
+- Notes: Gogodze Phu Vol II, released by Karoryfer Lecolds for the 2018 KVR Developer Challenge and licensed CC0-1.0 in this repository. The source readme describes a kick, snare, three toms and a hi-hat intended to evoke a 1970s Korean rock recording. This compact pack keeps the 10 core kit lanes, two dynamics and one take per sound.
+
+## Karoryfer Sneakybass
+
+- Attribution: Drogomir Smolken (performance and mapping); Karoryfer Samples
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.sneakybass/tree/cc1a67e5c913678b85eaad1a3b5cb180d3be3e2d
+- Notes: Sneakybass, released by Karoryfer Samples and licensed CC0-1.0 in this repository. The source readme credits Drogomir Smolken with playing and mapping a 1958 Otto Rubner double bass in fifths tuning with Spirocore strings, recorded pizzicato and very quietly. This pack uses the pluck program with every second sampled key and up to two layers.
+
+## Karoryfer Cowsynth Pad
+
+- Attribution: Karoryfer Samples (recordings and programming); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.cowsynth/tree/5a5b5afc2dabbe54cf9d75ab64711ce01862b42c
+- Notes: Cowsynth, released by Karoryfer Lecolds in 2014 and licensed CC0-1.0 in this repository. The source readme describes samples of a replica medieval bagpipe used as oscillators in a synthesizer. This pack uses the Fancy Pad mapping, which spreads eight pitch-corrected bagpipe samples across the keyboard with fixed outer-voice detuning.
+
+## Karoryfer Swirly Drums
+
+- Attribution: Karoryfer Samples (recordings and programming); Karoryfer Lecolds
+- License: CC0-1.0
+- Source: https://github.com/sfzinstruments/karoryfer.swirly-drums/tree/c40dafe0011cb2e54c0c220ff0fa308a11fc60f5
+- Notes: Swirly Drums by Karoryfer Samples, licensed CC0-1.0 in this repository after the 1.104 release. This compact pack uses the full-kit program with 16 core lanes, two dynamics and one take per sound.
+
+## FreePats Jaw Harp
+
+- Attribution: Eugene Vlaskin (recording); Michail Chayka (jaw harp); Roberto (FreePats bank)
+- License: CC0-1.0
+- Source: https://freepats.zenvoid.org/Ethnic/jaw-harp.html
+- Notes: FreePats Jaw Harp version 2020-06-06, CC0-1.0. Pinned archive SHA-256 8f635c9bf279774cd34dd5a336b63a6e652015f3514253f7be53467d67e5b90c. The source readme credits Eugene Vlaskin with recording the pack in Nekrasovka, Sakhalin, in autumn 2017; Michail Chayka played jaw harp and N.K. Chayka assisted. Roberto assembled the FreePats bank. The source SFZ maps 48 keys to variations of one fundamental; this compact pack keeps keys 36-47 as twelve pads.
+
+## FreePats Drawbar Organ
+
+- Attribution: Roberto (FreePats; samples and sound bank)
+- License: CC0-1.0
+- Source: https://freepats.zenvoid.org/Organ/electric-organ.html
+- Notes: FreePats Electric Organ, Drawbar Organ Emulation version 2019-07-12, CC0-1.0. Pinned archive SHA-256 e2da18b0a4d13be7020037e18e4a719387433357e7603d0773990e794dcf5d0f. Samples and bank by Roberto for FreePats, recorded from the setBfree software synthesizer. This pack uses the drawbar program only, not the percussive or rock variations; 16 looped roots span C2-C7.
+
+## FreePats Square Lead
+
+- Attribution: Roberto (FreePats; synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/synth-square/tree/6d204b085af42f023770a3add2eeea9f9dbc5f14
+- Notes: FreePats Synth Lead Square version 2020-05-12, CC0-1.0. Roberto created the bank for FreePats with ZynAddSubFX/Yoshimi. This is the General MIDI Synth Lead 1 square program; the source's loop points are retained.
+
+## FreePats Sweep Pad
+
+- Attribution: Roberto (FreePats; synthesis and sound bank)
+- License: CC0-1.0
+- Source: https://github.com/freepats/sweep-pad/tree/ed3e294fcec8c3ea3ec84471f8c7a75bc09eba04
+- Notes: FreePats Sweep Pad version 2019-08-13, CC0-1.0. Roberto created the bank for FreePats with ZynAddSubFX/Yoshimi as the General MIDI Synth Pad 8 sweep program; the source's loop points are retained.
+
+## VCSL Saxello
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Reed%20Aerophones/Saxello
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the non-vibrato sustains only; staccato and vibrato recordings remain in the source. The whole-tone roots span A#2-E5, with two recorded dynamics and auto-detected loops.
+
+## VCSL Tenor Saxophone
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Reed%20Aerophones/Tenor%20Saxophone
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the non-vibrato sustains only; staccato and vibrato recordings remain in the source. The whole-tone roots span A#1-E5, with two recorded dynamics and auto-detected loops.
+
+## VCSL Folk Harp
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Composite%20Chordophones/Folk%20Harp
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The normal plucks retain both recorded dynamics and span C1-G#5. The source does not name the individual harp or performer.
+
+## VCSL Baroque Bass Recorder
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Baroque%20Bass%20Recorder
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the looped sustain articulation only; the staccato and vibrato recordings remain in the source. The sampled roots span F#2-E4.
+
+## VCSL Kalimba Tanzania
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Kalimba%2C%20Tanzania
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source calls this a kalimba from Tanzania and maps 27 tine recordings across G#1-C#6. Duplicate roots are separate tine takes and remain round robins.
+
+## VCSL Mbira Mavembe
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Mbira%20Mavembe%20%28Gandanga%29%2C%20Zimbabwe%2C%20Low%20G
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This is the low-G Mavembe/Gandanga mbira. The 24 source recordings include separate tine takes at repeated roots; they remain round robins.
+
+## VCSL Nyunga Nyunga
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Nyunga%20Nyunga%2C%20Mozambique%2C%20Low%20F
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This is the low-F nyunga nyunga. The 19 source recordings include separate tine takes at repeated roots; they remain round robins.
+
+## VCSL Anvil
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Anvil
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides three anvils with three dynamics each. They are mapped as three pads; the single mid-position microphone recording is used.
+
+## VCSL Bell Tree
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Bell%20Tree
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The six individual bells and five stroke recordings are mapped as separate pads. The mid microphone recording is used throughout.
+
+## VCSL Brake Drum
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Brake%20Drum
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Two brake drums and four playing methods are mapped. Hammer and yarn-mallet strikes retain three dynamics; suspended strikes retain two; the bowed takes are round robins.
+
+## VCSL Flexatone
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Flexatone
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The eight source performances are mapped as separate pads: short, long, extra-long, fast and slap articulations. They are one-shots.
+
+## VCSL Gong
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Gong%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source contains two gongs: the first at four dynamics and the second at two, plus a scrape. Each recording is mapped to its own pad so the full dynamic spread remains playable.
+
+## VCSL Hand Chimes
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Hand%20Chimes
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The 19 suspended chime recordings span C3-C6. They are mapped as natural one-shots so each strike rings out after key-up.
+
+## VCSL Ocean Drum
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Other%20Membranophones/Ocean%20Drum
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides three sustained ocean-drum swells. They are mapped as three one-shot pads, with the natural tail preserved.
+
+## VCSL Slit Drum
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Slit%20Drum
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source provides high and low log-drum strokes at three dynamics. They are mapped to two pads with the three velocity layers preserved.
+
+## VCSL Toy Train Whistle
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Train%20Whistle%2C%20Toy
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The six source performances are mapped as separate pads: sustained, medium, short, double, falling and medium-short calls.
+
+## VCSL Baroque Soprano Recorder
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Baroque%20Soprano%20Recorder
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the looped sustain articulation only; staccato recordings remain in the source. Sampled roots span C4-C6.
+
+## VCSL Baroque Tenor Recorder
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Baroque%20Tenor%20Recorder
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the looped sustain articulation only; staccato and vibrato recordings remain in the source. Sampled roots span C3-C5.
+
+## VCSL Ocarina
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Ocarina%2C%20Typical
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the unmodulated sustained articulation only; vibrato and release recordings remain in the source. Sampled roots span A3-C#5.
+
+## VCSL Renaissance Organ
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Renaissance%20Organ
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the 8-foot rank only; the 4-foot and full-registration recordings remain in the source. Sampled roots span C1-E5; the room recordings retain their natural ambience.
+
+## VCSL Siren
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Siren
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All five source takes are mapped to separate pads so their different sweep shapes remain playable.
+
+## VCSL Orchestral Bass Drum
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Bass%20Drum%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source records four dynamics with two round robins each; this pack preserves both on one pad. The close summed microphone recording is used throughout.
+
+## VCSL Cabasa
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Cabasa
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The two hit takes and both rub variants are retained as separate pads; each pad keeps its two recorded round robins.
+
+## VCSL Claps
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Claps
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Six ensemble takes are mapped as round robins on one pad; the four solo takes are mapped as velocity layers on a second pad.
+
+## VCSL Cowbells
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Cowbells
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Two cowbells are represented. Normal, muted and struck tones keep their recorded dynamic variants; the second cowbell also includes double strokes.
+
+## VCSL Guiro
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Guiro
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The modern slow, medium, fast and hit recordings are retained, plus the long, short and super-long legacy strokes. Other legacy takes remain in the source.
+
+## VCSL Nepalese Hand Bells
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Hand%20Bells%2C%20Nepalese
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source contains three individual bells; each is mapped to its own pad so the different pitches and decays remain playable.
+
+## VCSL Mark Trees
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Mark%20Trees
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All six legacy chime-cluster performances are mapped to separate pads; the source does not identify the individual performer.
+
+## VCSL Ratchets
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Ratchet
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Both ratchets retain slow and fast turns; each crank pad keeps its two recorded round robins.
+
+## VCSL Large Shaker
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Shaker%2C%20Large
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source hit and both directional shake gestures are retained, with two round robins per pad.
+
+## VCSL Slapstick
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Slapstick
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The three full-volume takes and two quiet takes are grouped as round robins on separate pads.
+
+## VCSL Sleigh Bells
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Sleigh%20Bells
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The two hit takes are grouped as round robins; both recorded shakes and the two second-bell strikes are mapped separately.
+
+## VCSL Suspended Cymbal
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Suspended%20Cymbal%202
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This is the second suspended cymbal in the source. Five stick hits, two bell hits, three stick-tip dynamics, three bowed takes, three crescendos, three rolls and a scrape are retained.
+
+## VCSL Triangles
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Triangles
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Modern recordings for triangles 1, 3 and 6 are used. Each triangle has an open strike, a muted strike and a roll; the legacy triangles remain in the source.
+
+## VCSL Tubular Glockenspiel
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tubular%20Glockenspiel
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All nine sampled roots and their three recorded dynamics are retained. The source filenames span A0-C1, but the recordings measure six octaves above those labels; the recipe applies +72 semitones to map the actual pitches G6-A7. The three recorded dynamics are mapped to separate velocity layers.
+
+## VCSL Vibraslap
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Vibraslap
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All four legacy recordings are mapped as round robins on one pad.
+
+## VCSL Ball Whistle
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Ball%20Whistle
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Baroque Alto Recorder
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Baroque%20Alto%20Recorder/Sustain
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Sampled roots span F4-E6; the staccato and vibrato recordings remain in the source.
+
+## VCSL Small Ocarina
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Ocarina%2C%20Small/Sustain
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Sampled roots span A5-B6; the staccato recordings remain in the source.
+
+## VCSL Chromatic Harmonica
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Harmonica-Hohner-Super64/Sustains/Normal
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Sampled roots span C3-C7; the accented, vibrato and release recordings remain in the source.
+
+## VCSL Concert Harp
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Composite%20Chordophones/Concert%20Harp
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The selection spans E2-A7 and keeps the medium and loud plucked takes; the D7 and F7 extremes remain in the source.
+
+## VCSL Grand Piano
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Grand%20Piano%2C%20Kawai/Sustains
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The selection spans A#0-C8 at two dynamics; the remaining notes, release and pedal takes remain in the source.
+
+## VCSL Flemish Harpsichord
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Harpsichord%2C%20Flemish/Sustains/Low
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The lower-choir sustained manual is used; the upper choir, releases and other registers remain in the source.
+
+## VCSL English Harpsichord
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Harpsichord%2C%20English/Sustains/Normal
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The normal-register sustained manual is used; the lute stop and release recordings remain in the source.
+
+## VCSL Glockenspiel
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Glockenspiel
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Seven sampled roots keep their soft, medium and loud strikes; the source labels G4-C7.
+
+## VCSL Xylophone
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Xylophone
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Eight sampled roots keep the hard-mallet soft and loud strokes; the medium and soft mallets remain in the source.
+
+## VCSL Tubular Bells
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tubular%20Bells%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Nine sampled roots keep their soft and loud strikes; the source labels A#3-E4.
+
+## VCSL Cajon
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Cajon
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Finger Cymbals
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Finger%20Cymbals
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Hi-Hat
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Hi-Hat%20Cymbal
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Small Shaker
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Shaker%2C%20Small
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Modern Snare 1
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Snare%20Drum%2C%20Modern%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Modern Snare 2
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Snare%20Drum%2C%20Modern%202
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Rope-Tension Snare
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Snare%20Drum%2C%20Rope%20Tension
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Timpani
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Timpani%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## VCSL Tom
+
+- Attribution: Versilian Studios LLC (VCSL; individual performer not identified)
+- License: CC0-1.0
+- Source: https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Tom%201
+- Notes: Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer.
+
+## Hip-Hop Kicks
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Snares & Claps
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Hats & Cymbals
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Percussion
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## 808 & Sub Bank
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Bass Plucks
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Keys & Stabs
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.
+
+## Hip-Hop Plucks, Bells & Textures
+
+- Attribution: Unbox Studio — synthesised hip-hop bank
+- License: CC0-1.0
+- Source: Synthesised in-repo by scripts/instruments/hiphop/build.ts
+- Notes: No recordings or third-party samples: every one-shot is generated deterministically from a seed.

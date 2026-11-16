@@ -42,9 +42,9 @@ function GrMeter({ channelId }: { channelId: string }) {
 }
 
 const Section: React.FC<{ title: string; toggle?: { on: boolean; onToggle: () => void; title: string }; children: React.ReactNode }> = ({ title, toggle, children }) => (
-  <section className="rounded-md bg-black/25 border border-black/60 p-2 flex flex-col gap-2">
+  <section className="rounded-md bg-[#c6d2b9] border border-[#8b9880] p-2 flex flex-col gap-2">
     <header className="flex items-center gap-2 min-h-[20px]">
-      <span className="font-label font-bold text-[13px] tracking-[0.18em] text-[#d5dae0]">{title}</span>
+      <span className="font-label font-bold text-[13px] tracking-[0.18em] text-ink">{title}</span>
       <span className="flex-1" />
       {toggle && (
         <LedButton on={toggle.on} onClick={toggle.onToggle} title={toggle.title} className="w-[40px] h-[20px]" color="#7ff0ff">
@@ -65,7 +65,7 @@ export function ChannelInspector({ channelId, onClose }: { channelId: string | n
   if (!ch) {
     return (
       <aside className="w-[300px] shrink-0 us-chrome border-r border-black p-3 flex flex-col gap-2" data-testid="channel-inspector">
-        <div className="font-label font-bold text-[13px] tracking-[0.18em] text-[#d5dae0]">CHANNEL</div>
+        <div className="font-label font-bold text-[13px] tracking-[0.18em] text-ink">CHANNEL</div>
         <p className="font-label text-[13px] text-chrome-ink leading-snug">Click a channel's name, EQ or DYN area to edit its EQ and dynamics here.</p>
       </aside>
     );
@@ -104,10 +104,10 @@ export function ChannelInspector({ channelId, onClose }: { channelId: string | n
     <aside className="w-[300px] shrink-0 us-chrome border-r border-black flex flex-col min-h-0" data-testid="channel-inspector" aria-label={`${ch.settings.name} EQ and dynamics`}>
       <div className="h-1.5 shrink-0" style={{ background: ch.settings.color }} />
       <header className="flex items-center gap-2 px-3 pt-2 pb-1">
-        <span className="font-label font-bold text-[18px] text-white truncate">{ch.settings.name}</span>
+        <span className="font-label font-bold text-[18px] text-ink truncate">{ch.settings.name}</span>
         <span className="font-mono text-[11px] text-chrome-ink">{ch.kind.toUpperCase()}</span>
         <span className="flex-1" />
-        <button type="button" onClick={onClose} className="text-chrome-ink hover:text-white" title="Hide the channel inspector" aria-label="Hide the channel inspector">
+        <button type="button" onClick={onClose} className="text-chrome-ink hover:text-ink" title="Hide the channel inspector" aria-label="Hide the channel inspector">
           <X className="w-4 h-4" />
         </button>
       </header>

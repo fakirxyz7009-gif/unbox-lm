@@ -1,0 +1,240 @@
+{
+  "id": "vcsl-tubular-glockenspiel",
+  "name": "VCSL Tubular Glockenspiel",
+  "kind": "melodic",
+  "category": "percussion",
+  "description": "Recorded tubular glockenspiel with three dynamics across its upper register.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tubular%20Glockenspiel",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. All nine sampled roots and their three recorded dynamics are retained. The source filenames span A0-C1, but the recordings measure six octaves above those labels; the recipe applies +72 semitones to map the actual pitches G6-A7. The three recorded dynamics are mapped to separate velocity layers."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-tubular-glockenspiel/samples",
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 3,
+  "notes": [
+    {
+      "file": "A0_loud1.wav",
+      "root": 93,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "A0_medium1.wav",
+      "root": 93,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "A0_quiet1.wav",
+      "root": 93,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "A1_loud1.wav",
+      "root": 105,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "A1_medium1.wav",
+      "root": 105,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "A1_quiet1.wav",
+      "root": 105,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "B0_loud1.wav",
+      "root": 95,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "B0_medium1.wav",
+      "root": 95,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "B0_quiet1.wav",
+      "root": 95,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "C1_loud1.wav",
+      "root": 96,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "C1_medium1.wav",
+      "root": 96,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "C1_quiet1.wav",
+      "root": 96,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "D1_loud1.wav",
+      "root": 98,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "D1_medium1.wav",
+      "root": 98,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "D1_quiet1.wav",
+      "root": 98,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "E1_loud1.wav",
+      "root": 100,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "E1_medium1.wav",
+      "root": 100,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "E1_quiet1.wav",
+      "root": 100,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "F#1_loud1.wav",
+      "root": 102,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "F#1_medium1.wav",
+      "root": 102,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "F#1_quiet1.wav",
+      "root": 102,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "G0_loud1.wav",
+      "root": 91,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "G0_medium1.wav",
+      "root": 91,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "G0_quiet1.wav",
+      "root": 91,
+      "vel": [
+        1,
+        42
+      ]
+    },
+    {
+      "file": "G1_loud1.wav",
+      "root": 103,
+      "vel": [
+        85,
+        127
+      ]
+    },
+    {
+      "file": "G1_medium1.wav",
+      "root": 103,
+      "vel": [
+        43,
+        84
+      ]
+    },
+    {
+      "file": "G1_quiet1.wav",
+      "root": 103,
+      "vel": [
+        1,
+        42
+      ]
+    }
+  ],
+  "keyRange": [
+    91,
+    105
+  ],
+  "oneShot": true
+}

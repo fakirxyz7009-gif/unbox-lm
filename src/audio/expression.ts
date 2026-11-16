@@ -22,6 +22,8 @@ type Source = OscillatorNode | AudioBufferSourceNode;
 const exprs = new WeakMap<BaseDevice, Expression>();
 /** Nested captures (a player's note starting another instrument's note) get their own frame. */
 const frames: Source[][] = [];
+/** Sources captured per note number, so MPE per-note detune can reach them mid-note. */
+const perNoteSources = new WeakMap<BaseDevice, Map<number, Source[]>>();
 
 function captureSources(ctx: BaseAudioContext, fn: () => void): Source[] {
   const frame: Source[] = [];
@@ -89,13 +91,28 @@ export function installExpression(dev: BaseDevice): void {
   bend.connect(bus);
   bend.start();
   exprs.set(dev, { bus, bend, vibrato: null, rangeSemis: 2 });
+  const noteSources = new Map<number, Source[]>();
+  perNoteSources.set(dev, noteSources);
   const noteOn = dev.noteOn.bind(dev);
   dev.noteOn = (note: number, velocity?: number, time?: number) => {
-    for (const s of captureSources(ctx, () => noteOn(note, velocity, time))) attach(bus, s);
+    const captured = captureSources(ctx, () => noteOn(note, velocity, time));
+    for (const s of captured) attach(bus, s);
+    // Apply any stored per-note detune (MPE bend) to this note's sources at start.
+    const cents = dev.perNoteDetune.get(note) ?? 0;
+    if (cents !== 0) {
+      for (const s of captured) {
+        s.detune.setValueAtTime(cents, ctx.currentTime);
+      }
+    }
+    noteSources.set(note, captured);
   };
   const noteOff = dev.noteOff.bind(dev);
   dev.noteOff = (note: number, time?: number) => {
     for (const s of captureSources(ctx, () => noteOff(note, time))) attach(bus, s);
+    noteSources.delete(note);
+    dev.perNoteDetune.delete(note);
+    dev.perNotePressure.delete(note);
+    dev.perNoteTimbre.delete(note);
   };
 }
 
@@ -105,11 +122,13 @@ export function setPitchBend(dev: BaseDevice, amount: number): void {
   if (!e) return;
   const cents = Math.max(-1, Math.min(1, amount)) * e.rangeSemis * 100;
   e.bend.offset.setTargetAtTime(cents, dev.ctx.currentTime, 0.008);
+  dev.pitchBend = Math.max(-1, Math.min(1, amount));
 }
 
 /** value 0..1. */
 export function setModWheel(dev: BaseDevice, value: number): void {
   const v = Math.max(0, Math.min(1, value));
+  dev.modWheel = v;
   const cv = dev.cvInputs.get('cv_mod')?.setter;
   if (cv) {
     cv(v);
@@ -127,4 +146,35 @@ export function setModWheel(dev: BaseDevice, value: number): void {
   }
   // up to ±40 cents of vibrato at full wheel
   e.vibrato?.gain.setTargetAtTime(v * 40, dev.ctx.currentTime, 0.02);
+}
+
+/**
+ * MPE: set per-note pitch bend in cents for `note` and apply it to all currently sounding
+ * sources for that note. Called when a per-note MIDI channel sends pitch bend (0xe0).
+ */
+export function updateNoteDetune(dev: BaseDevice, note: number, cents: number): void {
+  dev.perNoteDetune.set(note, Math.max(-200, Math.min(200, cents)));
+  const sources = perNoteSources.get(dev)?.get(note);
+  if (sources) {
+    const now = dev.ctx.currentTime;
+    for (const s of sources) {
+      s.detune.setValueAtTime(cents, now);
+    }
+  }
+}
+
+/**
+ * MPE: set per-note pressure (0..1) for `note`. Engines that consume per-note pressure
+ * (e.g. for swell or filter brightness) read `dev.perNotePressure`.
+ */
+export function setPerNotePressure(dev: BaseDevice, note: number, value: number): void {
+  dev.perNotePressure.set(note, Math.max(0, Math.min(1, value)));
+}
+
+/**
+ * MPE: set per-note timbre / CC74 (0..1) for `note`. Engines that consume per-note timbre
+ * (e.g. for filter cutoff or oscillator wave) read `dev.perNoteTimbre`.
+ */
+export function setPerNoteTimbre(dev: BaseDevice, note: number, value: number): void {
+  dev.perNoteTimbre.set(note, Math.max(0, Math.min(1, value)));
 }

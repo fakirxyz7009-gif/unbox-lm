@@ -65,16 +65,16 @@ export const PanelButton: React.FC<{
     aria-label={title}
     aria-pressed={active}
     data-testid={testId}
-    className="us-btn-light w-[64px] h-[22px] rounded-[4px] flex items-center justify-between px-1.5 transition-all cursor-pointer"
-    style={active ? { boxShadow: '0 0 0 1.5px #d6a358, inset 0 1px 0 #fff', background: '#e4dcd0' } : undefined}
+    className="us-btn w-[64px] h-[22px] rounded-[4px] flex items-center justify-between px-1.5 transition-all cursor-pointer"
+    style={active ? { boxShadow: '0 0 0 1.5px #b8ff3f, inset 0 1px 0 rgba(255,255,255,0.18)', background: '#2c5f43' } : undefined}
   >
     <span
       className="block w-[7px] h-[7px] rounded-full shrink-0"
       style={{
-        background: (active || led) ? 'radial-gradient(circle, #ffe1a8 15%, #d69b50 75%, #8a5314 100%)' : '#33291e',
-        boxShadow: (active || led) ? '0 0 6px #f59e0b' : 'inset 0 1px 1px #000',
+        background: (active || led) ? 'radial-gradient(circle, #e4ffb0 15%, #b8ff3f 75%, #5f8a14 100%)' : '#1a2417',
+        boxShadow: (active || led) ? '0 0 6px rgba(184,255,63,0.8)' : 'inset 0 1px 1px #000',
       }}
     />
-    <span className="font-label font-bold text-[11px] tracking-wider text-[#241c14] leading-none">{label}</span>
+    <span className="font-label font-bold text-[11px] tracking-wider text-[#e6f7d0] leading-none">{label}</span>
   </button>
 );

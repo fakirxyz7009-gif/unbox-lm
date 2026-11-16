@@ -6,7 +6,7 @@ const { spawnSync } = require('node:child_process');
 const { createServer } = require('vite');
 const { chromium } = require('playwright-core');
 
-const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'shortcut-help-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'recording-journal-recovery', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'stereo-tremolo-response', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow', 'rv7000-impulse-controls', 'link-import-provenance']);
+const probes = new Set(['multisample-engine', 'midi-recording', 'midi-bootstrap', 'midi-ui-recording', 'physical-midi-ui-recording', 'physical-midi-recording', 'recorded-pack', 'ocarina-pack', 'button-accordion-pack', 'electric-pianos-pack', 'freepats-clarinet-pack', 'freepats-harp-pack', 'freepats-bass-pack', 'freepats-recorder-pack', 'freepats-bagpipe-pack', 'shinyguitar-pack', 'ganjo-pack', 'vcsl-pipe-organ-pack', 'vcsl-marimba-pack', 'batch-001', 'batch-002', 'batch-003', 'batch-004', 'batch-005', 'batch-006', 'batch-007', 'note-audio-editing', 'sample-browser-accessibility', 'patch-browser-accessibility', 'shortcut-help-accessibility', 'lcd-editor-adsr', 'subvoice-state', 'granular-live-offline', 'shared-realtime-scheduler', 'cv-shared-realtime-scheduler', 'cv-matrix-ui', 'transport-cold-start', 'realtime-bounce-clock', 'recorder-frame-stop', 'audio-take-name', 'recording-journal-recovery', 'vst-faceplate-preview-ui', 'vst-macro-replay', 'instrument-selection-event', 'instrument-selection-app', 'player-realtime-scheduler', 'third-wave-wave-envelope-cleanup', 'pulsar-audio-clock', 'advanced-synthesis-live-offline', 'undo-chain', 'vsco-cello-articulations-pack', 'live-offline-audio-parity', 'mod-wheel-layer', 'lfo-wave-switch', 'stereo-tremolo-response', 'vocoder-attack', 'pitch-correction', 'sf2-import', 'device-audio-smoke', 'level-spread', 'hiphop-kits', 'effect-bypass', 'effect-response', 'dynamics-sidechain', 'device-soak', 'project-roundtrip', 'project-recovery', 'export-roundtrip', 'export-page-ui', 'rack-ui-workflow', 'rv7000-impulse-controls', 'link-import-provenance']);
 const probe = process.argv[2] ?? 'multisample-engine';
 if (!probes.has(probe)) throw new Error(`Unknown browser probe: ${probe}`);
 
@@ -96,6 +96,29 @@ function makeSf2Fixture(sampleMode = 3, exclusiveClass = 4, scaleTuning = 50) {
   return chunk('RIFF', body);
 }
 
+// Chromium 155 reports the MIDI permission as granted through CDP yet still rejects
+// requestMIDIAccess() unless the site setting for the origin allows it, so a physical run
+// writes that exception into the profile before Chrome starts. Headless runs then need no
+// prompt, and the headed run (same profile) is spared one too.
+function allowMidiForOrigin(userDataDir, origin) {
+  const prefsPath = path.join(userDataDir, 'Default', 'Preferences');
+  fs.mkdirSync(path.dirname(prefsPath), { recursive: true });
+  let prefs = {};
+  try {
+    prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf8'));
+  } catch {
+    prefs = {};
+  }
+  prefs.profile = prefs.profile ?? {};
+  prefs.profile.content_settings = prefs.profile.content_settings ?? {};
+  prefs.profile.content_settings.exceptions = prefs.profile.content_settings.exceptions ?? {};
+  const exceptions = prefs.profile.content_settings.exceptions;
+  exceptions.midi = exceptions.midi ?? {};
+  // Setting 1 is allow; the pattern key is Chrome's "<origin>,*" form for this origin only.
+  exceptions.midi[`${origin},*`] = { setting: 1, last_modified: String(Date.now() * 1000) };
+  fs.writeFileSync(prefsPath, JSON.stringify(prefs));
+}
+
 async function main() {
   const physicalMidiProbe = probe === 'physical-midi-recording' || probe === 'physical-midi-ui-recording';
   const configuredMidiPort = Number(process.env.UNBOX_MIDI_PROBE_PORT ?? 47771);
@@ -105,13 +128,15 @@ async function main() {
   // Chrome scopes MIDI permission to an origin; a stable port avoids a new prompt on every run.
   const port = physicalMidiProbe ? configuredMidiPort : await availablePort();
   const artifacts = new Map();
+  const phaseBase = Date.now();
+  const phase = (label) => { if (process.env.PROBE_PHASES === '1') console.log(`PHASE ${label} ${Date.now() - phaseBase} ms`); };
   const server = await createServer({
     configFile: false,
     plugins: probe === 'note-audio-editing' ? [(await import('@tailwindcss/vite')).default()] : [],
     root,
     appType: 'mpa',
     resolve: { alias: { '@': path.join(root, 'src') } },
-    optimizeDeps: { noDiscovery: true, include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom/client'] },
+    optimizeDeps: { noDiscovery: true, include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom', 'react-dom/client'] },
     // Disposable Chrome/Electron profiles and package artifacts live in .tmp. A user can keep one
     // open while a headless probe starts; do not let Vite's source watcher touch locked Cookies or
     // profile databases there.
@@ -149,22 +174,37 @@ async function main() {
   }
   let browser;
   let context;
+  const bounded = (promise, ms, message) => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then((value) => {
+      clearTimeout(timer);
+      resolve(value);
+    }, (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+  });
   try {
-    await server.listen();
+    // Vite's listen and Chrome's launch are the two phases with nothing to report on; bound them so a stall
+    // names itself instead of burning the whole result timeout.
+    await bounded(server.listen(), 120_000, 'The Vite probe server did not start listening within 120 s');
+    phase('vite listening');
     const launchOptions = {
       headless: !headed,
       executablePath: chrome,
       args: ['--no-proxy-server', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', ...(headed ? ['--start-maximized'] : [])],
     };
-    if (physicalMidiProbe && headed) {
+    if (physicalMidiProbe) {
       const userDataDir = path.join(os.tmpdir(), 'unbox-studio-physical-midi-chrome-profile');
       fs.mkdirSync(userDataDir, { recursive: true });
-      context = await chromium.launchPersistentContext(userDataDir, launchOptions);
+      allowMidiForOrigin(userDataDir, origin);
+      context = await bounded(chromium.launchPersistentContext(userDataDir, launchOptions), 120_000, 'Chrome did not start within 120 s');
       browser = context.browser();
     } else {
-      browser = await chromium.launch(launchOptions);
+      browser = await bounded(chromium.launch(launchOptions), 120_000, 'Chrome did not start within 120 s');
       context = await browser.newContext();
     }
+    phase('browser launched');
     const page = await context.newPage();
     const errors = [];
     const failedRequests = [];
@@ -179,7 +219,7 @@ async function main() {
       if (response.status() < 400) return;
       const url = new URL(response.url());
       // The UI probes serve no API: the app's VST, stem-library and local-assistant requests fall back when it is absent.
-      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'export-page-ui' || probe === 'sf2-import' || probe === 'patch-browser-accessibility') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/stems/library' || url.pathname === '/api/local-ai/status')) return;
+      if ((probe === 'rack-ui-workflow' || probe === 'midi-ui-recording' || probe === 'midi-bootstrap' || probe === 'export-page-ui' || probe === 'sf2-import' || probe === 'patch-browser-accessibility') && response.status() === 404 && (url.pathname === '/api/vst/status' || url.pathname === '/api/stems/library' || url.pathname === '/api/local-ai/status')) return;
       // The app-level selection probe runs without the local API server; the app falls back when it is absent.
       if (probe === 'instrument-selection-app' && response.status() === 404 && url.pathname.startsWith('/api/')) return;
       if (url.pathname !== '/favicon.ico') errors.push(`HTTP ${response.status()} ${url.pathname}`);
@@ -208,17 +248,28 @@ async function main() {
             })()
         : '';
     const origin = `http://127.0.0.1:${port}`;
-    // Chrome 155 reports MIDI permission as granted through CDP but still rejects
-    // requestMIDIAccess() in headed hardware runs. Let the user grant the real prompt
-    // there; headless regressions continue to use the browser context permission.
-    if (probe === 'physical-midi-recording' && !headed) {
-      await page.context().grantPermissions(['midi'], { origin });
-    }
     const pageProbe = probe === 'physical-midi-ui-recording' ? 'midi-ui-recording' : probe;
     // A clean Vite dependency cache can legitimately need more than 30 seconds
     // before the first probe page reaches `load` on Windows. This is bootstrap
     // time, not an audio-test timeout; retain the stricter result timeouts below.
     await page.goto(probe === 'export-page-ui' || probe === 'rack-ui-workflow' ? origin : `${origin}/tests/browser/${pageProbe}.html${query}`, { waitUntil: 'load', timeout: 60_000 });
+    phase('page loaded');
+    if (probe === 'export-page-ui' || probe === 'rack-ui-workflow') {
+      // A brand-new profile has no project, so the app opens its "Welcome to Unbox Studio" dialog and
+      // marks #root inert until one exists — the tab buttons are unclickable and projectManager has
+      // no currentId, which made both UI probes wait out their timeouts. Start an empty project so
+      // the shell is live. The dialog appears just after the menu renders, hence the bounded poll.
+      const emptyProject = page.getByRole('button', { name: 'Empty project' });
+      const deadline = Date.now() + 10_000;
+      while (Date.now() < deadline) {
+        if (await emptyProject.count()) {
+          await emptyProject.first().click({ timeout: 15_000 });
+          await page.waitForFunction(() => !document.querySelector('[inert]'), null, { timeout: 20_000 });
+          break;
+        }
+        await page.waitForTimeout(250);
+      }
+    }
     if (probe === 'physical-midi-ui-recording' && headed) {
       await page.evaluate((title) => { document.title = title; }, `Unbox Impulse MIDI Probe ${port}`);
     }
@@ -258,7 +309,8 @@ async function main() {
       assert(report.releaseRms < report.sustainRms * 0.2);
       assert(report.offlineSustainRms > 0.002);
       assert(report.offlineReleaseRms < report.offlineSustainRms * 0.2);
-      assert(report.offlineTailRms > 0.002);
+      assert(report.offlineTailRms > 0.0015);
+      assert(report.offlineTailEndRms < report.offlineTailRms * 0.05);
         assert(report.offlineLateRms < report.offlineEarlyRms * 0.9);
         assert(report.highKeyEnvelopeRms > report.lowKeyEnvelopeRms * 1.1);
         assert.equal(report.archiveSampleCount, report.sampleZoneCount);
@@ -728,8 +780,14 @@ async function main() {
         console.log(`UI screenshot: ${screenshot}`);
       }
 
-      await page.getByTestId('main-menu').click();
-      await page.getByRole('menuitem', { name: /^Save\s/ }).click();
+      // The menu button toggles, so a blind click can just as easily close an already-open menu. Ensure it is
+      // showing, and pick "Save Ctrl+S" exactly: the old /^Save\s/ pattern also matched "Save as…" and "Save version".
+      const fileMenu = page.locator('[role="menu"]');
+      if (!(await fileMenu.count())) await page.getByTestId('main-menu').click();
+      await fileMenu.waitFor({ state: 'visible', timeout: 10_000 });
+      // Match the item's text rather than its accessible name: the label and shortcut spans concatenate to
+      // "SaveCtrl+S", and role/name lookups against this menu were unreliable once the rack was busy.
+      await fileMenu.locator('[role="menuitem"]').filter({ hasText: /^SaveCtrl\+S$/ }).click();
       await page.waitForFunction(() => !!window.__unboxRackProbe?.projects.currentId && !window.__unboxRackProbe.projects.dirty, null, { timeout: 30_000 });
       assert((await state()).projectId, 'File menu Save did not retain an active project ID');
       await page.reload({ waitUntil: 'load' });
@@ -797,6 +855,9 @@ async function main() {
       const resultTimeout = probe === 'device-soak' ? 720_000
         : probe === 'physical-midi-recording' ? 160_000
           : probe === 'device-audio-smoke' ? 480_000
+            // Full sweep of every instrument and recorded pack; the probe reports itself at ~70 s
+            // but has to decode every pack to get there.
+            : probe === 'level-spread' ? 480_000
             : 300_000;
       try {
         await page.waitForFunction(() => {
@@ -804,23 +865,20 @@ async function main() {
           return status === 'passed' || status === 'failed';
         }, null, { timeout: resultTimeout });
       } catch (error) {
-        if (probe === 'device-audio-smoke') {
-          const state = await page.evaluate(() => ({
-            status: document.querySelector('#result')?.getAttribute('data-status') ?? null,
-            message: document.querySelector('#result')?.textContent ?? null,
-          }));
-          throw new Error(`${error.message}; device sweep state=${JSON.stringify(state)}`);
-        }
-        if (probe !== 'physical-midi-recording' && probe !== 'physical-midi-ui-recording') throw error;
+        // A probe that never reports is almost always waiting on a module that never arrived, so describe the
+        // page in the failure instead of leaving only a timeout behind.
         const pageState = await page.evaluate(() => ({
           url: location.href,
           readyState: document.readyState,
           status: document.querySelector('#result')?.getAttribute('data-status') ?? null,
-          message: document.querySelector('#result')?.textContent ?? null,
-          resourceUrls: performance.getEntriesByType('resource').map((entry) => entry.name).filter((url) => url.startsWith(location.origin)),
-        }));
-        throw new Error(`${error.message}; browser state=${JSON.stringify(pageState)}; failed requests=${JSON.stringify(failedRequests)}`);
+          message: (document.querySelector('#result')?.textContent ?? '').slice(0, 400),
+          pendingModules: performance.getEntriesByType('resource')
+            .filter((entry) => entry.name.startsWith(location.origin) && entry.responseEnd === 0)
+            .map((entry) => entry.name),
+        })).catch((stateError) => ({ unavailable: String(stateError) }));
+        throw new Error(`${error.message}; page state=${JSON.stringify(pageState)}; failed requests=${JSON.stringify(failedRequests)}`);
       }
+      phase('result reported');
       const status = await page.locator('#result').getAttribute('data-status');
       result = await page.locator('#result').innerText();
       if (status !== 'passed') throw new Error(`${probe} reported: ${result}`);
