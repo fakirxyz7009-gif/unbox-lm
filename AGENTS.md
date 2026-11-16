@@ -300,6 +300,10 @@ take, the take is closed (transport keeps running) and its notes are released; t
 (Settings · MIDI, default 8 s, can be Off) continues that take after a one-bar count-in, and later replugs leave a
 Resume offer in the MIDI strip instead. The window is a device preference in localStorage (`unbox.midiAutoResumeSeconds`).
 
+A controller that Windows does not enumerate cannot be detected by the app: `docs/midi-controller-setup.md`
+is the layer-by-layer checklist (Windows enumeration, Chrome MIDI site setting, app binding) with a
+symptom table for deciding which of the three layers failed.
+
 ### Workspace and skin (Unbox Studios look)
 - Three tabs (`shell/AppShell.tsx`): **Workstation & Sequencer** (workstation panel + light song
   sequencer), **3-Column Rack**, **Mixer & Clip Editor** (console with the channel inspector, a
