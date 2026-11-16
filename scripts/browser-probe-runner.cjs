@@ -213,6 +213,41 @@ async function assertSectionMenuDismisses(page) {
   await menu.waitFor({ state: 'hidden', timeout: 5_000 });
 }
 
+/** Right-click empty lane space and verify the pattern menu dismisses both ways. */
+async function assertLaneMenuDismisses(page) {
+  const assert = require('node:assert/strict');
+  const lane = page.locator('[data-testid="arr-lane"]').first();
+  const menu = page.locator('[data-testid="lane-pattern-menu"]');
+  await lane.waitFor({ state: 'visible', timeout: 15_000 });
+  await lane.scrollIntoViewIfNeeded();
+
+  const open = async () => {
+    // A starter arrangement can cover the whole visible lane with clips. Dispatch the same
+    // contextmenu event on the lane element so the empty-lane handler runs regardless of paint.
+    await lane.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      element.dispatchEvent(new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        button: 2,
+        clientX: rect.left + 20,
+        clientY: rect.top + rect.height / 2,
+      }));
+    });
+    await menu.waitFor({ state: 'visible', timeout: 5_000 });
+    assert.match(await menu.innerText(), /PLACE PATTERN · BAR/, 'The lane contextmenu opened the wrong menu');
+  };
+
+  await open();
+  await page.keyboard.press('Escape');
+  await menu.waitFor({ state: 'hidden', timeout: 5_000 });
+
+  await open();
+  await page.mouse.click(5, 5);
+  await menu.waitFor({ state: 'hidden', timeout: 5_000 });
+}
+
 /**
  * Drive the built app with real pointer gestures and transport runs. These budgets are deliberately
  * looser than the measured production numbers (17 ms clip frames, 4-10 ms note pointer-up, 33 ms
@@ -546,6 +581,7 @@ async function runPerformanceProbe(page) {
   await page.getByRole('tab', { name: /Workstation/ }).first().click();
   await page.waitForTimeout(300);
   await assertSectionMenuDismisses(page);
+  await assertLaneMenuDismisses(page);
 
   const failures = [];
   const requireFrame = (name, result, budget) => {
@@ -577,7 +613,7 @@ async function runPerformanceProbe(page) {
     `transport ${transport.frames.p95}/${transport.frames.max} ms p95/max, ${positionBefore || '—'} → ${positionAfter}; ` +
     `split Mixer transport ${mixerTransport.frames.p95}/${mixerTransport.frames.max} ms p95/max${mixerTransportRetried ? ' (later sample)' : ''}, ${mixerMetersLive} channel meters live; ` +
     `${splitReadouts.count} fader readouts above the divider at 1280×800 (${splitReadouts.tightest.toFixed(1)} px initial, ${splitReadouts.draggedTightest.toFixed(1)} px at the dragged minimum); ` +
-    `section menu dismissed by Escape and an outside press; ` +
+    `section and lane menus dismissed by Escape and an outside press; ` +
     `all edits produced visible selection/position changes (selection ${selectedBefore} → ${selectedAfter} → ${selectedAfterMove}).`;
   return { summary, clip, draw, move, stepGrid, transport, mixerTransport };
 }
