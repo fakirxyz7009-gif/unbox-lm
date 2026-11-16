@@ -47,46 +47,31 @@ export const QuickControls: React.FC<{ dev: BaseDevice | null }> = ({ dev }) => 
 
   const slots = dev ? quickControls(dev) : Array<null>(QUICK_COUNT).fill(null);
   const menuParam = menu ? slots[menu.slot] ?? null : null;
+  // Only real assignments get a knob: a row of grey "—" placeholders read as unfinished hardware.
+  // Unassigned slots stay reachable through any knob's right-click menu.
+  const assigned = slots.flatMap((p, i) => (p && dev ? [{ param: p, slot: i }] : []));
   return (
-    <div className="flex justify-around items-start px-2" data-testid="quick-controls">
-      {slots.map((p, i) =>
-        p && dev ? (
-          <RingKnob
-            key={i}
-            value={p.value}
-            min={p.min}
-            max={p.max}
-            curve={p.curve}
-            step={p.step}
-            defaultValue={p.defaultValue}
-            bipolar={p.min < 0 && p.max > 0}
-            size={36}
-            label={p.label}
-            title={`${p.label} — right-click to assign another parameter`}
-            onChange={getSlotHandler(p.key)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              setMenu({ slot: i, x: e.clientX, y: e.clientY });
-            }}
-          />
-        ) : (
-          <RingKnob
-            key={i}
-            value={0}
-            min={0}
-            max={1}
-            size={52}
-            label="—"
-            disabled
-            title="Right-click to assign a parameter"
-            onChange={() => undefined}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              if (dev) setMenu({ slot: i, x: e.clientX, y: e.clientY });
-            }}
-          />
-        )
-      )}
+    <div className="flex justify-center items-start gap-10 px-2" data-testid="quick-controls">
+      {assigned.map(({ param: p, slot }) => (
+        <RingKnob
+          key={p.key}
+          value={p.value}
+          min={p.min}
+          max={p.max}
+          curve={p.curve}
+          step={p.step}
+          defaultValue={p.defaultValue}
+          bipolar={p.min < 0 && p.max > 0}
+          size={36}
+          label={p.label}
+          title={`${p.label} — right-click to assign another parameter`}
+          onChange={getSlotHandler(p.key)}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setMenu({ slot, x: e.clientX, y: e.clientY });
+          }}
+        />
+      ))}
       {menu && dev && (
         <div
           className="fixed z-50 max-h-[320px] overflow-y-auto min-w-[200px] rounded border border-chrome-line bg-chrome-1 shadow-2xl py-1 text-[13px] text-[#d5dae0]"

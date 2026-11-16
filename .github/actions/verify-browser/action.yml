@@ -1,0 +1,21 @@
+name: Verify the browser audio probe
+description: >-
+  Installs the optional pinned playwright-core and runs the hip-hop kit browser probe. Kept separate
+  from the unit suite because the probe boots a Vite dev server and Chrome, and it stalls when it
+  shares this machine with `npm test`.
+
+runs:
+  using: composite
+  steps:
+    # Chrome ships on the runner image; playwright-core is deliberately not a project dependency, so
+    # install it here without touching package.json or the lockfile. Pinned to the version the probe
+    # was last verified against.
+    - name: Install the probe browser driver
+      shell: pwsh
+      run: npm install --no-save --no-package-lock playwright-core@1.65.1
+
+    # Renders a three-pad chord from each generated hip-hop bank offline and checks the walk's
+    # scheduled step spacing against the project tempo.
+    - name: Hip-hop kit browser probe
+      shell: pwsh
+      run: npm run test:browser-hiphop-kits

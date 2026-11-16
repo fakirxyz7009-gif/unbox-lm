@@ -1,5 +1,5 @@
 /** Inline editor for one audio clip: gain, fades, pitch, reverse, tempo follow, loop and takes. */
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import type { AudioEngine } from '../../../audio/AudioEngine.ts';
 import type { ArrangementClip, SequencerTrack } from '../../../audio/types.ts';
@@ -12,6 +12,19 @@ import { audioClipRate, secPerBar } from '../../../audio/clips/clipMath.ts';
 import { Btn, NumField } from '../../../studio/ui/controls.tsx';
 import { AudioClipWave, useAudioStoreVersion } from './AudioClipWave.tsx';
 import { derivedAudioProvenance } from '../../../../shared/audio/provenance.ts';
+import { projectManager } from '../../../project/ProjectManager.ts';
+
+const VST3_DELAY_SAMPLE_RATE = 48_000;
+const VST3_DELAY_MAX_SECONDS = 30;
+type StereoChannels = [Float32Array, Float32Array];
+
+declare global {
+  interface Window {
+    unboxVst3Clip?: {
+      renderDelay(input: { sampleRate: typeof VST3_DELAY_SAMPLE_RATE; channels: StereoChannels }): Promise<StereoChannels>;
+    };
+  }
+}
 
 /** Peak (linear) of the part of the source a clip plays. */
 export function clipSourcePeak(c: ArrangementClip, bpm: number, spb: number): number {
@@ -58,6 +71,20 @@ export function AudioClipPanel({
   const [sliceMessage, setSliceMessage] = useState('');
   const [cleaning, setCleaning] = useState(false);
   const [cleanMessage, setCleanMessage] = useState('');
+  const [renderingVst3, setRenderingVst3] = useState(false);
+  const [vst3Message, setVst3Message] = useState('');
+  const panelMounted = useRef(false);
+  const displayedClip = useRef({ track, clip });
+  const busyVst3 = useRef(false);
+  useLayoutEffect(() => {
+    panelMounted.current = true;
+    return () => { panelMounted.current = false; };
+  }, []);
+  useLayoutEffect(() => { displayedClip.current = { track, clip }; }, [track, clip]);
+  const vst3Clip = window.unboxVst3Clip;
+  const delaySource = asset?.buffer;
+  const canRenderVst3 = delaySource?.sampleRate === VST3_DELAY_SAMPLE_RATE && delaySource.numberOfChannels === 2
+    && delaySource.length <= VST3_DELAY_SAMPLE_RATE * VST3_DELAY_MAX_SECONDS;
   const [selectedTakeId, setSelectedTakeId] = useState(clip.audioId ?? clip.takes?.[0]?.audioId ?? '');
   const [compStart, setCompStart] = useState(0);
   const [compEnd, setCompEnd] = useState(clip.lengthBars);
@@ -108,6 +135,55 @@ export function AudioClipPanel({
       setCleanMessage(`Noise removal failed: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setCleaning(false);
+    }
+  };
+  const renderVst3Delay = async () => {
+    if (!vst3Clip || !canRenderVst3 || !asset || !delaySource || busyVst3.current) return;
+    busyVst3.current = true;
+    setRenderingVst3(true);
+    setVst3Message('Rendering the full source through Unbox Test Delay…');
+    const projectId = projectManager.currentId;
+    const stillDisplayed = () => panelMounted.current && displayedClip.current.track === track && displayedClip.current.clip === clip;
+    const assertCurrentSource = () => {
+      if (!stillDisplayed() || projectManager.currentId !== projectId || !audioEngine.tracks.includes(track) ||
+          !track.arrangementClips?.includes(clip) || clip.audioId !== asset.id || audioStore.get(asset.id) !== asset) {
+        throw new Error('The project or source clip changed before the render could be added.');
+      }
+    };
+    let unplacedAssetId: string | undefined;
+    try {
+      const channels = await vst3Clip.renderDelay({
+        sampleRate: VST3_DELAY_SAMPLE_RATE,
+        channels: [delaySource.getChannelData(0).slice(), delaySource.getChannelData(1).slice()],
+      });
+      assertCurrentSource();
+      const length = delaySource.length + VST3_DELAY_SAMPLE_RATE;
+      if (!Array.isArray(channels) || channels.length !== 2 ||
+          channels.some((channel) => !(channel instanceof Float32Array) || channel.length !== length)) {
+        throw new Error('The delay returned an incomplete stereo render.');
+      }
+      const buffer = audioEngine.ctx.createBuffer(2, length, VST3_DELAY_SAMPLE_RATE);
+      buffer.getChannelData(0).set(channels[0]);
+      buffer.getChannelData(1).set(channels[1]);
+      const rendered = audioStore.add(`${asset.name} (VST3 delay)`, buffer, {
+        sourceBpm: asset.sourceBpm,
+        detectedBpm: asset.detectedBpm,
+        key: asset.key,
+        provenance: derivedAudioProvenance(asset.provenance, 'Unbox Test Delay VST3 render'),
+      });
+      unplacedAssetId = rendered.id;
+      if (!(await audioStore.ensurePersisted(rendered.id))) throw new Error('The rendered audio could not be saved.');
+      assertCurrentSource();
+      const placed = audioEngine.addAudioClip(rendered.id, clip.startBar, undefined, { followTempo: false, muteNewTrack: true });
+      if (!placed) throw new Error('The rendered audio could not be placed in the arrangement.');
+      unplacedAssetId = undefined;
+      setVst3Message('Added a muted delay track. Unmute it to hear the copy.');
+    } catch (error) {
+      if (unplacedAssetId) await audioStore.remove(unplacedAssetId);
+      if (panelMounted.current) setVst3Message(stillDisplayed() ? `VST3 render failed. ${error instanceof Error ? error.message : String(error)}` : '');
+    } finally {
+      busyVst3.current = false;
+      if (panelMounted.current) setRenderingVst3(false);
     }
   };
   const detectTempo = () => {
@@ -185,6 +261,19 @@ export function AudioClipPanel({
         <Btn onClick={() => void cleanNoise()} disabled={cleaning} title="Remove background noise with RNNoise (open source). Makes a new source; the original stays.">
           {cleaning ? 'Cleaning...' : 'Remove noise'}
         </Btn>
+        {vst3Clip && (
+          <span data-testid="vst3-render-delay">
+            <Btn
+              disabled={!canRenderVst3 || renderingVst3}
+              onClick={() => void renderVst3Delay()}
+              title={canRenderVst3
+                ? 'Development fixture. Render the full source without clip edits through Unbox Test Delay to a new muted audio track.'
+                : 'Unbox Test Delay requires a 48 kHz stereo source up to 30 seconds long.'}
+            >
+              {renderingVst3 ? 'Rendering VST3 delay…' : 'Render VST3 delay copy'}
+            </Btn>
+          </span>
+        )}
         <Btn
           on={!!clip.invertPhase}
           tone="yellow"
@@ -237,6 +326,7 @@ export function AudioClipPanel({
       {keyMessage && <div className="text-violet-300" role="status">{keyMessage}</div>}
       {sliceMessage && <div className="text-emerald-300" role="status">{sliceMessage}</div>}
       {cleanMessage && <div className="text-sky-300" role="status">{cleanMessage}</div>}
+      {vst3Message && <div className="text-sky-300" role="status" data-testid="vst3-render-status">{vst3Message}</div>}
       {clip.takes && clip.takes.length > 1 && (
         <div className="flex flex-col gap-2 border-t border-slate-800 pt-2" data-testid="audio-take-comp">
           <div className="flex flex-wrap items-center gap-2">
@@ -250,7 +340,7 @@ export function AudioClipPanel({
                 <div key={take.id} className={`flex items-center gap-2 rounded border px-2 py-1 ${selectedTakeId === take.audioId ? 'border-emerald-500/70 bg-emerald-950/20' : 'border-slate-800 bg-black/20'}`}>
                   <button type="button" aria-pressed={selectedTakeId === take.audioId} onClick={() => setSelectedTakeId(take.audioId)} className="w-24 truncate text-left text-[11px] font-bold text-slate-200" title={`Select ${take.name} for comping`}>{take.name}</button>
                   <div className="relative h-7 min-w-0 flex-1 overflow-hidden rounded bg-black/50" aria-label={`${take.name} waveform with selected comp range`}>
-                    <AudioClipWave clip={preview} width={720} height={28} color={selectedTakeId === take.audioId ? '#34d399' : '#64748b'} bpm={audioEngine.bpm} spb={spb} />
+                    <AudioClipWave clip={preview} width={720} height={28} color={selectedTakeId === take.audioId ? '#8ea99e' : '#64748b'} bpm={audioEngine.bpm} spb={spb} />
                     <span
                       className="pointer-events-none absolute inset-y-0 border-x border-amber-200/90 bg-amber-300/20"
                       style={{

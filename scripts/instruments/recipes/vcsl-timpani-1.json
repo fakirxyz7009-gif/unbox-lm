@@ -1,0 +1,369 @@
+{
+  "id": "vcsl-timpani-1",
+  "name": "VCSL Timpani",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded timpani set with five drums, three hit dynamics, round robins and rolls.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Timpani%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-timpani-1/samples",
+  "lanes": [
+    {
+      "name": "Timpani 1 Hit",
+      "note": 36,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "Timpani1_Hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani1_Hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani1_Hit_v3_rr3_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani1_Hit_v3_rr4_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani1_Hit_v4_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Timpani1_Hit_v4_rr2_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 2 Hit",
+      "note": 37,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "Timpani2_Hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani2_Hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani2_Hit_v3_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani2_Hit_v3_rr2_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani2_Hit_v4_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Timpani2_Hit_v4_rr2_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 3 Hit",
+      "note": 38,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "Timpani3_Hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani3_Hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani3_Hit_v3_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani3_Hit_v3_rr2_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani3_Hit_v4_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Timpani3_Hit_v4_rr2_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 4 Hit",
+      "note": 39,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "Timpani4_Hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani4_Hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani4_Hit_v3_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani4_Hit_v3_rr2_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani4_Hit_v4_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Timpani4_Hit_v4_rr2_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 5 Hit",
+      "note": 40,
+      "role": "tom",
+      "samples": [
+        {
+          "file": "Timpani5_Hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani5_Hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Timpani5_Hit_v3_rr1_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani5_Hit_v3_rr2_Sum.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Timpani5_Hit_v4_rr1_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Timpani5_Hit_v4_rr2_Sum.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 1 Roll",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Timpani1_Roll_v3_rr1_Sum.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "Timpani1_Roll_v5_rr1_Sum.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 2 Roll",
+      "note": 42,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Timpani2_Roll_v3_rr1_Sum.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "Timpani2_Roll_v5_rr1_Sum.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 3 Roll",
+      "note": 43,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Timpani3_Roll_v3_rr1_Sum.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "Timpani3_Roll_v5_rr1_Sum.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 4 Roll",
+      "note": 44,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Timpani4_Roll_v3_rr1_Sum.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "Timpani4_Roll_v5_rr1_Sum.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timpani 5 Roll",
+      "note": 45,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Timpani5_Roll_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "Timpani5_Roll_v4_rr1_Sum.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    }
+  ],
+  "maxSeconds": 5,
+  "release": 0.2,
+  "notePolyphony": 2
+}

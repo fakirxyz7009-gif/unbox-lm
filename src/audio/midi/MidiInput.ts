@@ -38,13 +38,32 @@ export class MidiInput {
   outputId = '';
   /** performance.now() of the last note or controller message (the transport LED). */
   lastActivity = 0;
+  /**
+   * Last hot-plug change, named so the UI can announce it: the port list alone does not tell the
+   * musician that the controller they just plugged in was recognised (or pulled out mid-take).
+   */
+  lastChange: { seq: number; added: string[]; removed: string[] } | null = null;
+  private changeSeq = 0;
   /** Keys held on the hardware keyboard right now. */
   readonly held = new Set<number>();
-  /** Last hardware pitch bend (−1..1) and mod wheel (0..1). */
+  /** Last hardware pitch bend (−1..1), mod wheel (0..1) and channel pressure (0..1). */
   pitch = 0;
   mod = 0;
+  pressure = 0;
+  /** MPE master channel (1-based, default 1). Per-note channels are everything else. */
+  mpeMasterChannel = 1;
+  /** Per-note pitch bend (−1..1) for MPE: note → bend. */
+  readonly perNoteBend = new Map<number, number>();
+  /** Per-note pressure (0..1) for MPE: note → pressure. */
+  readonly perNotePressure = new Map<number, number>();
+  /** Per-note timbre / CC74 (0..1) for MPE: note → timbre. */
+  readonly perNoteTimbre = new Map<number, number>();
+  /** Which note currently owns each per-note MPE channel (channel → note). */
+  private readonly mpeChannelToNote = new Map<number, number>();
   /** Bumped when held keys or wheels change; per-frame UI compares it. */
   version = 0;
+  /** MPE per-note expression events: { note, bend?, pressure?, timbre? } */
+  onMPE?: (event: { note: number; bend?: number; pressure?: number; timbre?: number }) => void;
   private access: MIDIAccess | null = null;
   private pending: Promise<boolean> | null = null;
   private readonly bound = new WeakSet<MIDIInput>();
@@ -193,6 +212,15 @@ export class MidiInput {
     });
     this.outputs = outputs;
     if (this.outputId && !outputs.some((p) => p.id === this.outputId)) this.outputId = '';
+    const before = new Map(this.ports.map((p) => [p.id, p.name]));
+    const after = new Map(ports.map((p) => [p.id, p.name]));
+    const added = [...after].filter(([id]) => !before.has(id)).map(([, name]) => name);
+    const removed = [...before].filter(([id]) => !after.has(id)).map(([, name]) => name);
+    if (added.length || removed.length) {
+      this.changeSeq += 1;
+      this.lastChange = { seq: this.changeSeq, added, removed };
+      this.version += 1;
+    }
     this.ports = ports;
     this.setStatus('ready');
   }
@@ -273,6 +301,11 @@ export class MidiInput {
       this.activeNotes.set(portId, notes);
       this.held.add(a);
       this.version++;
+      // MPE: on a per-note channel, remember which note owns this channel so subsequent
+      // bend / pressure / CC74 on that channel apply to that note only.
+      if (channel !== this.mpeMasterChannel && channel < 16) {
+        this.mpeChannelToNote.set(channel, a);
+      }
       if (downElsewhere) return;
     } else if (cmd === 0x80 || cmd === 0x90) {
       const notes = this.activeNotes.get(portId);
@@ -280,16 +313,61 @@ export class MidiInput {
       if (notes?.size === 0) this.activeNotes.delete(portId);
       const heldByAnotherInput = this.isNoteHeld(a, channel);
       if (!this.isPitchHeld(a)) this.held.delete(a);
+      // MPE: release the channel → note mapping when the note goes off.
+      if (channel !== this.mpeMasterChannel && channel < 16) {
+        const owned = this.mpeChannelToNote.get(channel);
+        if (owned === a) this.mpeChannelToNote.delete(channel);
+        this.perNoteBend.delete(a);
+        this.perNotePressure.delete(a);
+        this.perNoteTimbre.delete(a);
+      }
       this.version++;
       if (heldByAnotherInput) return;
+    } else if (cmd === 0xd0) {
+      if (channel !== this.mpeMasterChannel && channel < 16) {
+        // MPE per-note pressure on the note that owns this channel.
+        const owned = this.mpeChannelToNote.get(channel);
+        if (owned !== undefined) {
+          this.perNotePressure.set(owned, b / 127);
+          this.version++;
+          this.onMPE?.({ note: owned, pressure: b / 127 });
+          return;
+        }
+      }
+      this.pressure = b / 127;
+      this.version++;
     } else if (cmd === 0xe0) {
       const raw = (((b << 7) | a) - 8192) / 8192;
-      this.pitch = Math.max(-1, Math.min(1, Number.isFinite(raw) ? raw : 0));
+      const bend = Math.max(-1, Math.min(1, Number.isFinite(raw) ? raw : 0));
+      if (channel !== this.mpeMasterChannel && channel < 16) {
+        // MPE per-note pitch bend on the note that owns this channel.
+        const owned = this.mpeChannelToNote.get(channel);
+        if (owned !== undefined) {
+          this.perNoteBend.set(owned, bend);
+          this.version++;
+          this.onMPE?.({ note: owned, bend });
+          return;
+        }
+      }
+      this.pitch = bend;
       this.version++;
     } else if (cmd === 0xb0 && a === 1) {
       const rawMod = b / 127;
       this.mod = Math.max(0, Math.min(1, Number.isFinite(rawMod) ? rawMod : 0));
       this.version++;
+    } else if (cmd === 0xb0 && a === 74) {
+      // MPE per-note timbre (CC74) on the note that owns this channel.
+      if (channel !== this.mpeMasterChannel && channel < 16) {
+        const owned = this.mpeChannelToNote.get(channel);
+        if (owned !== undefined) {
+          this.perNoteTimbre.set(owned, b / 127);
+          this.version++;
+          this.onMPE?.({ note: owned, timbre: b / 127 });
+          return;
+        }
+      }
+      this.controls.forEach((f) => f(a, b, channel + 1));
+      return;
     } else if (cmd === 0xb0) {
       if (a === 64) {
         const channels = this.activeSustain.get(portId) ?? new Set<number>();
@@ -297,11 +375,37 @@ export class MidiInput {
         else channels.delete(channel);
         if (channels.size) this.activeSustain.set(portId, channels);
         else this.activeSustain.delete(portId);
+      } else if (a === 120 || a === 123) {
+        // All Sound Off / All Notes Off. These must reach the engine (panic), and the on-screen
+        // keys must drop too: a controller that panics sends no note-offs of its own.
+        this.activeNotes.delete(portId);
+        this.activeSustain.delete(portId);
+        if (this.held.size > 0) {
+          this.held.clear();
+          this.version++;
+        }
       } else if (a !== 1) {
         this.controls.forEach((f) => f(a, b, channel + 1));
         return;
       }
     }
     this.onMessage(d);
+  }
+
+  /** MPE: per-note pitch bend (−1..1) for `note`, or 0 if none. */
+  getPerNoteBend(note: number): number {
+    return this.perNoteBend.get(note) ?? 0;
+  }
+  /** MPE: per-note pressure (0..1) for `note`, or 0 if none. */
+  getPerNotePressure(note: number): number {
+    return this.perNotePressure.get(note) ?? 0;
+  }
+  /** MPE: per-note timbre / CC74 (0..1) for `note`, or 0 if none. */
+  getPerNoteTimbre(note: number): number {
+    return this.perNoteTimbre.get(note) ?? 0;
+  }
+  /** MPE: which note currently owns `channel` (per-note channel), or undefined. */
+  getMpeNoteForChannel(channel: number): number | undefined {
+    return this.mpeChannelToNote.get(channel);
   }
 }

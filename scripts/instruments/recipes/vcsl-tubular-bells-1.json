@@ -1,0 +1,169 @@
+{
+  "id": "vcsl-tubular-bells-1",
+  "name": "VCSL Tubular Bells",
+  "kind": "melodic",
+  "category": "percussion",
+  "description": "Recorded tubular chimes with nine pitches and soft and loud strikes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Tubular%20Bells%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Nine sampled roots keep their soft and loud strikes; the source labels A#3-E4."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-tubular-bells-1/samples",
+  "notes": [
+    {
+      "file": "chimes_A#3_ff_rr1.wav",
+      "root": 70,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_A#3_pp_rr1.wav",
+      "root": 70,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_C3_f_rr1.wav",
+      "root": 60,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_C3_pp_rr2.wav",
+      "root": 60,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_C4_ff_rr2.wav",
+      "root": 72,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_C4_p_rr1.wav",
+      "root": 72,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_D3_ff_rr1.wav",
+      "root": 62,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_D3_pp_rr3.wav",
+      "root": 62,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_D4_ff_rr2.wav",
+      "root": 74,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_D4_p_rr1.wav",
+      "root": 74,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_E3_ff_rr2.wav",
+      "root": 64,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_E3_pp_rr1.wav",
+      "root": 64,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_E4_ff_rr2.wav",
+      "root": 76,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_E4_pp_rr3.wav",
+      "root": 76,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_F#3_fff_rr1.wav",
+      "root": 66,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_F#3_p_rr1.wav",
+      "root": 66,
+      "vel": [
+        1,
+        63
+      ]
+    },
+    {
+      "file": "chimes_G#3_ff_rr1.wav",
+      "root": 68,
+      "vel": [
+        64,
+        127
+      ]
+    },
+    {
+      "file": "chimes_G#3_p_rr2.wav",
+      "root": 68,
+      "vel": [
+        1,
+        63
+      ]
+    }
+  ],
+  "keyRange": [
+    60,
+    76
+  ],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 8,
+  "release": 0.3,
+  "notePolyphony": 4
+}

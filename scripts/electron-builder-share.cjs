@@ -10,5 +10,6 @@ const base = require('../package.json').build;
 module.exports = {
   ...base,
   files: [...base.files, '!dist/library/**', '!dist/stems/**'],
-  win: { ...base.win, artifactName: 'Unbox-Studio-Share.exe' },
+  // The installer target names its own artifact, so the share package keeps its distinct name there.
+  nsis: { ...base.nsis, artifactName: 'Unbox-Studio-Share-Setup-${version}.exe' },
 };

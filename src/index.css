@@ -27,29 +27,29 @@
   --text-2xl--line-height: 1.15;
   --text-3xl: 22px;
   --text-3xl--line-height: 1.1;
-  --color-metal-1: #f0ece4;
-  --color-metal-2: #d5cdbf;
-  --color-metal-3: #aaa08f;
-  --color-metal-edge: #796d5b;
-  --color-ink: #211b14;
-  --color-lcd-1: #8bb3b8;
-  --color-lcd-2: #729ba0;
-  --color-lcd-ink: #112328;
-  --color-lcd-dim: #32555c;
-  --color-ring: #00e5ff;
-  --color-sel: #d69b50;
-  --color-sel-2: #efc887;
-  --color-chrome-0: #100e0b;
-  --color-chrome-1: #191511;
-  --color-chrome-2: #262019;
-  --color-chrome-line: #40352a;
-  --color-chrome-ink: #c1b7a8;
-  --color-seq-bg: #e4dfd5;
-  --color-seq-lane: #f1eee7;
-  --color-seq-lane-2: #e8e3da;
-  --color-seq-line: #c7c0b5;
-  --color-seq-head: #d8d1c5;
-  --color-seq-ink: #28231c;
+  --color-metal-1: #f4f7ee;
+  --color-metal-2: #d8e0cd;
+  --color-metal-3: #b0bca4;
+  --color-metal-edge: #7d8a73;
+  --color-ink: #1f2a1a;
+  --color-lcd-1: #dfe7c8;
+  --color-lcd-2: #bccb9f;
+  --color-lcd-ink: #26331f;
+  --color-lcd-dim: #4c5c39;
+  --color-ring: #c1702f;
+  --color-sel: #c1702f;
+  --color-sel-2: #e3a05e;
+  --color-chrome-0: #b6c2ab;
+  --color-chrome-1: #cad5bf;
+  --color-chrome-2: #dde5d2;
+  --color-chrome-line: #8b9880;
+  --color-chrome-ink: #22301c;
+  --color-seq-bg: #dedbd4;
+  --color-seq-lane: #f1efea;
+  --color-seq-lane-2: #e9e6df;
+  --color-seq-line: #c4c0b8;
+  --color-seq-head: #e5e1da;
+  --color-seq-ink: #26282b;
   --color-wood-1: #382217;
   --color-wood-2: #795331;
 }
@@ -72,8 +72,8 @@
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: radial-gradient(ellipse at 50% -30%, #312416 0%, #15110d 48%, #0a0908 100%);
-    color: #f8fafc;
+    background: #b6c2ab;
+    color: #1f2a1a;
     user-select: none;
     -webkit-user-select: none;
     overflow-x: hidden;
@@ -87,16 +87,16 @@
     height: 7px;
   }
   ::-webkit-scrollbar-track {
-    background: #110e0a;
-    border: 1px solid #3b2e20;
+    background: #c6d1bb;
+    border: 1px solid #a4b098;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #b98b50, #72502d);
+    background: #97a48a;
     border-radius: 4px;
-    border: 1px solid #d4ad76;
+    border: 1px solid #7d8a73;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #d8b477, #a87537);
+    background: #808d75;
   }
 }
 
@@ -159,12 +159,12 @@
 .knurled-edge-ring {
   background: repeating-conic-gradient(
     from 0deg,
-    #d4ae73 0deg 4deg,
-    #292017 4deg 8deg,
-    #8f693b 8deg 12deg,
-    #100d09 12deg 16deg
+    #b8bec2 0deg 1.5deg,
+    #3b4044 1.5deg 3deg,
+    #767d82 3deg 4.5deg,
+    #15181a 4.5deg 6deg
   );
-  box-shadow: inset 0 0 3px rgba(0,0,0,0.9), 0 1px 2px rgba(255,255,255,0.2);
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.95), 0 1px 2px rgba(255,255,255,0.16);
 }
 
 /* Techno Hi-Fi Top Bezel Trim */
@@ -183,6 +183,20 @@
 
 .electrical-spark-effect {
   animation: electrical-spark 3s ease-in-out infinite;
+}
+
+/* Hand-off from a count-in: the badge flashes green once, then settles into a quiet green chip */
+@keyframes us-take-start {
+  0% { background-color: rgba(52, 211, 153, 0.9); border-color: rgba(167, 243, 208, 0.95); color: #052e1b; box-shadow: 0 0 16px rgba(52, 211, 153, 0.75); }
+  100% { background-color: rgba(52, 211, 153, 0.16); border-color: rgba(110, 231, 183, 0.55); color: #a7f3d0; box-shadow: 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+.us-take-start {
+  animation: us-take-start 700ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-take-start { animation: none; }
 }
 
 /* High-Contrast Obsidian & Carbon Techno Chassis Background */
@@ -1304,8 +1318,8 @@
 .us-page input[type='search'],
 .us-page input:not([type]),
 .us-page textarea {
-  background: #0b0d10;
-  border: 1px solid #000;
+  background: #f3f6ea;
+  border: 1px solid #8b9880;
   border-radius: 4px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.05);
   color: #e6e9ec;
@@ -1987,4 +2001,3924 @@
   }
   .load-seg button + button { border-left: 1px solid #5a4329; }
   .load-seg button[aria-pressed='true'] { background: linear-gradient(180deg, #e3bc79, #bb8544); color: #21160c; }
+}
+
+/* =========================================================================================
+   AVOCADO CHROME — the 1970s hi-fi brochure: brushed light-green aluminium, bone labels,
+   walnut-dark ink and one burnt-orange accent. The faceplates keep their own materials; the
+   cabinet, tabs, transport, mixer console and rack frame all share this light metal so the
+   whole studio reads as one machine instead of a dark app with light islands.
+   ========================================================================================= */
+
+.unbox-cabinet {
+  background: #b6c2ab;
+  box-shadow: inset 0 0 0 1px #8b9880;
+}
+
+.unbox-titlebar {
+  background: linear-gradient(180deg, #e6ecdd, #ccd7c1);
+  border-bottom: 1px solid #8b9880;
+  box-shadow: inset 0 1px 0 #f7faf1, 0 2px 6px rgba(43, 55, 37, 0.16);
+}
+.unbox-brand-button { border-right-color: #a4b098; }
+.unbox-brand-button:hover,
+.unbox-brand-button:focus-visible { background: rgba(35, 47, 30, 0.07); }
+.unbox-brand-kicker { color: #4d5c45; }
+.unbox-brand-word { color: #1e2a1a; }
+.unbox-workspace-tab { color: #45543d; letter-spacing: 0.1em; }
+.unbox-workspace-tab:hover { color: #1c2719; background: rgba(35, 47, 30, 0.07); }
+.unbox-workspace-tab[aria-selected='true'] {
+  color: #182314;
+  background: linear-gradient(180deg, #f2f6ea, #dfe7d4);
+  box-shadow: inset 0 -2px 0 var(--color-sel), inset 0 1px 0 #ffffff;
+}
+.unbox-workspace-tab kbd { color: #65745b; }
+.unbox-utility-button { color: #44533c; }
+.unbox-utility-button:hover { color: #1c2719; background: rgba(35, 47, 30, 0.09); }
+.unbox-page-bar { background: #c6d1bb; border-bottom-color: #8b9880; }
+.unbox-transport {
+  background: linear-gradient(180deg, #dde5d3, #c7d2bc);
+  border-top: 1px solid #8b9880;
+  box-shadow: inset 0 1px 0 #f7faf1;
+}
+.unbox-meter-bank {
+  border-color: #8b9880;
+  background: repeating-linear-gradient(90deg, transparent 0 3px, rgba(35, 47, 30, 0.06) 3px 4px), #c2cdb7;
+  box-shadow: none;
+}
+.unbox-screen-well { box-shadow: inset 0 1px 2px rgba(43, 55, 37, 0.2); }
+
+@layer components {
+  /* cabinet metal of the workstation / mixer tabs: brushed avocado aluminium */
+  .us-metal {
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.28) 0 1px, rgba(60, 74, 50, 0.035) 1px 2px, transparent 2px 3px),
+      linear-gradient(180deg, #eaefe2 0%, #d4ddc9 42%, #bcc8b0 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(52, 64, 46, 0.25);
+    color: var(--color-ink);
+  }
+  .us-metal-frame { border-color: #7d8a73; }
+
+  .us-btn {
+    background: linear-gradient(180deg, #f0f4e7, #d5ddca);
+    border: 1px solid #7d8a73;
+    border-radius: 5px;
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 rgba(52, 64, 46, 0.18);
+    color: #26331f;
+    transition: background-color 100ms ease, color 100ms ease, border-color 100ms ease;
+  }
+  .us-btn:hover { background: linear-gradient(180deg, #f8faf2, #e0e7d5); color: #1a2415; }
+  .us-btn:active { background: linear-gradient(180deg, #cbd4bf, #dde4d1); }
+
+  .us-panel {
+    background: linear-gradient(180deg, #e9eee0, #d3dcc8);
+    border: 1px solid #8b9880;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px rgba(45, 56, 40, 0.16);
+  }
+  .us-panel-head {
+    min-height: 38px;
+    padding: 5px 10px;
+    border-bottom: 1px solid #a7b39b;
+    box-shadow: inset 0 1px 0 #ffffff;
+  }
+  /* name plate: a stamped badge in deep green, the 70s brochure label */
+  .us-plate {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font: 700 11px/1.1 var(--font-label);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #eef3e3;
+    background: #3f4d36;
+    border: 1px solid #2f3b29;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .us-field {
+    background: #f3f5eb;
+    border: 1px solid #93a086;
+    border-radius: 5px;
+    box-shadow: inset 0 1px 2px rgba(52, 64, 46, 0.16);
+    color: #202b1b;
+  }
+  .us-field:focus { border-color: var(--color-sel); }
+  .us-lcd {
+    background:
+      repeating-linear-gradient(0deg, rgba(40, 56, 28, 0.04) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #dfe7c8 0%, #cbd8ae 60%, #bccb9f 100%);
+    border: 1px solid #8d9b78;
+    box-shadow: inset 0 0 0 1px rgba(70, 88, 52, 0.18);
+  }
+  .us-lcd-field,
+  .us-lcd-chip {
+    background: linear-gradient(180deg, #dfe7c8, #cbd8ae);
+    box-shadow: inset 0 0 0 1px rgba(70, 88, 52, 0.25);
+  }
+
+  .cs-console { background: #aebaa3; }
+  .cs-strip {
+    background: linear-gradient(180deg, #e4ead9, #cdd7c1);
+    border: 1px solid #8b977f;
+    box-shadow: inset 0 1px 0 #ffffff;
+  }
+  .cs-strip--sel {
+    box-shadow: 0 0 0 1px var(--color-sel), 0 0 0 4px rgba(193, 112, 47, 0.18);
+  }
+  /* the strip name is a printed label on pale metal */
+  .cs-name {
+    background: linear-gradient(180deg, #f4f6ec, #dee6d2);
+    border: 1px solid #94a088;
+    color: #1f2a1c;
+    box-shadow: inset 0 1px 0 #ffffff;
+  }
+  .cs-sec { border-top-color: #b3bfa7; box-shadow: none; }
+
+  /* Clip Editor picker: one card per track, clip chips inside */
+  .clip-card {
+    background: #e7ecdf;
+    border: 1px solid #94a088;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 #ffffff;
+  }
+  .clip-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 10px;
+    background: linear-gradient(180deg, #f2f5ea, #e3e9d8);
+    border-bottom: 1px solid #b3bfa7;
+  }
+  .clip-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 5px;
+    font: 600 13px/1 var(--font-label);
+    color: #22301c;
+    background: linear-gradient(180deg, #f6f8f0, #e3e9d8);
+    border: 1px solid #98a48c;
+    transition: background-color 100ms ease, border-color 100ms ease, color 100ms ease;
+  }
+  .clip-chip:hover { background: #ffffff; border-color: var(--color-sel); color: #182313; }
+  .clip-chip-bar { font: 600 11px/1 var(--font-label); color: #52624a; }
+}
+
+/* Rack frame: light green anodised rails */
+.modular-rack {
+  background: linear-gradient(180deg, #bcc8b1, #a6b29a);
+}
+.studio-rack-rail,
+.rack-rail {
+  background: linear-gradient(90deg, #98a48c, #d6dfca 50%, #93a087);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.55), inset -1px 0 0 rgba(52, 64, 46, 0.35);
+}
+.rack-toolbar {
+  background: #cad5bf;
+  border-bottom: 1px solid #8b9880;
+  padding: 6px 10px;
+}
+.rack-tool {
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #26331f;
+  background: linear-gradient(180deg, #eef2e5, #d6dfcb);
+  border: 1px solid #89967d;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+.rack-tool:hover:not(:disabled) { background: linear-gradient(180deg, #f8faf2, #e2e9d7); color: #172112; }
+.rack-tool[aria-pressed='true'] {
+  color: #21160a;
+  background: linear-gradient(180deg, #eab673, #cf8a3a);
+  border-color: #a86c25;
+  box-shadow: inset 0 1px 0 #ffe0b4, inset 0 -2px 0 rgba(120, 70, 20, 0.28);
+}
+.rack-seg { border-color: #89967d; border-radius: 5px; }
+.rack-seg button {
+  height: 26px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #36432e;
+  background: linear-gradient(180deg, #e7ecdd, #d2dbc6);
+}
+.rack-seg button:hover { color: #1a2415; background: #f1f5e8; }
+.rack-seg button[aria-pressed='true'] { background: linear-gradient(180deg, #eab673, #cf8a3a); color: #21160a; }
+.rack-hint { color: #4c5b44; }
+.rack-col {
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 10px, #a9b59d 10px 17px, transparent 17px 26px),
+    repeating-linear-gradient(180deg, transparent 0 10px, #a9b59d 10px 17px, transparent 17px 26px),
+    linear-gradient(90deg, #b4c0a8, #d2dbc6 10px, #beCAB2 22px, transparent 22px, transparent calc(100% - 22px), #beCAB2 calc(100% - 22px), #d2dbc6 calc(100% - 10px), #b4c0a8);
+  background-color: #aab69f;
+}
+.rack-ear { background: linear-gradient(90deg, #a7b39b, #d4ddc8 45%, #a1ad95); }
+.rack-ear--left { border-right-color: #8e9b83; }
+.rack-ear--right { border-left-color: #8e9b83; }
+.rack-unit { border-color: #8b977f; border-top-color: #d9e1cd; border-bottom-color: #7f8c73; }
+.rack-unit--selected { outline: 2px solid var(--color-sel); }
+/* Light surfaces that used to be dark chrome */
+.us-chrome { background: linear-gradient(180deg, #e3ead8, #cfd9c3); }
+.cs-readout { color: #3b4a32; }
+.unbox-live-keyboard {
+  background: linear-gradient(180deg, #d7e0cc, #c0ccb4) !important;
+  border-top: 1px solid #8b9880;
+  border-color: #8b9880;
+  box-shadow: inset 0 1px 0 #f6f9ef;
+  color: #22301c;
+}
+.unbox-live-keyboard [class*="text-cyan-"],
+.unbox-live-keyboard [class*="text-slate-"] { color: #45543d !important; }
+.unbox-live-keyboard [class*="border-cyan-"] { border-color: #8b9880 !important; }
+.unbox-live-keyboard [class*="bg-slate-950"] { background-color: #b4c0a8 !important; }
+.unbox-live-keyboard [class*="bg-slate-9"] { background-color: #e7ecdc !important; }
+.unbox-live-keyboard [class~="hover:text-white"]:hover { color: #16200f !important; }
+.unbox-live-keyboard [class*="bg-emerald-950"] { background-color: #dfe7d4 !important; }
+.unbox-live-keyboard [class*="bg-emerald-300"],
+.unbox-live-keyboard [class*="bg-emerald-500"] { background-color: #c1702f !important; }
+
+.rack-chans {
+  background: linear-gradient(180deg, #e1e8d6, #cdd7c1);
+  border: 1px solid #8b9880;
+  border-radius: 6px;
+}
+.rack-chans-head { color: #45543d; letter-spacing: 0.18em; }
+.rack-chan {
+  background: #dde5d2;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+.rack-chan-jump { color: #3f4e37; }
+.rack-chan-jump:hover { color: #16200f; }
+.rack-chan-tag { color: #4c5b44; }
+.rack-chan--rear { background: #c3cfb7; }
+.rack-chan--rear .rack-chan-tag { color: #45543d; }
+.rack-add {
+  border-color: #8f9c83;
+  color: #4c5b44;
+  background: rgba(255, 255, 255, 0.22);
+}
+.rack-empty {
+  border-color: #8f9c83;
+  color: #4c5b44;
+  background: rgba(255, 255, 255, 0.22);
+}
+.rack-nav { background: #aab69f; }
+.rack-scroller { background: #a8b49d; }
+.rack-back { background: linear-gradient(180deg, #dbe3d0, #c3cfb7); }
+.rack-strip-name { background: #dde5d2; border-color: #94a088; }
+
+/* =========================================================================================
+   SIGNATURE MOTION - 70s hi-fi in motion: an amber lamp sweep across the title bar, the
+   wordmark glowing like a backlit badge, a breathing underline on the active tab, haloed
+   selected strips, and keys that drop a pixel under the finger. CSS only: no per-frame
+   React, no layout reads, and nothing moves when the OS asks for reduced motion.
+   ========================================================================================= */
+
+.us-btn,
+.rack-tool,
+.cs-name button { transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, transform 90ms ease; }
+.us-btn:active,
+.rack-tool:active { transform: translateY(1px); }
+
+.cs-strip { transition: transform 160ms cubic-bezier(0.2, 0.7, 0.3, 1), border-color 160ms ease, box-shadow 160ms ease; }
+.cs-strip:hover { transform: translateY(-1px); border-color: var(--color-sel); }
+
+.us-key-white,
+.us-key-black { transition: background-color 90ms linear, box-shadow 90ms linear, transform 70ms ease; }
+.us-key-white[data-on='true'] {
+  transform: translateY(1px);
+  box-shadow: inset 0 -3px 0 #b9762f, 0 0 12px rgba(193, 112, 47, 0.35);
+}
+.us-key-black[data-on='true'] {
+  transform: translateY(1px);
+  box-shadow: inset 0 -4px 0 #6e3f12, 0 0 10px rgba(193, 112, 47, 0.4);
+}
+
+@keyframes unbox-sweep {
+  from { background-position: -120% 50%; }
+  to { background-position: 220% 50%; }
+}
+@keyframes unbox-tab-breathe {
+  0%, 100% { box-shadow: inset 0 -2px 0 var(--color-sel), inset 0 1px 0 #ffffff; }
+  50% { box-shadow: inset 0 -2px 0 var(--color-sel), inset 0 1px 0 #ffffff, inset 0 -12px 22px -16px rgba(193, 112, 47, 0.75); }
+}
+@keyframes unbox-strip-halo {
+  0%, 100% { box-shadow: 0 0 0 1px var(--color-sel), 0 0 0 4px rgba(193, 112, 47, 0.18); }
+  50% { box-shadow: 0 0 0 1px var(--color-sel), 0 0 0 4px rgba(193, 112, 47, 0.24), 0 0 16px rgba(193, 112, 47, 0.35); }
+}
+@keyframes unbox-play-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(46, 148, 80, 0.35); }
+  50% { box-shadow: 0 0 16px 2px rgba(46, 148, 80, 0.6); }
+}
+@keyframes unbox-logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(193, 112, 47, 0)); }
+  50% { filter: drop-shadow(0 0 5px rgba(193, 112, 47, 0.5)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .unbox-titlebar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent 0%, rgba(193, 112, 47, 0) 34%, rgba(193, 112, 47, 0.85) 50%, rgba(193, 112, 47, 0) 66%, transparent 100%);
+    background-size: 200% 100%;
+    animation: unbox-sweep 9s linear infinite;
+  }
+  .unbox-workspace-tab[aria-selected='true'] { animation: unbox-tab-breathe 3.6s ease-in-out infinite; }
+  [data-testid='transport-play'][aria-pressed='true'] { animation: unbox-play-pulse 1.8s ease-in-out infinite; }
+  .cs-strip--sel { animation: unbox-strip-halo 2.6s ease-in-out infinite; }
+  .unbox-brand-mark { animation: unbox-logo-glow 6s ease-in-out infinite; }
+}
+
+/* =========================================================================================
+   PAGE SURFACES - Projects, Settings, Mastering and the other studio pages share the green
+   metal cabinet: no dark islands, light fields, engraved labels.
+   ========================================================================================= */
+
+.us-page { background: #b6c2ab; color: #22301c; }
+.us-page [class*="bg-[#070a10]"] { background-color: #b6c2ab; }
+.us-page [class*="bg-[#0d1119]"] { background-color: #cfd9c3; }
+.us-page [class*="border-[#1c2331]"] { border-color: #8b9880; }
+.us-page [class*="bg-black/80"] { background-color: #dfe7d4; }
+.us-page [class*="bg-black/60"] { background-color: #f3f6ea; }
+.us-page [class*="bg-black/50"] { background-color: #eef2e4; }
+.us-page [class*="bg-black/40"] { background-color: #e7ecdc; }
+.us-page [class*="bg-black/30"] { background-color: #e2e9d7; }
+.us-page [class*="bg-black/25"] { background-color: #edf1e3; }
+.us-page [class*="border-slate-700"] { border-color: #8b9880; }
+.us-page [class*="border-slate-800"] { border-color: #a7b39b; }
+.us-page [class*="text-white"] { color: #1b2617; }
+.us-page [class*="text-slate-100"],
+.us-page [class*="text-slate-200"],
+.us-page [class*="text-slate-300"] { color: #26331f; }
+.us-page [class*="text-slate-400"] { color: #3f4e37; }
+.us-page [class*="text-slate-500"],
+.us-page [class*="text-slate-600"] { color: #52624a; }
+.us-page [class*="text-cyan-200"],
+.us-page [class*="text-cyan-300"] { color: #2f5f3f; }
+.us-page [class*="text-violet-"] { color: #5c4a86; }
+.us-page h2 { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); }
+
+/* =========================================================================================
+   PHOTOREAL MATERIALS - brushed aluminium grain, specular sheen, beveled panels, engraved
+   lettering and glassy LCDs. All layered CSS so the surfaces keep the light 70s palette.
+   ========================================================================================= */
+
+:root {
+  --unbox-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.38'/%3E%3C/svg%3E");
+}
+
+.unbox-cabinet {
+  background-image:
+    var(--unbox-grain),
+    radial-gradient(130% 80% at 50% -10%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, #bdc9b2, #adb9a2);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 0 0 1px #7f8c73, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.unbox-titlebar {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.2) 55%, rgba(0, 0, 0, 0.04) 100%),
+    linear-gradient(180deg, #eef3e5 0%, #dfe7d3 55%, #c9d4be 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(52, 64, 46, 0.25), 0 3px 8px rgba(35, 47, 30, 0.18);
+}
+
+.unbox-transport {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(180deg, #e0e8d5, #c3cfb7);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 2px 5px -3px rgba(35, 47, 30, 0.35), 0 -2px 6px rgba(35, 47, 30, 0.12);
+}
+
+.us-metal {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.04) 24%, rgba(255, 255, 255, 0.22) 46%, rgba(0, 0, 0, 0.045) 64%, rgba(255, 255, 255, 0.18) 84%, rgba(0, 0, 0, 0.06) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, rgba(60, 74, 50, 0.055) 1px 2px, transparent 2px 4px),
+    linear-gradient(180deg, #eef3e5 0%, #dae2cf 38%, #c3cfb7 72%, #b1bda5 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 4px rgba(52, 64, 46, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 0 rgba(52, 64, 46, 0.14),
+    0 8px 20px rgba(45, 56, 40, 0.16);
+}
+
+.us-panel {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 40%),
+    linear-gradient(180deg, #edf2e4, #d5dec9);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 3px rgba(52, 64, 46, 0.12),
+    0 1px 0 #7d8a73,
+    0 10px 22px rgba(35, 47, 30, 0.16);
+}
+
+.us-btn {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #fbfcf7 0%, #edf2e4 45%, #d4ddc8 100%);
+  background-blend-mode: overlay, normal;
+  border-color: #85927a;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 0 rgba(60, 74, 50, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 3px rgba(35, 47, 30, 0.18);
+}
+.us-btn:hover { background-image: var(--unbox-grain), linear-gradient(180deg, #ffffff, #f1f5e8 60%, #dee6d2); }
+.us-btn:active {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #ccd6c0, #dde6d1);
+  box-shadow: inset 0 2px 4px rgba(35, 47, 30, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.us-plate {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #4d5d42, #35422e 70%, #2c3727);
+  background-blend-mode: overlay, normal;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.us-lcd {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.06) 38%, rgba(0, 0, 0, 0.04) 100%),
+    repeating-linear-gradient(0deg, rgba(40, 56, 28, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #e4eccc 0%, #ccd9b0 60%, #bccb9f 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 4px rgba(40, 56, 28, 0.22), 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.us-key-white {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f8f2 58%, #e3e7dc 100%);
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -7px 0 #d4d9cc, inset -1px 0 0 #b3bcac, 0 2px 3px rgba(35, 47, 30, 0.28);
+}
+.us-key-black {
+  background: linear-gradient(180deg, #3b4139 0%, #20251e 55%, #0d0f0c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -5px 0 #333a30, 0 3px 5px rgba(20, 26, 17, 0.5);
+}
+
+.cs-strip {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, #e7eddb, #cfd8c3);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(52, 64, 46, 0.16), 0 2px 5px rgba(35, 47, 30, 0.18);
+}
+.cs-name {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #f6f8ef, #e0e8d4);
+  background-blend-mode: overlay, normal;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(52, 64, 46, 0.14);
+}
+
+.studio-rack-rail,
+.rack-rail {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(90deg, #8f9c83 0%, #dbe4d0 32%, #eef3e5 50%, #cfd9c3 66%, #8b9880 100%);
+  background-blend-mode: overlay, normal;
+}
+
+.unbox-workspace-tab { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
+.unbox-workspace-tab[aria-selected='true'] { text-shadow: 0 1px 0 #ffffff; }
+.rack-tool { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); }
+.rack-chans-head { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45); }
+
+/* page accent text on light metal */
+.us-page [class*="bg-slate-900"] { background-color: #dfe7d4; }
+.us-page [class*="bg-slate-800"] { background-color: #d3dcc7; }
+.us-page [class*="text-amber-"] { color: #6d421a; }
+.us-page [class*="bg-amber-950"] { background-color: #f6edd9; }
+.us-page [class*="border-amber-500"] { border-color: rgba(193, 112, 47, 0.45); }
+.us-page [class*="text-emerald-3"],
+.us-page [class*="text-emerald-4"] { color: #2f6b3f; }
+.us-page [class*="text-red-3"],
+.us-page [class*="text-red-4"] { color: #8a2b2b; }
+.us-page [class*="text-cyan-3"],
+.us-page [class*="text-cyan-4"] { color: #2f5f3f; }
+
+/* depth where panels meet the cabinet */
+.rack-unit { box-shadow: 0 6px 16px rgba(35, 47, 30, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.cs-console { box-shadow: inset 0 2px 7px rgba(35, 47, 30, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.35); }
+.unbox-screen-well { box-shadow: inset 0 2px 9px rgba(35, 47, 30, 0.22), inset 0 -1px 0 rgba(255, 255, 255, 0.45); }
+.unbox-titlebar .unbox-brand-mark { filter: drop-shadow(0 1px 1px rgba(35, 47, 30, 0.35)); }
+
+.us-page [class*="bg-emerald-9"] { background-color: #dcead2; }
+.us-page [class*="border-emerald-"] { border-color: #7fa273; }
+.us-page [class*="text-emerald-2"] { color: #2f6b3f; }
+/* =========================================================================================
+   FACEPLATE MATERIALS - every device panel is the same photograph of brushed metal: fine
+   directional grain, a raking specular highlight, a bevelled lip. Light panels go avocado,
+   dark panels go deep green-black so their existing light lettering keeps its contrast.
+   ========================================================================================= */
+
+.rack-face {
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 3px rgba(15, 21, 12, 0.35),
+    inset 1px 0 0 rgba(255, 255, 255, 0.16),
+    inset -1px 0 0 rgba(15, 21, 12, 0.22);
+}
+/* one grain + glass sheen over every front panel, including the spec-painted ones */
+.rack-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 22%, rgba(0, 0, 0, 0.06) 100%),
+    var(--unbox-grain);
+  opacity: 0.24;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+/* the material sits under the hardware: labels, knobs and screens are never dusted over */
+.rack-face > * {
+  position: relative;
+  z-index: 1;
+}
+
+.faceplate-brushed-aluminum {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 28%, rgba(255, 255, 255, 0.26) 50%, rgba(0, 0, 0, 0.05) 72%, rgba(255, 255, 255, 0.2) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 1px, rgba(60, 74, 50, 0.06) 1px 2px, transparent 2px 4px),
+    linear-gradient(180deg, #e9efe0 0%, #d2dbc6 55%, #a9b69d 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 3px rgba(52, 64, 46, 0.3), inset -1px 0 0 rgba(52, 64, 46, 0.2);
+  color: #22301c;
+}
+
+.faceplate-dark-charcoal {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 32%, rgba(0, 0, 0, 0.35) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, rgba(0, 0, 0, 0.1) 1px 2px, transparent 2px 4px),
+    linear-gradient(180deg, #39462f 0%, #222c1b 60%, #131a0f 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+  color: #e7eee0;
+}
+
+.faceplate-light-grey-metal, .faceplate-brushed-grey {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.3) 52%, rgba(0, 0, 0, 0.05) 72%, rgba(255, 255, 255, 0.22) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 1px, rgba(60, 74, 50, 0.06) 1px 2px, transparent 2px 4px),
+    linear-gradient(180deg, #eef3e6 0%, #d6dfca 30%, #c0ccb3 70%, #a9b69d 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -2px 2px rgba(52, 64, 46, 0.26), inset 1px 0 0 rgba(255, 255, 255, 0.5);
+  border-top: 1px solid #f8faf2;
+  border-bottom: 1px solid #7f8c73;
+  color: #22301c;
+}
+
+.faceplate-crisp-white, .faceplate-studio-white {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 34%, rgba(255, 255, 255, 0.34) 58%, rgba(0, 0, 0, 0.03) 100%),
+    linear-gradient(180deg, #fbf9ee 0%, #efe9d6 45%, #ded6c0 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(52, 64, 46, 0.24);
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #aab49c;
+  color: #2b2a1d;
+}
+
+.faceplate-forest-green {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 34%, rgba(0, 0, 0, 0.3) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #4e6040 0%, #35452b 55%, #233018 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  border-top: 1px solid rgba(236, 244, 226, 0.3);
+  border-bottom: 1px solid #16200f;
+  color: #eef3e4;
+}
+
+.faceplate-studio-blue {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 34%, rgba(0, 0, 0, 0.35) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #2c4140 0%, #1b2c2b 60%, #101b1b 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+  border-top: 1px solid rgba(205, 230, 225, 0.22);
+  border-bottom: 1px solid #0a1212;
+  color: #eaf3ee;
+}
+
+.faceplate-slate-black {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 30%, rgba(0, 0, 0, 0.4) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #2d3826 0%, #1a2317 55%, #0d130b 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: 1px solid #070a06;
+  color: #eef2e6;
+}
+
+.faceplate-vst-effect {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(100deg, rgba(255, 255, 255, 0.08) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%),
+    linear-gradient(100deg, #2b3223 0%, #3b4430 55%, #1d2418 100%);
+  background-blend-mode: overlay, normal, normal;
+  color: #e8eee1;
+}
+.faceplate-vst-instrument {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(100deg, rgba(255, 255, 255, 0.08) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%),
+    linear-gradient(100deg, #242f24 0%, #31442f 55%, #131c12 100%);
+  background-blend-mode: overlay, normal, normal;
+  color: #e8eee1;
+}
+
+/* 70s hardware archetypes, each still one piece of brushed metal */
+.faceplate-walnut {
+  background-image:
+    var(--unbox-grain),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 2px, rgba(0, 0, 0, 0.12) 2px 5px, transparent 5px 9px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.3)),
+    linear-gradient(90deg, #3d2412, #6b4322 38%, #57351a 64%, #2e1b0d);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 226, 186, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+  border-top: 1px solid rgba(255, 226, 186, 0.3);
+  border-bottom: 1px solid #1b0f06;
+  color: #ffeed8;
+}
+.faceplate-oxblood {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 34%, rgba(0, 0, 0, 0.32) 100%),
+    linear-gradient(180deg, #6d2027 0%, #4a1118 55%, #2d0a0e 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 220, 0.24), inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(255, 210, 210, 0.24);
+  border-bottom: 1px solid #1c0608;
+  color: #fff0f1;
+}
+.faceplate-brass {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 34%, rgba(0, 0, 0, 0.3) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #7a5a30 0%, #5a3f1e 55%, #38260f 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 235, 200, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  border-top: 1px solid rgba(255, 235, 200, 0.32);
+  border-bottom: 1px solid #241708;
+  color: #fff4e0;
+}
+.faceplate-teal {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 34%, rgba(0, 0, 0, 0.34) 100%),
+    linear-gradient(180deg, #275b52 0%, #173f39 55%, #0c2320 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(214, 244, 238, 0.24), inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(214, 244, 238, 0.24);
+  border-bottom: 1px solid #071513;
+  color: #e6fbf7;
+}
+.faceplate-gold {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 30%, rgba(0, 0, 0, 0.32) 100%),
+    linear-gradient(180deg, #7d5a1c 0%, #5a3f12 55%, #332408 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 236, 180, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  border-top: 1px solid rgba(255, 236, 180, 0.34);
+  border-bottom: 1px solid #1f1505;
+  color: #fff6df;
+}
+.faceplate-charcoal {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 30%, rgba(0, 0, 0, 0.4) 100%),
+    linear-gradient(180deg, #3a3225 0%, #262015 55%, #15110a 100%);
+  background-blend-mode: overlay, normal, normal;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+  border-top: 1px solid rgba(255, 240, 210, 0.16);
+  border-bottom: 1px solid #0b0805;
+  color: #f6ead5;
+}
+
+/* translucent-black device insets over a pale faceplate turn grey, which strands their
+   light labels; give them the solid dark backing they were designed against */
+.rack-face-body [class^="bg-black/"],
+.rack-face-body [class*=" bg-black/"] {
+  background-color: rgba(20, 24, 16, 0.94);
+}
+
+/* the unit frame reads as a milled insert in the rails */
+.rack-unit {
+  box-shadow: 0 8px 18px rgba(35, 47, 30, 0.3), 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+/* =========================================================================================
+   HARD GREEN EDITION - deep cannabis lacquer cabinet, gold hardware, acid-green lettering.
+   The working panels stay light metal so labels keep their contrast; the frame around them
+   is the dark green machine.
+   ========================================================================================= */
+
+:root {
+  --color-chrome-0: #08160e;
+  --color-chrome-1: #10271a;
+  --color-chrome-2: #173524;
+  --color-chrome-line: #35664a;
+  --color-chrome-ink: #e2f4cc;
+  --color-sel: #c9a53c;
+  --color-sel-2: #e8cd7c;
+  --color-ring: #c9a53c;
+}
+
+body {
+  background: #07130c;
+  color: #dcefc7;
+}
+
+::-webkit-scrollbar-track { background: #0b1c12; border-color: #1c3a26; }
+::-webkit-scrollbar-thumb { background: #2c5a3c; border-color: #173523; }
+::-webkit-scrollbar-thumb:hover { background: #3a7450; }
+
+/* title bar and every chrome strip: dark green lacquer with a gold hairline */
+.unbox-titlebar,
+.us-chrome {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(201, 165, 60, 0.12) 0%, rgba(201, 165, 60, 0) 28%),
+    linear-gradient(180deg, #173825 0%, #0d2115 62%, #09170e 100%);
+  background-blend-mode: overlay, normal, normal;
+  border-bottom: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.16), 0 2px 8px rgba(0, 0, 0, 0.6);
+  color: #e2f4cc;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+}
+
+.unbox-transport {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, #14301f 0%, #0c1f13 60%, #08160d 100%);
+  background-blend-mode: overlay, normal;
+  border-top: 1px solid #c9a53c;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.14);
+  color: #e2f4cc;
+}
+
+/* brand lockup turns gold on the dark lacquer */
+.unbox-brand-kicker { color: #d8b45c; }
+.unbox-brand-word { color: #f1f8dd; }
+.unbox-brand-word span { color: #d8b45c; }
+.unbox-brand-button:hover { background: rgba(201, 165, 60, 0.08); }
+.unbox-brand-button { border-right-color: #35664a; }
+
+.unbox-workspace-tab { color: #a6c492; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); }
+.unbox-workspace-tab:hover { color: #e6f7ce; background: rgba(201, 165, 60, 0.1); }
+.unbox-workspace-tab[aria-selected='true'] {
+  color: #f6ffe6;
+  background: linear-gradient(180deg, #245036, #143420);
+  box-shadow: inset 0 -2px 0 var(--color-sel), inset 0 1px 0 rgba(226, 244, 204, 0.18);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+.unbox-workspace-tab kbd { color: #86a874; }
+.unbox-utility-button { color: #c6dfae; }
+.unbox-utility-button:hover { color: #f4ffe2; background: rgba(201, 165, 60, 0.12); }
+
+/* chrome-level buttons and labels */
+.unbox-titlebar .us-btn,
+.unbox-transport .us-btn,
+.us-chrome .us-btn {
+  background: linear-gradient(180deg, #1d4229, #112a1a);
+  border-color: #3d714c;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.18), 0 1px 0 rgba(0, 0, 0, 0.45);
+  color: #e2f4cc;
+}
+.unbox-titlebar .us-btn:hover,
+.unbox-transport .us-btn:hover,
+.us-chrome .us-btn:hover {
+  background: linear-gradient(180deg, #27573a, #163623);
+  color: #f6ffe6;
+}
+.unbox-titlebar .text-ink,
+.unbox-page-bar .text-ink { color: #f1f9df; }
+.unbox-titlebar [class*="text-[#7"],
+.unbox-titlebar [class*="text-[#8"] { color: #9dbf89 !important; }
+.unbox-titlebar [class*="text-[#4"] { color: #c6dfae !important; }
+.unbox-titlebar [class*="text-slate-"],
+.unbox-titlebar [class*="text-neutral-"],
+.us-chrome [class*="text-slate-"],
+.us-chrome [class*="text-neutral-"] { color: #b6d3a0 !important; }
+
+/* rack frame: dark green punched rails, gold-lit hardware */
+.rack-toolbar {
+  background: linear-gradient(180deg, #14301f, #0d2115);
+  border-bottom-color: #35664a;
+  color: #dcefc7;
+}
+.rack-rail {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(90deg, #06120b 0%, #24503a 26%, #3e7753 50%, #1d3f2b 74%, #06120b 100%);
+  background-blend-mode: overlay, normal;
+  box-shadow: inset 1px 0 0 rgba(226, 244, 204, 0.12), inset -1px 0 0 rgba(0, 0, 0, 0.6);
+}
+.rack-col {
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 10px, #06130c 10px 17px, transparent 17px 26px),
+    repeating-linear-gradient(180deg, transparent 0 10px, #06130c 10px 17px, transparent 17px 26px),
+    linear-gradient(90deg, #0a1a11, #2a5a3d 10px, #14321f 22px, transparent 22px, transparent calc(100% - 22px), #14321f calc(100% - 22px), #2a5a3d calc(100% - 10px), #0a1a11);
+  background-size: 7px 100%, 7px 100%, 100% 100%;
+  background-color: #0b1d12;
+}
+.rack-add {
+  border-color: #3d714c;
+  color: #b6d3a0;
+  background: rgba(20, 48, 31, 0.45);
+}
+.rack-add:hover { color: #f1f9df; background: rgba(36, 80, 54, 0.6); }
+.rack-empty {
+  border-color: #3d714c;
+  color: #b6d3a0;
+  background: rgba(20, 48, 31, 0.45);
+}
+.rack-scroller {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(62, 119, 83, 0.18), transparent 62%),
+    linear-gradient(180deg, #0a1910, #06110b);
+}
+.rack-nav {
+  background: linear-gradient(180deg, #0d2115, #07140c);
+  border-left-color: #234332;
+}
+.rack-drop-line { box-shadow: 0 0 10px var(--color-sel); }
+
+/* keyboard dock on the dark frame */
+.unbox-live-keyboard {
+  background: linear-gradient(180deg, #163726, #0c2014) !important;
+  border-top-color: #35664a;
+  border-color: #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.14);
+  color: #e2f4cc;
+}
+.unbox-live-keyboard [class*="text-cyan-"],
+.unbox-live-keyboard [class*="text-slate--"],
+.unbox-live-keyboard [class*="text-slate-"],
+.unbox-live-keyboard [class*="text-neutral-"] { color: #b6d3a0 !important; }
+
+/* page bar sits on the same lacquer */
+.unbox-page-bar {
+  background: linear-gradient(180deg, #14301f, #0d2115);
+  border-bottom-color: #35664a;
+  color: #dcefc7;
+}
+/* hardware status strip belongs to the lacquer frame, not the light modules */
+[data-testid="status-bar"] {
+  background: linear-gradient(180deg, #10261a, #0a1a10);
+  border-bottom: 1px solid #35664a;
+  color: #b6d3a0;
+}
+[data-testid="status-bar"] [class*="text-[#"],
+[data-testid="status-bar"] [class*="text-slate-"],
+[data-testid="status-bar"] [class*="text-neutral-"] { color: #a9c795 !important; }
+[data-testid="status-bar"] [class*="hover:text"]:hover { color: #f1f9df !important; }
+[data-testid="status-bar"] svg { color: #7fa96b; }
+/* studio page headings sit on light metal, so they keep dark ink */
+.us-page [class*="text-slate-1"],
+.us-page [class*="text-slate-2"],
+.us-page [class*="text-slate-3"] { color: #2c4224; }
+/* acid-lime LEDs on the green machine */
+.led-indicator.active-blue,
+.led-indicator.active-green {
+  background: #b8ff3f;
+  box-shadow: 0 0 9px rgba(184, 255, 63, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.led-indicator.active-amber {
+  background: #d9ff6a;
+  box-shadow: 0 0 9px rgba(217, 255, 106, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.cs-lamp--on {
+  background: linear-gradient(180deg, #d8ff86, #8fd61f);
+  color: #14260a;
+  box-shadow: 0 0 8px rgba(184, 255, 63, 0.65);
+}
+.cs-strip--sel {
+  box-shadow: 0 0 0 2px #b8ff3f, 0 0 14px rgba(184, 255, 63, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.rack-unit--selected { outline-color: #b8ff3f; }
+.rack-jack--plugged::after { box-shadow: 0 0 8px var(--plug), inset 0 1px 2px rgba(255, 255, 255, 0.5); }
+
+@keyframes unbox-play-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(184, 255, 63, 0.55), inset 0 1px 0 rgba(226, 244, 204, 0.3); }
+}
+@keyframes unbox-strip-halo {
+  0%, 100% { box-shadow: 0 0 0 2px #b8ff3f, 0 0 8px rgba(184, 255, 63, 0.25); }
+  50% { box-shadow: 0 0 0 2px #d4ff7a, 0 0 18px rgba(184, 255, 63, 0.55); }
+}
+@keyframes unbox-tab-breathe {
+  0%, 100% { box-shadow: inset 0 -2px 0 #b8ff3f, inset 0 1px 0 rgba(226, 244, 204, 0.18); }
+  50% { box-shadow: inset 0 -2px 0 #b8ff3f, inset 0 1px 0 rgba(226, 244, 204, 0.18), inset 0 -12px 22px -16px rgba(184, 255, 63, 0.75); }
+}
+
+/* graffiti brand mark: sprayed tag under the wordmark, acid fill with a gold throw-shadow */
+.unbox-brand-lockup { position: relative; }
+.unbox-brand-tag {
+  position: absolute;
+  left: 47px;
+  bottom: -6px;
+  width: 96px;
+  height: 18px;
+  color: #b8ff3f;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(184, 255, 63, 0.45));
+  transform: rotate(-2deg);
+}
+.unbox-brand-kicker {
+  color: #c8ff6a;
+  letter-spacing: 0.26em;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+}
+.unbox-brand-word {
+  color: #ddff8a;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  transform: skewX(-7deg);
+  text-shadow:
+    1.5px 0 0 #0a1a0f,
+    -1.5px 0 0 #0a1a0f,
+    0 1.5px 0 #0a1a0f,
+    0 -1.5px 0 #0a1a0f,
+    2.5px 2.5px 0 #c9a53c;
+}
+.unbox-brand-type { position: relative; z-index: 1; }
+.unbox-brand-tag {
+  left: 42px;
+  bottom: -4px;
+  width: 100px;
+  height: 16px;
+  z-index: 0;
+  opacity: 0.95;
+  transform: rotate(-2deg) skewX(-7deg);
+}
+/* =========================================================================================
+   FULL DARK GREEN INTERIOR - the workstation and mixer tabs join the cabinet: dark green
+   brushed metal, pale green labels, gold selection, lime LEDs. LCDs and piano keys stay light
+   because they are displays / ivory hardware, not surfaces.
+   ========================================================================================= */
+
+[data-testid='workstation-tab'],
+[data-testid='mixer-tab'] {
+  --color-ink: #e6f7d0;
+  --color-chrome-ink: #dcefc7;
+}
+
+.us-metal {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(115deg, rgba(226, 244, 204, 0.1) 0%, rgba(226, 244, 204, 0.01) 26%, rgba(226, 244, 204, 0.06) 52%, rgba(0, 0, 0, 0.18) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, rgba(0, 0, 0, 0.06) 1px 2px, transparent 2px 4px),
+    linear-gradient(180deg, #1c3c28 0%, #142e1d 42%, #0f2417 72%, #0a1a10 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 244, 204, 0.18),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+    inset 1px 0 0 rgba(226, 244, 204, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.45);
+  color: #e6f7d0;
+}
+.us-metal-frame { border-color: #35664a; }
+
+.us-btn {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #24503a 0%, #183a27 48%, #112a1a 100%);
+  background-blend-mode: overlay, normal;
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.16), 0 1px 0 rgba(0, 0, 0, 0.45);
+  color: #e6f7d0;
+}
+.us-btn:hover { background-image: var(--unbox-grain), linear-gradient(180deg, #2c5f43, #1b4029); color: #f6ffe6; }
+.us-btn:active { background-image: var(--unbox-grain), linear-gradient(180deg, #112a1a, #1d4229); }
+
+.us-btn-light {
+  background: linear-gradient(180deg, #24503a, #163623);
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.16), 0 1px 0 rgba(0, 0, 0, 0.4);
+  color: #e6f7d0;
+}
+.us-btn-light:hover { background: linear-gradient(180deg, #2f6a49, #1b4029); color: #f6ffe6; }
+.unbox-titlebar .us-btn-light { background: transparent; border-color: transparent; box-shadow: none; }
+
+.us-panel {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, #1a3a27 0%, #112a1a 55%, #0c1f14 100%);
+  background-blend-mode: overlay, normal;
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.12), 0 8px 20px rgba(0, 0, 0, 0.4);
+  color: #e6f7d0;
+}
+.us-panel-head { border-bottom-color: #35664a; box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.1); }
+.us-plate {
+  color: #d8ff86;
+  background-image: var(--unbox-grain), linear-gradient(180deg, #20472f, #14301f);
+  background-blend-mode: overlay, normal;
+  border: 1px solid #3d714c;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* workstation dividers and inline light surfaces */
+[data-testid='workstation-tab'] [class*='bg-[#c6d1bb]'],
+[data-testid='mixer-tab'] [class*='bg-[#c6d1bb]'] {
+  background: #102418 !important;
+  border-color: #35664a !important;
+  color: #b6d3a0;
+}
+[data-testid='mixer-tab'] [class*='bg-[#e2e9d7]'] {
+  background: #173523 !important;
+  border-color: #35664a !important;
+  color: #dcefc7 !important;
+}
+[data-testid='workstation-tab'] [class*='border-[#796d5b]'],
+[data-testid='mixer-tab'] [class*='border-[#796d5b]'] { border-color: #35664a !important; }
+
+/* part list: inline-styled patch / link buttons */
+[data-testid='workstation-tab'] [data-testid='part-list'] > div:first-child { color: #a9c795 !important; }
+[data-testid='workstation-tab'] [data-testid='part-link'] {
+  background: linear-gradient(180deg, #1d4229, #112a1a) !important;
+  border-color: #35664a !important;
+  color: #c8ff6a !important;
+}
+[data-testid='workstation-tab'] [data-testid='part-link'][aria-pressed='true'] { box-shadow: inset 0 -2px 0 #b8ff3f !important; }
+[data-testid='workstation-tab'] [data-testid='part-patch'] {
+  background: linear-gradient(180deg, #1d4229, #112a1a) !important;
+  border-color: #35664a !important;
+  color: #dcefc7 !important;
+}
+[data-testid='workstation-tab'] [data-testid='part-patch'].us-sel-row {
+  background: linear-gradient(180deg, #d8b45c, #b08a2e) !important;
+  color: #14210d !important;
+  border-color: #8a6b1d !important;
+}
+
+/* workstation sequencer toolbar */
+[data-testid='seq-toolbar'] {
+  background: linear-gradient(180deg, #173523, #0f2417) !important;
+  border-bottom-color: #35664a !important;
+  color: #dcefc7;
+}
+[data-testid='seq-toolbar'] > div[role='group'] button,
+[data-testid='seq-toolbar'] > div[class*='rounded'] button[aria-pressed='false'] {
+  background: linear-gradient(180deg, #1d4229, #112a1a) !important;
+  border-color: #35664a !important;
+  color: #dcefc7 !important;
+}
+[data-testid='seq-toolbar'] button[aria-pressed='true'] {
+  background: linear-gradient(180deg, #d8b45c, #b08a2e) !important;
+  color: #14210d !important;
+  border-color: #8a6b1d !important;
+}
+[data-testid='seq-toolbar'] select {
+  background: #0d2115 !important;
+  border: 1px solid #35664a !important;
+  color: #e6f7d0 !important;
+}
+[data-testid='seq-toolbar'] select option { background: #0d2115; color: #e6f7d0; }
+[data-testid='seq-toolbar'] .bg-white { background: #12291b !important; color: #dcefc7 !important; }
+[data-testid='seq-toolbar'] .bg-white button:hover { background: #20472f !important; }
+[data-testid='seq-toolbar'] .w-px { background: #35664a !important; }
+
+/* mixer console: strips and name plates go dark, labels stay pale */
+.cs-console { background: #08160e; box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.55), inset 0 -1px 0 rgba(226, 244, 204, 0.08); }
+.cs-strip {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, rgba(226, 244, 204, 0.08), rgba(226, 244, 204, 0) 36%),
+    linear-gradient(180deg, #1c3c28, #12291b 55%, #0c1f14);
+  background-blend-mode: overlay, normal, normal;
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+.cs-strip--sel { box-shadow: 0 0 0 1px #b8ff3f, 0 0 0 4px rgba(184, 255, 63, 0.18); }
+.cs-name {
+  background-image: var(--unbox-grain), linear-gradient(180deg, #24503a, #163623);
+  background-blend-mode: overlay, normal;
+  border: 1px solid #3d714c;
+  color: #ecf9d8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.16);
+}
+.cs-name input { color: #14210d !important; }
+.cs-sec { border-top-color: #2c5238; }
+.cs-readout { color: #d8ff86; }
+.cs-badge { background: #0b1c12; color: #c8ff6a; }
+.cs-bottom { background: rgba(0, 0, 0, 0.35); }
+.cs-lamp { background: #07130c; border-color: #0a1a10; color: #a9c795; }
+.cs-lamp--gate { background: linear-gradient(180deg, #bae6fd, #38bdf8); color: #06202c; }
+
+/* channel inspector sections */
+[data-testid='mixer-tab'] section[class*='bg-[#c6d2b9]'] {
+  background: #12291b !important;
+  border-color: #35664a !important;
+}
+
+/* clip editor picker */
+[data-testid='clip-editor-area'] { background: #0c1f14; }
+.clip-card {
+  background: #12291b;
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.08);
+}
+.clip-card-head {
+  background: linear-gradient(180deg, #1a3a27, #132d1d);
+  border-bottom: 1px solid #35664a;
+}
+.clip-chip {
+  color: #dcefc7;
+  background: linear-gradient(180deg, #1d4229, #14301f);
+  border: 1px solid #3d714c;
+}
+.clip-chip:hover { background: #20472f; border-color: #b8ff3f; color: #f6ffe6; }
+.clip-chip-bar { color: #a9c795; }
+[data-testid='clip-picker'] [class*='text-[#8d9aa2]'] { color: #a9c795 !important; }
+[data-testid='clip-picker'] [class*='border-[#39434a]'] { border-color: #35664a !important; }
+/* rack-style tools and segmented buttons inside the workstation/mixer tabs */
+[data-testid='mixer-tab'] .rack-tool,
+[data-testid='workstation-tab'] .rack-tool {
+  color: #dcefc7;
+  background: linear-gradient(180deg, #1d4229, #112a1a);
+  border: 1px solid #35664a;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.14);
+  text-shadow: none;
+}
+[data-testid='mixer-tab'] .rack-tool:hover:not(:disabled),
+[data-testid='workstation-tab'] .rack-tool:hover:not(:disabled) { color: #f6ffe6; background: linear-gradient(180deg, #27573a, #163623); }
+[data-testid='mixer-tab'] .rack-tool[aria-pressed='true'],
+[data-testid='workstation-tab'] .rack-tool[aria-pressed='true'] {
+  color: #14210d;
+  background: linear-gradient(180deg, #d8b45c, #b08a2e);
+  border-color: #8a6b1d;
+  box-shadow: inset 0 1px 0 rgba(255, 244, 208, 0.55);
+}
+[data-testid='mixer-tab'] .rack-seg,
+[data-testid='workstation-tab'] .rack-seg { border-color: #35664a; }
+[data-testid='mixer-tab'] .rack-seg button,
+[data-testid='workstation-tab'] .rack-seg button {
+  color: #dcefc7;
+  background: linear-gradient(180deg, #1d4229, #112a1a);
+}
+[data-testid='mixer-tab'] .rack-seg button:hover,
+[data-testid='workstation-tab'] .rack-seg button:hover { color: #f6ffe6; background: #27573a; }
+[data-testid='mixer-tab'] .rack-seg button[aria-pressed='true'],
+[data-testid='workstation-tab'] .rack-seg button[aria-pressed='true'] {
+  color: #14210d;
+  background: linear-gradient(180deg, #d8b45c, #b08a2e);
+}
+
+[data-testid='mixer-console'] { background: #08160e !important; color: #dcefc7 !important; }
+[data-testid='mixer-console'] [class*='bg-[#d7e0cc]'] {
+  background: #173523 !important;
+  border-color: #35664a !important;
+  color: #dcefc7;
+}
+[data-testid='mixer-console'] input[type='checkbox'] { accent-color: #b8ff3f; }
+/* status bar badges stay dark green with pale ink */
+[data-testid='status-bar'] [class*='bg-[#'] {
+  background-color: #16301f !important;
+  border-color: #3d714c !important;
+  color: #b6d3a0 !important;
+}
+[data-testid='status-bar'] [class*='text-[#'] { color: #b6d3a0 !important; }
+
+/* keyboard dock fields and toggles (StudioKeyboard) */
+.unbox-live-keyboard [class*='bg-slate-950'],
+.unbox-live-keyboard [class*='bg-slate-900'],
+.unbox-live-keyboard [class*='bg-slate-800'] {
+  background-color: #173523 !important;
+  border-color: #35664a !important;
+}
+.unbox-live-keyboard [class*='bg-slate-950']:focus,
+.unbox-live-keyboard [class*='bg-slate-900']:focus { border-color: #b8ff3f !important; }
+.unbox-live-keyboard [class*='bg-emerald-950'] { background-color: #1b3a27 !important; }
+.unbox-live-keyboard select,
+.unbox-live-keyboard option { background-color: #173523; color: #dcefc7; }
+.unbox-live-keyboard kbd { color: #c8ff6a; }
+
+/* active tab shortcut hints */
+.unbox-workspace-tab kbd { color: #b6d3a0; }
+/* transport meter bank: dark green, pale scale */
+.unbox-meter-bank {
+  border-color: #3d714c;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 3px, rgba(184, 255, 63, 0.05) 3px 4px),
+    #0d2115;
+  box-shadow: inset 0 1px 0 rgba(226, 244, 204, 0.1);
+}
+.unbox-meter-bank [class*='text-[#'] { color: #b6d3a0 !important; }
+.unbox-meter-bank svg { color: #7fa96b; }
+
+/* =====================================================================================
+   RACK DARK GREEN CHROME — toolbar and mixer channel list (scoped so the mixer and the
+   clip editor, which reuse .rack-toolbar/.rack-tool, keep their own surfaces)
+   ===================================================================================== */
+.modular-rack .rack-toolbar {
+  border-bottom: 1px solid #234332;
+  background: linear-gradient(180deg, #12291b, #081710);
+  color: #dcefc7;
+}
+.modular-rack .rack-tool {
+  color: #dcefc7;
+  background: linear-gradient(180deg, #1d3a28, #10231a);
+  border-color: #0a1710;
+  box-shadow: inset 0 1px 0 rgba(220, 239, 199, 0.14);
+}
+.modular-rack .rack-tool:hover:not(:disabled) {
+  color: #eaf9d8;
+  background: linear-gradient(180deg, #244832, #142c1e);
+}
+.modular-rack .rack-tool[aria-pressed='true'] {
+  color: #10231a;
+  background: linear-gradient(180deg, #e8cd7c, #c9a53c);
+  border-color: #8a6f24;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.55), inset 0 -2px 0 rgba(80, 58, 12, 0.28);
+}
+.modular-rack .rack-seg {
+  border-color: #0a1710;
+}
+.modular-rack .rack-seg button {
+  color: #dcefc7;
+  background: linear-gradient(180deg, #1d3a28, #10231a);
+}
+.modular-rack .rack-seg button:hover {
+  color: #eaf9d8;
+  background: #244832;
+}
+.modular-rack .rack-seg button[aria-pressed='true'] {
+  background: linear-gradient(180deg, #e8cd7c, #c9a53c);
+  color: #10231a;
+}
+.modular-rack .rack-hint { color: #9fbd8a; }
+.modular-rack .rack-chip {
+  color: #e8cd7c;
+  background: rgba(201, 165, 60, 0.14);
+  border-color: #c9a53c;
+}
+.modular-rack .combinator-prompt {
+  border-color: rgba(184, 255, 63, 0.34);
+  background: linear-gradient(90deg, rgba(28, 56, 40, 0.85), rgba(7, 19, 12, 0.96));
+}
+.modular-rack .combinator-prompt:focus-within {
+  border-color: #b8ff3f;
+  box-shadow: 0 0 0 2px rgba(184, 255, 63, 0.16);
+}
+.modular-rack .combinator-prompt input::placeholder { color: #9fbd8a; opacity: 1; }
+.modular-rack .combinator-go {
+  background: linear-gradient(180deg, #e8cd7c, #c9a53c);
+  color: #10231a;
+}
+.modular-rack .combinator-go:hover:not(:disabled) {
+  background: linear-gradient(180deg, #f2dda0, #d6b24a);
+}
+
+.modular-rack .rack-chans {
+  background: linear-gradient(180deg, #12291b, #0a1710);
+  border: 1px solid #234332;
+  border-top-color: #35664a;
+}
+.modular-rack .rack-chans-head { color: #e8cd7c; }
+.modular-rack .rack-chans-empty { color: #9fbd8a; }
+.modular-rack .rack-chan {
+  background: linear-gradient(180deg, #183526, #0f2418);
+  box-shadow: inset 0 1px 0 rgba(220, 239, 199, 0.08), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.modular-rack .rack-chan--sel {
+  outline: 1px solid #c9a53c;
+  box-shadow: 0 0 0 2px #c9a53c, inset 0 1px 0 rgba(220, 239, 199, 0.08);
+}
+.modular-rack .rack-chan-jump { color: #9fbd8a; }
+.modular-rack .rack-chan-jump:hover { color: #b8ff3f; }
+.modular-rack .rack-chan-name {
+  color: #eaf9d8;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chan) 14%, #173523), color-mix(in srgb, var(--chan) 8%, #0d1f14));
+  box-shadow: inset 3px 0 0 var(--chan), inset 0 0 0 1px rgba(220, 239, 199, 0.14);
+}
+.modular-rack .rack-chan-tag { color: #9fbd8a; }
+.modular-rack .rack-chan--rear {
+  background: linear-gradient(180deg, #12291b, #0a1710);
+  box-shadow: inset 0 1px 0 rgba(220, 239, 199, 0.06), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.modular-rack .rack-chan--rear .rack-chan-tag { color: #9fbd8a; }
+
+/* Rear channel labels stay legible where patch cables cross them: the cable SVG paints at
+   z-index 30 inside .rack-content, and channel rows create no stacking context, so lifting the
+   text above it keeps the labels on top without moving the cables off the panels. */
+.rack-chan .rack-chan-tag,
+.rack-chan .rack-jack-label {
+  position: relative; z-index: 31;
+  padding: 0 3px; border-radius: 3px;
+  background: rgba(10, 23, 16, 0.9);
+  box-shadow: 0 0 0 1px rgba(35, 67, 50, 0.85);
+  pointer-events: none;
+}
+
+/* Unit rear panels: the same dark backing plate keeps the jack labels legible on the light
+   faceplates (and anywhere a cable crosses them). The labels stay non-interactive. */
+.rack-back .rack-jack-label {
+  padding: 0 3px; border-radius: 3px;
+  color: #dcefc7;
+  background: rgba(10, 23, 16, 0.9);
+  box-shadow: 0 0 0 1px rgba(35, 67, 50, 0.85);
+  pointer-events: none;
+}
+
+/* =====================================================================================
+   DARK GREEN UNIT FACEPLATES — every rack front panel gets the cabinet finish; knobs,
+   displays, pads and rear panels keep their own materials. Folded-unit strips match.
+   ===================================================================================== */
+.rack-unit .rack-face,
+.rack-unit .rack-strip {
+  background: linear-gradient(180deg, #173523, #0b1d12) !important;
+  border-color: #234332 !important;
+  color: #e6f7d0 !important;
+}
+.rack-unit .rack-face [data-testid='spec-faceplate'] {
+  box-shadow: inset 0 1px 0 rgba(220, 239, 199, 0.12), inset 0 -10px 22px rgba(0, 0, 0, 0.34) !important;
+}
+.rack-unit--hw .rack-face.hw-face {
+  background: linear-gradient(90deg, #0b1d12, #173523 50%, #0b1d12) !important;
+  color: #e6f7d0 !important;
+}
+
+/* =====================================================================================
+   DARK GREEN REAR JACK PANELS — unit backs match the cabinet; the metal jacks and the
+   cream device nameplate stay as hardware, and the jack groups pick up the green trim.
+   ===================================================================================== */
+.rack-unit .rack-back {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(0, 0, 0, 0.35) 22px 24px),
+    radial-gradient(120% 90% at 50% 0%, rgba(62, 119, 83, 0.16), transparent 62%),
+    linear-gradient(180deg, #12291b, #081710);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.85);
+  color: #dcefc7;
+}
+.rack-unit .rack-back .rack-jack-group {
+  border-color: rgba(184, 255, 63, 0.22);
+  background: rgba(7, 19, 12, 0.58);
+}
+.rack-unit .rack-back .rack-jack-group legend { color: #b6d3a0; }
+
+/* Rear device nameplates: gold lettering on a green enamel plate with a gold edge. */
+.rack-unit .rack-rear-label {
+  background: linear-gradient(180deg, #1b3a27, #0e2417);
+  border: 1px solid #c9a53c;
+  color: #e8cd7c;
+  box-shadow: inset 0 1px 0 rgba(232, 205, 124, 0.28), 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.rack-unit .rack-rear-label [class*='text-neutral-900'] { color: #e8cd7c !important; }
+.rack-unit .rack-rear-label [class*='text-neutral-600'] { color: #b6d3a0 !important; }
+
+/* =====================================================================================
+   SIGNATURE SERIES — the collectible-hardware layer: an octagonal Unbox crest on every
+   unit, a colour-coded family rail, a gold-framed nameplate and a silk-screened model
+   plate (family, code and serial) along the bottom of every front faceplate.
+   ===================================================================================== */
+
+.unbox-series-plate {
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border-left: 1px solid rgba(201, 165, 60, 0.22);
+}
+.unbox-series-text {
+  display: grid;
+  line-height: 1;
+  gap: 3px;
+}
+.unbox-series-text b {
+  color: #e8cd7c;
+  font: 800 11px/1 var(--font-label);
+  letter-spacing: 0.18em;
+}
+.unbox-series-text span {
+  color: #7f8b93;
+  font: 700 11px/1 var(--font-label);
+  letter-spacing: 0.1em;
+}
+
+/* The live workspace tab gets a short acid-lime segment inside its gold underline. */
+.unbox-workspace-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 22px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: #b8ff3f;
+  box-shadow: 0 0 8px rgba(184, 255, 63, 0.8);
+}
+
+/* Every faceplate carries a thin family rail at its left edge. */
+.rack-unit .rack-face::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  z-index: 7;
+  pointer-events: none;
+  border-radius: 3px 0 0 3px;
+}
+.rack-unit[data-family='instrument'] .rack-face::before {
+  background: linear-gradient(180deg, #b8ff3f 0%, #7fa52c 55%, #c9a53c 100%);
+  box-shadow: 1px 0 7px rgba(184, 255, 63, 0.22);
+}
+.rack-unit[data-family='effect'] .rack-face::before {
+  background: linear-gradient(180deg, #e8cd7c 0%, #a88332 100%);
+  box-shadow: 1px 0 7px rgba(232, 205, 124, 0.16);
+}
+.rack-unit[data-family='utility'] .rack-face::before {
+  background: linear-gradient(180deg, #dcefc7 0%, #708d64 100%);
+  box-shadow: 1px 0 7px rgba(220, 239, 199, 0.12);
+}
+
+.rack-unit-crest {
+  display: inline-flex;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+}
+.rack-strip-crest { flex: 0 0 auto; opacity: 0.9; }
+
+/* Device nameplate: a black enamel plate with a family-coloured edge. */
+.rack-nameplate {
+  color: #e6f7d0;
+  background: linear-gradient(180deg, #0d2115, #06110a);
+  border: 1px solid rgba(201, 165, 60, 0.55);
+  box-shadow:
+    inset 3px 0 0 #c9a53c,
+    inset 0 1px 0 rgba(230, 247, 208, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.75);
+}
+.rack-unit[data-family='instrument'] .rack-nameplate {
+  box-shadow:
+    inset 3px 0 0 #b8ff3f,
+    inset 0 1px 0 rgba(230, 247, 208, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.75);
+}
+.rack-unit[data-family='effect'] .rack-nameplate {
+  box-shadow:
+    inset 3px 0 0 #e8cd7c,
+    inset 0 1px 0 rgba(230, 247, 208, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.75);
+}
+.rack-unit[data-family='utility'] .rack-nameplate {
+  box-shadow:
+    inset 3px 0 0 #9fbd8a,
+    inset 0 1px 0 rgba(230, 247, 208, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+/* Bottom silk-screen plate shared by spec and legacy units. */
+.device-signature-strip {
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 1px solid rgba(201, 165, 60, 0.28);
+  background: linear-gradient(180deg, rgba(6, 17, 10, 0.72), rgba(3, 10, 6, 0.92));
+  color: #b6cba3;
+  font: 700 11px/1 var(--font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(230, 247, 208, 0.05);
+  pointer-events: none;
+}
+.device-signature-led {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+  background: #b8ff3f;
+  box-shadow: 0 0 6px rgba(184, 255, 63, 0.8);
+}
+.device-signature-brand { color: #e8cd7c; letter-spacing: 0.16em; }
+.device-signature-series {
+  color: #9fbd8a;
+  padding-left: 8px;
+  border-left: 1px solid rgba(201, 165, 60, 0.28);
+}
+.device-signature-family { margin-left: auto; color: #9fbd8a; overflow: hidden; text-overflow: ellipsis; }
+.device-signature-code {
+  color: #e8cd7c;
+  padding-left: 8px;
+  border-left: 1px solid rgba(201, 165, 60, 0.28);
+}
+.device-signature-serial { color: #cfe4b9; }
+
+@media (hover: hover) {
+  .rack-unit:hover .device-signature-led { box-shadow: 0 0 10px rgba(184, 255, 63, 1); }
+}
+
+/* =====================================================================================
+   PREMIUM HARDWARE PASS — model-specific dark finishes, engraved brand plates,
+   recessed control wells, machined knobs and a smoked-glass instrument display.
+   ===================================================================================== */
+
+[data-testid='spec-faceplate'] {
+  isolation: isolate;
+}
+.spec-panel-etching {
+  position: absolute;
+  right: 12px;
+  bottom: 24px;
+  z-index: -1;
+  width: 184px;
+  height: 84px;
+  opacity: 0.2;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+}
+
+[data-testid='spec-faceplate'] .spec-brand-plate {
+  min-width: 0;
+  max-width: min(250px, 56%);
+  padding: 2px 9px 3px;
+  border-left: 3px solid;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.16));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+[data-testid='spec-faceplate'] .spec-brand-plate > .spec-logo {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+[data-testid='spec-faceplate'] .spec-tagline {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.spec-tagline-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spec-accent-rule { height: 2px; opacity: 0.9; }
+
+/* Control wells: a shallow machined recess instead of a flat translucent box. */
+[data-testid='spec-faceplate'] section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(0, 0, 0, 0.3)) !important;
+  border-color: rgba(220, 239, 199, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    inset 0 -12px 20px rgba(0, 0, 0, 0.2),
+    0 2px 5px rgba(0, 0, 0, 0.35);
+}
+[data-testid='spec-faceplate'] section > h4 {
+  color: #e8cd7c !important;
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+  border-bottom: 1px solid rgba(201, 165, 60, 0.24);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+[data-testid='spec-faceplate'] select {
+  background: linear-gradient(180deg, #10251a, #07130b) !important;
+  border-color: rgba(201, 165, 60, 0.4) !important;
+  color: #e6f7d0 !important;
+  color-scheme: dark;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.spec-knob-label {
+  letter-spacing: 0.01em;
+  font-weight: 600 !important;
+  opacity: 0.92;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+}
+.spec-knob-label--long {
+  white-space: normal;
+  line-height: 1.05;
+  overflow-wrap: break-word;
+}
+.spec-knob-value {
+  display: inline-block;
+  min-width: 34px;
+  margin-top: 1px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: rgba(3, 11, 6, 0.46);
+  border: 1px solid rgba(220, 239, 199, 0.12);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Faceplate depth: a lit top edge and a shadowed lower lip. */
+.rack-unit .rack-face {
+  box-shadow: inset 0 1px 0 rgba(230, 247, 208, 0.09), inset 0 -9px 20px rgba(0, 0, 0, 0.24);
+}
+
+/* Smoked-glass LCDs: the same instrument glass across Workstation, transport and editors. */
+.us-bezel {
+  padding: 3px;
+  background: linear-gradient(180deg, #3b2b1c 0%, #1a120c 55%, #0c0906 100%);
+  border: 1px solid #6e5535;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 208, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    0 3px 10px rgba(0, 0, 0, 0.45);
+}
+.us-lcd {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 24%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 35% 0%, rgba(184, 255, 63, 0.12), transparent 56%),
+    linear-gradient(180deg, #1b3525 0%, #0b1b11 100%);
+  border: 1px solid #4a7055;
+  border-radius: 3px;
+  color: #d9efc2 !important;
+  text-shadow: 0 0 10px rgba(184, 255, 63, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 2px 10px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.us-lcd-box {
+  background: rgba(3, 11, 6, 0.58) !important;
+  border-color: #315039 !important;
+  color: #cfe6b8 !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+.us-lcd-inverse {
+  background: linear-gradient(180deg, #d7efb8, #a9c98b) !important;
+  color: #12200e !important;
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52), 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.us-lcd-btn {
+  background: linear-gradient(180deg, #284734, #13271a) !important;
+  border-color: #4c7057 !important;
+  color: #d9efc2 !important;
+  text-shadow: 0 1px 0 #000;
+}
+.us-lcd-btn:hover,
+.us-lcd-btn:active {
+  background: linear-gradient(180deg, #e8cd7c, #b88f39) !important;
+  border-color: #f0dc9c !important;
+  color: #13200e !important;
+  text-shadow: none;
+}
+.us-lcd-field,
+.us-lcd-chip {
+  background: #0a1a10 !important;
+  border-color: #3c5d46 !important;
+  color: #d9efc2 !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* A barely-there brushed grain keeps the large cabinet faces from reading as flat fills. */
+.unbox-screen-well {
+  background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 4px);
+}
+
+/* Smoked-glass displays keep readouts luminous even where the old light theme used dark ink. */
+.us-lcd .text-lcd-ink,
+.us-lcd .text-lcd-dim,
+.us-lcd input.text-lcd-ink {
+  color: #d9efc2 !important;
+}
+.us-lcd .text-lcd-dim { color: #9fbd8a !important; }
+
+/* Small slot-head screws at the top corners of spec faceplates. */
+.spec-screw {
+  position: absolute;
+  top: 6px;
+  z-index: 8;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e9d6b0, #9b7746 55%, #3a2a18 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.spec-screw::after {
+  content: '';
+  position: absolute;
+  left: 1.5px;
+  right: 1.5px;
+  top: 3px;
+  height: 1px;
+  background: #2c2013;
+  transform: rotate(-28deg);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.spec-screw--tl { left: 6px; }
+.spec-screw--tr { right: 6px; }
+
+/* Legacy faceplates get a muted model-coloured glow, like the spec devices' own material tints. */
+.rack-unit .rack-face:not(:has([data-testid='spec-faceplate'])) {
+  background:
+    linear-gradient(180deg, var(--face-glow, rgba(184, 255, 63, 0.07)) 0%, transparent 42%),
+    radial-gradient(120% 80% at 50% 0%, var(--face-glow, rgba(184, 255, 63, 0.07)), transparent 64%),
+    linear-gradient(180deg, var(--face-top, #173523), var(--face-bottom, #0b1d12)) !important;
+}
+.rack-unit .rack-face section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(0, 0, 0, 0.3)) !important;
+  border-color: rgba(220, 239, 199, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    inset 0 -12px 20px rgba(0, 0, 0, 0.2),
+    0 2px 5px rgba(0, 0, 0, 0.35);
+}
+.rack-unit .rack-face section > h4 {
+  color: #e8cd7c !important;
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+  border-bottom: 1px solid rgba(201, 165, 60, 0.24);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Fine grain and a cast shadow make the controls sit on the metal instead of in it. */
+.rack-unit .rack-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  border-radius: inherit;
+  background-image: var(--unbox-grain);
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.spec-knob-svg {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+}
+
+/* Section headings are a step above control labels, as on a real panel. */
+.rack-unit .rack-face section > h4 {
+  font-size: 13px !important;
+  letter-spacing: 0.12em;
+}
+
+/* =====================================================================================
+   MACHINED CHASSIS PASS — the faceplate is a milled plate seated in the rack, with a
+   shadowed lower lip, a brushed centre, metal header rail and a perforated vent stack.
+   These layers sit under the controls, so dense panels keep every hit target intact.
+   ===================================================================================== */
+.rack-unit {
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.58),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+.rack-unit .rack-face {
+  border-radius: 3px;
+  background-image: linear-gradient(112deg, rgba(255, 255, 255, 0.035) 0%, transparent 38%, rgba(0, 0, 0, 0.06) 72%, transparent 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    inset 0 -16px 28px rgba(0, 0, 0, 0.32),
+    inset 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+.rack-unit .rack-face > header {
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.018) 48%, rgba(0, 0, 0, 0.26) 100%);
+  border-bottom-color: rgba(0, 0, 0, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 1px 0 rgba(0, 0, 0, 0.28),
+    0 4px 9px rgba(0, 0, 0, 0.16);
+}
+.rack-unit .rack-face > header::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 165, 60, 0.32) 18%, rgba(201, 165, 60, 0.32) 82%, transparent);
+  pointer-events: none;
+}
+.rack-unit .rack-face-body {
+  position: relative;
+  z-index: 2;
+  border-radius: 2px;
+  background-image:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.045) 0%, transparent 44%, rgba(0, 0, 0, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 4px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* A low-contrast silkscreen layer gives the sparse legacy panels the printed detail of a real
+   unit without adding fake controls. It sits behind the control layer and is click-through. */
+.rack-panel-art {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.rack-panel-etching {
+  position: absolute;
+  right: 132px;
+  bottom: 28px;
+  width: 176px;
+  height: 78px;
+  opacity: 0.3;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.45));
+}
+
+/* Bolted enamel model plate on the sparse legacy panels. It is decorative only and sits below
+   the control layer, so it disappears wherever a real control needs the space. */
+.rack-panel-badge {
+  position: absolute;
+  right: 14px;
+  bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 6px;
+  border: 1px solid rgba(201, 165, 60, 0.58);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #18291c, #07120a);
+  box-shadow:
+    inset 0 1px 0 rgba(232, 205, 124, 0.2),
+    0 2px 5px rgba(0, 0, 0, 0.55);
+}
+.rack-panel-badge::before,
+.rack-panel-badge::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e9d6b0, #9b7746 58%, #3a2a18 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+}
+.rack-panel-badge::before { left: 3px; }
+.rack-panel-badge::after { right: 3px; }
+.rack-panel-badge-text {
+  display: grid;
+  gap: 2px;
+  line-height: 1;
+}
+.rack-panel-badge-text b {
+  color: #e8cd7c;
+  font: 800 11px/1 var(--font-label);
+  letter-spacing: 0.14em;
+}
+.rack-panel-badge-text i {
+  color: #9fbd8a;
+  font: 700 11px/1 var(--font-label);
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+/* A narrow brushed end-cheek on the right edge of every front panel. */
+.rack-face-side {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 4px;
+  border-left: 1px solid rgba(0, 0, 0, 0.55);
+  background: linear-gradient(90deg, #0c1510 0%, #506052 38%, #919c8d 52%, #3d493f 66%, #09110c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+.device-signature-strip {
+  position: relative;
+  z-index: 4;
+}
+
+
+/* Deeper control wells with a lit upper lip and a dark lower lip. */
+[data-testid='spec-faceplate'] section {
+  border-radius: 3px;
+  border-top-color: rgba(255, 255, 255, 0.2) !important;
+  border-left-color: rgba(255, 255, 255, 0.07) !important;
+  border-right-color: rgba(0, 0, 0, 0.28) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.52) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.2),
+    0 2px 5px rgba(0, 0, 0, 0.3) !important;
+}
+[data-testid='spec-faceplate'] section > h4::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 1px;
+  vertical-align: -1px;
+  background: linear-gradient(180deg, #f3dda1, #a77c2e);
+  box-shadow: 0 0 5px rgba(232, 205, 124, 0.28);
+}
+
+/* Framed analogue meters: a warm metal bezel, inner glass shadow and a soft reflected ceiling
+   light. box-shadow keeps the meter's measured footprint unchanged. */
+.vu-bezel {
+  border-color: #6f5838 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 214, 0.2),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.5),
+    0 0 0 2px #3b2d1b,
+    0 4px 9px rgba(0, 0, 0, 0.55) !important;
+}
+.vu-bezel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13) 0%, transparent 26%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+
+/* Section mounting screws: tiny brass heads at the lower corners of each control well. */
+[data-testid='spec-faceplate'] section {
+  position: relative;
+}
+[data-testid='spec-faceplate'] section::before,
+[data-testid='spec-faceplate'] section::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  z-index: 2;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e9d6b0, #9b7746 58%, #3a2a18 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+  opacity: 0.7;
+  pointer-events: none;
+}
+[data-testid='spec-faceplate'] section::before { left: 4px; }
+[data-testid='spec-faceplate'] section::after { right: 4px; }
+
+/* Physical push-buttons and selector wells on every faceplate family. */
+.rack-unit .rack-face-body button {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.42),
+    0 1px 2px rgba(0, 0, 0, 0.48);
+}
+.rack-unit .rack-face-body button:active {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.58),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  transform: translateY(1px);
+}
+.rack-unit .rack-face-body select {
+  background: linear-gradient(180deg, rgba(28, 38, 32, 0.96), rgba(6, 14, 9, 0.98)) !important;
+  border-color: rgba(220, 239, 199, 0.22) !important;
+  color: #e6f7d0 !important;
+  color-scheme: dark;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.rack-unit .rack-face::after {
+  opacity: 0.1;
+}
+
+/* =========================================================================================
+   REFINED HARDWARE — 2026
+   One visual language for the whole instrument: graphite chassis, softly brushed aluminium,
+   restrained warm metal accents, crisp neutral displays and clean silkscreen typography.
+   This final layer intentionally replaces the earlier green-enamel pass.
+   ========================================================================================= */
+
+:root {
+  --unbox-brass: #c99561;
+  --unbox-brass-light: #e7bd8b;
+  --unbox-cabinet: #111316;
+  --unbox-cabinet-edge: #30353b;
+  --unbox-screen: #0b0c0e;
+  --unbox-phosphor: #e8e4dc;
+  --unbox-meter-grille: rgba(214, 220, 226, 0.1);
+  --studio-ink: #e9e6df;
+  --studio-muted: #9ba1a8;
+  --studio-line: #30353b;
+  --studio-panel: #191c20;
+  --studio-panel-raised: #23272c;
+  --studio-accent: #cf9560;
+}
+
+body {
+  background: #0b0c0e;
+  color: var(--studio-ink);
+}
+
+::-webkit-scrollbar-track { background: #111316; border-color: #24282d; }
+::-webkit-scrollbar-thumb { background: #3a3f45; border-color: #1b1e22; }
+::-webkit-scrollbar-thumb:hover { background: #4b5158; }
+
+.unbox-cabinet {
+  background: #0d0f11;
+  color: var(--studio-ink);
+  box-shadow:
+    inset 0 0 0 1px #292d32,
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.us-chrome {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #202328 0%, #17191c 100%);
+}
+
+.unbox-titlebar {
+  border-bottom: 1px solid #30343a;
+  background: linear-gradient(180deg, #22262b 0%, #181a1e 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.unbox-brand-button { border-right-color: #33383e; color: #f1eee8; }
+.unbox-brand-button:hover,
+.unbox-brand-button:focus-visible { background: rgba(255, 255, 255, 0.055); color: #fff; }
+.unbox-brand-mark { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7)); }
+.unbox-brand-kicker { color: #b08a61; }
+.unbox-brand-word { color: #f4f1eb; letter-spacing: 0.07em; }
+.unbox-brand-word span { color: #c99561; }
+
+.unbox-workspace-tab {
+  min-width: 94px;
+  color: #969ca4;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  border-left-color: #30343a !important;
+  text-shadow: none;
+}
+.unbox-workspace-tab:hover { color: #f2efe9; background: rgba(255, 255, 255, 0.045); }
+.unbox-workspace-tab[aria-selected='true'] {
+  color: #fff;
+  background: linear-gradient(180deg, #30343a 0%, #22262b 100%);
+  box-shadow: inset 0 -2px 0 var(--studio-accent), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  text-shadow: none;
+}
+.unbox-workspace-tab[aria-selected='true']::after { content: none; }
+.unbox-workspace-tab kbd { color: #777e86; }
+.unbox-utility-button { color: #a1a7af; }
+.unbox-utility-button:hover { color: #f5f1ea; background: rgba(255, 255, 255, 0.06); }
+
+.unbox-series-plate { border-left-color: #34383e; }
+.unbox-series-text b { color: #c99561; }
+.unbox-series-text span { color: #8b929a; }
+
+.unbox-screen-well {
+  background: #0b0c0e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.unbox-cabinet [data-testid='status-bar'] {
+  background: #17191c !important;
+  border-bottom: 1px solid #2c3035 !important;
+  color: #a5abb3 !important;
+}
+
+/* ------------------------------------------------------------------ workstation */
+
+.us-metal,
+.us-metal-frame {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.28) 0 1px, rgba(72, 69, 63, 0.035) 1px 3px, transparent 3px 4px),
+    linear-gradient(180deg, #e8e5df 0%, #d8d4cc 46%, #c3beb5 100%);
+  border-color: #8d877d;
+  color: #25272b;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -2px 4px rgba(52, 49, 44, 0.16),
+    0 5px 16px rgba(0, 0, 0, 0.38);
+}
+
+.us-metal .us-metal,
+.us-metal .us-metal-frame {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.26) 0 1px, rgba(72, 69, 63, 0.03) 1px 3px, transparent 3px 4px),
+    linear-gradient(180deg, #f0ede7 0%, #e1ddd5 52%, #d0cac1 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 3px rgba(52, 49, 44, 0.12),
+    0 3px 9px rgba(49, 46, 41, 0.2);
+}
+
+.us-screw {
+  background: radial-gradient(circle at 34% 28%, #f2f3f4 0%, #aeb3b8 48%, #50555a 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+.us-screw::after { background: #464b50; }
+
+.us-lcd {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.08) 20%, transparent 48%),
+    repeating-linear-gradient(0deg, rgba(40, 43, 47, 0.026) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #f4f1e9 0%, #e8e3d9 58%, #dcd6ca 100%) !important;
+  border: 1px solid #a8a195 !important;
+  color: #25272b !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 2px 7px rgba(55, 50, 42, 0.13),
+    0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+.us-lcd .text-lcd-ink,
+.us-lcd .text-lcd-dim,
+.us-lcd input.text-lcd-ink { color: #25272b !important; }
+.us-lcd .text-lcd-dim { color: #706c64 !important; }
+.us-lcd-box {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(52, 50, 45, 0.24) !important;
+  color: #25272b !important;
+  box-shadow: inset 0 1px 2px rgba(52, 50, 45, 0.1) !important;
+}
+.us-lcd-inverse {
+  background: linear-gradient(180deg, #3a3e44, #23262b) !important;
+  border-color: #17191c !important;
+  color: #f7f3ea !important;
+  text-shadow: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+.us-lcd-btn {
+  background: linear-gradient(180deg, #fbf8f1, #e8e2d8) !important;
+  border-color: #a0988c !important;
+  color: #2d2d2b !important;
+  text-shadow: none !important;
+  box-shadow: inset 0 1px 0 #fff, 0 1px 1px rgba(0, 0, 0, 0.12) !important;
+}
+.us-lcd-btn:hover,
+.us-lcd-btn:active {
+  background: linear-gradient(180deg, #3a3e44, #23262b) !important;
+  border-color: #17191c !important;
+  color: #f7f3ea !important;
+}
+
+.us-btn {
+  background: linear-gradient(180deg, #3c4147 0%, #292d32 46%, #1b1e22 100%);
+  border-color: #0c0e10;
+  color: #f1eee8;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.55);
+}
+.us-btn:hover { background: linear-gradient(180deg, #484d54, #30343a 52%, #202328); }
+.us-btn span[style*='b8ff3f'] {
+  background: radial-gradient(circle, #ffe6b7 10%, #dfa463 72%, #8c5c2f 100%) !important;
+  box-shadow: 0 0 7px rgba(223, 164, 99, 0.75) !important;
+}
+.us-btn[aria-pressed='true'] {
+  background: linear-gradient(180deg, #4c3d2e, #2b241c) !important;
+  box-shadow: 0 0 0 1px rgba(207, 149, 96, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+.us-btn span { text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
+
+.us-sel-row {
+  background: linear-gradient(180deg, #34383e, #25292e) !important;
+  color: #f7f3ea !important;
+  border-color: #9a7148 !important;
+  box-shadow: inset 2px 0 0 #cf9560, inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+.us-plate {
+  background: linear-gradient(180deg, #4a4f56, #2d3136 70%, #23262a);
+  color: #f2eee7;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ------------------------------------------------------------------ rack frame */
+
+.modular-rack {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.04), transparent 45%),
+    linear-gradient(180deg, #111316, #08090a);
+}
+
+.rack-toolbar {
+  gap: 7px;
+  padding: 6px 9px;
+  border-bottom-color: #30343a;
+  background: linear-gradient(180deg, #202328, #16181b);
+}
+.rack-tool,
+.rack-seg button {
+  height: 26px;
+  border-radius: 5px;
+  border: 1px solid #0b0d0f;
+  background: linear-gradient(180deg, #343940, #23272c);
+  color: #c9ced4;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+.rack-tool:hover:not(:disabled) { color: #f2c28f; background: linear-gradient(180deg, #3c4148, #292d32); }
+.rack-tool[aria-pressed='true'] {
+  color: #f0c08a;
+  background: linear-gradient(180deg, #363b42, #24282d);
+  box-shadow: inset 0 -2px 0 var(--studio-accent), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.rack-seg { border-color: #0b0d0f; }
+.rack-seg button[aria-pressed='true'] {
+  background: linear-gradient(180deg, #e0b47f, #bf8350);
+  color: #20160f;
+  text-shadow: none;
+}
+.rack-hint { color: #858c94; }
+.rack-chip { color: #e5b782; background: rgba(207, 149, 96, 0.12); border-color: #8d633e; }
+.combinator-prompt {
+  border-color: #3b4047;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.045), rgba(10, 11, 13, 0.76));
+}
+.combinator-prompt:focus-within { border-color: #b07c4c; box-shadow: 0 0 0 2px rgba(207, 149, 96, 0.13); }
+.combinator-go { background: linear-gradient(180deg, #d8ad7b, #b47b47); color: #21170f; }
+
+.rack-scroller { background: #090a0c; }
+.rack-content { min-width: 1298px; }
+.rack-grid {
+  grid-template-columns: 12px minmax(460px, 1fr) 12px minmax(470px, 1.55fr) 12px minmax(320px, 0.8fr) 12px;
+}
+.rack-col {
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 10px, #050607 10px 17px, transparent 17px 26px),
+    repeating-linear-gradient(180deg, transparent 0 10px, #050607 10px 17px, transparent 17px 26px),
+    linear-gradient(90deg, #101215, #343940 10px, #20242a 22px, transparent 22px, transparent calc(100% - 22px), #20242a calc(100% - 22px), #343940 calc(100% - 10px), #101215);
+  background-size: 7px 100%, 7px 100%, 100% 100%;
+  background-position: 8px 0, calc(100% - 8px) 0, 0 0;
+  background-color: #0b0c0e;
+}
+.rack-rail,
+.studio-rack-rail {
+  background: linear-gradient(90deg, #090a0c 0%, #262a2f 35%, #50555c 50%, #24282d 65%, #090a0c 100%) !important;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08), inset -1px 0 0 rgba(0, 0, 0, 0.9) !important;
+}
+.rack-unit {
+  border-color: rgba(137, 146, 156, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.16);
+  border-bottom-color: #000;
+  border-radius: 4px;
+  box-shadow:
+    0 7px 17px rgba(0, 0, 0, 0.56),
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035) !important;
+}
+.rack-ear {
+  width: 17px;
+  background: linear-gradient(90deg, #0e1012, #33383e 45%, #171a1e);
+}
+.rack-ear--left { border-right-color: #050607; }
+.rack-ear--right { border-left-color: #050607; }
+.rack-ear span { color: #7f868e !important; }
+.rack-screw {
+  background: radial-gradient(circle at 35% 32%, #eef0f2 0%, #a9afb5 46%, #40454a 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+.rack-screw::before,
+.rack-screw::after { background: #3b4045; }
+
+.rack-unit .rack-face {
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 -15px 24px rgba(0, 0, 0, 0.28) !important;
+}
+.rack-unit .rack-face:not(:has([data-testid='spec-faceplate'])),
+.rack-unit .rack-strip {
+  background:
+    linear-gradient(180deg, var(--face-glow, rgba(255, 255, 255, 0.035)) 0%, transparent 38%),
+    radial-gradient(130% 70% at 30% 0%, rgba(255, 255, 255, 0.06), transparent 60%),
+    linear-gradient(180deg, var(--face-top, #30343a), var(--face-bottom, #15181b)) !important;
+  border-color: #292d32 !important;
+  color: #e8e5df !important;
+}
+.rack-unit .rack-face > header {
+  min-height: 31px;
+  padding: 4px 8px 5px !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.012) 45%, rgba(0, 0, 0, 0.18) 100%);
+  border-bottom-color: rgba(0, 0, 0, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+.rack-unit .rack-face > header::after {
+  left: 9px;
+  right: 9px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09) 16%, rgba(255, 255, 255, 0.09) 84%, transparent);
+}
+.rack-nameplate {
+  padding: 3px 9px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px !important;
+  background: linear-gradient(180deg, #24282d, #16191c);
+  color: #f3f0e9 !important;
+  font-family: var(--font-label) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.075em !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+  box-shadow: inset 3px 0 0 #7f8b94, inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 1px 1px rgba(0, 0, 0, 0.5) !important;
+}
+.rack-unit[data-family='instrument'] .rack-nameplate { box-shadow: inset 3px 0 0 #7d9a86, inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 1px 1px rgba(0, 0, 0, 0.5) !important; }
+.rack-unit[data-family='effect'] .rack-nameplate { box-shadow: inset 3px 0 0 #b68b5e, inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 1px 1px rgba(0, 0, 0, 0.5) !important; }
+.rack-unit[data-family='utility'] .rack-nameplate { box-shadow: inset 3px 0 0 #858f99, inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 1px 1px rgba(0, 0, 0, 0.5) !important; }
+.rack-unit .rack-face::before { width: 2px; border-radius: 2px 0 0 2px; }
+.rack-unit[data-family='instrument'] .rack-face::before { background: linear-gradient(180deg, #8ea896, #5c7464); box-shadow: none; }
+.rack-unit[data-family='effect'] .rack-face::before { background: linear-gradient(180deg, #c09564, #83613e); box-shadow: none; }
+.rack-unit[data-family='utility'] .rack-face::before { background: linear-gradient(180deg, #979fa8, #616a73); box-shadow: none; }
+.rack-face-side { width: 3px; background: linear-gradient(90deg, #0d0f11, #555b62 45%, #8c939a 55%, #2a2e33); }
+
+.rack-unit .rack-face-body {
+  background-image:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.025) 0%, transparent 44%, rgba(0, 0, 0, 0.06) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 4px);
+  box-shadow: none;
+}
+.rack-panel-badge {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: linear-gradient(180deg, #272b30, #15181b);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+.rack-panel-badge-text b { color: #cbd0d6; }
+.rack-panel-badge-text i { color: #8f969e; }
+.rack-panel-etching { opacity: 0.12; }
+
+.device-signature-strip {
+  flex-basis: 19px;
+  gap: 7px;
+  padding: 0 10px;
+  border-top-color: rgba(255, 255, 255, 0.055);
+  background: linear-gradient(180deg, rgba(12, 13, 15, 0.55), rgba(7, 8, 9, 0.78));
+  color: #7f868e;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  box-shadow: none;
+}
+.device-signature-led { width: 4px; height: 4px; border-radius: 50%; background: #c99561; box-shadow: 0 0 4px rgba(201, 149, 97, 0.45); }
+.device-signature-brand { color: #b09a7f; letter-spacing: 0.12em; }
+.device-signature-series { color: #737a82; border-left-color: rgba(255, 255, 255, 0.08); }
+.device-signature-family { color: #737a82; }
+.device-signature-code { color: #a79d8e; border-left-color: rgba(255, 255, 255, 0.08); }
+.device-signature-serial { color: #737a82; }
+@media (hover: hover) { .rack-unit:hover .device-signature-led { box-shadow: 0 0 7px rgba(201, 149, 97, 0.8); } }
+
+.rack-chans {
+  background: linear-gradient(180deg, #202328, #131518);
+  border-color: #08090b;
+  border-top-color: rgba(255, 255, 255, 0.09);
+}
+.rack-chans-head { color: #b6bcc4; font-size: 11px; letter-spacing: 0.14em; }
+.rack-chans-empty { color: #858c94; }
+.rack-chan { background: linear-gradient(180deg, #262a2f, #191c20) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 1px 1px rgba(0, 0, 0, 0.35) !important; }
+.rack-chan-name {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chan) 16%, #2b2f34), color-mix(in srgb, var(--chan) 10%, #171a1d));
+  color: #ece9e2;
+  box-shadow: inset 3px 0 0 var(--chan), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+.rack-chan-jump { color: #9299a1; }
+.rack-chan-jump:hover { color: #e6b37e; }
+.rack-chan-tag { color: #858c94; }
+.rack-chans-head { text-shadow: none; }
+.rack-add { border-color: #343940; color: #858c94; background: rgba(255, 255, 255, 0.015); }
+.rack-add:hover { color: #e4b27d; border-color: #8a6543; }
+.rack-add--armed { color: #e8b882; border-color: #a36f43; box-shadow: inset 0 0 0 1px #7e5737, 0 0 12px rgba(207, 149, 96, 0.15); }
+.rack-empty { border-color: #3a4047; color: #9ba1a8; background: rgba(255, 255, 255, 0.015); }
+.rack-unit--selected { outline-color: rgba(207, 149, 96, 0.82); }
+
+/* Rear panels and patch bay */
+.rack-unit .rack-back {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(0, 0, 0, 0.32) 22px 24px),
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 62%),
+    linear-gradient(180deg, #202328, #0d0f11);
+  color: #c7ccd2;
+}
+.rack-unit .rack-back .rack-jack-group { border-color: rgba(255, 255, 255, 0.11); background: rgba(8, 9, 11, 0.5); }
+.rack-unit .rack-back .rack-jack-group legend { color: #aab0b8; }
+.rack-unit .rack-rear-label {
+  border-color: #484e55;
+  color: #ebe7df;
+  background: linear-gradient(180deg, #31363c, #1a1d21);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.rack-unit .rack-rear-label [class*='text-neutral-900'] { color: #ebe7df !important; }
+.rack-unit .rack-rear-label [class*='text-neutral-600'] { color: #9aa1a9 !important; }
+
+/* ------------------------------------------------------------------ spec faceplates */
+
+[data-testid='spec-faceplate'] {
+  border-radius: 2px;
+}
+[data-testid='spec-faceplate'] .spec-header {
+  padding: 8px 14px 7px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(0, 0, 0, 0.11));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-testid='spec-faceplate'] .spec-brand-plate {
+  padding: 1px 10px 2px !important;
+  border-left-width: 2px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+[data-testid='spec-faceplate'] .spec-brand-plate > .spec-logo {
+  font-family: var(--font-label) !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.035em !important;
+  font-size: 19px !important;
+  line-height: 1.05 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+[data-testid='spec-faceplate'] .spec-tagline {
+  opacity: 1 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.015em;
+}
+.spec-tagline-text { opacity: 0.62; }
+.spec-family-kicker {
+  flex: 0 0 auto;
+  padding: 1px 4px;
+  border: 1px solid color-mix(in srgb, var(--sig-accent, #c99561) 44%, transparent);
+  border-radius: 2px;
+  color: var(--sig-accent, #c99561);
+  font-family: var(--font-label);
+  font-weight: 800;
+  font-size: 11px;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+[data-testid='spec-faceplate'] .spec-badge {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(0, 0, 0, 0.18) !important;
+  color: rgba(239, 236, 229, 0.68) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+.spec-accent-rule { height: 1px !important; opacity: 0.5 !important; }
+.spec-panel-etching { opacity: 0.075; right: 10px; bottom: 20px; }
+
+[data-testid='spec-faceplate'] section {
+  border-radius: 5px !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(0, 0, 0, 0.2)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 1px 2px rgba(0, 0, 0, 0.26) !important;
+}
+[data-testid='spec-faceplate'] section::before,
+[data-testid='spec-faceplate'] section::after { display: none !important; }
+[data-testid='spec-faceplate'] section > h4 {
+  margin-bottom: 4px !important;
+  padding-bottom: 3px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: rgba(240, 237, 230, 0.55) !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.13em !important;
+  text-shadow: none !important;
+}
+[data-testid='spec-faceplate'] section > h4::before {
+  width: 2px !important;
+  height: 8px !important;
+  margin-right: 5px !important;
+  background: #c99561 !important;
+  box-shadow: none !important;
+}
+
+[data-testid='spec-faceplate'] .spec-body { padding-top: 6px; }
+.spec-knob-svg { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.42)); }
+.spec-knob-label {
+  margin-top: 2px;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.005em !important;
+  text-transform: none !important;
+  opacity: 0.76 !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+.spec-knob-value {
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  opacity: 0.58;
+  letter-spacing: 0.01em;
+}
+[data-testid='spec-faceplate'] select {
+  background: linear-gradient(180deg, #282c31, #15181b) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ebe7df !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+[data-testid='spec-faceplate'] .spec-screw {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 35% 30%, #eef0f2, #8f969d 52%, #34393e 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.7);
+}
+[data-testid='spec-faceplate'] .spec-screw::after { background: #3f4449; }
+
+/* Selected part row and quick-control labels sit on light aluminium, not the LCD. */
+.unbox-cabinet [data-testid='workstation-tab'] [data-testid='part-patch'].us-sel-row {
+  background: linear-gradient(180deg, #34383e, #25292e) !important;
+  color: #f7f3ea !important;
+  border-color: #9a7148 !important;
+  box-shadow: inset 2px 0 0 #cf9560, inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+[data-testid='quick-controls'] span { color: #2a2d30 !important; }
+[data-testid='part-list'] .text-ink,
+[data-testid='part-list'] .text-ink\/80,
+[data-testid='part-list'] .text-ink\/70 { color: #25272b !important; }
+
+/* Legacy hardware often packed more controls into a row than a rack column can hold. Let those
+   groups wrap at the faceplate width instead of cutting the last knob off at the edge. */
+.rack-unit .rack-face-body > div { min-width: 0; }
+.rack-unit .rack-face-body > div > div[class*='space-x-'] {
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 6px;
+  min-width: 0;
+}
+.rack-unit .rack-face-body > div > div[class*='space-x-'] > * { margin-left: 0 !important; }
+
+/* Legacy units share the recessed control wells and quiet headings of the spec panels. */
+.rack-unit .rack-face-body section {
+  border-radius: 5px !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.2)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 1px 2px rgba(0, 0, 0, 0.26) !important;
+}
+.rack-unit .rack-face-body section > h4 {
+  color: rgba(240, 237, 230, 0.58) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.13em !important;
+  text-shadow: none !important;
+}
+
+[data-testid='mixer-console'] { background: #0c0e11 !important; color: #d3d7dc !important; }
+[data-testid='mixer-tab'] [data-testid='clip-editor-area'],
+[data-testid='clip-editor-area'] { background: #111316 !important; }
+.clip-card {
+  background: linear-gradient(180deg, #202328, #171a1e) !important;
+  border-color: #343940 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+.clip-card-head { color: #e6e2da !important; }
+
+/* Mixer console strips: dark anodised channels with a quiet colour tab, not green plastic. */
+.cs-console { background: repeating-linear-gradient(90deg, #0b0d0f 0 2px, #101215 2px 4px); }
+.cs-strip {
+  background: linear-gradient(180deg, #25292e 0%, #181b1f 58%, #121417 100%);
+  border-color: #343940;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 3px 9px rgba(0, 0, 0, 0.42);
+}
+.cs-strip--sel { box-shadow: 0 0 0 1px #cf9560, 0 0 10px rgba(207, 149, 96, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.09); }
+.cs-name {
+  background: linear-gradient(180deg, #32373d, #23272c) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #ece9e2 !important;
+  box-shadow: inset 2px 0 0 var(--chan, #8f969e), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+.cs-badge { background: #15181b; color: #b8bec5; }
+.cs-sec { border-top-color: rgba(255, 255, 255, 0.065); box-shadow: none; }
+.cs-label { color: #b9bfc6; }
+.cs-lamp { background: #0b0d0f; color: #8e959d; border-color: #000; }
+.cs-bottom { background: rgba(0, 0, 0, 0.28); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55); }
+.cs-readout { color: #e3b784; }
+
+/* ------------------------------------------------------------------ transport / live keyboard */
+
+[data-testid='transport-bar'] {
+  background: linear-gradient(180deg, #1d2024, #141619) !important;
+  border-top-color: #34383e !important;
+  color: #c9ced4;
+}
+.unbox-live-keyboard {
+  background: linear-gradient(180deg, #181b1f, #0e1012) !important;
+  border-color: #30353b !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+.unbox-live-keyboard [class*='text-cyan-'],
+.unbox-live-keyboard [class*='text-emerald-'],
+.unbox-live-keyboard [class*='text-neutral-'],
+.unbox-live-keyboard [class*='text-slate-'] { color: #a9afb7 !important; }
+.unbox-live-keyboard kbd { color: #4f545a !important; }
+
+/* ------------------------------------------------------------------ panels / sequencer */
+
+[role='separator'][aria-label*='Resize workstation'] {
+  background: #25292e !important;
+  border-color: #343940 !important;
+}
+[role='separator'][aria-label*='Resize workstation'] button { color: #9da3ab !important; }
+[role='separator'][aria-label*='Resize workstation'] button:hover { color: #f3d2ad !important; }
+
+.unbox-seq-toprail { background: linear-gradient(90deg, #2d3136, #1c1f23 48%, #2d3136); border-color: #3b4047; }
+.unbox-seq-patternrail { background: linear-gradient(180deg, #23262b, #181a1e); border-color: #34383e; }
+.unbox-seq-instrumentrail { background: linear-gradient(180deg, #292c31, #1c1f23); border-color: #383d43; }
+.unbox-seq-songrail { background: linear-gradient(90deg, #202328, #292c31 48%, #202328); border-color: #3b4047; }
+.unbox-piano-roll { background: #121417; }
+
+@media (max-width: 1220px) {
+  .unbox-workspace-tab { min-width: 74px; padding-inline: 9px; }
+}
+
+
+/* ------------------------------------------------------------------ device families
+
+   The rack stays one graphite system. Family identity is carried by a restrained edge
+   colour, a family chip, a different machining texture in the header and the family name
+   on the signature plate — enough to tell an analog synth from a sampler at a glance
+   without turning the cabinet into a paint chart. */
+
+.rack-unit[data-signature] .rack-face::before {
+  background: linear-gradient(180deg, var(--sig-accent, #8e9aa4), color-mix(in srgb, var(--sig-accent, #8e9aa4) 42%, #15181b));
+  box-shadow: none;
+}
+.rack-unit[data-signature] .rack-nameplate {
+  box-shadow:
+    inset 3px 0 0 var(--sig-accent, #8e9aa4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 1px 1px rgba(0, 0, 0, 0.5) !important;
+}
+.rack-unit[data-signature] .device-signature-led {
+  background: var(--sig-accent, #c99561);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--sig-accent, #c99561) 60%, transparent);
+}
+.rack-unit[data-signature] .device-signature-family { color: var(--sig-accent, #9ba1a8); }
+
+[data-testid='spec-faceplate'] section > h4 {
+  border-bottom-color: color-mix(in srgb, var(--sig-accent, #b59a74) 30%, transparent) !important;
+}
+
+.rack-unit[data-signature='analog'] .rack-face > header,
+.rack-unit[data-signature='analog'] .spec-header {
+  background:
+    repeating-linear-gradient(90deg, rgba(192, 138, 92, 0.075) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='digital'] .rack-face > header,
+.rack-unit[data-signature='digital'] .spec-header {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(125, 155, 179, 0.18) 0 1px, transparent 1.15px) 0 0 / 7px 7px,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='recorded'] .rack-face > header,
+.rack-unit[data-signature='recorded'] .spec-header {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 7px, rgba(169, 163, 154, 0.14) 7px 9px, transparent 9px 17px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='rhythm'] .rack-face > header,
+.rack-unit[data-signature='rhythm'] .spec-header {
+  background:
+    repeating-linear-gradient(90deg, rgba(183, 127, 114, 0.11) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(0deg, rgba(183, 127, 114, 0.07) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='signal'] .rack-face > header,
+.rack-unit[data-signature='signal'] .spec-header {
+  background:
+    repeating-linear-gradient(135deg, rgba(181, 154, 116, 0.07) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='system'] .rack-face > header,
+.rack-unit[data-signature='system'] .spec-header {
+  background:
+    repeating-linear-gradient(0deg, rgba(135, 147, 158, 0.075) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+.rack-unit[data-signature='player'] .rack-face > header,
+.rack-unit[data-signature='player'] .spec-header {
+  background:
+    radial-gradient(circle at 2px 2px, rgba(161, 141, 169, 0.18) 0 1px, transparent 1.2px) 1px 1px / 9px 9px,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+}
+
+.rack-family-chip {
+  flex: 0 0 auto;
+  max-width: 88px;
+  overflow: hidden;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--sig-accent, #8e9aa4) 42%, transparent);
+  border-radius: 2px;
+  color: var(--sig-accent, #9ba1a8);
+  font: 800 11px/1.15 var(--font-label);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* ------------------------------------------------ legacy family cleanup
+
+   Older faceplates were authored with emerald / lime / teal utilities. Remap those
+   ramps inside a faceplate to the device family's accent, preserving the light-to-dark
+   hierarchy while removing the last green cast from the graphite cabinet. */
+
+.rack-unit .rack-face,
+[data-testid='spec-faceplate'] {
+  --color-emerald-50: color-mix(in srgb, var(--sig-accent, #c9a06c) 8%, #f4f1ea);
+  --color-emerald-100: color-mix(in srgb, var(--sig-accent, #c9a06c) 14%, #e8e4dc);
+  --color-emerald-200: color-mix(in srgb, var(--sig-accent, #c9a06c) 24%, #d9d4ca);
+  --color-emerald-300: color-mix(in srgb, var(--sig-accent, #c9a06c) 38%, #c9c3b8);
+  --color-emerald-400: color-mix(in srgb, var(--sig-accent, #c9a06c) 58%, #c9c3b8);
+  --color-emerald-500: var(--sig-accent, #c9a06c);
+  --color-emerald-600: color-mix(in srgb, var(--sig-accent, #c9a06c) 72%, #1a1d20);
+  --color-emerald-700: color-mix(in srgb, var(--sig-accent, #c9a06c) 58%, #171a1d);
+  --color-emerald-800: color-mix(in srgb, var(--sig-accent, #c9a06c) 38%, #1b1f23);
+  --color-emerald-900: color-mix(in srgb, var(--sig-accent, #c9a06c) 24%, #1a1e22);
+  --color-emerald-950: color-mix(in srgb, var(--sig-accent, #c9a06c) 15%, #171a1e);
+  --color-lime-50: var(--color-emerald-50);
+  --color-lime-100: var(--color-emerald-100);
+  --color-lime-200: var(--color-emerald-200);
+  --color-lime-300: var(--color-emerald-300);
+  --color-lime-400: var(--color-emerald-400);
+  --color-lime-500: var(--color-emerald-500);
+  --color-lime-600: var(--color-emerald-600);
+  --color-lime-700: var(--color-emerald-700);
+  --color-lime-800: var(--color-emerald-800);
+  --color-lime-900: var(--color-emerald-900);
+  --color-lime-950: var(--color-emerald-950);
+  --color-green-50: var(--color-emerald-50);
+  --color-green-100: var(--color-emerald-100);
+  --color-green-200: var(--color-emerald-200);
+  --color-green-300: var(--color-emerald-300);
+  --color-green-400: var(--color-emerald-400);
+  --color-green-500: var(--color-emerald-500);
+  --color-green-600: var(--color-emerald-600);
+  --color-green-700: var(--color-emerald-700);
+  --color-green-800: var(--color-emerald-800);
+  --color-green-900: var(--color-emerald-900);
+  --color-green-950: var(--color-emerald-950);
+  --color-teal-500: var(--color-emerald-500);
+}
+
+/* Opacity utilities compile to literal colours in Tailwind, so map the few used by
+   legacy faceplates directly. */
+.rack-unit .rack-face [class*='border-emerald-'] {
+  border-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 36%, transparent) !important;
+}
+.rack-unit .rack-face [class~='text-emerald-100/45'] {
+  color: color-mix(in srgb, var(--sig-accent, #c9a06c) 32%, transparent) !important;
+}
+.rack-unit .rack-face [class~='bg-emerald-950/80'],
+.rack-unit .rack-face [class~='bg-emerald-950/70'] {
+  background-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 15%, #171a1e) !important;
+}
+.rack-unit .rack-face [class~='bg-emerald-950/25'] {
+  background-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 10%, #171a1e) !important;
+}
+.rack-unit .rack-face [class~='bg-emerald-600/80'] {
+  background-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 62%, #171a1e) !important;
+}
+.rack-unit .rack-face [class~='hover:bg-emerald-500']:hover {
+  background-color: var(--sig-accent, #c9a06c) !important;
+}
+.rack-unit .rack-face [class~='hover:bg-emerald-950/60']:hover {
+  background-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 12%, #171a1e) !important;
+}
+
+.rack-unit .rack-face [class*='border-teal-'] {
+  border-color: color-mix(in srgb, var(--sig-accent, #c9a06c) 36%, transparent) !important;
+}
+.rack-unit .rack-face [class*='text-teal-'] {
+  color: color-mix(in srgb, var(--sig-accent, #c9a06c) 58%, #c9c3b8) !important;
+}
+.rack-unit .rack-face [class*='text-lime-'] {
+  color: color-mix(in srgb, var(--sig-accent, #c9a06c) 58%, #c9c3b8) !important;
+}
+
+/* LEDs and selects were the last lime objects on the older panels. */
+.rack-unit .led-indicator.active-blue,
+.rack-unit .led-indicator.active-green,
+.rack-unit .led-indicator.active-amber {
+  background: var(--sig-accent, #c99561);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--sig-accent, #c99561) 78%, transparent),
+    inset 0 1px 2px rgba(255, 255, 255, 0.75);
+}
+.rack-unit .rack-face-body select,
+[data-testid='spec-faceplate'] select {
+  background: linear-gradient(180deg, #24282d, #15181b) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #e8e5df !important;
+  color-scheme: dark;
+}
+
+.rack-unit .rack-face [data-testid='spec-faceplate'] {
+  box-shadow:
+    inset 0 1px 0 rgba(232, 229, 223, 0.11),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.34) !important;
+}
+
+/* One last explicit ink reset: a few legacy panels still inherit the old pale-green
+   header ink through a more specific rule. */
+.rack-unit .rack-face,
+.rack-unit .rack-face > header,
+.rack-unit .rack-face-body {
+  color: #e8e5df !important;
+}
+
+/* Legacy faceplate insets were forced onto a green-black backing by an older rule.
+   Keep their contrast, but put them on graphite. */
+.rack-unit .rack-face-body [class^='bg-black/'],
+.rack-unit .rack-face-body [class*=' bg-black/'] {
+  background-color: rgba(21, 24, 27, 0.94) !important;
+}
+.rack-unit {
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.rack-unit .rack-face .ds-bar {
+  background: linear-gradient(180deg, #24282d, #15181b);
+  border-color: #0d0f11;
+  color: #e8e5df !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.rack-unit .rack-face .ds-bar .ds-btn { color: #e8e5df; }
+
+/* Channel identity text and rear-strip chrome: the old green rules outrank the
+   graphite pass, so restate the neutral ink with their full selector weight. */
+.modular-rack .rack-chan-name {
+  color: #ece9e2;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chan) 16%, #2b2f34), color-mix(in srgb, var(--chan) 10%, #171a1d));
+  box-shadow: inset 3px 0 0 var(--chan), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+.modular-rack .rack-chan-jump { color: #9299a1; }
+.modular-rack .rack-chan-jump:hover { color: #e6b37e; }
+.modular-rack .rack-chan-tag { color: #858c94; }
+.modular-rack .rack-chan--rear {
+  background: linear-gradient(180deg, #22262b, #15181b);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.modular-rack .rack-chan--rear .rack-chan-tag { color: #9ba1a8; }
+
+/* Workstation part rails: graphite rows on the light cabinet, gold still marks selection. */
+[data-testid='workstation-tab'] [data-testid='part-list'] > div:first-child {
+  color: #3c4249 !important;
+}
+[data-testid='workstation-tab'] [data-testid='part-link'] {
+  background: linear-gradient(180deg, #3b4046, #23272c) !important;
+  border-color: #4b5158 !important;
+  color: #c9ced4 !important;
+}
+[data-testid='workstation-tab'] [data-testid='part-link'][aria-pressed='true'] {
+  color: #f0ede6 !important;
+  box-shadow: inset 0 -2px 0 #c9a06c !important;
+}
+[data-testid='workstation-tab'] [data-testid='part-patch'] {
+  background: linear-gradient(180deg, #3b4046, #23272c) !important;
+  border-color: #4b5158 !important;
+  color: #ece9e2 !important;
+}
+[data-testid='workstation-tab'] [data-testid='workstation-keyboard'] .text-ink {
+  color: #2b3035 !important;
+}
+
+/* Keyboard dock: graphite chassis and neutral labels; keys stay ivory/black. */
+.unbox-live-keyboard {
+  background: linear-gradient(180deg, #2b3035, #171a1d) !important;
+  border-top-color: #353a40 !important;
+  border-color: #353a40 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #e8e5df !important;
+}
+.unbox-live-keyboard [class*='text-cyan-'],
+.unbox-live-keyboard [class*='text-slate-'],
+.unbox-live-keyboard [class*='text-neutral-'] {
+  color: #aab1b9 !important;
+}
+.unbox-live-keyboard [class*='text-slate-300'] { color: #dfe3e7 !important; }
+.unbox-live-keyboard [class*='border-cyan-'] { border-color: #4a5057 !important; }
+.unbox-live-keyboard [class*='bg-slate-950'] { background-color: #111417 !important; }
+.unbox-live-keyboard [class*='bg-slate-900'] { background-color: #20242a !important; }
+.unbox-live-keyboard [class*='bg-slate-800'] { background-color: #2d3239 !important; }
+.unbox-live-keyboard [class*='bg-emerald-950'] { background-color: #1b1f23 !important; }
+.unbox-live-keyboard [class~='from-emerald-400'] {
+  --tw-gradient-from: #c9ced4 var(--tw-gradient-from-position) !important;
+}
+.unbox-live-keyboard [class~='to-emerald-600'] {
+  --tw-gradient-to: #6f757d var(--tw-gradient-to-position) !important;
+}
+
+/* Direct gradients keep the wheel thumbs visible; the legacy variable overrides
+   leave Tailwind's computed gradient stops transparent. */
+.unbox-live-keyboard [class~='from-cyan-300'] {
+  background-image: linear-gradient(180deg, #e5c58e, #a66e32) !important;
+}
+.unbox-live-keyboard [class~='from-emerald-400'] {
+  background-image: linear-gradient(180deg, #c9ced4, #6f757d) !important;
+}
+
+/* Workstation sequencer chrome: graphite replaces the old green toolbar/splitter. */
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] {
+  background: linear-gradient(180deg, #262b30, #171a1d) !important;
+  border-bottom-color: #3a4047 !important;
+  color: #e8e5df !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] > div[role='group'] button,
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] > div[class*='rounded'] button[aria-pressed='false'] {
+  background: linear-gradient(180deg, #3b4046, #23272c) !important;
+  border-color: #4b5158 !important;
+  color: #e8e5df !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] button[aria-pressed='true'] {
+  background: linear-gradient(180deg, #d8b45c, #b08a2e) !important;
+  color: #14210d !important;
+  border-color: #8a6b1d !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] select {
+  background: #181c20 !important;
+  border: 1px solid #3a4047 !important;
+  color: #e8e5df !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] select option {
+  background: #181c20;
+  color: #e8e5df;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] .bg-white {
+  background: #20242a !important;
+  color: #e8e5df !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] .bg-white button:hover {
+  background: #34393f !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] .w-px { background: #4a5057 !important; }
+
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] .us-btn-light {
+  background: linear-gradient(180deg, #3b4046, #23272c) !important;
+  border-color: #4b5158 !important;
+  color: #e8e5df !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(0, 0, 0, 0.45) !important;
+}
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] .us-btn-light:hover {
+  background: linear-gradient(180deg, #484e55, #2d3238) !important;
+  color: #f4f1ea !important;
+}
+/* The generic group-button reset also covers Pattern/Song; restore gold on the active mode. */
+[data-testid='workstation-tab'] [data-testid='seq-toolbar'] > div[role='group'] button[aria-pressed='true'] {
+  background: linear-gradient(180deg, #d8b45c, #b08a2e) !important;
+  color: #14210d !important;
+  border-color: #8a6b1d !important;
+}
+
+/* ------------------------------------------------------------------ graphite title / status chrome
+
+   The shell and workspaces are graphite now. These two strips were the last green lacquer:
+   neutral steel ink replaces it, while gold stays the only warm selection accent. */
+
+.unbox-titlebar {
+  color: #c9ced4;
+  border-bottom-color: #30343a;
+}
+.unbox-titlebar [data-testid='project-name'] { color: #f2f0eb; }
+.unbox-titlebar [class*="text-[#7"],
+.unbox-titlebar [class*="text-[#8"],
+.unbox-titlebar [class*="text-[#4"],
+.unbox-titlebar [class*="text-slate-"],
+.unbox-titlebar [class*="text-neutral-"] { color: #aab0b7 !important; }
+
+.unbox-titlebar .us-btn {
+  background: linear-gradient(180deg, #2c3137, #1c1f23);
+  border-color: #41474e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(0, 0, 0, 0.45);
+  color: #e8e5df;
+}
+.unbox-titlebar .us-btn:hover {
+  background: linear-gradient(180deg, #363b42, #23272c);
+  color: #fff;
+}
+.unbox-titlebar .unbox-workspace-tab[aria-selected='true'] { animation: none; }
+
+.unbox-brand-tag {
+  color: #9aa3ac;
+  filter: drop-shadow(0 0 4px rgba(154, 163, 172, 0.22));
+}
+
+.unbox-cabinet [data-testid='status-bar'] {
+  background: linear-gradient(180deg, #1b1e22, #131518) !important;
+  border-bottom: 1px solid #2c3035 !important;
+  color: #aab0b7 !important;
+}
+[data-testid='status-bar'] [class*='text-[#'] { color: #aab0b7 !important; }
+[data-testid='status-bar'] .font-mono { color: #c9ced4 !important; }
+[data-testid='status-bar'] svg { color: #8f969e !important; }
+[data-testid='status-bar'] [class*="hover:text"]:hover { color: #f2f0eb !important; }
+[data-testid='status-bar'] .bg-emerald-500 { background-color: #b9c0c7 !important; }
+[data-testid='status-bar'] [class*="text-[#2f6b3f]"] { color: #3f464e !important; }
+[data-testid='status-bar'] [class*="text-[#7a4a1e]"] { color: #c8a578 !important; }
+[data-testid='status-bar'] [class*="bg-[#dbe7cf]"] { background: #c9ced5 !important; }
+[data-testid='status-bar'] [class*="border-[#7fa273]"] { border-color: #8f969e !important; }
+
+/* ------------------------------------------------------------------ graphite studio pages
+
+   Page bars and the shared Panel chassis join the graphite system. The page keeps its light
+   work surface so forms and long lists stay easy to scan; selection stays gold. */
+
+.unbox-page-bar {
+  background: linear-gradient(180deg, #202328, #141619);
+  border-bottom-color: #30343a;
+  color: #c9ced4;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.unbox-page-bar .text-ink { color: #f2f0eb; }
+.unbox-page-bar .us-btn {
+  background: linear-gradient(180deg, #2c3137, #1c1f23);
+  border-color: #41474e;
+  color: #e8e5df;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+.unbox-page-bar .us-btn:hover {
+  background: linear-gradient(180deg, #363b42, #23272c);
+  color: #fff;
+}
+
+.us-page .us-panel {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, #24282d 0%, #181b1f 58%, #121417 100%);
+  background-blend-mode: overlay, normal;
+  border-color: #343940;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 20px rgba(0, 0, 0, 0.32);
+  color: #e7e4dd;
+}
+.us-page .us-panel-head {
+  border-bottom-color: #343940;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.us-page .us-plate { color: #f1eee8; border-color: #4b5158; }
+
+/* Panel ink follows the dark chassis; page-level text outside a Panel keeps the light surface. */
+.us-page .us-panel [class*="text-white"],
+.us-page .us-panel [class*="text-slate-100"],
+.us-page .us-panel [class*="text-slate-200"],
+.us-page .us-panel [class*="text-slate-300"] { color: #ece9e2 !important; }
+.us-page .us-panel [class*="text-slate-400"] { color: #b9bfc6 !important; }
+.us-page .us-panel [class*="text-slate-500"],
+.us-page .us-panel [class*="text-slate-600"] { color: #9ba1a8 !important; }
+.us-page .us-panel .text-chrome-ink { color: #d9d6cf !important; }
+.us-page .us-panel .text-ink { color: #ece9e2 !important; }
+.us-page .us-panel [class*="text-cyan-"] { color: #a9c0cf !important; }
+.us-page .us-panel [class*="text-emerald-"] { color: #aab0b7 !important; }
+.us-page .us-panel [class*="text-amber-"] { color: #d8b45c !important; }
+.us-page .us-panel [class*="text-red-"] { color: #e09a9a !important; }
+.us-page .us-panel [class*="text-violet-"] { color: #b9b3cc !important; }
+
+/* Cards, list rows and form wells inside a Panel are graphite, not light-green paper. */
+.us-page .us-panel [class*="bg-slate-900"] { background-color: #20242a !important; }
+.us-page .us-panel [class*="bg-slate-800"] { background-color: #2a2f35 !important; }
+.us-page .us-panel [class*="bg-black/80"] { background-color: #101214 !important; }
+.us-page .us-panel [class*="bg-black/60"] { background-color: #171a1e !important; }
+.us-page .us-panel [class*="bg-black/50"] { background-color: #1c2024 !important; }
+.us-page .us-panel [class*="bg-emerald-9"] { background-color: #23272c !important; }
+.us-page .us-panel [class*="border-slate-700"] { border-color: #3b4148 !important; }
+.us-page .us-panel [class*="border-slate-800"] { border-color: #343940 !important; }
+.us-page .us-panel [class*="border-emerald-"] { border-color: #4b5158 !important; }
+
+.us-page .us-panel input[type='text'],
+.us-page .us-panel input[type='search'],
+.us-page .us-panel input:not([type]),
+.us-page .us-panel textarea {
+  background: #15181b;
+  border-color: #3b4148;
+  color: #e8e5df;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+.us-page .us-panel input::placeholder,
+.us-page .us-panel textarea::placeholder { color: #7d848c; }
+.us-page .us-panel .us-field {
+  background: #181c20;
+  border-color: #3a4047;
+  color: #e8e5df;
+}
+.us-page .us-btn {
+  background: linear-gradient(180deg, #2c3137, #1c1f23);
+  border-color: #41474e;
+  color: #e8e5df;
+}
+.us-page .us-btn:hover {
+  background: linear-gradient(180deg, #363b42, #23272c);
+  color: #fff;
+}
+.us-page .us-panel .us-lcd-chip {
+  background: linear-gradient(180deg, #1c2024, #121417) !important;
+  border-color: #3a4047 !important;
+  color: #e6e3dc !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* ------------------------------------------------------------------ graphite studio page surfaces
+
+   The page body is the same graphite work surface as the rest of the studio. Panels are a
+   slightly raised layer; gold, amber and red remain reserved for selection and warnings. */
+
+.us-page {
+  background: linear-gradient(180deg, #101316, #0b0d0f);
+  color: #d6d3cc;
+}
+.us-page [class*="bg-[#070a10]"] { background-color: #0d0f11; }
+.us-page [class*="bg-[#0d1119]"] { background-color: #1a1d21; }
+.us-page [class*="border-[#1c2331]"] { border-color: #343940; }
+.us-page [class*="bg-black/80"] { background-color: #101214; }
+.us-page [class*="bg-black/60"] { background-color: #15181b; }
+.us-page [class*="bg-black/50"] { background-color: #191c20; }
+.us-page [class*="bg-black/40"] { background-color: #1c2024; }
+.us-page [class*="bg-black/30"] { background-color: #202429; }
+.us-page [class*="bg-black/25"] { background-color: #23272c; }
+.us-page [class*="border-slate-700"] { border-color: #3b4148; }
+.us-page [class*="border-slate-800"] { border-color: #343940; }
+
+.us-page [class*="text-white"] { color: #ece9e2; }
+.us-page [class*="text-slate-100"],
+.us-page [class*="text-slate-200"],
+.us-page [class*="text-slate-300"] { color: #e6e3dc; }
+.us-page [class*="text-slate-400"] { color: #b9bfc6; }
+.us-page [class*="text-slate-500"],
+.us-page [class*="text-slate-600"] { color: #9ba1a8; }
+.us-page [class*="text-cyan-"] { color: #a9c0cf; }
+.us-page [class*="text-violet-"] { color: #b9b3cc; }
+.us-page .text-chrome-ink { color: #d9d6cf; }
+.us-page .text-ink { color: #ece9e2; }
+
+/* Semantic ink stays legible without the old light-green cast. */
+.us-page [class*="text-emerald-"] { color: #aab0b7; }
+.us-page [class*="text-amber-"] { color: #d8b45c; }
+.us-page [class*="text-red-"] { color: #e09a9a; }
+.us-page [class*="bg-amber-950"] { background-color: #292218; }
+.us-page [class*="border-amber-500"] { border-color: rgba(216, 180, 92, 0.42); }
+.us-page [class*="bg-emerald-9"] { background-color: #23272c; }
+.us-page [class*="border-emerald-"] { border-color: #4b5158; }
+.us-page h2 { text-shadow: none; }
+
+.us-page input[type='text'],
+.us-page input[type='search'],
+.us-page input:not([type]),
+.us-page textarea {
+  background: #15181b;
+  border-color: #3b4148;
+  color: #e8e5df;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+.us-page input::placeholder,
+.us-page textarea::placeholder { color: #7d848c; }
+.us-page .us-field {
+  background: #181c20;
+  border-color: #3a4047;
+  color: #e8e5df;
+}
+.us-page fieldset,
+.us-page legend { color: #b9bfc6; }
+
+/* ------------------------------------------------------------------ graphite menus and dialogs
+
+   The main menu and the shared project/prompt dialogs use the same graphite panel and gold
+   selection as the rest of the shell. */
+
+.unbox-main-menu {
+  background: linear-gradient(180deg, #20242a, #15171a);
+  border-color: #3a4047;
+  color: #c9ced4;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+}
+.unbox-main-menu [role='menuitem'] { color: #e6e3dc; }
+.unbox-main-menu [role='menuitem']:hover { color: #141414; }
+
+.unbox-dialog {
+  background: linear-gradient(180deg, #1e2227, #121417);
+  border-color: #3a4047;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+}
+.unbox-dialog .us-btn {
+  background: linear-gradient(180deg, #2c3137, #1c1f23);
+  border-color: #41474e;
+  color: #e8e5df;
+}
+.unbox-dialog .us-btn:hover {
+  background: linear-gradient(180deg, #363b42, #23272c);
+  color: #fff;
+}
+
+/* Larger dialogs (sample browser, edit window, Co-Pilot) inherit the same graphite chrome. */
+.unbox-dialog-shell {
+  --color-chrome-0: #0f1113;
+  --color-chrome-1: #1a1d21;
+  --color-chrome-2: #23272c;
+  --color-chrome-line: #3a4047;
+  --color-chrome-ink: #d6d3dc;
+  color: #d6d3dc;
+}
+.unbox-dialog-shell .us-btn {
+  background: linear-gradient(180deg, #2c3137, #1c1f23);
+  border-color: #41474e;
+  color: #e8e5df;
+}
+.unbox-dialog-shell .us-btn:hover {
+  background: linear-gradient(180deg, #363b42, #23272c);
+  color: #fff;
+}
+.unbox-dialog-shell .us-field,
+.unbox-dialog-shell input[type='text'],
+.unbox-dialog-shell input[type='search'],
+.unbox-dialog-shell textarea {
+  background: #15181b;
+  border-color: #3b4148;
+  color: #e8e5df;
+}
+.unbox-dialog-shell input::placeholder,
+.unbox-dialog-shell textarea::placeholder { color: #7d848c; }
+.unbox-dialog-shell .us-panel {
+  background-image:
+    var(--unbox-grain),
+    linear-gradient(180deg, #24282d 0%, #181b1f 58%, #121417 100%);
+  background-blend-mode: overlay, normal;
+  border-color: #343940;
+  color: #e7e4dd;
+}
+.unbox-dialog-shell .us-panel-head { border-bottom-color: #343940; }
+
+/* ------------------------------------------------------------------ graphite mixer toolbars
+
+   Both the console and Clip Editor toolbars reuse .rack-toolbar/.rack-tool. Green toolbar
+   rules from the old mixer theme outrank the generic graphite pass, so restate them here. */
+
+[data-testid='mixer-tab'] .rack-toolbar {
+  border-bottom-color: #30343a;
+  color: #c9ced4;
+}
+[data-testid='mixer-tab'] .rack-toolbar .text-ink,
+[data-testid='mixer-tab'] .rack-toolbar .text-chrome-ink { color: #e6e3dc !important; }
+[data-testid='mixer-tab'] .rack-toolbar .rack-tool:not([aria-pressed='true']) {
+  color: #c9ced4;
+  background: linear-gradient(180deg, #343940, #23272c);
+  border-color: #0b0d0f;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+[data-testid='mixer-tab'] .rack-toolbar .rack-tool:not([aria-pressed='true']):hover:not(:disabled) {
+  color: #f2c28f;
+  background: linear-gradient(180deg, #3c4148, #292d32);
+}
+[data-testid='mixer-tab'] .rack-toolbar .rack-seg { border-color: #0b0d0f; }
+[data-testid='mixer-tab'] .rack-toolbar .rack-seg button:not([aria-pressed='true']) {
+  color: #c9ced4;
+  background: linear-gradient(180deg, #343940, #23272c);
+}
+[data-testid='mixer-tab'] .rack-toolbar .rack-seg button:not([aria-pressed='true']):hover {
+  color: #f2c28f;
+  background: #3c4148;
+}
+[data-testid='mixer-tab'] .rack-toolbar > span[class*='bg-[#d7e0cc]'] {
+  background: #23272c !important;
+  border-color: #3a4047 !important;
+  color: #d6d3cc !important;
+}
+
+/* ------------------------------------------------------------------ graphite rack toolbar and channel chrome
+
+   The rack keeps its channel identity tint and every cable/jack colour. Only the surrounding
+   toolbar and channel-list metal change. */
+
+.modular-rack .rack-toolbar {
+  border-bottom-color: #30343a;
+  background: linear-gradient(180deg, #202328, #16181b);
+  color: #c9ced4;
+}
+.modular-rack .rack-toolbar .rack-tool:not([aria-pressed='true']) {
+  color: #c9ced4;
+  background: linear-gradient(180deg, #343940, #23272c);
+  border-color: #0b0d0f;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+.modular-rack .rack-toolbar .rack-tool:not([aria-pressed='true']):hover:not(:disabled) {
+  color: #f2c28f;
+  background: linear-gradient(180deg, #3c4148, #292d32);
+}
+.modular-rack .rack-toolbar .rack-seg button:not([aria-pressed='true']) {
+  color: #c9ced4;
+  background: linear-gradient(180deg, #343940, #23272c);
+}
+.modular-rack .rack-toolbar .rack-seg button:not([aria-pressed='true']):hover {
+  color: #f2c28f;
+  background: #3c4148;
+}
+.modular-rack .rack-toolbar .rack-hint { color: #858c94; }
+.modular-rack .rack-toolbar .combinator-prompt {
+  border-color: #3b4047;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(10, 11, 13, 0.76));
+}
+.modular-rack .rack-toolbar .combinator-prompt:focus-within {
+  border-color: #b07c4c;
+  box-shadow: 0 0 0 2px rgba(207, 149, 96, 0.13);
+}
+.modular-rack .rack-toolbar .combinator-prompt input::placeholder { color: #858c94; opacity: 1; }
+
+.modular-rack .rack-chans {
+  background: linear-gradient(180deg, #202328, #131518);
+  border: 1px solid #08090b;
+  border-top-color: rgba(255, 255, 255, 0.09);
+}
+.modular-rack .rack-chans-empty { color: #858c94; }
+.modular-rack .rack-chan-jump { color: #9299a1; }
+.modular-rack .rack-chan-jump:hover { color: #e6b37e; }
+.modular-rack .rack-chan-tag { color: #858c94; }
+.modular-rack .rack-chan--rear {
+  background: linear-gradient(180deg, #22262b, #15181b);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.modular-rack .rack-chan .rack-jack-label {
+  background: rgba(15, 17, 19, 0.92);
+  box-shadow: 0 0 0 1px #343940;
+}
+
+/* ------------------------------------------------------------------ graphite mixer inspector, strips and clip cards
+
+   The mixer tab overrides the green ink tokens once, so every strip label, inspector heading and
+   card caption inherits graphite. Track colours, fader caps, meters, LEDs and the EQ handle palette
+   stay untouched. */
+
+[data-testid='mixer-tab'] {
+  --color-ink: #ece9e2;
+  --color-chrome-ink: #b9bfc6;
+  --color-chrome-line: #343940;
+}
+
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] { color: #c9ced4; }
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] section {
+  background: linear-gradient(180deg, #202328, #171a1e) !important;
+  border: 1px solid #343940 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] .us-btn {
+  background: linear-gradient(180deg, #343940, #23272c);
+  border-color: #41474e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.4);
+  color: #e6e3dc;
+}
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] .us-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3c4148, #292d32);
+  color: #f2c28f;
+}
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] .us-lcd-field,
+[data-testid='mixer-tab'] [data-testid='channel-inspector'] .us-lcd-chip {
+  background: linear-gradient(180deg, #1a1d21, #111316) !important;
+  border-color: #3a4047 !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  color: #e6e3dc !important;
+}
+
+[data-testid='clip-picker'] .clip-card { color: #c9ced4; }
+[data-testid='clip-picker'] .clip-card-head {
+  background: linear-gradient(180deg, #2b3036, #202429);
+  border-bottom-color: #343940;
+  color: #e6e3dc;
+}
+[data-testid='clip-picker'] .clip-chip {
+  color: #d6d3cc;
+  background: linear-gradient(180deg, #2d3238, #1f2328);
+  border: 1px solid #3a4047;
+}
+[data-testid='clip-picker'] .clip-chip:hover {
+  color: #f5f1ea;
+  background: #343940;
+  border-color: #cf9560;
+}
+[data-testid='clip-picker'] .clip-chip-bar { color: #9198a0; }
+[data-testid='clip-picker'] [class*='text-[#8d9aa2]'] { color: #858c94 !important; }
+[data-testid='clip-picker'] [class*='border-[#39434a]'] { border-color: #343940 !important; }
+
+.spec-function-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.spec-function-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-position: var(--face-phase, 0) var(--face-phase, 0);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 13%, #000 87%, transparent 100%);
+  opacity: 0.8;
+}
+.spec-function-stages,
+.spec-function-stamp {
+  position: absolute;
+  right: 12px;
+  z-index: 0;
+  color: color-mix(in srgb, var(--sig-accent, #b59a74) 82%, #f4efe4);
+  font: 800 11px/1.15 var(--font-label);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  opacity: 0.28;
+  white-space: nowrap;
+}
+.spec-function-stages { top: 51px; }
+.spec-function-stamp { bottom: 24px; letter-spacing: 0.08em; opacity: 0.34; }
+
+[data-testid='spec-faceplate'] .spec-header,
+[data-testid='spec-faceplate'] .spec-accent-rule,
+[data-testid='spec-faceplate'] .spec-body {
+  position: relative;
+  z-index: 1;
+}
+[data-testid='spec-faceplate'] .spec-family-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.spec-function-crest {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+}
+
+/* Functional module numbering, printed in the upper-right corner of each control well. */
+.spec-module-index {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: color-mix(in srgb, var(--sig-accent, #b59a74) 62%, transparent);
+  font: 800 11px/1 var(--font-label);
+  letter-spacing: 0.04em;
+  opacity: 0.48;
+  pointer-events: none;
+}
+
+/* A quiet functional ruler inside the left edge of the control area. */
+[data-testid='spec-faceplate'] .spec-body::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 1px;
+  width: 1px;
+  background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--sig-accent, #b59a74) 48%, transparent) 0 2px, transparent 2px 8px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* A fixed matrix for the generic synth family: every parameter remains on the panel, but the
+   control wells share rows instead of stacking section cards down a 3U face. */
+[data-testid='spec-faceplate'] .spec-body--synthesis {
+  flex: 0 0 auto;
+  padding: 0 8px !important;
+  overflow: hidden;
+}
+.synth-dense {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.synth-dense__grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  gap: 3px;
+  align-items: stretch;
+}
+.synth-dense__rail {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 0 2px 0 1px;
+  border-right: 1px solid color-mix(in srgb, var(--sig-accent, #c99561) 25%, transparent);
+  color: color-mix(in srgb, var(--sig-accent, #c99561) 70%, #e9e6df);
+  font: 800 11px/1.05 var(--font-label);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  overflow: hidden;
+}
+.synth-dense__rail span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.synth-dense__rail-extra { opacity: 0.55; }
+.synth-dense__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 1px 0;
+  border-left: 1px solid transparent;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(0, 0, 0, 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  overflow: hidden;
+}
+.synth-dense__cell--start { border-left-color: color-mix(in srgb, var(--sig-accent, #c99561) 48%, transparent); }
+.synth-dense__cell > div { width: 100% !important; max-width: 100%; min-width: 0; }
+.synth-dense__empty { visibility: hidden; }
+.synth-dense__cell .spec-knob-svg { margin-top: 0; }
+.spec-knob-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  height: 11px;
+  margin-top: 1px;
+  overflow: hidden;
+  line-height: 1;
+  white-space: nowrap;
+}
+.spec-knob-readout__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: currentColor;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.spec-knob-readout__value {
+  flex: 0 0 auto;
+  font-family: ui-monospace, monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  opacity: 0.86;
+}
+.synth-dense__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+.synth-dense__switch,
+.synth-dense__select,
+.synth-dense__toggle {
+  width: 100%;
+  height: 22px;
+  min-width: 0;
+  padding: 0 3px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #292d32, #14171a);
+  color: var(--sig-accent, #c99561);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 1px rgba(0, 0, 0, 0.35);
+  font: 700 11px/1 ui-monospace, monospace;
+  text-align: center;
+  outline: none;
+}
+.synth-dense__switch { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.synth-dense__select { appearance: auto; cursor: pointer; }
+.synth-dense__select option { background: #181b1f; color: #ebe7df; font: 11px/1.4 ui-sans-serif, system-ui; }
+.synth-dense__toggle { display: flex; align-items: center; justify-content: center; gap: 3px; }
+.synth-dense__led {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+}
+.synth-dense__switch:focus-visible,
+.synth-dense__select:focus-visible,
+.synth-dense__toggle:focus-visible {
+  outline: 2px solid var(--sig-accent, #c99561);
+  outline-offset: 1px;
+}
+.synth-dense__control-label {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: currentColor;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 11px;
+  letter-spacing: 0 !important;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+/* Each function gets its own working surface, control-well topology and accent cadence. */
+[data-face-function='synthesis'] .spec-function-surface::before {
+  background-image:
+    radial-gradient(circle at 22% 8%, color-mix(in srgb, var(--sig-accent) 18%, transparent), transparent 42%),
+    repeating-linear-gradient(90deg, transparent 0 41px, color-mix(in srgb, var(--sig-accent) 12%, transparent) 41px 42px),
+    repeating-linear-gradient(0deg, transparent 0 27px, color-mix(in srgb, var(--sig-accent) 9%, transparent) 27px 28px);
+}
+[data-face-function='synthesis'] .spec-body section {
+  border-top: 2px solid color-mix(in srgb, var(--sig-accent) 52%, transparent) !important;
+}
+[data-face-function='synthesis'] .spec-body section > h4::before {
+  width: 2px !important;
+  height: 9px !important;
+  border-radius: 0 !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='synthesis'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 12px, transparent 12px 17px) !important;
+  opacity: 0.7 !important;
+}
+
+[data-face-function='rhythm'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--sig-accent) 16%, transparent) 0 1px, transparent 1px 21px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--sig-accent) 13%, transparent) 0 1px, transparent 1px 21px),
+    radial-gradient(circle at 75% 15%, color-mix(in srgb, var(--sig-accent) 18%, transparent), transparent 40%);
+}
+[data-face-function='rhythm'] .spec-body section {
+  border-left: 2px solid color-mix(in srgb, var(--sig-accent) 54%, transparent) !important;
+  background-image: repeating-linear-gradient(90deg, color-mix(in srgb, var(--sig-accent) 7%, transparent) 0 1px, transparent 1px 12px) !important;
+}
+[data-face-function='rhythm'] .spec-body section > h4::before {
+  width: 6px !important;
+  height: 3px !important;
+  border-radius: 1px !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='rhythm'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 4px, transparent 4px 8px) !important;
+  opacity: 0.75 !important;
+}
+
+[data-face-function='sampling'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 5px, color-mix(in srgb, var(--sig-accent) 13%, transparent) 5px 7px, transparent 7px 13px),
+    linear-gradient(180deg, transparent 48%, color-mix(in srgb, var(--sig-accent) 13%, transparent) 48% 50%, transparent 50%);
+}
+[data-face-function='sampling'] .spec-body section {
+  border-top: 1px solid color-mix(in srgb, var(--sig-accent) 45%, transparent) !important;
+  background-image: repeating-linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--sig-accent) 5%, transparent) 9px 10px) !important;
+}
+[data-face-function='sampling'] .spec-body section > h4::before {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='sampling'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 2px, transparent 2px 7px) !important;
+  opacity: 0.7 !important;
+}
+
+[data-face-function='dynamics'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(135deg, transparent 0 11px, color-mix(in srgb, var(--sig-accent) 11%, transparent) 11px 12px),
+    radial-gradient(ellipse at 100% 18%, color-mix(in srgb, var(--sig-accent) 18%, transparent), transparent 47%);
+}
+[data-face-function='dynamics'] .spec-body section {
+  border-left: 2px solid color-mix(in srgb, var(--sig-accent) 48%, transparent) !important;
+  background-image: repeating-linear-gradient(0deg, transparent 0 15px, color-mix(in srgb, var(--sig-accent) 6%, transparent) 15px 16px) !important;
+}
+[data-face-function='dynamics'] .spec-body section > h4::before {
+  width: 2px !important;
+  height: 8px !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='dynamics'] .spec-accent-rule {
+  background: linear-gradient(90deg, var(--sig-accent) 0 36%, transparent 36%) !important;
+  opacity: 0.65 !important;
+}
+
+[data-face-function='eq'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 27px, color-mix(in srgb, var(--sig-accent) 14%, transparent) 27px 28px),
+    linear-gradient(0deg, transparent 22%, color-mix(in srgb, var(--sig-accent) 11%, transparent) 22% 23%, transparent 23%);
+}
+[data-face-function='eq'] .spec-body section {
+  border-top: 1px solid color-mix(in srgb, var(--sig-accent) 50%, transparent) !important;
+  background-image: repeating-linear-gradient(90deg, transparent 0 21px, color-mix(in srgb, var(--sig-accent) 6%, transparent) 21px 22px) !important;
+}
+[data-face-function='eq'] .spec-body section > h4::before {
+  width: 9px !important;
+  height: 1px !important;
+  border-radius: 0 !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='eq'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 1px, transparent 1px 11px) !important;
+  opacity: 0.8 !important;
+}
+
+[data-face-function='drive'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--sig-accent) 14%, transparent) 0 2px, transparent 2px 14px),
+    radial-gradient(circle at 18% 82%, color-mix(in srgb, var(--sig-accent) 18%, transparent), transparent 42%);
+}
+[data-face-function='drive'] .spec-body section {
+  border-top: 2px dashed color-mix(in srgb, var(--sig-accent) 58%, transparent) !important;
+}
+[data-face-function='drive'] .spec-body section > h4::before {
+  width: 6px !important;
+  height: 2px !important;
+  transform: skewX(-25deg);
+  background: var(--sig-accent) !important;
+}
+[data-face-function='drive'] .spec-accent-rule {
+  background: repeating-linear-gradient(135deg, var(--sig-accent) 0 5px, transparent 5px 10px) !important;
+  opacity: 0.75 !important;
+}
+
+[data-face-function='modulation'] .spec-function-surface::before {
+  background-image:
+    radial-gradient(circle at 12% 22%, transparent 0 9px, color-mix(in srgb, var(--sig-accent) 15%, transparent) 9px 10px, transparent 10px 22px),
+    repeating-linear-gradient(135deg, transparent 0 17px, color-mix(in srgb, var(--sig-accent) 7%, transparent) 17px 18px);
+  background-size: 56px 56px, auto;
+}
+[data-face-function='modulation'] .spec-body section {
+  border-top: 1px dotted color-mix(in srgb, var(--sig-accent) 64%, transparent) !important;
+}
+[data-face-function='modulation'] .spec-body section > h4::before {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='modulation'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 6px, transparent 6px 10px) !important;
+  opacity: 0.65 !important;
+}
+
+[data-face-function='space'] .spec-function-surface::before {
+  background-image:
+    repeating-radial-gradient(circle at 86% 22%, transparent 0 18px, color-mix(in srgb, var(--sig-accent) 13%, transparent) 18px 19px, transparent 19px 38px),
+    radial-gradient(ellipse at 12% 90%, color-mix(in srgb, var(--sig-accent) 12%, transparent), transparent 48%);
+}
+[data-face-function='space'] .spec-body section {
+  border-top: 1px solid color-mix(in srgb, var(--sig-accent) 42%, transparent) !important;
+  background-image: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--sig-accent) 8%, transparent), transparent 62%) !important;
+}
+[data-face-function='space'] .spec-body section > h4::before {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--sig-accent) 54%, transparent) !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='space'] .spec-accent-rule {
+  background: linear-gradient(90deg, var(--sig-accent), transparent) !important;
+  opacity: 0.6 !important;
+}
+
+[data-face-function='filter'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 33px, color-mix(in srgb, var(--sig-accent) 12%, transparent) 33px 34px),
+    linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--sig-accent) 11%, transparent) 62%);
+}
+[data-face-function='filter'] .spec-body section {
+  border-top: 2px solid color-mix(in srgb, var(--sig-accent) 46%, transparent) !important;
+}
+[data-face-function='filter'] .spec-body section > h4::before {
+  width: 2px !important;
+  height: 9px !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='filter'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 1px, transparent 1px 8px) !important;
+  opacity: 0.7 !important;
+}
+
+[data-face-function='voice'] .spec-function-surface::before {
+  background-image:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--sig-accent) 12%, transparent) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--sig-accent) 9%, transparent) 55%);
+}
+[data-face-function='voice'] .spec-body section {
+  border-left: 2px solid color-mix(in srgb, var(--sig-accent) 43%, transparent) !important;
+}
+[data-face-function='voice'] .spec-body section > h4::before {
+  width: 3px !important;
+  height: 7px !important;
+  background: var(--sig-accent) !important;
+}
+[data-face-function='voice'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 2px, transparent 2px 7px) !important;
+  opacity: 0.7 !important;
+}
+
+[data-face-function='routing'] .spec-function-surface::before {
+  background-image:
+    radial-gradient(circle at 14px 14px, color-mix(in srgb, var(--sig-accent) 18%, transparent) 0 2px, transparent 2.5px),
+    repeating-linear-gradient(90deg, transparent 0 29px, color-mix(in srgb, var(--sig-accent) 8%, transparent) 29px 30px);
+  background-size: 30px 30px, auto;
+}
+[data-face-function='routing'] .spec-body section {
+  border-top: 1px solid color-mix(in srgb, var(--sig-accent) 38%, transparent) !important;
+  border-radius: 0 !important;
+}
+[data-face-function='routing'] .spec-body section > h4::before {
+  width: 5px !important;
+  height: 5px !important;
+  border: 1px solid var(--sig-accent) !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+}
+[data-face-function='routing'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 3px, transparent 3px 7px) !important;
+  opacity: 0.6 !important;
+}
+
+[data-face-function='player'] .spec-function-surface::before {
+  background-image:
+    linear-gradient(135deg, transparent 0 46%, color-mix(in srgb, var(--sig-accent) 9%, transparent) 46% 47%, transparent 47%),
+    repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in srgb, var(--sig-accent) 9%, transparent) 22px 23px);
+}
+[data-face-function='player'] .spec-body section {
+  border-top: 1px solid color-mix(in srgb, var(--sig-accent) 44%, transparent) !important;
+}
+[data-face-function='player'] .spec-body section > h4::before {
+  width: 0 !important;
+  height: 0 !important;
+  border-top: 4px solid transparent !important;
+  border-bottom: 4px solid transparent !important;
+  border-left: 6px solid var(--sig-accent) !important;
+  background: transparent !important;
+}
+[data-face-function='player'] .spec-accent-rule {
+  background: repeating-linear-gradient(90deg, var(--sig-accent) 0 8px, transparent 8px 12px) !important;
+  opacity: 0.7 !important;
+}
+
+/* Stable per-model variation: same function, different edition of the hardware. */
+[data-face-variant='0'] .spec-function-surface::before { opacity: 0.66; }
+[data-face-variant='1'] .spec-function-surface::before { opacity: 0.78; }
+[data-face-variant='2'] .spec-function-surface::before { opacity: 0.9; }
+[data-face-variant='3'] .spec-function-surface::before { opacity: 0.72; }
+[data-face-variant='0'] .spec-function-stamp { letter-spacing: 0.04em; }
+[data-face-variant='1'] .spec-function-stamp { letter-spacing: 0.1em; }
+[data-face-variant='2'] .spec-function-stamp { letter-spacing: 0.16em; }
+[data-face-variant='3'] .spec-function-stamp { letter-spacing: 0.07em; }
+
+/* Function tag and model tagline read as two lines; squeezing both into one row left only a
+   couple of characters of the tagline on narrow faceplates. */
+[data-testid='spec-faceplate'] .spec-tagline {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+[data-testid='spec-faceplate'] .spec-tagline-text {
+  flex: 1 1 100%;
+}
+/* Short model names (Meta Nylon) must still leave room for the full function tag. */
+[data-testid='spec-faceplate'] .spec-brand-plate {
+  min-width: 112px;
 }

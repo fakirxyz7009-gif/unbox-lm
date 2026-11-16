@@ -41,6 +41,7 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
       { key: 'Alt+M', label: 'CV matrix', action: 'toggle_cv_matrix' },
       { key: 'Alt+S', label: 'Audio Stems & Instruments', action: 'open_stems' },
       { key: 'Alt+K', label: 'Show / hide the keyboard dock (Rack, Mixer)', action: 'toggle_keyboard' },
+      { key: 'Alt+P', label: 'Hip-Hop kits: tap, arrow-step or walk the pads', action: 'open_hiphop' },
       { key: 'Alt+Q / `', label: 'Pie menu', action: 'open_pie_center' },
       { key: 'F11 / Alt+G', label: 'Stage mode', action: 'toggle_stage_mode' },
       { key: '? / Alt+H', label: 'This help' },
@@ -51,7 +52,7 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
     icon: Zap,
     accent: 'text-emerald-400 border-emerald-500/40',
     items: [
-      { key: 'Space', label: 'Play / stop', action: 'play_stop' },
+      { key: 'Space', label: 'Play / stop (on the Hip-Hop kits page: start / stop the pad walk)', action: 'play_stop' },
       { key: 'R', label: 'Back to bar 1 (while KEYS plays notes)', action: 'rewind' },
       { key: 'M', label: 'Metronome on / off', action: 'toggle_metro' },
       { key: '[  /  ]', label: 'Tempo −2 / +2 BPM', action: 'bpm_down' },

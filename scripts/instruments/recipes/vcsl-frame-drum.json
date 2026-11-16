@@ -1,0 +1,63 @@
+{
+  "id": "vcsl-frame-drum",
+  "name": "VCSL Frame Drum",
+  "kind": "drums",
+  "category": "world",
+  "description": "Recorded large and small frame drums with open and muted hand strokes at two dynamics and two takes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Frame%20Drum",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual frame-drum performer. The open and muted hits of both drums retain their two dynamics and two takes; the separate hand-only recordings are omitted."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-frame-drum/samples",
+  "lanes": [
+    {
+      "name": "Large Open",
+      "note": 48,
+      "role": "kick",
+      "samples": [
+        "HDrumL_Hit_v2_rr1_Sum.wav",
+        "HDrumL_Hit_v2_rr2_Sum.wav",
+        "HDrumL_Hit_v3_rr1_Sum.wav",
+        "HDrumL_Hit_v3_rr2_Sum.wav"
+      ]
+    },
+    {
+      "name": "Large Muted",
+      "note": 49,
+      "role": "rim",
+      "samples": [
+        "HDrumL_HitMuted_v2_rr1_Sum.wav",
+        "HDrumL_HitMuted_v2_rr2_Sum.wav",
+        "HDrumL_HitMuted_v3_rr1_Sum.wav",
+        "HDrumL_HitMuted_v3_rr2_Sum.wav"
+      ]
+    },
+    {
+      "name": "Small Open",
+      "note": 50,
+      "role": "snare",
+      "samples": [
+        "HDrumS_Hit_v2_rr1_Sum.wav",
+        "HDrumS_Hit_v2_rr2_Sum.wav",
+        "HDrumS_Hit_v3_rr1_Sum.wav",
+        "HDrumS_Hit_v3_rr2_Sum.wav"
+      ]
+    },
+    {
+      "name": "Small Muted",
+      "note": 51,
+      "role": "perc",
+      "samples": [
+        "HDrumS_HitMuted_v2_rr1_Sum.wav",
+        "HDrumS_HitMuted_v2_rr2_Sum.wav",
+        "HDrumS_HitMuted_v3_rr1_Sum.wav",
+        "HDrumS_HitMuted_v3_rr2_Sum.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

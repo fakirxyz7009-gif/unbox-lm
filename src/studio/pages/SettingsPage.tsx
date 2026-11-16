@@ -10,22 +10,11 @@ import type { MonitorState } from '../../audio/mixer/MonitorController.ts';
 import { Btn, Panel, Sel, Slide } from '../ui/controls.tsx';
 import { useFrame } from '../../nexa/useEngine.ts';
 import { clearMidi, learnMidi, MIDI_TARGETS, midiLearning, midiMap, resetMidiMap, subscribeMidiMap } from '../../workstation/midiControls.ts';
+import { describeMidi, MidiHealth } from '../../workstation/MidiHealth.tsx';
 import { localHardwareAi } from '../../ai/hardware/localHardwareAiEngine.ts';
 import { MIDI_NO_INPUT_GUIDANCE } from '../../audio/midi/MidiInput.ts';
 
-const NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-function describeMidi(d: Uint8Array): string {
-  const cmd = d[0] & 0xf0;
-  const ch = (d[0] & 0x0f) + 1;
-  if (cmd === 0x90 && d[2] > 0) return `ch${ch} Note on ${NOTE[d[1] % 12]}${Math.floor(d[1] / 12) - 1} vel ${d[2]}`;
-  if (cmd === 0x80 || cmd === 0x90) return `ch${ch} Note off ${NOTE[d[1] % 12]}${Math.floor(d[1] / 12) - 1}`;
-  if (cmd === 0xb0) return `ch${ch} CC${d[1]} = ${d[2]}${d[1] === 1 ? ' (mod wheel)' : d[1] === 64 ? ' (sustain)' : ''}`;
-  if (cmd === 0xe0) return `ch${ch} Pitch bend ${((d[2] << 7) | d[1]) - 8192}`;
-  if (cmd === 0xd0) return `ch${ch} Aftertouch ${d[1]}`;
-  return `0x${Array.from(d).map((b) => b.toString(16).padStart(2, '0')).join(' ')}`;
-}
-
-/** MIDI: status and ports (from the engine), what hardware notes play, the knob / button map
+/** MIDI: the health check, ports (from the engine), what hardware notes play, the knob / button map
  *  with MIDI Learn, and an activity log. */
 function MidiPanel() {
   const midi = audioEngine.midi;
@@ -53,21 +42,11 @@ function MidiPanel() {
   const target = audioEngine.midiTarget();
   const map = midiMap();
   const learning = midiLearning();
-  const status =
-    midi.status === 'unsupported'
-      ? 'This browser has no Web MIDI (use Chrome / Edge, or the desktop app).'
-      : midi.status === 'blocked'
-        ? 'MIDI access was refused. Allow MIDI for this site, then press Ask again.'
-        : midi.status === 'off'
-          ? 'MIDI is not connected yet. Press Connect MIDI to request access to your controller.'
-        : midi.status !== 'ready'
-          ? 'Looking for MIDI devices…'
-          : '';
   const canRetry = midi.status !== 'unsupported' && (midi.status !== 'ready' || midi.ports.length === 0);
   return (
     <Panel title="MIDI" right={canRetry ? <Btn onClick={() => void midi.refresh()}>{midi.status === 'ready' ? 'Rescan MIDI' : midi.status === 'blocked' ? 'Ask again' : 'Connect MIDI'}</Btn> : undefined}>
       <div className="space-y-2 text-[11px]" data-testid="midi-panel">
-        {status && <div className="text-amber-300">{status}</div>}
+        <MidiHealth />
         <div className="text-slate-400">
           Every connected input plays the selected part: <span className="text-white font-bold">{target?.name ?? 'none (add an instrument)'}</span>. Notes on any channel, velocity, pitch bend,
           mod wheel (CC1) and sustain pedal (CC64) are used. To record notes, select the instrument part, arm its track, then press Record in the transport before playing; stop recording to commit the notes. The Activity log confirms whether key messages arrive. Held keys and the wheels show on the Workstation keyboard.
@@ -98,6 +77,19 @@ function MidiPanel() {
               ))}
             </ul>
           ))}
+        <div className="flex items-center gap-2">
+          <span className="w-24 shrink-0 text-slate-400">Auto-continue</span>
+          <Sel
+            value={String(audioEngine.midiAutoResumeSeconds)}
+            onChange={(v) => audioEngine.setMidiAutoResumeSeconds(Number(v))}
+            options={[{ value: '0', label: 'Off' }, ...[3, 5, 8, 15, 30].map((n) => ({ value: String(n), label: `${n} s` }))]}
+            title="Unplugged mid-take: the take is closed and its notes released. If the same controller comes back within this time, recording continues on that part after a one-bar count-in."
+            className="flex-1"
+          />
+        </div>
+        <div className="text-slate-500">
+          A controller unplugged mid-take closes the take and releases its notes. Back inside this window, recording continues after a one-bar count-in; later, the MIDI strip offers Resume.
+        </div>
         <div className="flex items-center gap-2 pt-1">
           <span className="text-slate-300 font-bold">Knobs, fader &amp; buttons</span>
           <div className="flex-1" />

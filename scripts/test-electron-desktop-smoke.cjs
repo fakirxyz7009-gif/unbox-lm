@@ -1,8 +1,7 @@
 'use strict';
 
-// Launches the real Electron main entry with an isolated profile. The window stays hidden,
-// and the test owns (and terminates) only its own process tree. This is a source-desktop
-// smoke, not a packaged-EXE or audio-device acceptance test.
+// Launches source, unpacked, or portable Electron with an isolated profile. The test owns
+// and terminates only the process tree it launched.
 const fs = require('node:fs');
 const http = require('node:http');
 const net = require('node:net');
@@ -10,6 +9,9 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { prepareRecordingCrash, verifyRecordingRecovery } = require('./electron-recording-recovery.cjs');
+const { prepareMidiRecordingCrash, verifyMidiRecordingRecovery } = require('./electron-midi-recording-recovery.cjs');
+const { createWelcomeProject } = require('./electron-welcome-fixture.cjs');
+const { inspectPortableChild, terminatePortableChild } = require('./electron-portable-fixture.cjs');
 
 const root = path.resolve(__dirname, '..');
 // With no argument this is the source-Electron smoke. Passing a packaged executable keeps the
@@ -17,7 +19,7 @@ const root = path.resolve(__dirname, '..');
 const argSet = new Set(process.argv.slice(2));
 const persistenceMode = argSet.has('--indexeddb-write') ? 'write' : argSet.has('--indexeddb-read') ? 'read' : null;
 if (argSet.has('--indexeddb-write') && argSet.has('--indexeddb-read')) throw new Error('Choose one IndexedDB persistence mode.');
-const recoveryFlags = [
+const recoveryModes = [
   ['--project-recovery-write', 'write'],
   ['--project-recovery-restore', 'restore'],
   ['--project-recovery-verify', 'verify'],
@@ -27,11 +29,18 @@ const recoveryFlags = [
   ['--recording-recovery-crash-write', 'recording-crash-write'],
   ['--recording-recovery-crash-restore', 'recording-crash-restore'],
   ['--recording-recovery-crash-verify', 'recording-crash-verify'],
-].filter(([flag]) => argSet.has(flag));
+];
+const supportedFlags = new Set(['--indexeddb-write', '--indexeddb-read', '--master-capture',
+  '--midi-capture-song', '--midi-capture-pattern', '--reuse-portable', ...recoveryModes.map(([flag]) => flag)]);
+const positionalArgs = [...argSet].filter((arg) => !arg.startsWith('--'));
+const unknownFlag = [...argSet].find((arg) => arg.startsWith('--') && !supportedFlags.has(arg));
+if (unknownFlag) throw new Error(`Unrecognized desktop smoke flag: ${unknownFlag}`);
+if (positionalArgs.length > 1) throw new Error('Pass at most one packaged executable path.');
+const recoveryFlags = recoveryModes.filter(([flag]) => argSet.has(flag));
 if (recoveryFlags.length > 1) throw new Error('Choose one packaged project-recovery mode.');
 const recoveryMode = recoveryFlags[0]?.[1] ?? null;
 if (persistenceMode && recoveryMode) throw new Error('Choose either IndexedDB-sentinel or project-recovery coverage.');
-const packagedExeArg = process.argv.slice(2).find((arg) => !arg.startsWith('--'));
+const packagedExeArg = positionalArgs[0];
 const isPackaged = !!packagedExeArg;
 const electronExe = isPackaged
   ? path.resolve(root, packagedExeArg)
@@ -40,44 +49,62 @@ if (!fs.existsSync(electronExe)) throw new Error(`Electron executable was not fo
 const packagedKind = isPackaged
   ? electronExe.toLowerCase().includes(`${path.sep}win-unpacked${path.sep}`) ? 'unpacked' : 'portable'
   : 'source';
-if (recoveryMode && (!isPackaged || packagedKind === 'portable')) {
-  throw new Error('Packaged project-recovery coverage requires an unpacked executable because the portable wrapper does not propagate the test debugger.');
+const isPortable = packagedKind === 'portable';
+const webBuild = path.join(root, 'dist', 'index.html');
+const reusePortable = argSet.has('--reuse-portable');
+if (reusePortable && (!isPortable || path.relative(root, electronExe) !== path.join('.tmp', 'desktop-portable', 'Unbox-Studio-Portable-Smoke.exe'))) {
+  throw new Error('--reuse-portable requires the dedicated portable smoke artifact.');
 }
+if (isPortable && !reusePortable && fs.statSync(electronExe).mtimeMs < fs.statSync(webBuild).mtimeMs) {
+  throw new Error('The portable executable predates the current web build. Package it again before testing it.');
+}
+if (recoveryMode && !isPackaged) throw new Error('Packaged project-recovery coverage requires a packaged executable.');
 const crashRecoveryMode = recoveryMode?.startsWith('crash-') ?? false;
 const recordingCrashMode = recoveryMode?.startsWith('recording-crash-') ?? false;
 const masterCapture = argSet.has('--master-capture');
-if (masterCapture && !recordingCrashMode) throw new Error('--master-capture requires a recording-recovery phase.');
-const probeScope = recordingCrashMode ? masterCapture ? 'master-recording-recovery-crash' : 'recording-recovery-crash'
+const midiSong = argSet.has('--midi-capture-song');
+const midiPattern = argSet.has('--midi-capture-pattern');
+const midiCapture = midiSong ? 'song_arrangement' : midiPattern ? 'pattern_loop' : null;
+const captureModeCount = [masterCapture, midiSong, midiPattern].filter(Boolean).length;
+if (captureModeCount > 1 || (captureModeCount && !recordingCrashMode)) throw new Error('Choose at most one capture type for a recording-recovery phase.');
+const captureScope = midiCapture ? `midi-${midiSong ? 'song' : 'pattern'}-` : masterCapture ? 'master-' : '';
+const probeScope = recordingCrashMode ? `${captureScope}recording-recovery-crash`
   : crashRecoveryMode ? 'project-recovery-crash' : recoveryMode ? 'project-recovery' : 'desktop';
 const probeDir = path.join(root, '.tmp', `electron-${packagedKind}-${probeScope}-smoke`);
-const startupTimeoutMs = packagedKind === 'portable' ? 90_000 : 15_000;
-const debugPort = persistenceMode || recoveryMode ? 9229 : null;
+const startupTimeoutMs = packagedKind === 'portable' ? 180_000 : 15_000;
+const debugPort = persistenceMode || recoveryMode || packagedKind === 'portable' ? 9229 : null;
 const userData = path.join(probeDir, 'userdata');
 const urlFile = path.join(probeDir, 'app-url.txt');
+const sequenceOriginFile = path.join(probeDir, 'sequence-origin.txt');
 const rendererFile = path.join(probeDir, 'renderer-status.json');
 const recoveryFile = path.join(probeDir, 'project-recovery-target.json');
 const entry = path.join(root, 'electron', 'main.cjs');
+let appUrl = null;
 
 // The write phase starts a complete recovery sequence. Its dedicated disposable profile must not
 // inherit a prior interrupted run's projects, recovery banner or Chromium cache.
 const startsRecoveryRun = recoveryMode === 'write' || recoveryMode === 'crash-write' || recoveryMode === 'recording-crash-write';
-if (startsRecoveryRun && fs.existsSync(probeDir)) {
-  const expectedPath = path.join(fs.realpathSync(root), '.tmp', path.basename(probeDir));
-  if (path.relative(expectedPath, fs.realpathSync(probeDir))) throw new Error('The disposable recovery profile resolves outside its expected path.');
-  fs.rmSync(probeDir, { recursive: true, force: true });
+function prepareProfile() {
+  if (startsRecoveryRun && fs.existsSync(probeDir)) {
+    const expectedPath = path.join(fs.realpathSync(root), '.tmp', path.basename(probeDir));
+    if (path.relative(expectedPath, fs.realpathSync(probeDir))) throw new Error('The disposable recovery profile resolves outside its expected path.');
+    fs.rmSync(probeDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(userData, { recursive: true });
+  if (fs.existsSync(urlFile)) fs.unlinkSync(urlFile);
+  if (fs.existsSync(rendererFile)) fs.unlinkSync(rendererFile);
 }
-fs.mkdirSync(userData, { recursive: true });
-if (fs.existsSync(urlFile)) fs.unlinkSync(urlFile);
-if (fs.existsSync(rendererFile)) fs.unlinkSync(rendererFile);
-if (startsRecoveryRun && fs.existsSync(recoveryFile)) fs.unlinkSync(recoveryFile);
 
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForUrl(timeoutMs) {
+async function waitForUrl(child, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      throw new Error(`The executable exited before serving the app (exit code ${child.exitCode}, signal ${child.signalCode}).`);
+    }
     if (fs.existsSync(urlFile)) {
       const value = fs.readFileSync(urlFile, 'utf8').trim();
       if (/^http:\/\/127\.0\.0\.1:\d+\/$/.test(value)) return value;
@@ -85,26 +112,6 @@ async function waitForUrl(timeoutMs) {
     await wait(100);
   }
   throw new Error(`Electron main did not load its real app URL within ${Math.round(timeoutMs / 1_000)} seconds.`);
-}
-
-/**
- * electron-builder's portable wrapper forwards CLI flags but not our test-only environment
- * variables to the extracted child. The production app still owns its first fixed port when the
- * preflight is clear, so use that observable UI/API boundary for this one wrapper mode.
- */
-async function waitForPortableUrl(timeoutMs) {
-  const url = 'http://127.0.0.1:47821/';
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const response = await get(url);
-      if (response.status === 200 && /<!doctype html>/i.test(response.body)) return url;
-    } catch {
-      // Extraction and app startup have not reached the loopback listener yet.
-    }
-    await wait(200);
-  }
-  throw new Error(`Portable Electron app did not serve its fixed loopback URL within ${Math.round(timeoutMs / 1_000)} seconds.`);
 }
 
 async function waitForRendererStatus(timeoutMs) {
@@ -178,10 +185,10 @@ async function withRendererDebugger(label, task, { retryTask = true } = {}) {
     let taskStarted = false;
     try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`);
-      const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().startsWith('http://127.0.0.1:'));
+      const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url() === appUrl);
       if (!page) throw new Error('The Electron renderer was not exposed through the test debugger.');
       taskStarted = true;
-      const value = await task(page);
+      const value = await task(page, browser);
       await browser.close();
       return value;
     } catch (error) {
@@ -319,7 +326,9 @@ async function verifyPackagedProjectRecovery(mode) {
   if (!mode) return;
   const recoveryBpm = 137;
   if (mode === 'write') {
-    const target = await withRendererDebugger('project-recovery setup', async (page) => page.evaluate(async ({ bpm }) => {
+    const target = await withRendererDebugger('project-recovery setup', async (page) => {
+      await createWelcomeProject(page);
+      return page.evaluate(async ({ bpm }) => {
       const db = await new Promise((resolve, reject) => {
         const request = indexedDB.open('unbox-studio');
         request.onsuccess = () => resolve(request.result);
@@ -354,7 +363,8 @@ async function verifyPackagedProjectRecovery(mode) {
       } finally {
         db.close();
       }
-    }, { bpm: recoveryBpm }));
+      }, { bpm: recoveryBpm });
+    }, { retryTask: false });
     fs.writeFileSync(recoveryFile, JSON.stringify(target), 'utf8');
     return;
   }
@@ -387,6 +397,13 @@ async function verifyPackagedProjectRecovery(mode) {
 async function prepareAbruptProjectRecovery() {
   const recoveryBpm = 139;
   const target = await withRendererDebugger('abrupt project-recovery setup', async (page) => {
+    await createWelcomeProject(page);
+    // Keep normal autosave enabled, with time for the portable ownership check
+    // between the prompt snapshot and the forced stop.
+    await page.getByRole('button', { name: 'Main menu', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Projects…', exact: true }).click();
+    await page.locator('label').filter({ hasText: 'Autosave every' }).locator('select').selectOption('60');
+    await page.getByTestId('tab-workstation').click();
     const tempo = page.getByLabel('Tempo (BPM)', { exact: true });
     await tempo.fill(String(recoveryBpm));
     await tempo.press('Enter');
@@ -402,7 +419,7 @@ async function prepareAbruptProjectRecovery() {
       await wait(100);
     }
     throw new Error(`The renderer did not persist an unsaved recovery before the full autosave: ${JSON.stringify(state)}`);
-  });
+  }, { retryTask: false });
   fs.writeFileSync(recoveryFile, JSON.stringify(target), 'utf8');
 }
 
@@ -411,7 +428,12 @@ async function verifyAbruptProjectRecovery(mode) {
   await withRendererDebugger(`abrupt project-recovery ${mode}`, async (page) => {
     if (mode === 'crash-restore') {
       const restore = page.getByRole('button', { name: 'Restore', exact: true });
-      await restore.waitFor({ state: 'visible', timeout: 10_000 });
+      try {
+        await restore.waitFor({ state: 'visible', timeout: 15_000 });
+      } catch (error) {
+        const state = await inspectRendererRecovery(page);
+        throw new Error(`The abrupt project recovery banner did not appear: ${JSON.stringify(state)}`, { cause: error });
+      }
       await restore.click();
       await page.waitForFunction((bpm) => {
         const tempo = document.querySelector('input[aria-label="Tempo (BPM)"]')?.value;
@@ -424,17 +446,7 @@ async function verifyAbruptProjectRecovery(mode) {
     }
     const state = await inspectPackagedProject(page, target.projectId);
     assertRecoveredProject(state, target, mode);
-  });
-}
-
-function stopWindowsListener(port) {
-  // The portable preflight requires this port to be free, then this test starts the only app that
-  // may claim it. Stopping its exact listener PID is safer than a process-name search and cleans
-  // up a self-extracted child whose wrapper parent may have already exited.
-  const command = `$listener = Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Stop-Process -Id $listener.OwningProcess -Force }`;
-  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], { stdio: 'ignore', windowsHide: true });
-  if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`Could not stop portable smoke listener on port ${port}.`);
+  }, { retryTask: false });
 }
 
 async function stop(child) {
@@ -449,6 +461,22 @@ async function stop(child) {
   // Chromium children. It never searches for or terminates another Electron instance.
   spawnSync('taskkill.exe', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore', windowsHide: true });
 }
+
+async function waitForPortableWrapper(wrapper) {
+  if (wrapper.exitCode !== null || wrapper.signalCode !== null) return;
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      wrapper.off('exit', onExit);
+      reject(new Error('The portable wrapper did not exit after the extracted app stopped.'));
+    }, 15_000);
+    function onExit() {
+      clearTimeout(timer);
+      resolve();
+    }
+    wrapper.once('exit', onExit);
+  });
+}
+
 
 /** Force-kills only the Electron process tree this smoke script started. */
 async function crash(child) {
@@ -468,11 +496,8 @@ async function crash(child) {
 async function main() {
   const output = [];
   let appPort = null;
-  const portablePort = packagedKind === 'portable' ? 47821 : null;
-  if (portablePort !== null && await portOpen(portablePort)) {
-    throw new Error(`Portable smoke needs fixed port ${portablePort}, but it is already in use; it will not disturb another app.`);
-  }
   if (debugPort !== null && await portOpen(debugPort)) throw new Error(`Packaged renderer smoke needs debug port ${debugPort}, but it is already in use.`);
+  prepareProfile();
   // The source test needs --no-sandbox on this restricted Windows harness. A packaged executable
   // must use its normal production sandbox; otherwise this would only be a diagnostic launch.
   const launchArgs = [
@@ -480,6 +505,7 @@ async function main() {
     '--disable-gpu',
     `--user-data-dir=${userData}`,
     ...(debugPort !== null ? [`--remote-debugging-port=${debugPort}`] : []),
+    ...(isPortable ? ['--enable-automation'] : []),
     ...(isPackaged ? [] : [entry]),
   ];
   const child = spawn(electronExe, [
@@ -496,8 +522,36 @@ async function main() {
   });
   child.stdout.on('data', (chunk) => output.push(chunk.toString()));
   child.stderr.on('data', (chunk) => output.push(chunk.toString()));
+  let portableIdentity = null;
+  let portableStopped = false;
+  const verifyPortableShutdown = async (browser) => {
+    const verified = await inspectPortableChild(browser, userData, debugPort, child);
+    if (verified.pid !== portableIdentity?.pid || verified.executablePath !== portableIdentity?.executablePath) {
+      throw new Error('The extracted app identity changed before shutdown.');
+    }
+    return verified;
+  };
+  const forceStop = async () => {
+    if (!isPortable) return crash(child);
+    const verified = await withRendererDebugger('portable shutdown ownership', (_page, browser) =>
+      verifyPortableShutdown(browser), { retryTask: false });
+    terminatePortableChild(verified.pid);
+    portableStopped = true;
+    await waitForPortableWrapper(child);
+  };
+  const closePortable = async () => {
+    await withRendererDebugger('portable shutdown ownership', async (page, browser) => {
+      await verifyPortableShutdown(browser);
+      // The write phase already simulated the crash. Later restarts model a
+      // normal close after restoring, including the browser storage shutdown.
+      await page.close({ runBeforeUnload: true });
+    }, { retryTask: false });
+    await waitForPortableWrapper(child);
+    portableStopped = true;
+  };
   try {
-    const url = packagedKind === 'portable' ? await waitForPortableUrl(startupTimeoutMs) : await waitForUrl(startupTimeoutMs);
+    const url = await waitForUrl(child, startupTimeoutMs);
+    appUrl = url;
     appPort = Number(new URL(url).port);
     const response = await get(url);
     if (response.status !== 200 || !/<!doctype html>/i.test(response.body)) {
@@ -516,55 +570,89 @@ async function main() {
     if (!apiStatus || typeof apiStatus.scanning !== 'boolean' || typeof apiStatus.rootsAvailable !== 'boolean') {
       throw new Error(`Electron API bundle returned an invalid VST status: ${apiResponse.body.slice(0, 160)}`);
     }
-    if (packagedKind !== 'portable') {
+    if (!isPortable) {
       const renderer = await waitForRendererStatus(15_000);
       if (renderer.error || renderer.readyState !== 'complete' || !renderer.hasRoot || renderer.rootChildren < 1 || !renderer.hasTitleBar) {
         throw new Error(`Electron renderer did not mount the Unbox shell: ${JSON.stringify(renderer)}`);
       }
+    } else {
+      await withRendererDebugger('portable renderer ready', async (page, browser) => {
+        portableIdentity = await inspectPortableChild(browser, userData, debugPort, child);
+        await page.getByTestId('title-bar').waitFor({ state: 'attached', timeout: 15_000 });
+      }, { retryTask: false });
+    }
+    if (persistenceMode === 'write' || startsRecoveryRun) {
+      fs.writeFileSync(sequenceOriginFile, url, 'utf8');
+    } else if (persistenceMode || recoveryMode) {
+      const expected = fs.readFileSync(sequenceOriginFile, 'utf8');
+      if (url !== expected) throw new Error(`The packaged app started at ${url} instead of ${expected}. IndexedDB is scoped to the original address. Restart the complete test with stable ports.`);
     }
     if (persistenceMode) await verifyIndexedDbPersistence(persistenceMode);
     if (recordingCrashMode) {
+      if (midiCapture) {
+        if (recoveryMode === 'recording-crash-write') {
+          const target = await withRendererDebugger('active MIDI recording', (page) => prepareMidiRecordingCrash(page, midiCapture), { retryTask: false });
+          fs.writeFileSync(recoveryFile, JSON.stringify(target), 'utf8');
+          await forceStop();
+          console.log(`PASS: force-stopped the test-owned Electron process during ${midiCapture} with two durable MIDI notes.`);
+        } else {
+          const target = JSON.parse(fs.readFileSync(recoveryFile, 'utf8'));
+          if (target.mode !== midiCapture) throw new Error('The saved MIDI fixture was created for a different capture mode.');
+          const restore = recoveryMode === 'recording-crash-restore';
+          await withRendererDebugger('MIDI recording recovery', (page) => verifyMidiRecordingRecovery(page, target, restore), { retryTask: false });
+          console.log(`PASS: ${restore ? 'recovered and saved' : 'reopened'} two ${midiCapture} MIDI notes with the original project material intact.`);
+        }
+        return;
+      }
       const captureLabel = masterCapture ? 'master output' : 'armed audio track';
       if (recoveryMode === 'recording-crash-write') {
         const target = await withRendererDebugger('active audio recording', (page) => prepareRecordingCrash(page, masterCapture), { retryTask: false });
         fs.writeFileSync(recoveryFile, JSON.stringify(target), 'utf8');
-        await crash(child);
+        await forceStop();
         console.log(`PASS: force-stopped the test-owned Electron process tree during ${captureLabel} recording with ${target.verifiedFrames} committed stereo frames.`);
       } else {
         const target = JSON.parse(fs.readFileSync(recoveryFile, 'utf8'));
         if (target.master !== masterCapture) throw new Error('The saved recording fixture was created for a different capture path.');
         const restore = recoveryMode === 'recording-crash-restore';
         const audio = await withRendererDebugger('recording recovery', (page) => verifyRecordingRecovery(page, target, restore), { retryTask: false });
+        if (restore) fs.writeFileSync(recoveryFile, JSON.stringify({ ...target, assetFingerprint: audio.assetFingerprint }), 'utf8');
         console.log(`PASS: ${restore ? 'recovered and saved' : 'reopened'} ${audio.frames} frames of the captured stereo take in project ${target.projectId}.`);
       }
       return;
     }
     if (recoveryMode === 'crash-write') {
       await prepareAbruptProjectRecovery();
-      await crash(child);
+      await forceStop();
       console.log('PASS: packaged renderer persisted a live recovery snapshot before the test-owned Electron process tree was force-stopped.');
       return;
     }
     if (crashRecoveryMode) await verifyAbruptProjectRecovery(recoveryMode);
     else await verifyPackagedProjectRecovery(recoveryMode);
     const label = packagedKind === 'portable' ? 'portable Electron app' : isPackaged ? 'unpacked Electron app' : 'real Electron main';
-    const verification = packagedKind === 'portable'
-      ? 'served index.html and /api/vst/status from its self-extracted child'
-      : 'served index.html and /api/vst/status, and mounted the Unbox renderer shell';
+    const verification = 'served index.html and /api/vst/status, and mounted the Unbox renderer shell';
     const coverage = persistenceMode
       ? ` and ${persistenceMode === 'write' ? 'wrote' : 'read'} the packaged IndexedDB sentinel`
       : recoveryMode
         ? ` and ${recoveryMode === 'write' ? 'staged a valid project recovery record' : recoveryMode === 'restore' ? 'restored a project through the live Recovery banner' : recoveryMode === 'crash-restore' ? 'restored an app-written recovery through the live Recovery banner after a forced exit' : 'reopened the restored project without a recovery banner'}`
         : '';
-    console.log(`PASS: ${label} loaded ${url} in a hidden isolated window and ${verification}${coverage}.`);
+    console.log(`PASS: ${label} loaded ${url} with an isolated test profile and ${verification}${coverage}.`);
   } catch (error) {
     const detail = output.join('').trim();
     throw new Error(`${error instanceof Error ? error.message : String(error)}${detail ? `\nElectron output:\n${detail}` : ''}`);
   } finally {
-    await stop(child);
-    const cleanupPort = appPort ?? portablePort;
-    if (portablePort !== null && cleanupPort !== null && await portOpen(cleanupPort)) stopWindowsListener(cleanupPort);
-    if (cleanupPort !== null) await waitForPortClosed(cleanupPort);
+    if (!portableStopped && isPortable && portableIdentity && await portOpen(debugPort)) {
+      try {
+        await closePortable();
+      } catch (error) {
+        if (await portOpen(debugPort)) await forceStop();
+        throw new Error('The portable fixture could not close cleanly.', { cause: error });
+      }
+    } else if (!portableStopped && isPortable && child.exitCode === null && child.signalCode === null) {
+      // Startup may fail before verification. The spawned wrapper PID is still ours. Do not
+      // use the port alone to identify or kill a process.
+      await crash(child);
+    } else if (!isPortable) await stop(child);
+    if (appPort !== null) await waitForPortClosed(appPort);
     if (debugPort !== null) await waitForPortClosed(debugPort);
   }
 }

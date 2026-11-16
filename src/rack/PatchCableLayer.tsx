@@ -56,8 +56,8 @@ interface DragState {
 const DRAG_THRESHOLD = 5;
 const SNAP_RADIUS = 28;
 const NEW_CABLE_COLORS: Record<CableKind, string[]> = {
-  audio: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6'],
-  cv: ['#eab308', '#06b6d4', '#a3e635', '#d946ef'],
+  audio: ['#ef4444', '#f59e0b', '#3b82f6', '#7f9a8e', '#ec4899', '#8b5cf6'],
+  cv: ['#eab308', '#06b6d4', '#a6a46a', '#d946ef'],
 };
 
 export class CableController {

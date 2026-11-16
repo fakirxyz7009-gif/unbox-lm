@@ -1,0 +1,74 @@
+{
+  "id": "vcsl-cowbells",
+  "name": "VCSL Cowbells",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded cowbells with normal, muted, struck and double-stroke variations.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Cowbells",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Two cowbells are represented. Normal, muted and struck tones keep their recorded dynamic variants; the second cowbell also includes double strokes."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-cowbells/samples",
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Cowbell 1 Normal",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "Cowbell1_Normal_v2_rr1_Mid.wav",
+        "Cowbell1_Normal_v3_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Cowbell 1 Muted",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "Cowbell1_Muted_v2_rr1_Mid.wav",
+        "Cowbell1_Muted_v3_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Cowbell 1 Struck",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "Cowbell1_Hit_v2_rr1_Mid.wav",
+        "Cowbell1_Hit_v3_rr1_Mid.wav",
+        "Cowbell1_Hit_v4_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Cowbell 2 Normal",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "Cowbell2_Normal_v2_rr1_Mid.wav",
+        "Cowbell2_Normal_v3_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Cowbell 2 Muted",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "Cowbell2_Muted_v2_rr1_Mid.wav",
+        "Cowbell2_Muted_v3_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Cowbell 2 Double",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "Cowbell2_Double_v2_rr1_Mid.wav",
+        "Cowbell2_Double_v3_rr1_Mid.wav"
+      ]
+    }
+  ]
+}

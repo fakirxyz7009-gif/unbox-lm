@@ -12,20 +12,32 @@ import { SpecDevice } from '../audio/spec/SpecDevice.ts';
 import { VstPluginDevice } from '../vst/VstPluginDevice.ts';
 import { DeviceFaceplate } from '../components/faceplates/DeviceFaceplate.tsx';
 import { SpecFaceplate } from '../components/faceplates/SpecFaceplate.tsx';
+import { ChoraleFaceplate } from '../components/faceplates/ChoraleFaceplate.tsx';
+import { PolytoneFaceplate } from '../components/faceplates/PolytoneFaceplate.tsx';
+import { Seer6Faceplate } from '../components/faceplates/Seer6Faceplate.tsx';
 import { VstFaceplate } from './VstFaceplate.tsx';
 import { MixerUnitFaceplate, isMixerUnit } from './MixerUnitFaceplate.tsx';
 import { DeviceSampleBar, isAudioFile } from './DeviceSampleBar.tsx';
 
-export const DeviceFront: React.FC<{ device: BaseDevice; onUpdate: () => void; onMessage: (msg: string, type: 'success' | 'error' | 'info') => void }> = ({
+export const DeviceFront: React.FC<{ device: BaseDevice; onUpdate: () => void; onMessage: (msg: string, type: 'success' | 'error' | 'info') => void; dark?: boolean }> = ({
   device,
   onUpdate,
   onMessage,
+  dark = false,
 }) => {
   const face =
     device instanceof VstPluginDevice ? (
       <VstFaceplate device={device} onUpdate={onUpdate} onMessage={onMessage} />
     ) : device instanceof SpecDevice ? (
-      <SpecFaceplate device={device} onUpdate={onUpdate} />
+      device.spec.type === 'humana' ? (
+        <ChoraleFaceplate device={device} onUpdate={onUpdate} />
+      ) : device.spec.type === 'polytone' ? (
+        <PolytoneFaceplate device={device} onUpdate={onUpdate} />
+      ) : device.spec.type === 'prophet6' ? (
+        <Seer6Faceplate device={device} onUpdate={onUpdate} />
+      ) : (
+        <SpecFaceplate device={device} onUpdate={onUpdate} dark={dark} />
+      )
     ) : isMixerUnit(device) ? (
       <MixerUnitFaceplate device={device} />
     ) : (

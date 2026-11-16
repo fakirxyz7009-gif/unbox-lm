@@ -1,0 +1,23 @@
+{
+  "id": "vcsl-kalimba-tanzania",
+  "name": "VCSL Kalimba Tanzania",
+  "kind": "melodic",
+  "category": "world",
+  "description": "Recorded Tanzanian kalimba with metallic tine plucks, a wide range and natural one-shot decay.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Kalimba%2C%20Tanzania",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source calls this a kalimba from Tanzania and maps 27 tine recordings across G#1-C#6. Duplicate roots are separate tine takes and remain round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-kalimba-tanzania/samples",
+  "notes": "*.wav",
+  "keyRange": [
+    32,
+    85
+  ],
+  "maxSeconds": 4,
+  "release": 0.3,
+  "notePolyphony": 3,
+  "oneShot": true
+}

@@ -1,0 +1,75 @@
+{
+  "id": "vcsl-gong",
+  "name": "VCSL Gong",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded large gongs with four dynamics on the first gong, two on the second, and a scraped articulation.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Gong%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source contains two gongs: the first at four dynamics and the second at two, plus a scrape. Each recording is mapped to its own pad so the full dynamic spread remains playable."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-gong/samples",
+  "lanes": [
+    {
+      "name": "Gong 1 Soft",
+      "note": 36,
+      "role": "cymbal",
+      "samples": [
+        "gong_p.wav"
+      ]
+    },
+    {
+      "name": "Gong 1 Medium",
+      "note": 37,
+      "role": "cymbal",
+      "samples": [
+        "gong_mf.wav"
+      ]
+    },
+    {
+      "name": "Gong 1 Loud",
+      "note": 38,
+      "role": "cymbal",
+      "samples": [
+        "gong_f.wav"
+      ]
+    },
+    {
+      "name": "Gong 1 Maximum",
+      "note": 39,
+      "role": "cymbal",
+      "samples": [
+        "gong_fff.wav"
+      ]
+    },
+    {
+      "name": "Gong 2 Soft",
+      "note": 40,
+      "role": "cymbal",
+      "samples": [
+        "gong_2_mp.wav"
+      ]
+    },
+    {
+      "name": "Gong 2 Loud",
+      "note": 41,
+      "role": "cymbal",
+      "samples": [
+        "gong_2_f.wav"
+      ]
+    },
+    {
+      "name": "Scrape",
+      "note": 42,
+      "role": "cymbal",
+      "samples": [
+        "gong_scrape_mf.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 6,
+  "release": 0.2,
+  "notePolyphony": 2
+}

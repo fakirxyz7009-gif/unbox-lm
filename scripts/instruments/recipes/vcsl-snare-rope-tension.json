@@ -1,0 +1,261 @@
+{
+  "id": "vcsl-snare-rope-tension",
+  "name": "VCSL Rope-Tension Snare",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded rope-tension snare with high and low tunings, muted hits, rim and stick strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Snare%20Drum%2C%20Rope%20Tension",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-snare-rope-tension/samples",
+  "lanes": [
+    {
+      "name": "High Snare",
+      "note": 36,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "RopeSnare_hi_sn_Main_vl1_rr1.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl1_rr2.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl2_rr1.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl2_rr2.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl3_rr1.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl3_rr3.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl4_rr1.wav",
+          "vel": [
+            96,
+            127
+          ]
+        },
+        {
+          "file": "RopeSnare_hi_sn_Main_vl4_rr2.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Low Snare",
+      "note": 37,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "RopeSnare_low_sn_Main_vl1_rr1.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "RopeSnare_low_sn_Main_vl1_rr2.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "RopeSnare_low_sn_Main_vl2_rr1.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "RopeSnare_low_sn_Main_vl2_rr2.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "RopeSnare_low_sn_Main_vl3_rr1.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "RopeSnare_low_sn_Main_vl3_rr3.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Low Muted",
+      "note": 38,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "RopeSnare_low_ns_Main_vl1_rr2.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "RopeSnare_low_ns_Main_vl1_rr3.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "RopeSnare_low_ns_Main_vl2_rr1.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "RopeSnare_low_ns_Main_vl2_rr2.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "RopeSnare_low_ns_Main_vl3_rr1.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "RopeSnare_low_ns_Main_vl3_rr2.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Low Snare B",
+      "note": 39,
+      "role": "snare",
+      "samples": [
+        {
+          "file": "RopeSnare_low_tsn_Main_vl1_rr1.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl1_rr2.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl2_rr1.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl2_rr2.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl3_rr1.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl3_rr2.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl4_rr1.wav",
+          "vel": [
+            96,
+            127
+          ]
+        },
+        {
+          "file": "RopeSnare_low_tsn_Main_vl4_rr4.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Side Stick",
+      "note": 40,
+      "role": "rim",
+      "samples": [
+        "RopeSnare_sidestick_Main_vl2_rr1.wav",
+        "RopeSnare_sidestick_Main_vl2_rr2.wav"
+      ]
+    },
+    {
+      "name": "Stick",
+      "note": 41,
+      "role": "rim",
+      "samples": [
+        "RopeSnare_stick_Main_vl1_rr1.wav",
+        "RopeSnare_stick_Main_vl1_rr2.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2
+}

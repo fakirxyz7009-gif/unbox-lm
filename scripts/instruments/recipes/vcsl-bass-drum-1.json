@@ -1,0 +1,82 @@
+{
+  "id": "vcsl-bass-drum-1",
+  "name": "VCSL Orchestral Bass Drum",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded orchestral bass drum with four dynamics and two round robins, mapped as a one-shot pad.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Bass%20Drum%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source records four dynamics with two round robins each; this pack preserves both on one pad. The close summed microphone recording is used throughout."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-bass-drum-1/samples",
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Bass Drum",
+      "note": 36,
+      "role": "kick",
+      "samples": [
+        {
+          "file": "BDrumNew_hit_v2_rr1_Sum.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v2_rr2_Sum.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v3_rr1_Sum.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v3_rr2_Sum.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v5_rr1_Sum.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v5_rr2_Sum.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v7_rr1_Sum.wav",
+          "vel": [
+            96,
+            127
+          ]
+        },
+        {
+          "file": "BDrumNew_hit_v7_rr2_Sum.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    }
+  ]
+}

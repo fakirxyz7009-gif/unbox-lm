@@ -1,0 +1,83 @@
+{
+  "id": "vcsl-flexatone",
+  "name": "VCSL Flexatone",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded flexatone with short slaps, long bends, fast wobbles and extended performances.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Flexatone",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The eight source performances are mapped as separate pads: short, long, extra-long, fast and slap articulations. They are one-shots."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-flexatone/samples",
+  "lanes": [
+    {
+      "name": "Short 1",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "flexatone1.wav"
+      ]
+    },
+    {
+      "name": "Short 2",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "flexatone2.wav"
+      ]
+    },
+    {
+      "name": "Long 1",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "flexatone_long.wav"
+      ]
+    },
+    {
+      "name": "Long 2",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "flexatone_long2.wav"
+      ]
+    },
+    {
+      "name": "Extra Long",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "flexatone_extralong.wav"
+      ]
+    },
+    {
+      "name": "Fast",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "flexatone_fast.wav"
+      ]
+    },
+    {
+      "name": "Slap 1",
+      "note": 42,
+      "role": "perc",
+      "samples": [
+        "flexatone_slap1.wav"
+      ]
+    },
+    {
+      "name": "Slap 2",
+      "note": 43,
+      "role": "perc",
+      "samples": [
+        "flexatone_slap2.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 5,
+  "release": 0.2,
+  "notePolyphony": 2
+}

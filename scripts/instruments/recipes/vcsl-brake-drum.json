@@ -1,0 +1,175 @@
+{
+  "id": "vcsl-brake-drum",
+  "name": "VCSL Brake Drum",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded brake drums played with hammers, suspended mallets, yarn mallets and a bow.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Brake%20Drum",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Two brake drums and four playing methods are mapped. Hammer and yarn-mallet strikes retain three dynamics; suspended strikes retain two; the bowed takes are round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-brake-drum/samples",
+  "lanes": [
+    {
+      "name": "Brake Drum 1 Hammer",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "BrakeDrum1_Hammer_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "BrakeDrum1_Hammer_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "BrakeDrum1_Hammer_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drum 2 Hammer",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "BrakeDrum2_Hammer1_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "BrakeDrum2_Hammer1_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drum 2 Hammer 3",
+      "note": 42,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "BrakeDrum2_Hammer3_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "BrakeDrum2_Hammer3_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "BrakeDrum2_Hammer3_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drum 1 Suspended",
+      "note": 38,
+      "role": "cymbal",
+      "samples": [
+        {
+          "file": "BrakeDrum1_Susp_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "BrakeDrum1_Susp_v3_rr1_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drum 2 Suspended",
+      "note": 39,
+      "role": "cymbal",
+      "samples": [
+        {
+          "file": "BrakeDrum2_Susp_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            63
+          ]
+        },
+        {
+          "file": "BrakeDrum2_Susp_v2_rr1_Mid.wav",
+          "vel": [
+            64,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drum 1 Yarn Mallet",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "BrakeDrum1_YarnM_v1_rr1_Mid.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "BrakeDrum1_YarnM_v2_rr1_Mid.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "BrakeDrum1_YarnM_v3_rr1_Mid.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brake Drums Bowed",
+      "note": 41,
+      "role": "cymbal",
+      "samples": [
+        "BrakeDrum1_Bowed_rr2_Mid.wav",
+        "BrakeDrum2_Bowed_rr1_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

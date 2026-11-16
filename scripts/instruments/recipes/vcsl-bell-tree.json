@@ -1,0 +1,107 @@
+{
+  "id": "vcsl-bell-tree",
+  "name": "VCSL Bell Tree",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded bell tree with six individually struck bells and five glissando strokes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Bell%20Tree",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The six individual bells and five stroke recordings are mapped as separate pads. The mid microphone recording is used throughout."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-bell-tree/samples",
+  "lanes": [
+    {
+      "name": "Bell A#5",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_A#5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Bell C5",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_C5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Bell D5",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_D5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Bell E5",
+      "note": 39,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_E5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Bell F#5",
+      "note": 40,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_F#5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Bell G#5",
+      "note": 41,
+      "role": "perc",
+      "samples": [
+        "BellTree_Hit_G#5_rr1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Stroke 1",
+      "note": 42,
+      "role": "perc",
+      "samples": [
+        "BellTree_Stroke_1_Mid.wav"
+      ]
+    },
+    {
+      "name": "Stroke 3",
+      "note": 43,
+      "role": "perc",
+      "samples": [
+        "BellTree_Stroke_3_Mid.wav"
+      ]
+    },
+    {
+      "name": "Stroke 4",
+      "note": 44,
+      "role": "perc",
+      "samples": [
+        "BellTree_Stroke_4_Mid.wav"
+      ]
+    },
+    {
+      "name": "Stroke 6",
+      "note": 45,
+      "role": "perc",
+      "samples": [
+        "BellTree_Stroke_6_Mid.wav"
+      ]
+    },
+    {
+      "name": "Stroke 10",
+      "note": 46,
+      "role": "perc",
+      "samples": [
+        "BellTree_Stroke_10_Mid.wav"
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

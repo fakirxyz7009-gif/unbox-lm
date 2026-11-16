@@ -1,0 +1,21 @@
+{
+  "id": "vcsl-mbira-dzavadzimu",
+  "name": "VCSL Mbira dzaVadzimu",
+  "kind": "melodic",
+  "category": "world",
+  "description": "Recorded Zimbabwean mbira dzaVadzimu in the Nyamaropa tuning, with its characteristic metallic tine attack and alternate takes.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Mbira%20dzaVadzimu%20Nyamaropa%2C%20Zimbabwe%2C%20Low%20B",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual mbira performer. This is the Nyamaropa-tuned mbira dzaVadzimu in low B. The source's two B3 and two C#4 tines remain separate alternate takes for those pitches."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-mbira-dzavadzimu/samples",
+  "notes": "MBira4_pluck_Main_*.wav",
+  "keyRange": [33, 73],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 3
+}

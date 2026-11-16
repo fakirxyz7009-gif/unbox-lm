@@ -1,0 +1,24 @@
+{
+  "id": "vcsl-clash-cymbals",
+  "name": "VCSL Clash Cymbals",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded orchestral clash cymbals at four dynamic levels plus a short choked stroke, with two takes per level.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Clash%20Cymbals%201",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual percussionist. The four crash dynamics and the short choked stroke each keep both recorded takes as round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-clash-cymbals/samples",
+  "lanes": [
+    { "name": "Crash PP", "note": 48, "role": "cymbal", "samples": ["cymbal_crash1_pp1.wav", "cymbal_crash1_pp2.wav"] },
+    { "name": "Crash MP", "note": 49, "role": "cymbal", "samples": ["cymbal_crash1_mp1.wav", "cymbal_crash1_mp2.wav"] },
+    { "name": "Crash MF", "note": 50, "role": "cymbal", "samples": ["cymbal_crash1_mf1.wav", "cymbal_crash1_mf2.wav"] },
+    { "name": "Crash FF", "note": 51, "role": "cymbal", "samples": ["cymbal_crash1_ff2.wav", "cymbal_crash1_ff3.wav"] },
+    { "name": "Short Choke", "note": 52, "role": "cymbal", "samples": ["cymbal_crash1_short1.wav", "cymbal_crash1_short2.wav"] }
+  ],
+  "maxSeconds": 4,
+  "release": 0.2,
+  "notePolyphony": 2
+}

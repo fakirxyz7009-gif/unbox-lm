@@ -1,0 +1,166 @@
+{
+  "id": "vcsl-cajon",
+  "name": "VCSL Cajon",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded cajon with three hand-strike positions across soft, medium and loud dynamics.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Cajon",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-cajon/samples",
+  "lanes": [
+    {
+      "name": "Cajon Hit 1",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Cajon_hit1_mp_rr1.wav",
+          "vel": [
+            1,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit1_mp_rr2.wav",
+          "vel": [
+            1,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit1_f_rr1.wav",
+          "vel": [
+            85,
+            105
+          ]
+        },
+        {
+          "file": "Cajon_hit1_f_rr2.wav",
+          "vel": [
+            85,
+            105
+          ]
+        },
+        {
+          "file": "Cajon_hit1_fff_rr1.wav",
+          "vel": [
+            106,
+            127
+          ]
+        },
+        {
+          "file": "Cajon_hit1_fff_rr2.wav",
+          "vel": [
+            106,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cajon Hit 2",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Cajon_hit2_pp_rr1.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Cajon_hit2_pp_rr2.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Cajon_hit2_mp_rr1.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit2_mp_rr2.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit2_f_rr1.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Cajon_hit2_f_rr2.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cajon Hit 3",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        {
+          "file": "Cajon_hit3_p_rr1.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Cajon_hit3_p_rr2.wav",
+          "vel": [
+            1,
+            42
+          ]
+        },
+        {
+          "file": "Cajon_hit3_mp_rr1.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit3_mp_rr2.wav",
+          "vel": [
+            43,
+            84
+          ]
+        },
+        {
+          "file": "Cajon_hit3_f_rr1.wav",
+          "vel": [
+            85,
+            127
+          ]
+        },
+        {
+          "file": "Cajon_hit3_f_rr2.wav",
+          "vel": [
+            85,
+            127
+          ]
+        }
+      ]
+    }
+  ],
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2
+}

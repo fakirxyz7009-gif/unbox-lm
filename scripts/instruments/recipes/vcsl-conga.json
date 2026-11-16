@@ -1,0 +1,95 @@
+{
+  "id": "vcsl-conga",
+  "name": "VCSL Conga Set",
+  "kind": "drums",
+  "category": "world",
+  "description": "Recorded conga, quinto and tumba strokes from the VCSL CC0 library, with open and slap voices, recorded dynamics and two round robins.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Conga",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual conga performer. The conga, quinto and tumba open/slap voices retain their recorded dynamics and both round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-conga/samples",
+  "lanes": [
+    {
+      "name": "Conga Open",
+      "note": 60,
+      "role": "tom",
+      "samples": [
+        { "file": "Conga_HitN_v1_rr1_Sum.wav", "vel": [1, 42] },
+        { "file": "Conga_HitN_v1_rr2_Sum.wav", "vel": [1, 42] },
+        { "file": "Conga_HitN_v2_rr1_Sum.wav", "vel": [43, 84] },
+        { "file": "Conga_HitN_v2_rr2_Sum.wav", "vel": [43, 84] },
+        { "file": "Conga_HitN_v3_rr1_Sum.wav", "vel": [85, 127] },
+        { "file": "Conga_HitN_v3_rr2_Sum.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Conga Slap",
+      "note": 61,
+      "role": "rim",
+      "samples": [
+        { "file": "Conga_HitFM_v1_rr1_Sum.wav", "vel": [1, 63] },
+        { "file": "Conga_HitFM_v1_rr2_Sum.wav", "vel": [1, 63] },
+        { "file": "Conga_HitFM_v2_rr1_Sum.wav", "vel": [64, 127] },
+        { "file": "Conga_HitFM_v2_rr2_Sum.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Quinto Open",
+      "note": 62,
+      "role": "tom",
+      "samples": [
+        { "file": "Quinto_HitN_v1_rr1_Sum.wav", "vel": [1, 42] },
+        { "file": "Quinto_HitN_v1_rr2_Sum.wav", "vel": [1, 42] },
+        { "file": "Quinto_HitN_v2_rr1_Sum.wav", "vel": [43, 84] },
+        { "file": "Quinto_HitN_v2_rr2_Sum.wav", "vel": [43, 84] },
+        { "file": "Quinto_HitN_v3_rr1_Sum.wav", "vel": [85, 127] },
+        { "file": "Quinto_HitN_v3_rr2_Sum.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Quinto Slap",
+      "note": 63,
+      "role": "rim",
+      "samples": [
+        { "file": "Quinto_HitFM1_v1_rr1_Sum.wav", "vel": [1, 63] },
+        { "file": "Quinto_HitFM1_v1_rr2_Sum.wav", "vel": [1, 63] },
+        { "file": "Quinto_HitFM1_v2_rr1_Sum.wav", "vel": [64, 127] },
+        { "file": "Quinto_HitFM1_v2_rr2_Sum.wav", "vel": [64, 127] }
+      ]
+    },
+    {
+      "name": "Tumba Open",
+      "note": 64,
+      "role": "tom",
+      "samples": [
+        { "file": "Tumba_HitN_v1_rr1_Sum.wav", "vel": [1, 31] },
+        { "file": "Tumba_HitN_v1_rr2_Sum.wav", "vel": [1, 31] },
+        { "file": "Tumba_HitN_v2_rr1_Sum.wav", "vel": [32, 63] },
+        { "file": "Tumba_HitN_v2_rr2_Sum.wav", "vel": [32, 63] },
+        { "file": "Tumba_HitN_v3_rr1_Sum.wav", "vel": [64, 95] },
+        { "file": "Tumba_HitN_v3_rr2_Sum.wav", "vel": [64, 95] },
+        { "file": "Tumba_HitN_v4_rr1_Sum.wav", "vel": [96, 127] },
+        { "file": "Tumba_HitN_v4_rr2_Sum.wav", "vel": [96, 127] }
+      ]
+    },
+    {
+      "name": "Tumba Slap",
+      "note": 65,
+      "role": "rim",
+      "samples": [
+        { "file": "Tumba_HitFM_v2_rr1_Sum.wav", "vel": [1, 42] },
+        { "file": "Tumba_HitFM_v2_rr2_Sum.wav", "vel": [1, 42] },
+        { "file": "Tumba_HitFM_v3_rr1_Sum.wav", "vel": [43, 84] },
+        { "file": "Tumba_HitFM_v3_rr2_Sum.wav", "vel": [43, 84] },
+        { "file": "Tumba_HitFM_v4_rr1_Sum.wav", "vel": [85, 127] },
+        { "file": "Tumba_HitFM_v4_rr2_Sum.wav", "vel": [85, 127] }
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

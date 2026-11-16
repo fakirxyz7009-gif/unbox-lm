@@ -60,7 +60,7 @@ if ($pdbFlagCount -gt 0) {
 }
 
 $ninjaCommand = '"' + $vsDevCmd + '" -arch=x64 -host_arch=x64 >nul && "' + $ninja + '"' +
-    ' -C "' + $BuildRoot + '" validator unbox-test-delay unbox-test-synth unbox-vst3-host-smoke unbox-vst3-instrument-smoke unbox-vst3-process-stream-host unbox-vst3-midi-process-stream-host unbox-vst3-shared-memory-host -j 8'
+    ' -C "' + $BuildRoot + '" validator unbox-test-delay unbox-test-synth unbox-vst3-host-smoke unbox-vst3-instrument-smoke unbox-vst3-process-stream-host unbox-vst3-midi-process-stream-host unbox-vst3-shared-memory-host unbox-vst3-third-party-host third-party-adelay -j 8'
 & cmd.exe /d /s /c $ninjaCommand
 if ($LASTEXITCODE -ne 0) {
     throw "VST3 smoke build failed with exit code $LASTEXITCODE."
@@ -99,5 +99,14 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Steinberg VST3 validation failed for the MIDI instrument with exit code $LASTEXITCODE."
 }
+
+$delayModule = Join-Path $plugin 'Contents\x86_64-win\unbox-test-delay.vst3'
+$artifactInfo = [ordered]@{
+    version = 1
+    hostSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $processStreamHostExe).Hash.ToLowerInvariant()
+    pluginSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $delayModule).Hash.ToLowerInvariant()
+}
+$artifactManifest = Join-Path $BuildRoot 'unbox-test-delay-artifacts.json'
+[System.IO.File]::WriteAllText($artifactManifest, ($artifactInfo | ConvertTo-Json -Compress), [System.Text.UTF8Encoding]::new($false))
 
 Write-Output 'VST3 effect and MIDI instrument host smoke passed.'

@@ -19,7 +19,7 @@ function listenOnFixedPort(server, ports, host = '127.0.0.1') {
       };
       const onError = (error) => {
         server.off('listening', onListening);
-        if (error && error.code === 'EADDRINUSE') tryNext();
+        if (error && error.code === 'EADDRINUSE' && index < ports.length) tryNext();
         else reject(error);
       };
 

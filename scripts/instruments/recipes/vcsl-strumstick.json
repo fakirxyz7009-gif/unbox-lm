@@ -1,0 +1,21 @@
+{
+  "id": "vcsl-strumstick",
+  "name": "VCSL Strumstick",
+  "kind": "melodic",
+  "category": "strings",
+  "description": "Recorded three-string strumstick played fingerstyle, with three takes for each sampled pitch across D2–G4.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Composite%20Chordophones/Strumstick",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual strumstick performer. The fingerstyle folder has three dynamic takes for each pitch; this pack keeps all three recordings as alternate takes rather than pruning them."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-strumstick/samples",
+  "notes": "*.wav",
+  "keyRange": [36, 69],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 3
+}

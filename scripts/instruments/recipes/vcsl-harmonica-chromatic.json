@@ -1,0 +1,76 @@
+{
+  "id": "vcsl-harmonica-chromatic",
+  "name": "VCSL Chromatic Harmonica",
+  "kind": "melodic",
+  "category": "winds",
+  "description": "Recorded chromatic harmonica with looped sustains across four octaves.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Free%20Aerophones/Harmonica-Hohner-Super64/Sustains/Normal",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. Sampled roots span C3-C7; the accented, vibrato and release recordings remain in the source."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-harmonica-chromatic/samples",
+  "notes": [
+    {
+      "file": "Hohner-Super64_Normal _C2.wav",
+      "root": 48
+    },
+    {
+      "file": "Hohner-Super64_Normal _C3.wav",
+      "root": 60
+    },
+    {
+      "file": "Hohner-Super64_Normal _C4.wav",
+      "root": 72
+    },
+    {
+      "file": "Hohner-Super64_Normal _C5.wav",
+      "root": 84
+    },
+    {
+      "file": "Hohner-Super64_Normal _C6.wav",
+      "root": 96
+    },
+    {
+      "file": "Hohner-Super64_Normal _E2.wav",
+      "root": 52
+    },
+    {
+      "file": "Hohner-Super64_Normal _E3.wav",
+      "root": 64
+    },
+    {
+      "file": "Hohner-Super64_Normal _E4.wav",
+      "root": 76
+    },
+    {
+      "file": "Hohner-Super64_Normal _E5.wav",
+      "root": 88
+    },
+    {
+      "file": "Hohner-Super64_Normal _G2.wav",
+      "root": 55
+    },
+    {
+      "file": "Hohner-Super64_Normal _G3.wav",
+      "root": 67
+    },
+    {
+      "file": "Hohner-Super64_Normal _G4.wav",
+      "root": 79
+    },
+    {
+      "file": "Hohner-Super64_Normal _G5.wav",
+      "root": 91
+    }
+  ],
+  "keyRange": [
+    48,
+    96
+  ],
+  "loop": "auto",
+  "length": 4,
+  "release": 0.2,
+  "notePolyphony": 3
+}

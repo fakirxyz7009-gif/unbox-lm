@@ -355,29 +355,30 @@ export const DualNeedleVuMeter: React.FC<{
   const angleR = -38 + Math.min(1, Math.max(0.05, driveLevel * 0.92)) * 72;
 
   return (
-    <div className="flex flex-col items-center bg-[#1c1309] p-1.5 rounded border border-amber-600/50 shadow-inner w-28 select-none">
-      <div className="w-full h-11 rounded bg-gradient-to-b from-[#fef3c7] via-[#fde68a] to-[#f59e0b] border border-amber-900 relative overflow-hidden shadow-[inset_0_2px_6px_rgba(0,0,0,0.45)]">
+    <div className="flex flex-col items-center bg-[#14171a] p-1.5 rounded border border-[#3a3f45] shadow-inner w-28 select-none">
+      <div className="w-full h-12 rounded bg-gradient-to-b from-[#2a2e33] via-[#1a1d21] to-[#0e1012] border border-[#3a3f45] relative overflow-hidden shadow-[inset_0_2px_6px_rgba(0,0,0,0.45)]">
         {/* dB Scale Arc */}
-        <div className="absolute inset-x-1.5 top-1 flex justify-between text-[11px] font-mono font-black text-amber-950">
+        <div className="absolute inset-x-1.5 top-0.5 flex justify-between text-[11px] font-mono font-black text-[#c9cdd3]">
           <span>-20</span>
           <span>-10</span>
           <span>-3</span>
-          <span className="text-red-700">0</span>
-          <span className="text-red-700">+3</span>
+          <span className="text-red-400">0</span>
+          <span className="text-red-400">+3</span>
         </div>
         {/* Left Needle (Input Drive) */}
         <div
-          className="absolute bottom-0 left-1/2 w-0.5 h-9 bg-neutral-900 origin-bottom transition-transform duration-100"
+          className="absolute bottom-0 left-1/2 w-0.5 h-9 bg-[#e8cd7c] origin-bottom transition-transform duration-100"
           style={{ transform: `translateX(-4px) rotate(${angleL}deg)` }}
         />
         {/* Right Needle (Gain Reduction / Output) */}
         <div
-          className="absolute bottom-0 left-1/2 w-0.5 h-9 bg-red-700 origin-bottom transition-transform duration-100"
+          className="absolute bottom-0 left-1/2 w-0.5 h-9 bg-red-400 origin-bottom transition-transform duration-100"
           style={{ transform: `translateX(4px) rotate(${angleR}deg)` }}
         />
-        <div className="absolute bottom-0.5 inset-x-0 text-center text-[11px] font-mono font-black text-amber-950 uppercase">
-          {label} &bull; -{grDb.toFixed(1)}dB
-        </div>
+      </div>
+      <div className="mt-1 flex w-full items-baseline justify-between gap-1 px-0.5 font-mono font-bold uppercase text-[#c99561]">
+        <span className="truncate text-[11px]">{label}</span>
+        <span className="shrink-0 text-[11px] text-[#8f969e]">-{grDb.toFixed(1)}</span>
       </div>
     </div>
   );
@@ -1651,7 +1652,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
             cutoffHz={p.cutoff ?? 3200}
             resonance={p.resonance ?? 2.5}
             filterMode={p.filterType || 'LP24'}
-            accentColor="#10b981"
+            accentColor="#c9a06c"
             onChangeCutoff={(hz) => setP('cutoff', hz)}
             onChangeMode={(m) => setP('filterType', m)}
           />
@@ -1664,7 +1665,7 @@ export const DeviceFaceplate: React.FC<DeviceFaceplateProps> = ({ device, onUpda
           decay={p.decay ?? 0.3}
           sustain={p.sustain ?? 0.65}
           release={p.release ?? 0.25}
-          accentColor="#10b981"
+          accentColor="#c9a06c"
           onChange={(k, v) => setP(k, v)}
         />
 

@@ -3,13 +3,14 @@
  * three workspace tabs (App `goSection`); PageIds are the full-screen pages rendered by StudioPages.
  */
 import type { LucideIcon } from 'lucide-react';
-import { AudioLines, Boxes, Cable, Disc3, Download, Drum, Gauge, FolderOpen, Home, KeyRound, LayoutGrid, ListMusic, Music, Piano, Settings, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { AudioLines, AudioWaveform, Boxes, Cable, Disc3, Download, Drum, Gauge, FolderOpen, Home, KeyRound, LayoutGrid, ListMusic, Music, Piano, Settings, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 export type ViewId = 'studio' | 'sequencer' | 'mixer' | 'rack';
 export type PageId =
   | 'projects'
   | 'instruments'
   | 'drums'
+  | 'hiphop'
   | 'synths'
   | 'sampler'
   | 'effects'
@@ -39,6 +40,7 @@ export const SECTIONS: Section[] = [
   { id: 'rack', label: 'Rack', icon: Boxes },
   { id: 'instruments', label: 'Instruments', icon: Music, group: true },
   { id: 'drums', label: 'Drums', icon: Drum },
+  { id: 'hiphop', label: 'Hip-Hop Kits', icon: AudioWaveform },
   { id: 'synths', label: 'Synths', icon: KeyRound },
   { id: 'sampler', label: 'Samplers', icon: AudioLines },
   { id: 'effects', label: 'Effects', icon: Sparkles },
@@ -49,5 +51,5 @@ export const SECTIONS: Section[] = [
   { id: 'settings', label: 'Settings', icon: Settings, group: true },
 ];
 
-export const PAGE_IDS: PageId[] = ['projects', 'instruments', 'drums', 'synths', 'sampler', 'effects', 'patchbay', 'export', 'meters', 'mastering', 'settings'];
+export const PAGE_IDS: PageId[] = ['projects', 'instruments', 'drums', 'hiphop', 'synths', 'sampler', 'effects', 'patchbay', 'export', 'meters', 'mastering', 'settings'];
 export const isPage = (id: string): id is PageId => (PAGE_IDS as string[]).includes(id);

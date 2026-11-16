@@ -4,6 +4,7 @@ import { ProjectsPage } from './pages/ProjectsPage.tsx';
 import { DevicesPage } from './pages/DevicesPage.tsx';
 import { ExportPage } from './pages/ExportPage.tsx';
 import { MetersPage } from './pages/MetersPage.tsx';
+import { HipHopPage } from './pages/HipHopPage.tsx';
 import { MasteringPage } from './pages/MasteringPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import type { PageId } from './sections.ts';
@@ -16,6 +17,8 @@ export function StudioPage({ id, onOpenDevice, onOpenRear }: { id: PageId; onOpe
       return <ExportPage />;
     case 'meters':
       return <MetersPage />;
+    case 'hiphop':
+      return <HipHopPage />;
     case 'mastering':
       return <MasteringPage />;
     case 'settings':

@@ -1,4 +1,5 @@
 import { audioEngine } from '../../src/audio/AudioEngine.ts';
+import { setDialogListener } from '../../src/shell/dialogService.ts';
 import { dbGet, dbPut } from '../../src/project/db.ts';
 import { projectManager, type ProjectRecord, type RecoveryRecord } from '../../src/project/ProjectManager.ts';
 
@@ -21,13 +22,20 @@ function recoveredProjectId(): string | null {
 
 async function run(): Promise<void> {
   projectManager.autosave = false;
-  // Switching projects with unsaved edits and autosave off asks first; the probe answers and records the prompt.
+  // Switching projects with unsaved edits and autosave off asks first through the dialog service. This page
+  // mounts no DialogHost, so stand in for it: record the question and answer it with `answer`.
   const prompts: string[] = [];
   let answer = true;
-  window.confirm = (message?: string) => {
-    prompts.push(message ?? '');
-    return answer;
-  };
+  setDialogListener((request) => {
+    if (request.kind === 'confirm') {
+      prompts.push(request.message);
+      request.resolve(answer);
+    } else if (request.kind === 'prompt') {
+      request.resolve(null);
+    } else {
+      request.resolve();
+    }
+  });
 
   const beforeRejectedImport = audioEngine.exportProjectJSON();
   expect(!audioEngine.importProjectJSON(JSON.stringify({ format: 'unbox-project', version: 5, devices: [] })),

@@ -1,0 +1,67 @@
+{
+  "id": "vcsl-claps",
+  "name": "VCSL Claps",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded ensemble and solo handclaps with six ensemble round robins and four solo dynamics.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Claps",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. Six ensemble takes are mapped as round robins on one pad; the four solo takes are mapped as velocity layers on a second pad."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-claps/samples",
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Ensemble Claps",
+      "note": 36,
+      "role": "clap",
+      "samples": [
+        "Clap_rr1.wav",
+        "Clap_rr2.wav",
+        "Clap_rr3.wav",
+        "Clap_rr4.wav",
+        "Clap_rr5.wav",
+        "Clap_rr6.wav"
+      ]
+    },
+    {
+      "name": "Solo Claps",
+      "note": 37,
+      "role": "clap",
+      "samples": [
+        {
+          "file": "SoloClap_vl1.wav",
+          "vel": [
+            1,
+            31
+          ]
+        },
+        {
+          "file": "SoloClap_vl2.wav",
+          "vel": [
+            32,
+            63
+          ]
+        },
+        {
+          "file": "SoloClap_vl3.wav",
+          "vel": [
+            64,
+            95
+          ]
+        },
+        {
+          "file": "SoloClap_vl4.wav",
+          "vel": [
+            96,
+            127
+          ]
+        }
+      ]
+    }
+  ]
+}

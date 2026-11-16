@@ -96,3 +96,40 @@ add_executable(unbox-vst3-shared-memory-host
 target_compile_features(unbox-vst3-shared-memory-host PRIVATE cxx_std_17)
 target_include_directories(unbox-vst3-shared-memory-host PRIVATE "${VST3_SDK_ROOT}")
 target_link_libraries(unbox-vst3-shared-memory-host PRIVATE sdk_hosting)
+
+# Development-only generic loader for the third-party hosting probe. The shipping host above stays
+# locked to the project-owned fixture on purpose; this one takes any module path and any class.
+# Third-party module for the hosting probe: Steinberg's own ADelay sample, compiled here only so the
+# probe has a plugin this project did not write. It is never shipped and the app never loads it.
+set(third_party_adelay_root "${VST3_SDK_ROOT}/public.sdk/samples/vst/adelay")
+# The sample's version.h includes a projectversion.h that the SDK's sample build generates; our own
+# configure step has to produce it or version.h cannot compile.
+set(third_party_adelay_generated "${CMAKE_BINARY_DIR}/third-party-adelay-generated")
+file(MAKE_DIRECTORY "${third_party_adelay_generated}")
+set(SMTG_PROJECT_VERSION "${PROJECT_VERSION}")
+configure_file("${VST3_SDK_ROOT}/cmake/templates/projectversion.h.in"
+    "${third_party_adelay_generated}/projectversion.h" @ONLY)
+
+smtg_add_vst3plugin(third-party-adelay
+    "${third_party_adelay_root}/source/adelaycontroller.cpp"
+    "${third_party_adelay_root}/source/adelayprocessor.cpp"
+    "${third_party_adelay_root}/source/factory.cpp"
+)
+target_compile_features(third-party-adelay PRIVATE cxx_std_17)
+target_include_directories(third-party-adelay PRIVATE "${VST3_SDK_ROOT}" "${third_party_adelay_root}/source"
+    "${third_party_adelay_generated}")
+target_link_libraries(third-party-adelay PRIVATE sdk)
+if(CMAKE_GENERATOR STREQUAL "Ninja")
+    set_target_properties(third-party-adelay PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE
+            "${CMAKE_BINARY_DIR}/VST3/Release/third-party-adelay.vst3/Contents/x86_64-win")
+endif()
+
+add_executable(unbox-vst3-third-party-host
+    third_party_host.cpp
+    "${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/module_win32.cpp"
+    "${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp"
+)
+target_compile_features(unbox-vst3-third-party-host PRIVATE cxx_std_17)
+target_include_directories(unbox-vst3-third-party-host PRIVATE "${VST3_SDK_ROOT}")
+target_link_libraries(unbox-vst3-third-party-host PRIVATE sdk_hosting)

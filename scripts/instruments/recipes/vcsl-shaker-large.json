@@ -1,0 +1,46 @@
+{
+  "id": "vcsl-shaker-large",
+  "name": "VCSL Large Shaker",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded large shaker with struck, down-shake and up-shake articulations.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Shaker%2C%20Large",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source hit and both directional shake gestures are retained, with two round robins per pad."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-shaker-large/samples",
+  "maxSeconds": 3,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Shaker Hit",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "LShaker_Hit_rr1_Mid.wav",
+        "LShaker_Hit_rr2_Mid.wav"
+      ]
+    },
+    {
+      "name": "Shaker Down",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "LShaker_Shake1D_rr2_Mid.wav",
+        "LShaker_Shake1D_rr3_Mid.wav"
+      ]
+    },
+    {
+      "name": "Shaker Up",
+      "note": 38,
+      "role": "perc",
+      "samples": [
+        "LShaker_Shake1U_rr1_Mid.wav",
+        "LShaker_Shake1U_rr4_Mid.wav"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "vcsl-baroque-tenor-recorder",
+  "name": "VCSL Baroque Tenor Recorder",
+  "kind": "melodic",
+  "category": "winds",
+  "description": "Recorded baroque tenor recorder with a warm, woody tone and looped sustains.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Aerophones/Edge-blown%20Aerophones/Baroque%20Tenor%20Recorder",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the looped sustain articulation only; staccato and vibrato recordings remain in the source. Sampled roots span C3-C5."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-baroque-tenor-recorder/samples",
+  "maxSeconds": 3,
+  "release": 0.3,
+  "notePolyphony": 3,
+  "notes": "*.wav",
+  "keyRange": [
+    48,
+    72
+  ],
+  "loop": "auto"
+}

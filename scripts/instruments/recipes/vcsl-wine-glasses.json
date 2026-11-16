@@ -1,0 +1,29 @@
+{
+  "id": "vcsl-wine-glasses",
+  "name": "VCSL Wine Glasses",
+  "kind": "melodic",
+  "category": "world",
+  "description": "Four tuned wine glasses rubbed fast and slow, with the fast rubs mapped to higher velocities and the slow rubs to lower velocities.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Friction%20Idiophones/Wine%20Glasses",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source has four tuned glasses (D#4, F#4, A#4 and D5) played with fast and slow rubbing. Fast rubs are mapped to velocities 64–127 and slow rubs to 1–63; the separate release-trigger decay recordings are omitted."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-wine-glasses/samples",
+  "notes": [
+    { "file": "glass1_D#4_Slow_1_Main.wav", "vel": [1, 63] },
+    { "file": "glass2_F#4_Slow_1_Main.wav", "vel": [1, 63] },
+    { "file": "glass3_A#4_Slow_1_Main.wav", "vel": [1, 63] },
+    { "file": "glass4_D5_Slow_2_Main.wav", "vel": [1, 63] },
+    { "file": "glass1_D#4_Fast_1_main.wav", "vel": [64, 127] },
+    { "file": "glass2_F#4_Fast_1_Main.wav", "vel": [64, 127] },
+    { "file": "glass3_A#4_Fast_1_Main.wav", "vel": [64, 127] },
+    { "file": "glass4_D5_Fast_1_Main.wav", "vel": [64, 127] }
+  ],
+  "keyRange": [63, 74],
+  "loop": "auto",
+  "length": 6,
+  "release": 0.4,
+  "notePolyphony": 2
+}

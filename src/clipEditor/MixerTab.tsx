@@ -48,7 +48,7 @@ export function MixerTab({ request, renderSequencer, selectedPart, onSelectPart,
         {/* Resizable Divider (visible in split view) */}
         {isSplit && (
           <div
-            className="h-[10px] shrink-0 cursor-row-resize flex items-center justify-center group bg-[#261d15] border-y border-[#4a3826] relative select-none"
+            className="h-[10px] shrink-0 cursor-row-resize flex items-center justify-center group bg-[#c6d1bb] border-y border-[#8b9880] relative select-none"
             role="separator"
             aria-orientation="horizontal"
             aria-label="Resize mixer and clip editor"
@@ -80,7 +80,7 @@ export function MixerTab({ request, renderSequencer, selectedPart, onSelectPart,
                   e.stopPropagation();
                   setUi({ mixerLayout: 'clip' });
                 }}
-                className="text-[11px] font-label font-bold text-[#8a939e] hover:text-sel flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/80 border border-black"
+                className="text-[11px] font-label font-bold text-[#3f4e37] hover:text-sel flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#e2e9d7] border border-[#8b9880]"
                 title="Full screen Clip Editor (F10)"
               >
                 <ChevronUp className="w-3 h-3 text-sel" /> Clip Editor (Full)
@@ -97,7 +97,7 @@ export function MixerTab({ request, renderSequencer, selectedPart, onSelectPart,
                   e.stopPropagation();
                   setUi({ mixerLayout: 'mixer' });
                 }}
-                className="text-[11px] font-label font-bold text-[#8a939e] hover:text-sel flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/80 border border-black"
+                className="text-[11px] font-label font-bold text-[#3f4e37] hover:text-sel flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#e2e9d7] border border-[#8b9880]"
                 title="Full screen Mixer"
               >
                 Mixer (Full) <ChevronDown className="w-3 h-3 text-sel" />

@@ -5,6 +5,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { checkLink, downloadAudio, isPrivateHost, toolStatus } from '../server/routes/importRoutes.ts';
+import { announceSkip } from './helpers/skip.ts';
 
 test('checkLink accepts public http and https links and trims them', () => {
   assert.deepEqual(checkLink('  https://example.com/watch?v=abc  '), { url: 'https://example.com/watch?v=abc' });
@@ -64,7 +65,7 @@ function toneWav(seconds: number, rate = 8000): Buffer {
 
 test('a WAV served on this computer goes through yt-dlp and comes back as WAV', { timeout: 180_000 }, async (t) => {
   const tools = await toolStatus();
-  if (!tools.ytDlp || !tools.ffmpeg) return t.skip('yt-dlp and ffmpeg are needed for this check');
+  if (!tools.ytDlp || !tools.ffmpeg) return announceSkip(t, 'link import through yt-dlp and ffmpeg', 'yt-dlp and ffmpeg are needed for this check');
   const body = toneWav(0.5);
   const server = http.createServer((_req, res) => {
     res.writeHead(200, { 'Content-Type': 'audio/wav', 'Content-Length': body.length });

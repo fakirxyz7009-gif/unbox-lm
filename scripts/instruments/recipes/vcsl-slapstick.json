@@ -1,0 +1,38 @@
+{
+  "id": "vcsl-slapstick",
+  "name": "VCSL Slapstick",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "Recorded slapstick with three normal and two quiet flips.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Slapstick",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The three full-volume takes and two quiet takes are grouped as round robins on separate pads."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-slapstick/samples",
+  "maxSeconds": 2.5,
+  "release": 0.2,
+  "notePolyphony": 2,
+  "lanes": [
+    {
+      "name": "Slapstick",
+      "note": 36,
+      "role": "perc",
+      "samples": [
+        "slapstick_rr1.wav",
+        "slapstick_rr2.wav",
+        "slapstick_rr3.wav"
+      ]
+    },
+    {
+      "name": "Slapstick Quiet",
+      "note": 37,
+      "role": "perc",
+      "samples": [
+        "slapstick_quiet_rr1.wav",
+        "slapstick_quiet_rr2.wav"
+      ]
+    }
+  ]
+}

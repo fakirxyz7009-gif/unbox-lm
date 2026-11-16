@@ -1,0 +1,21 @@
+{
+  "id": "vcsl-harpsichord",
+  "name": "VCSL Harpsichord",
+  "kind": "melodic",
+  "category": "keys",
+  "description": "Recorded French-style harpsichord with a bright plucked attack and natural key release, sampled across its full keyboard.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Harpsichord%2C%20French/Sustains",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the normal-register sustained manual recordings, including the source's additional round-robin takes; the lute stop and separate release recordings are omitted. Strikes are one-shot so the plucked decay is not cut off."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-harpsichord/samples",
+  "notes": "*.wav",
+  "keyRange": [21, 88],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 5,
+  "release": 0.3,
+  "notePolyphony": 4
+}

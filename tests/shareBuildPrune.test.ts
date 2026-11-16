@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pruneShareBuild } from '../scripts/prune-share-build-core.ts';
+import { announceSkip } from './helpers/skip.ts';
 
 test('share pruning removes private stems, previews, and non-redistributable pack files', () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'unbox-share-prune-'));
@@ -77,7 +78,7 @@ test('share pruning rejects an instrument-directory junction into source content
       fs.symlinkSync(source, path.join(dist, 'instruments'), process.platform === 'win32' ? 'junction' : 'dir');
     } catch (error) {
       if (['EPERM', 'EACCES', 'ENOSYS'].includes((error as NodeJS.ErrnoException).code ?? '')) {
-        context.skip('This process token cannot create the directory link needed by the junction scenario');
+        announceSkip(context, 'the junction-based share pruning guard', 'This process token cannot create the directory link needed by the junction scenario');
         return;
       }
       throw error;

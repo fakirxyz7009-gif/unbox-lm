@@ -269,7 +269,7 @@ export function AICoPilotDrawer({ isOpen, onClose, audioEngine, devices, onRackB
   );
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-chrome-0/95 border-l border-chrome-line shadow-2xl flex flex-col backdrop-blur-md select-none" role="dialog" aria-label="AI Co-Pilot">
+    <div className="unbox-dialog-shell fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-chrome-0/95 border-l border-chrome-line shadow-2xl flex flex-col backdrop-blur-md select-none" role="dialog" aria-label="AI Co-Pilot">
       <div className="flex items-center justify-between px-5 py-4 border-b border-chrome-line bg-chrome-1">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">

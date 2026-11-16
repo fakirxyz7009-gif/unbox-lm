@@ -1,0 +1,21 @@
+{
+  "id": "vcsl-psaltery",
+  "name": "VCSL Psaltery",
+  "kind": "melodic",
+  "category": "strings",
+  "description": "Recorded bowed psaltery played with plucked strokes, with a thin metallic string tone and natural decay.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Psaltery%2C%20Bowed%20and%20Plucked/Pluck",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This pack uses the plucked program; the long-bow and spiccato articulations are omitted. The source recordings are one-shot strikes and are allowed to ring after key-up."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-psaltery/samples",
+  "notes": "*.wav",
+  "keyRange": [58, 78],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 4,
+  "release": 0.25,
+  "notePolyphony": 3
+}

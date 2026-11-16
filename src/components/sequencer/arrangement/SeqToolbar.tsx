@@ -1,5 +1,5 @@
 /**
- * Light toolbar of the Workstation sequencer: tools (Q W E R T Y U when computer keys are
+ * Graphite toolbar of the Workstation sequencer: tools (Q W E R T Y U when computer keys are
  * commands), Edit Mode, Snap + grid, Pattern / Song, add track, automation mode, zoom to fit.
  */
 import React, { useState } from 'react';
@@ -53,9 +53,9 @@ interface Props {
 
 export const SeqToolbar: React.FC<Props> = (p) => {
   const [addOpen, setAddOpen] = useState(false);
-  const sep = <div className="w-px h-5 bg-[#634a2e] mx-1" />;
+  const sep = <div className="w-px h-5 bg-[#4a5057] mx-1" />;
   return (
-    <div className="h-[34px] shrink-0 flex items-center gap-1 px-2 border-b border-[#634a2e]" style={{ background: 'linear-gradient(180deg,#35291b,#19130e)' }} data-testid="seq-toolbar">
+    <div className="h-[34px] shrink-0 flex items-center gap-1 px-2 border-b border-[#3a4047]" style={{ background: 'linear-gradient(180deg,#262b30,#171a1d)' }} data-testid="seq-toolbar">
       <div className="flex items-center gap-0.5" role="group" aria-label="Tools">
         {TOOLS.map(({ id, Icon, label, key }) => (
           <button
@@ -66,7 +66,7 @@ export const SeqToolbar: React.FC<Props> = (p) => {
             aria-label={label}
             aria-pressed={p.tool === id}
             data-testid={`arr-tool-${id}`}
-            className={`w-[28px] h-[26px] rounded-[4px] grid place-items-center transition-all ${p.tool === id ? 'bg-[#c89655] text-[#21160c] shadow-inner font-bold' : 'us-btn-light text-[#2c3137] hover:bg-[#fff7ea]'}`}
+            className={`w-[28px] h-[26px] rounded-[4px] grid place-items-center transition-all ${p.tool === id ? 'bg-[#c1702f] text-white shadow-inner font-bold' : 'us-btn-light text-[#2c3137] hover:bg-[#fff7ea]'}`}
           >
             <Icon className="w-3.5 h-3.5" />
           </button>
@@ -83,7 +83,7 @@ export const SeqToolbar: React.FC<Props> = (p) => {
         type="button"
         onClick={() => p.onSnapOn(!p.snapOn)}
         aria-pressed={p.snapOn}
-        className={`rounded-[4px] px-2 h-[26px] font-label font-bold text-[11px] transition-all ${p.snapOn ? 'bg-[#c89655] text-[#21160c] shadow-inner' : 'us-btn-light text-[#2c3137] hover:bg-[#fff7ea]'}`}
+        className={`rounded-[4px] px-2 h-[26px] font-label font-bold text-[11px] transition-all ${p.snapOn ? 'bg-[#c1702f] text-white shadow-inner' : 'us-btn-light text-[#2c3137] hover:bg-[#fff7ea]'}`}
         title="Snap to the grid (S)"
       >
         SNAP
@@ -91,7 +91,7 @@ export const SeqToolbar: React.FC<Props> = (p) => {
       <select
         value={p.snapId}
         onChange={(e) => p.onSnap(e.target.value as SnapId)}
-        className="bg-[#241a12] border border-[#634a2e] rounded-[4px] px-1.5 h-[26px] font-label font-bold text-[11px] text-[#f5debe] outline-none cursor-pointer"
+        className="bg-[#181c20] border border-[#3a4047] rounded-[4px] px-1.5 h-[26px] font-label font-bold text-[11px] text-[#e8e5df] outline-none cursor-pointer"
         title="Grid"
         aria-label="Snap grid"
       >
@@ -104,12 +104,12 @@ export const SeqToolbar: React.FC<Props> = (p) => {
         <option value="32nd">1/32</option>
       </select>
       {sep}
-      <div className="flex rounded-[4px] overflow-hidden border border-[#634a2e]" role="group" aria-label="Pattern or Song">
+      <div className="flex rounded-[4px] overflow-hidden border border-[#4a5057]" role="group" aria-label="Pattern or Song">
         <button
           type="button"
           onClick={() => p.onBlockMode(true)}
           aria-pressed={p.blockMode}
-          className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${p.blockMode ? 'bg-[#c89655] text-[#21160c]' : 'bg-[#2b2116] text-[#b8a98c] hover:bg-[#382b1d]'}`}
+          className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${p.blockMode ? 'bg-[#c1702f] text-white' : 'bg-[#3b4046] text-[#e8e5df] hover:bg-[#484e55]'}`}
           title="Pattern: every part loops the pattern it is on, and the transport loops with them (B)"
           data-testid="mode-pattern"
         >
@@ -119,7 +119,7 @@ export const SeqToolbar: React.FC<Props> = (p) => {
           type="button"
           onClick={() => p.onBlockMode(false)}
           aria-pressed={!p.blockMode}
-          className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${!p.blockMode ? 'bg-[#c89655] text-[#21160c]' : 'bg-[#2b2116] text-[#b8a98c] hover:bg-[#382b1d]'}`}
+          className={`px-2.5 h-[26px] font-label font-bold text-[11px] transition-all ${!p.blockMode ? 'bg-[#c1702f] text-white' : 'bg-[#3b4046] text-[#e8e5df] hover:bg-[#484e55]'}`}
           title="Song: plays the clips placed in the arrangement (B)"
           data-testid="mode-song"
         >
@@ -138,7 +138,7 @@ export const SeqToolbar: React.FC<Props> = (p) => {
         type="button"
         onClick={() => p.onNoteChaseEnabled(!p.noteChaseEnabled)}
         aria-pressed={p.noteChaseEnabled}
-        className={`rounded-[4px] px-2 h-[26px] font-label font-bold text-[11px] transition-all ${p.noteChaseEnabled ? 'bg-[#c89655] text-[#21160c]' : 'us-btn-light text-[#504538]'}`}
+        className={`rounded-[4px] px-2 h-[26px] font-label font-bold text-[11px] transition-all ${p.noteChaseEnabled ? 'bg-[#c1702f] text-white' : 'us-btn-light text-[#504538]'}`}
         title="When enabled, sustained notes continue when playback starts or seeks into them"
         data-testid="note-chase"
       >
@@ -159,17 +159,17 @@ export const SeqToolbar: React.FC<Props> = (p) => {
           <Plus className="w-3.5 h-3.5" />
         </button>
         {addOpen && (
-          <div className="absolute z-50 top-[30px] left-0 min-w-[170px] rounded border border-[#8f959c] bg-white shadow-xl py-1 text-[13px] text-[#2c3137]" onPointerLeave={() => setAddOpen(false)}>
+          <div className="absolute z-50 top-[30px] left-0 min-w-[170px] rounded border border-[#4a5057] bg-[#20242a] shadow-xl py-1 text-[13px] text-[#e8e5df]" onPointerLeave={() => setAddOpen(false)}>
             {p.onAddInstrument && (
-              <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#ffd59b]" onClick={() => { setAddOpen(false); p.onAddInstrument?.(); }}>
+              <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#34393f]" onClick={() => { setAddOpen(false); p.onAddInstrument?.(); }}>
                 Instrument part…
               </button>
             )}
-            <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#ffd59b] flex items-center gap-1" onClick={() => { setAddOpen(false); p.onAddAudioTrack(); }} data-testid="arr-add-audio-track">
+            <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#34393f] flex items-center gap-1" onClick={() => { setAddOpen(false); p.onAddAudioTrack(); }} data-testid="arr-add-audio-track">
               <AudioLines className="w-3.5 h-3.5" /> Audio track
             </button>
             {p.onAddMidiOutTrack && (
-              <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#ffd59b]" onClick={() => { setAddOpen(false); p.onAddMidiOutTrack?.(); }} data-testid="arr-add-midi-out-track">
+              <button type="button" className="w-full text-left px-3 py-1 hover:bg-[#34393f]" onClick={() => { setAddOpen(false); p.onAddMidiOutTrack?.(); }} data-testid="arr-add-midi-out-track">
                 MIDI Out track
               </button>
             )}

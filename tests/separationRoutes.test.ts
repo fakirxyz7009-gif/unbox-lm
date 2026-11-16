@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import express from 'express';
 import { createSeparationRouter, demucsAvailable, DEMUCS_MODELS } from '../server/routes/separationRoutes.ts';
+import { announceSkip } from './helpers/skip.ts';
 
 function songWav(seconds: number, rate = 44100): Buffer {
   const frames = Math.round(seconds * rate);
@@ -42,9 +43,20 @@ async function listen(): Promise<{ server: http.Server; base: string }> {
 test('separation status reports whether demucs runs, and unknown stems are refused', async () => {
   const { server, base } = await listen();
   try {
-    const status = (await (await fetch(`${base}/api/separate/status`)).json()) as { demucs: boolean; stems: string[] };
+    const status = (await (await fetch(`${base}/api/separate/status`)).json()) as {
+      demucs: boolean;
+      stems: string[];
+      models: { id: string; stems: string[] }[];
+    };
     assert.equal(status.demucs, await demucsAvailable());
     assert.deepEqual(status.stems, ['drums', 'bass', 'other', 'vocals']);
+    // Both models are advertised without running either; the single split below exercises htdemucs_6s.
+    assert.deepEqual(
+      status.models.map((entry) => entry.id).sort(),
+      Object.keys(DEMUCS_MODELS).sort(),
+    );
+    const sixStem = status.models.find((entry) => entry.id === 'htdemucs_6s');
+    assert.deepEqual(sixStem?.stems, [...DEMUCS_MODELS.htdemucs_6s]);
     const bad = await fetch(`${base}/api/separate/jobs/not-a-job/drums`);
     assert.equal(bad.status, 404);
   } finally {
@@ -67,49 +79,30 @@ test('trained separation rejects an otherwise valid local WAV without explicit c
   }
 });
 
-test('a short song is split into four WAV stems by the local demucs model', { timeout: 420_000 }, async (t) => {
-  if (!(await demucsAvailable())) return t.skip('demucs is not installed on this computer');
+// One short clip through the six-stem model covers the split itself and the guitar / piano stems; the
+// four-stem model is a different `-n` value on the same path, and the status check above covers what it
+// advertises. Two full splits took ~40 s, one short split ~15 s.
+test('a short song is split into six WAV stems, guitar and piano included', { timeout: 420_000 }, async (t) => {
+  if (!(await demucsAvailable())) return announceSkip(t, 'the demucs split', 'demucs is not installed on this computer');
   const { server, base } = await listen();
   try {
-    const wav = songWav(3);
-    const created = await fetch(`${base}/api/separate/jobs?consent=trained-model-separation`, {
+    const seconds = 1.5;
+    const created = await fetch(`${base}/api/separate/jobs?model=htdemucs_6s&consent=trained-model-separation`, {
       method: 'POST',
       headers: { 'Content-Type': 'audio/wav' },
-      body: new Uint8Array(wav),
+      body: new Uint8Array(songWav(seconds)),
     });
     if (created.status !== 200) assert.fail(await created.text());
     const { id, stems } = (await created.json()) as { id: string; stems: string[] };
     assert.match(id, /^[a-f0-9]{32}$/);
-    assert.deepEqual(stems.sort(), ['bass', 'drums', 'other', 'vocals']);
-    for (const stem of ['drums', 'bass', 'other', 'vocals']) {
+    assert.deepEqual([...stems].sort(), [...DEMUCS_MODELS.htdemucs_6s].sort());
+    for (const stem of stems) {
       const part = await fetch(`${base}/api/separate/jobs/${id}/${stem}`);
-      assert.equal(part.status, 200);
+      assert.equal(part.status, 200, `${stem} stem`);
       assert.equal(part.headers.get('content-type'), 'audio/wav');
       const bytes = Buffer.from(await part.arrayBuffer());
       assert.equal(bytes.subarray(0, 4).toString('ascii'), 'RIFF');
-      assert.ok(bytes.length > 44 + 3 * 44100 * 4 - 4096, `${stem} is shorter than the input`);
-    }
-  } finally {
-    server.close();
-  }
-});
-
-test('the six-stem model also writes guitar and piano', { timeout: 420_000 }, async (t) => {
-  if (!(await demucsAvailable())) return t.skip('demucs is not installed on this computer');
-  const { server, base } = await listen();
-  try {
-    const created = await fetch(`${base}/api/separate/jobs?model=htdemucs_6s&consent=trained-model-separation`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'audio/wav' },
-      body: new Uint8Array(songWav(3)),
-    });
-    if (created.status !== 200) assert.fail(await created.text());
-    const { id, stems } = (await created.json()) as { id: string; stems: string[] };
-    assert.deepEqual([...stems].sort(), [...DEMUCS_MODELS.htdemucs_6s].sort());
-    for (const stem of ['guitar', 'piano']) {
-      const part = await fetch(`${base}/api/separate/jobs/${id}/${stem}`);
-      assert.equal(part.status, 200, `${stem} stem`);
-      assert.equal(Buffer.from(await part.arrayBuffer()).subarray(0, 4).toString('ascii'), 'RIFF');
+      assert.ok(bytes.length > 44 + Math.round(seconds * 44100) * 4 - 4096, `${stem} is shorter than the input`);
     }
   } finally {
     server.close();

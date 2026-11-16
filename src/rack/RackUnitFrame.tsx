@@ -1,12 +1,19 @@
 import React, { memo, useLayoutEffect, useReducer, useRef } from 'react';
 import { ChevronDown, ChevronRight, GripVertical, Power, X } from 'lucide-react';
 import type { BaseDevice } from '../audio/BaseDevice.ts';
+import { SpecDevice } from '../audio/spec/SpecDevice.ts';
 import { VstPluginDevice } from '../vst/VstPluginDevice.ts';
 import { DeviceFront } from './DeviceFront.tsx';
+import { DeviceEmblem } from './DeviceEmblem.tsx';
+import { PanelEtching } from './PanelEtching.tsx';
+import { DeviceSignatureStrip } from './DeviceSignatureStrip.tsx';
+import { deviceIdentity } from './deviceIdentity.ts';
 import type { CableController, Notify } from './PatchCableLayer.tsx';
 import type { JackRegistry } from './jackRegistry.ts';
 import { RearPanel } from './RearPanel.tsx';
 import { faceplateClass, unitMinHeight } from './rackTheme.ts';
+import { faceSignatureForSpec } from '../ui/skin/facePalette.ts';
+import { functionFaceForSpec } from '../components/faceplates/functionFace.ts';
 
 export type RackFace = 'front' | 'rear';
 
@@ -101,6 +108,20 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
   const [, tick] = useReducer((n: number) => n + 1, 0);
   const frontRef = useRef<HTMLDivElement>(null);
   const showFolded = folded && face === 'front';
+  const spec = device instanceof SpecDevice ? device.spec : undefined;
+  const legacyKind = device.isPlayableInstrument()
+    ? 'instrument'
+    : device.ports.some((p) => p.type === 'audio_in')
+      ? 'effect'
+      : 'utility';
+  const modelSeed = device instanceof VstPluginDevice ? device.snapshot.itemId : device.type;
+  const identity = deviceIdentity(modelSeed, spec?.engine, spec?.kind ?? legacyKind, nav, device.id);
+  const signature = faceSignatureForSpec(spec?.engine, spec?.kind ?? legacyKind, device.type);
+  const functionFace = spec ? functionFaceForSpec(spec) : null;
+  const functionLabel = functionFace?.label ?? signature.label;
+  // The rack header keeps a compact function tag; the full name lives on the faceplate.
+  const familyTag = functionFace && functionLabel.length > 8 ? functionFace.code : functionLabel;
+  const etchAccent = signature.accent;
 
   useLayoutEffect(() => {
     const el = frontRef.current;
@@ -170,8 +191,17 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
       data-unit-id={device.id}
       data-rack-item={dragKey}
       data-nav={nav}
+      data-family={identity.family}
+      data-signature={signature.id}
       className={`rack-unit ${selected ? 'rack-unit--selected' : ''} ${combineSelected ? 'rack-unit--combiner-selected' : ''} ${device.isPowered ? '' : 'rack-unit--off'} ${showFolded ? 'rack-unit--folded' : ''}`}
-      style={face === 'rear' ? { minHeight } : undefined}
+      style={{
+        ...(face === 'rear' ? { minHeight } : null),
+        '--face-top': signature.palette.top,
+        '--face-bottom': signature.palette.bottom,
+        '--face-edge': signature.palette.edge,
+        '--face-glow': signature.palette.glow,
+        '--sig-accent': signature.accent,
+      } as React.CSSProperties}
       onClick={() => actions.select(device.id)}
       aria-label={`${device.name} rack unit, ${face} panel${showFolded ? ', folded' : ''}`}
     >
@@ -184,6 +214,7 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
           <button type="button" onClick={togglePower} className="rack-strip-power" title={device.isPowered ? 'Power off' : 'Power on'} aria-pressed={device.isPowered}>
             <span className={`led-indicator ${device.isPowered ? 'active-blue' : ''}`} />
           </button>
+          <DeviceEmblem engine={spec?.engine} family={identity.family} size={15} className="rack-strip-crest" />
           <span className="rack-strip-name truncate">{device.name}</span>
           {badge}
           <span className="flex-1" />
@@ -194,7 +225,22 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
         </div>
       ) : face === 'front' ? (
         <div ref={frontRef} className={`rack-face flex-1 min-w-0 flex flex-col ${faceplateClass(device.type)}`} style={{ minHeight: unitMinHeight(device.heightUnits) }}>
-          <header className="flex items-center gap-1.5 px-2 pt-1.5 pb-1 border-b border-black/25">
+          <span className="rack-face-side" aria-hidden="true" />
+          {!spec && (
+            <div className="rack-panel-art" aria-hidden="true">
+              <PanelEtching type={device.type} accent={etchAccent} className="rack-panel-etching" />
+              {identity.family === 'effect' && device.heightUnits >= 2 && (
+                <span className="rack-panel-badge">
+                  <DeviceEmblem family={identity.family} size={24} />
+                  <span className="rack-panel-badge-text">
+                    <b>UNBOX AUDIO</b>
+                    <i>{identity.code}</i>
+                  </span>
+                </span>
+              )}
+            </div>
+          )}
+          <header className="flex items-center gap-1 px-2 pt-1.5 pb-1 border-b border-black/25">
             {dragKey && <RackGrip dragKey={dragKey} name={device.name} />}
             {foldButton}
             {combineButton}
@@ -209,9 +255,16 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
               <Power className="w-3.5 h-3.5" />
               <span className={`led-indicator ${device.isPowered ? 'active-blue' : ''}`} />
             </button>
-            <span className="text-xs font-bold font-mono tracking-widest uppercase px-2 py-0.5 rounded bg-black/35 border border-white/10 truncate min-w-0 max-w-[260px]">
+            <span className="rack-unit-crest" title={`${identity.label} · ${identity.code}`}>
+              <DeviceEmblem engine={spec?.engine} family={identity.family} size={19} />
+            </span>
+            <span
+              className={`rack-nameplate ${device.name.length > 26 ? 'text-[11px] tracking-tighter' : device.name.length > 14 ? 'text-[11px] tracking-normal' : 'text-xs tracking-widest'} ${device.name.length > 14 ? 'whitespace-normal break-words leading-tight line-clamp-2' : 'truncate'} font-bold font-mono uppercase px-2 py-0.5 rounded min-w-0`}
+              title={device.name}
+            >
               {device.name}
             </span>
+            <span className="rack-family-chip" title={`${functionLabel} function`}>{familyTag}</span>
             {badge}
             <span className="flex-1" />
             <button
@@ -230,8 +283,9 @@ const RackUnitFrameImpl: React.FC<RackUnitFrameProps> = ({
             </button>
           </header>
           <div className="rack-face-body flex-1 flex flex-col justify-center px-3 py-2">
-            <DeviceFront device={device} onUpdate={tick} onMessage={actions.message} />
+            <DeviceFront device={device} onUpdate={tick} onMessage={actions.message} dark />
           </div>
+          <DeviceSignatureStrip identity={identity} familyLabel={functionLabel} />
         </div>
       ) : (
         <div className="rack-back flex-1 min-w-0 relative">

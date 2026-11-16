@@ -26,7 +26,7 @@ import { EqCurve } from './EqCurve.tsx';
 import { showAlert, showConfirm } from '../../shell/dialogService.ts';
 
 const KIND_BADGE: Record<ChannelRef['kind'], string> = { track: 'INST', audio: 'AUDIO', bus: 'BUS', return: 'RETURN', rack: 'RACK' };
-export const PALETTE = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#94a3b8'];
+export const PALETTE = ['#f43f5e', '#f97316', '#eab308', '#7f9a8e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#94a3b8'];
 const save = () => audioEngine.changed();
 
 function InsertPicker({ onPick, onClose }: { onPick: (type: DeviceType | `lib:${string}`) => void; onClose: () => void }) {

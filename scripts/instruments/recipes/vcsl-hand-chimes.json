@@ -1,0 +1,23 @@
+{
+  "id": "vcsl-hand-chimes",
+  "name": "VCSL Hand Chimes",
+  "kind": "melodic",
+  "category": "percussion",
+  "description": "Recorded hand chimes with clear, sustained metallic tones across three octaves.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Hand%20Chimes",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The 19 suspended chime recordings span C3-C6. They are mapped as natural one-shots so each strike rings out after key-up."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-hand-chimes/samples",
+  "notes": "*.wav",
+  "keyRange": [
+    48,
+    84
+  ],
+  "maxSeconds": 4,
+  "release": 0.3,
+  "notePolyphony": 3,
+  "oneShot": true
+}

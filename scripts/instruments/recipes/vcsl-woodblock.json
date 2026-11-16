@@ -1,0 +1,35 @@
+{
+  "id": "vcsl-woodblock",
+  "name": "VCSL Woodblock",
+  "kind": "drums",
+  "category": "percussion",
+  "description": "A woodblock recorded for the VCSL CC0 library, with ten takes covering soft to hard strikes on MIDI note 60.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Struck%20Idiophones/Woodblock",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual woodblock performer. All ten current recordings are used as round-robin takes on one note; the source does not document separate high/low blocks for this folder."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-woodblock/samples",
+  "lanes": [
+    {
+      "name": "Woodblock",
+      "note": 60,
+      "samples": [
+        "wood_click2_mp.wav",
+        "wood_click3_vl1.wav",
+        "wood_click3_vl2.wav",
+        "wood_click_f_rr1.wav",
+        "wood_click_f_rr2.wav",
+        "wood_click_ff.wav",
+        "wood_click_mp.wav",
+        "wood_click_pp_rr1.wav",
+        "wood_click_pp_rr2.wav",
+        "wood_click_pp_rr3.wav"
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

@@ -20,6 +20,7 @@ import { RecoveryBanner } from './shell/RecoveryBanner.tsx';
 import { getUi, setUi, type SeqTool } from './shell/uiStore.ts';
 import { WorkstationTab } from './workstation/WorkstationTab.tsx';
 import { installMidiControls } from './workstation/midiControls.ts';
+import { toast } from './shell/toast.ts';
 import { StemBrowserModal } from './components/StemBrowserModal.tsx';
 import { stemLibrary } from './audio/stemLibraryClient.ts';
 import { OPEN_STEM_TOOLS_EVENT } from './shell/stemTools.ts';
@@ -136,6 +137,25 @@ export default function App() {
       .catch(() => undefined);
   }, []);
 
+  // Announce a controller that is plugged in or removed. The MIDI health strip above the keyboard and
+  // Settings · MIDI read the same port list, so they refresh on their own from the engine event.
+  useEffect(() => {
+    const midi = audioEngine.midi;
+    let seen = midi.lastChange?.seq ?? 0;
+    return midi.subscribe(() => {
+      const change = midi.lastChange;
+      if (!change || change.seq === seen) return;
+      seen = change.seq;
+      if (change.added.length && change.seq !== audioEngine.lastMidiResumeNoticeSeq) {
+        toast(`MIDI connected: ${change.added.join(', ')}`, 'success');
+      }
+      // A removal that closed a running take already announced itself with the take.
+      if (change.removed.length && change.seq !== audioEngine.lastMidiTakeCloseSeq) {
+        toast(`MIDI disconnected: ${change.removed.join(', ')}`, 'info');
+      }
+    });
+  }, []);
+
   const goTab = (t: WorkspaceTab) => {
     setPage(null);
     setTab(t);
@@ -189,6 +209,9 @@ export default function App() {
         break;
       case 'open_stems':
         setIsStemBrowserOpen(true);
+        break;
+      case 'open_hiphop':
+        setPage('hiphop');
         break;
       case 'flip_rack':
         if (page || tab !== 'rack') {
@@ -310,7 +333,7 @@ export default function App() {
         return;
       }
       if (e.altKey) {
-        const map: Record<string, string> = { '1': 'view_sequencer', '2': 'view_mixer', '3': 'view_rack', '4': 'toggle_split', s: 'open_stems', c: 'toggle_copilot', m: 'toggle_cv_matrix', f: 'flip_rack', k: 'toggle_keyboard' };
+        const map: Record<string, string> = { '1': 'view_sequencer', '2': 'view_mixer', '3': 'view_rack', '4': 'toggle_split', s: 'open_stems', c: 'toggle_copilot', m: 'toggle_cv_matrix', f: 'flip_rack', k: 'toggle_keyboard', p: 'open_hiphop' };
         const id = map[e.code.startsWith('Digit') ? e.code.slice(5) : k];
         if (id) {
           e.preventDefault();
@@ -327,6 +350,8 @@ export default function App() {
       // Spacebar always toggles playback in DAW workflow unless typing text (which returns early above).
       // Blur any focused button or slider so spacebar does not re-trigger that control.
       if (e.code === 'Space') {
+        // The Hip-Hop kits page owns Space while it is open (walk start / stop, see HipHopPage).
+        if (page === 'hiphop') return;
         e.preventDefault();
         if (target && target !== document.body && typeof target.blur === 'function') {
           target.blur();

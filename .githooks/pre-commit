@@ -1,0 +1,14 @@
+#!/bin/sh
+# Rejects a commit whose staged text is not valid UTF-8, or that carries a U+FFFD replacement
+# character (see scripts/check-utf8.mjs). Checks the index, not the working tree, so it judges
+# exactly what the commit would contain.
+#
+# Installed by `npm run hooks:install` (git config core.hooksPath .githooks).
+# Skip once with `git commit --no-verify`.
+node scripts/check-utf8.mjs --staged
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "commit blocked: fix the file(s) above, stage them again, or use --no-verify to skip." >&2
+  exit 1
+fi
+exit 0

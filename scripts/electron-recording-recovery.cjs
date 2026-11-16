@@ -1,5 +1,7 @@
 'use strict';
 
+const { createWelcomeProject } = require('./electron-welcome-fixture.cjs');
+
 const armedDestinationName = 'Crash recovery stereo fixture';
 const masterDestinationName = 'Master recording';
 const signal = [0.125, -0.25];
@@ -46,25 +48,32 @@ async function inspectStorage(page, target) {
       const journal = manifestRows.find((entry) => entry.sessionId === sessionId ||
         (!sessionId && trackId && entry.tracks?.some((track) => track.trackId === trackId)));
       let verifiedFrames = 0;
-      if (trackId && journal?.recordEdgeConfirmed && Number.isFinite(journal.startFrame)) {
+      let journalPcm = null;
+      const journalTrack = trackId ?? journal?.tracks?.[0]?.trackId;
+      if (journalTrack && journal?.recordEdgeConfirmed && Number.isFinite(journal.startFrame)) {
         const rows = await get('recordingJournal', (store) => store.index('sessionId').getAll(journal.sessionId));
-        const chunks = rows.filter((row) => row.kind === 'chunk' && row.trackId === trackId).sort((a, b) => a.frame - b.frame);
-        let nextFrame = journal.startFrame;
+        const chunks = rows.filter((row) => row.kind === 'chunk' && row.trackId === journalTrack).sort((a, b) => a.frame - b.frame);
+        const firstFrame = Math.max(journal.startFrame, chunks[0]?.frame ?? journal.startFrame);
+        const lastChunk = chunks.at(-1);
+        const lastFrame = lastChunk ? lastChunk.frame + lastChunk.channels[0].byteLength / 4 : firstFrame;
+        if (sessionId && lastFrame > firstFrame) journalPcm = signal.map(() => new Float32Array(lastFrame - firstFrame));
         for (const chunk of chunks) {
-          const lastFrame = chunk.frame + (chunk.channels[0]?.byteLength ?? 0) / Float32Array.BYTES_PER_ELEMENT;
-          if (lastFrame <= nextFrame) continue;
-          if (chunk.frame > nextFrame) break;
-          const length = lastFrame - nextFrame;
-          if (!matchesSignal(chunk.channels, nextFrame - chunk.frame, length)) break;
-          nextFrame = lastFrame;
+          const from = Math.max(0, firstFrame - chunk.frame);
+          const length = (chunk.channels[0]?.byteLength ?? 0) / 4 - from;
+          if (length <= 0) continue;
+          if (matchesSignal(chunk.channels, from, length)) verifiedFrames += length;
+          journalPcm?.forEach((channel, index) => channel.set(new Float32Array(chunk.channels[index]).subarray(from), chunk.frame + from - firstFrame));
         }
-        verifiedFrames = nextFrame - journal.startFrame;
       }
 
       const recovered = tracks.filter((track) => track.kind === 'audio' && track.name === recoveredName);
       const clips = recovered.flatMap((track) => track.arrangementClips ?? []).filter((clip) => clip.kind === 'audio');
       const assetId = clips[0]?.audioId;
       const asset = assetId ? await get('audio', (store) => store.get(assetId)) : null;
+      const fingerprint = (channels) => channels?.map((channel) => {
+        const words = new Uint32Array(channel);
+        return `${words.length}:${words.reduce((hash, sample) => Math.imul(hash ^ sample, 16777619), 2166136261) >>> 0}`;
+      }).join('/');
       const recorder = window.recordingSmokeRuntime.engine.recorder;
       return {
         projectId: project?.id ?? null,
@@ -87,7 +96,8 @@ async function inspectStorage(page, target) {
         muted: recovered[0]?.mute === true,
         frames: asset?.length ?? 0,
         hasSavedAsset: project?.audioIds?.includes(assetId) ?? false,
-        hasExpectedSignal: !!asset?.length && matchesSignal(asset.channels, 0, asset.length),
+        journalFingerprint: fingerprint(journalPcm?.map((channel) => channel.buffer)),
+        assetFingerprint: fingerprint(asset?.channels),
       };
     } finally {
       db.close();
@@ -108,6 +118,7 @@ async function waitForStorage(page, target, predicate, failureMessage) {
 
 async function prepareRecordingCrash(page, master = false) {
   await findAudioRuntime(page);
+  await createWelcomeProject(page);
   const { projectId } = await waitForStorage(page, {}, (state) => !!state.projectId, 'The app did not save its initial project');
   const fixture = await page.evaluate(({ destinationName, master, signal }) => {
     const { engine } = window.recordingSmokeRuntime;
@@ -161,9 +172,18 @@ async function prepareRecordingCrash(page, master = false) {
 
   const captured = await waitForStorage(page, { projectId, trackId, master }, (state) =>
     state.recording && state.journal?.projectId === projectId && !state.journal.finalizing &&
-    state.journal.durableThroughFrame >= state.journal.startFrame + state.verifiedFrames && state.verifiedFrames >= 8_192,
+    state.verifiedFrames >= 8_192,
   'The active take did not commit the expected stereo signal');
   return { projectId, sessionId: captured.journal.sessionId, verifiedFrames: captured.verifiedFrames, master, startBar: fixture.startBar };
+}
+
+async function activateRecoveryButton(button) {
+  // The smoke window is hidden. Activate the enabled UI control without waiting
+  // for Chromium to scroll and paint it in an invisible native window.
+  await button.evaluate((element) => {
+    if (element.disabled) throw new Error('The recovery button is disabled.');
+    element.click();
+  }, undefined, { timeout: 10_000 });
 }
 
 async function verifyRecordingRecovery(page, target, restore) {
@@ -172,18 +192,21 @@ async function verifyRecordingRecovery(page, target, restore) {
   }
   await findAudioRuntime(page);
   const recover = page.getByRole('button', { name: 'Recover audio', exact: true });
+  let expectedFingerprint = target.assetFingerprint;
   if (restore) {
     await recover.waitFor({ state: 'visible', timeout: 10_000 });
     const before = await inspectStorage(page, target);
-    if (before.journal?.sessionId !== target.sessionId || before.journal.finalizing || before.recoveredCount !== 0) {
+    if (before.journal?.sessionId !== target.sessionId || before.journal.finalizing || before.recoveredCount !== 0 ||
+        before.verifiedFrames < target.verifiedFrames || !before.journalFingerprint) {
       throw new Error(`The interrupted take did not reach the app's recovery UI: ${JSON.stringify(before)}`);
     }
-    await recover.click({ timeout: 10_000 });
+    expectedFingerprint = before.journalFingerprint;
+    await activateRecoveryButton(recover);
   }
   const audio = await waitForStorage(page, target, (state) =>
     !state.journal && state.projectId === target.projectId && state.lastProjectId === target.projectId &&
     state.recoveredCount === 1 && state.clipCount === 1 && state.hasSavedAsset &&
-    state.frames >= target.verifiedFrames && state.hasExpectedSignal &&
+    state.frames >= target.verifiedFrames && state.assetFingerprint === expectedFingerprint &&
     state.startBar === target.startBar && state.muted === target.master,
   'The recovered project did not retain the expected audio');
   await page.waitForFunction(({ name, assetId, frames, mute, startBar }) => {
@@ -199,4 +222,4 @@ async function verifyRecordingRecovery(page, target, restore) {
   return audio;
 }
 
-module.exports = { prepareRecordingCrash, verifyRecordingRecovery };
+module.exports = { activateRecoveryButton, findAudioRuntime, prepareRecordingCrash, verifyRecordingRecovery };

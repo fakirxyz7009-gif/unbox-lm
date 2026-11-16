@@ -78,6 +78,59 @@ export class ThirdWaveDevice extends BaseDevice {
 
   private activeVoices: Map<number, ThirdWaveVoice> = new Map();
   private voiceCounter: number = 0;
+  private lfo1Origin = -1;
+
+  /** Most recently started voice: its AudioParams carry the envelopes actually applied. */
+  private newestVoice(): ThirdWaveVoice | null {
+    let newest: ThirdWaveVoice | null = null;
+    for (const voice of this.activeVoices.values()) newest = voice;
+    return newest;
+  }
+
+  /** Wave (amplitude) envelope level of the sounding voice, 0..1. */
+  private waveEnvCv(): number {
+    const voice = this.newestVoice();
+    if (!voice) return 0;
+    return Math.max(0, Math.min(1, voice.amp.gain.value));
+  }
+
+  /** Filter 1 envelope position of the sounding voice (its cutoff against the base cutoff), 0..1. */
+  private filterEnvCv(): number {
+    const voice = this.newestVoice();
+    if (!voice) return 0;
+    const base = Math.max(20, Number(this.params.f1_cutoff) || 4200);
+    return Math.max(0, Math.min(1, Math.log2(Math.max(20, voice.filter1.frequency.value) / base) / 2.5));
+  }
+
+  /** LFO 1 as a control-rate signal, from its own rate / shape / amount knobs. */
+  private lfo1Cv(time = this.ctx.currentTime): number {
+    if (!this.isPowered || this.isBypassed) return 0;
+    if (this.lfo1Origin < 0) this.lfo1Origin = time;
+    const rate = Math.max(0.01, Number(this.params.lfo1_rate) || 1.8);
+    const amount = Math.max(0, Math.min(1, Number(this.params.lfo1_amt) || 0));
+    const cycles = Math.max(0, time - this.lfo1Origin) * rate;
+    const phase = cycles - Math.floor(cycles);
+    let raw: number;
+    switch (String(this.params.lfo1_shape ?? 'triangle')) {
+      case 'sine':
+        raw = Math.sin(phase * 2 * Math.PI);
+        break;
+      case 'saw':
+        raw = 2 * phase - 1;
+        break;
+      case 'square':
+        raw = phase < 0.5 ? 1 : -1;
+        break;
+      case 'random': {
+        const hashed = Math.sin(Math.floor(cycles) * 12.9898) * 43758.5453;
+        raw = (hashed - Math.floor(hashed)) * 2 - 1;
+        break;
+      }
+      default:
+        raw = 1 - 4 * Math.abs(phase - 0.5);
+    }
+    return raw * amount;
+  }
   private periodicWaveCache: Map<string, PeriodicWave> = new Map();
   private whiteNoiseBuffer?: AudioBuffer;
 
@@ -382,6 +435,12 @@ export class ThirdWaveDevice extends BaseDevice {
         else this.noteOff(60);
       },
     });
+
+    // Rear CV outs read the voice that is actually sounding, so a cable from them carries the
+    // envelopes this synth applies instead of a constant 0.
+    this.cvOutputs.set('cv_out_wave_env', { getter: () => this.waveEnvCv() });
+    this.cvOutputs.set('cv_out_filter_env', { getter: () => this.filterEnvCv() });
+    this.cvOutputs.set('cv_out_lfo1', { getter: (time) => this.lfo1Cv(time) });
 
     // Wire input mixer to FX input for external processing
     this.inputMixer.connect(this.fx1Input);

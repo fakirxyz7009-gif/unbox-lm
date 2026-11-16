@@ -1,0 +1,137 @@
+{
+  "id": "vcsl-harpsichord-flemish",
+  "name": "VCSL Flemish Harpsichord",
+  "kind": "melodic",
+  "category": "keys",
+  "description": "Recorded Flemish-style harpsichord, lower choir, sampled across four octaves.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Chordophones/Zithers/Harpsichord%2C%20Flemish/Sustains/Low",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. The source note labels use the VCSL octave convention, one octave below the measured sounding pitch; the recipe adds +12 semitones to each root. The lower-choir sustained manual is used; the upper choir, releases and other registers remain in the source."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-harpsichord-flemish/samples",
+  "notes": [
+    {
+      "file": "HarpsiRH_Low_Far_A#0_rr1.wav",
+      "root": 34
+    },
+    {
+      "file": "HarpsiRH_Low_Far_A#1_rr1.wav",
+      "root": 46
+    },
+    {
+      "file": "HarpsiRH_Low_Far_A#2_rr1.wav",
+      "root": 58
+    },
+    {
+      "file": "HarpsiRH_Low_Far_A#3_rr1.wav",
+      "root": 70
+    },
+    {
+      "file": "HarpsiRH_Low_Far_A#4_rr1.wav",
+      "root": 82
+    },
+    {
+      "file": "HarpsiRH_Low_Far_C1_rr1.wav",
+      "root": 36
+    },
+    {
+      "file": "HarpsiRH_Low_Far_C2_rr1.wav",
+      "root": 48
+    },
+    {
+      "file": "HarpsiRH_Low_Far_C3_rr1.wav",
+      "root": 60
+    },
+    {
+      "file": "HarpsiRH_Low_Far_C4_rr1.wav",
+      "root": 72
+    },
+    {
+      "file": "HarpsiRH_Low_Far_C5_rr1.wav",
+      "root": 84
+    },
+    {
+      "file": "HarpsiRH_Low_Far_D1_rr1.wav",
+      "root": 38
+    },
+    {
+      "file": "HarpsiRH_Low_Far_D2_rr1.wav",
+      "root": 50
+    },
+    {
+      "file": "HarpsiRH_Low_Far_D3_rr1.wav",
+      "root": 62
+    },
+    {
+      "file": "HarpsiRH_Low_Far_D4_rr1.wav",
+      "root": 74
+    },
+    {
+      "file": "HarpsiRH_Low_Far_E1_rr1.wav",
+      "root": 40
+    },
+    {
+      "file": "HarpsiRH_Low_Far_E2_rr1.wav",
+      "root": 52
+    },
+    {
+      "file": "HarpsiRH_Low_Far_E3_rr1.wav",
+      "root": 64
+    },
+    {
+      "file": "HarpsiRH_Low_Far_E4_rr1.wav",
+      "root": 76
+    },
+    {
+      "file": "HarpsiRH_Low_Far_F#0_rr1.wav",
+      "root": 30
+    },
+    {
+      "file": "HarpsiRH_Low_Far_F#1_rr1.wav",
+      "root": 42
+    },
+    {
+      "file": "HarpsiRH_Low_Far_F#2_rr1.wav",
+      "root": 54
+    },
+    {
+      "file": "HarpsiRH_Low_Far_F#3_rr1.wav",
+      "root": 66
+    },
+    {
+      "file": "HarpsiRH_Low_Far_F#4_rr1.wav",
+      "root": 78
+    },
+    {
+      "file": "HarpsiRH_Low_Far_G#0_rr1.wav",
+      "root": 32
+    },
+    {
+      "file": "HarpsiRH_Low_Far_G#1_rr1.wav",
+      "root": 44
+    },
+    {
+      "file": "HarpsiRH_Low_Far_G#2_rr1.wav",
+      "root": 56
+    },
+    {
+      "file": "HarpsiRH_Low_Far_G#3_rr1.wav",
+      "root": 68
+    },
+    {
+      "file": "HarpsiRH_Low_Far_G#4_rr1.wav",
+      "root": 80
+    }
+  ],
+  "keyRange": [
+    30,
+    84
+  ],
+  "oneShot": true,
+  "loop": false,
+  "maxSeconds": 4,
+  "release": 0.5,
+  "notePolyphony": 4
+}

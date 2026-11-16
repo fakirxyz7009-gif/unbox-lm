@@ -1,0 +1,23 @@
+{
+  "id": "vcsl-mbira-mavembe",
+  "name": "VCSL Mbira Mavembe",
+  "kind": "melodic",
+  "category": "world",
+  "description": "Recorded Zimbabwean mbira in the Mavembe/Gandanga tuning, with metallic plucks and natural decay.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Idiophones/Plucked%20Idiophones/Mbira%20Mavembe%20%28Gandanga%29%2C%20Zimbabwe%2C%20Low%20G",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual performer. This is the low-G Mavembe/Gandanga mbira. The 24 source recordings include separate tine takes at repeated roots; they remain round robins."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-mbira-mavembe/samples",
+  "notes": "*.wav",
+  "keyRange": [
+    34,
+    67
+  ],
+  "maxSeconds": 4,
+  "release": 0.3,
+  "notePolyphony": 3,
+  "oneShot": true
+}

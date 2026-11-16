@@ -1,0 +1,71 @@
+{
+  "id": "vcsl-bongos",
+  "name": "VCSL Bongos",
+  "kind": "drums",
+  "category": "world",
+  "description": "Recorded bongo pair from the VCSL CC0 library, with open and muted high/low strokes at three dynamic levels and two round robins.",
+  "license": {
+    "spdx": "CC0-1.0",
+    "author": "Versilian Studios LLC (VCSL; individual performer not identified)",
+    "source": "https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e/Membranophones/Struck%20Membranophones/Bongos",
+    "notes": "Pinned VCSL source c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e. VCSL is licensed CC0-1.0 by Versilian Studios LLC; the repository does not identify the individual bongo performer. The open and muted high/low hits retain all three recorded dynamics and both round robins; the long roll takes are omitted."
+  },
+  "dir": "../../../data/instrument-cache/vcsl-bongos/samples",
+  "lanes": [
+    {
+      "name": "Bongo High",
+      "note": 60,
+      "role": "perc",
+      "samples": [
+        { "file": "BongoH_Hit1_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoH_Hit1_v1_rr2_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoH_Hit1_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoH_Hit1_v2_rr2_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoH_Hit1_v3_rr1_Mid.wav", "vel": [85, 127] },
+        { "file": "BongoH_Hit1_v3_rr2_Mid.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Bongo Low",
+      "note": 62,
+      "role": "perc",
+      "samples": [
+        { "file": "BongoL_Hit1_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoL_Hit1_v1_rr2_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoL_Hit1_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoL_Hit1_v2_rr2_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoL_Hit1_v3_rr1_Mid.wav", "vel": [85, 127] },
+        { "file": "BongoL_Hit1_v3_rr2_Mid.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Bongo High Muted",
+      "note": 64,
+      "role": "perc",
+      "samples": [
+        { "file": "BongoH_HitMuted1_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoH_HitMuted1_v1_rr2_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoH_HitMuted1_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoH_HitMuted1_v2_rr2_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoH_HitMuted1_v3_rr1_Mid.wav", "vel": [85, 127] },
+        { "file": "BongoH_HitMuted1_v3_rr2_Mid.wav", "vel": [85, 127] }
+      ]
+    },
+    {
+      "name": "Bongo Low Muted",
+      "note": 65,
+      "role": "perc",
+      "samples": [
+        { "file": "BongoL_HitMuted2_v1_rr1_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoL_HitMuted2_v1_rr2_Mid.wav", "vel": [1, 42] },
+        { "file": "BongoL_HitMuted2_v2_rr1_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoL_HitMuted2_v2_rr2_Mid.wav", "vel": [43, 84] },
+        { "file": "BongoL_HitMuted2_v3_rr1_Mid.wav", "vel": [85, 127] },
+        { "file": "BongoL_HitMuted2_v3_rr2_Mid.wav", "vel": [85, 127] }
+      ]
+    }
+  ],
+  "release": 0.2,
+  "notePolyphony": 2,
+  "maxSeconds": 3
+}

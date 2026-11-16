@@ -1059,7 +1059,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   };
 
   const clipColor = (t: SequencerTrack, c: ArrangementClip) =>
-    c.kind === 'notes' || c.kind === 'audio' ? c.color || t.color || '#10b981' : findPattern(t, c.patternId)?.color || t.color || '#f59e0b';
+    c.kind === 'notes' || c.kind === 'audio' ? c.color || t.color || '#7f9a8e' : findPattern(t, c.patternId)?.color || t.color || '#f59e0b';
 
   const clipLabel = (t: SequencerTrack, c: ArrangementClip) =>
     c.kind === 'audio' ? c.name || 'Audio' : c.kind === 'notes' ? c.name || 'Note clip' : findPattern(t, c.patternId)?.name || 'Pattern';
@@ -1383,7 +1383,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
         <div style={{ width: HEADER_W + lanesW, height: contentH, position: 'relative' }}>
           {/* ruler row */}
           <div className="sticky top-0 z-30 flex" style={{ height: RULER_H }}>
-            <div className="sticky left-0 z-40 flex-shrink-0 border-r border-b flex items-center px-2 text-[11px]" style={{ width: HEADER_W, background: P.headerBg, borderColor: P.headerBorder, color: light ? '#4b5159' : '#94a3b8' }}>
+            <div className="sticky left-0 z-40 flex-shrink-0 border-r border-b flex items-center px-2 text-[11px]" style={{ width: HEADER_W, background: P.headerBg, borderColor: P.headerBorder, color: light ? '#e8e5df' : '#94a3b8' }}>
               {light ? (
                 <span className="font-label font-bold text-[13px]">
                   <span ref={posRef}>1.1.1</span> · {tracks.length} TRACKS
@@ -1408,7 +1408,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                 ref={rulerHeadRef}
                 aria-hidden
                 className="absolute left-0 pointer-events-none will-change-transform"
-                style={{ top: 26, marginLeft: -6, width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `10px solid ${light ? '#e8861a' : '#fbbf24'}` }}
+                style={{ top: 26, marginLeft: -6, width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `10px solid ${light ? '#c9a06c' : '#fbbf24'}` }}
               />
             </div>
           </div>
@@ -1425,9 +1425,9 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
           <div className="flex" style={{ height: BLOCK_H }} data-testid="arr-block-row">
             <div
               className="sticky left-0 z-20 flex-shrink-0 border-r border-b flex items-center gap-2 px-2"
-              style={{ width: HEADER_W, background: light ? '#dddfe2' : '#202a3a', borderColor: P.headerBorder, color: light ? '#30363d' : '#dbeafe' }}
+              style={{ width: HEADER_W, background: light ? '#2c3137' : '#202a3a', borderColor: P.headerBorder, color: light ? '#e8e5df' : '#dbeafe' }}
             >
-              <span className="font-black text-[11px] text-[#7c4a03]">BLOCKS</span>
+              <span className="font-black text-[11px] text-[#c9a53c]">BLOCKS</span>
               <button
                 type="button"
                 disabled={!tracks.some((t) => t.kind !== 'audio')}
@@ -1435,7 +1435,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                   const block = audioEngine.createSongBlock();
                   if (block) audioEngine.placeSongBlock(block.id, audioEngine.arrangementEndBar(), 4);
                 }}
-                className="ml-auto px-1.5 py-0.5 rounded bg-slate-800 text-[11px] font-bold text-amber-200 hover:text-white disabled:opacity-40"
+                className="ml-auto px-1.5 py-0.5 rounded bg-[#2c3137] text-[11px] font-bold text-[#e8e5df] hover:text-white disabled:opacity-40"
                 title={`Create a reusable block from scene ${audioEngine.activePatternIndex + 1}, then place it at the song end`}
                 aria-label={`Create block from scene ${audioEngine.activePatternIndex + 1}`}
               >
@@ -1448,7 +1448,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                   const block = audioEngine.createSongBlock(undefined, audioEngine.activePatternIndex, { startBar: loop.start, endBar: loop.end });
                   if (block) audioEngine.placeSongBlock(block.id, audioEngine.arrangementEndBar());
                 }}
-                className="px-1.5 py-0.5 rounded bg-emerald-950 text-[11px] font-bold text-emerald-200 hover:text-white disabled:opacity-40"
+                className="px-1.5 py-0.5 rounded bg-[#34393f] text-[11px] font-bold text-[#e8e5df] hover:text-white disabled:opacity-40"
                 title={`Create a block from scene ${audioEngine.activePatternIndex + 1}; capture overlapping audio clips and automation from the current L–R range (${loop.start.toFixed(2)}–${loop.end.toFixed(2)} bars)`}
                 aria-label={`Create block from scene ${audioEngine.activePatternIndex + 1} and current loop range`}
               >
@@ -1457,7 +1457,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
             </div>
             <div
               className={`relative border-b ${tool === 'pencil' ? 'cursor-crosshair' : ''}`}
-              style={{ width: lanesW, height: BLOCK_H, background: light ? '#eceef0' : '#101724', borderColor: P.laneBorder, backgroundImage: gridBg }}
+              style={{ width: lanesW, height: BLOCK_H, background: light ? '#181c20' : '#101724', borderColor: P.laneBorder, backgroundImage: gridBg }}
               onPointerDown={onBlockLaneDown}
               data-testid="arr-block-lane"
             >
@@ -1474,7 +1474,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                   <div
                     key={placement.id}
                     className="absolute top-[3px] bottom-[3px] z-[5] rounded border flex items-center px-1.5 text-[11px] font-black select-none overflow-hidden"
-                    style={{ left: start * barPx, width: Math.max(18, length * barPx), color: light ? '#18212d' : '#fff7ed', background: `${block.color}55`, borderColor: block.color, cursor: tool === 'pointer' ? 'grab' : undefined }}
+                    style={{ left: start * barPx, width: Math.max(18, length * barPx), color: light ? '#f0ede6' : '#fff7ed', background: `${block.color}55`, borderColor: block.color, cursor: tool === 'pointer' ? 'grab' : undefined }}
                     onPointerDown={(e) => onBlockDown(e, placement.id, placement.startBar)}
                     onDoubleClick={() => {
                       void showPrompt({
@@ -1536,7 +1536,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                 );
               })}
               {audioEngine.blockPlacements.length === 0 && (
-                <span className="absolute inset-y-0 left-2 flex items-center text-[11px] text-slate-600 pointer-events-none">
+                <span className="absolute inset-y-0 left-2 flex items-center text-[11px] text-slate-400 pointer-events-none">
                   Create a block from the selected scene, or choose Pencil and click here to place a new one.
                 </span>
               )}
@@ -1606,7 +1606,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                     ×
                   </button>
                 </div>
-                <div className="relative border-b" style={{ width: lanesW, background: light ? '#e5e7e9' : '#141c29', borderColor: P.laneBorder }} data-testid="arr-folder-lane">
+                <div className="relative border-b" style={{ width: lanesW, background: light ? '#181c20' : '#141c29', borderColor: P.laneBorder }} data-testid="arr-folder-lane">
                   {(folderStart.clips || []).map((grouped) => {
                     const moving = drag?.kind === 'folderClipMove' && drag.folderId === folderStart.id && drag.clipId === grouped.id ? drag : null;
                     const start = grouped.startBar + (moving?.deltaBars || 0);
@@ -1783,7 +1783,7 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
                         const tg = targets.find((x) => targetKey(x) === e.target.value);
                         if (tg) auto.addLane(tg, auto.globalMode === 'off' ? 'read' : auto.globalMode, t.id);
                       }}
-                      className={`w-full text-[11px] rounded border ${light ? 'bg-white text-violet-700 border-[#a7adb4]' : 'bg-slate-900 text-violet-300 border-slate-700'}`}
+                      className={`w-full text-[11px] rounded border ${light ? 'bg-[#181c20] text-violet-300 border-[#3a4047]' : 'bg-slate-900 text-violet-300 border-slate-700'}`}
                       aria-label="Add automation lane"
                     >
                       <option value="">+ automation lane…</option>

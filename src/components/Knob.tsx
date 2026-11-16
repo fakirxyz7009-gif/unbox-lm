@@ -45,6 +45,8 @@ const KnobComponent: React.FC<KnobProps> = ({
   );
 
   const sizePixels = size === 'xs' ? 28 : size === 'sm' ? 38 : size === 'lg' ? 62 : 48;
+  // The coloured cap is an insert in a machined metal shell, not the whole control.
+  const bodyPixels = Math.max(22, Math.round(sizePixels * 0.76));
   const clampedVal = Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
   const normalized = (clampedVal - min) / (max - min || 1);
   // -135 deg to +135 deg (270 deg total range)
@@ -135,22 +137,22 @@ const KnobComponent: React.FC<KnobProps> = ({
   const getKnobBg = () => {
     switch (variant) {
       case 'blue':
-        return 'linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #172554 100%)';
+        return 'linear-gradient(135deg, #506b7d 0%, #304958 52%, #1c2c36 100%)';
       case 'yellow':
-        return 'linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #854d0e 100%)';
+        return 'linear-gradient(135deg, #cfa061 0%, #a4743d 50%, #654724 100%)';
       case 'white':
-        return 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #94a3b8 100%)';
+        return 'linear-gradient(135deg, #f0eee8 0%, #d5d1c8 52%, #a6a198 100%)';
       case 'dark':
-        return 'linear-gradient(135deg, #262930 0%, #14161a 60%, #1c1e24 100%)';
+        return 'linear-gradient(135deg, #2c3035 0%, #16191d 60%, #20242a 100%)';
       case 'amber':
-        return 'linear-gradient(135deg, #d97706 0%, #92400e 60%, #451a03 100%)';
+        return 'linear-gradient(135deg, #b6793d 0%, #7d512c 60%, #3d2919 100%)';
       case 'bakelite':
-        return 'radial-gradient(circle at 35% 30%, #3a2318 0%, #1c100b 55%, #0d0705 100%)';
+        return 'radial-gradient(circle at 35% 30%, #3a2c24 0%, #201814 55%, #0d0908 100%)';
       case 'brass':
-        return 'linear-gradient(135deg, #fde68a 0%, #d97706 48%, #78350f 100%)';
+        return 'linear-gradient(135deg, #d8bd8c 0%, #b08855 48%, #6d5130 100%)';
       case 'metal':
       default:
-        return 'linear-gradient(135deg, #64748b 0%, #334155 50%, #475569 100%)';
+        return 'linear-gradient(135deg, #778087 0%, #444b52 50%, #2b3035 100%)';
     }
   };
 
@@ -201,8 +203,11 @@ const KnobComponent: React.FC<KnobProps> = ({
         style={{
           width: sizePixels + 10,
           height: sizePixels + 10,
-          background: 'radial-gradient(circle, #1a1d22 0%, #0a0b0d 100%)',
-          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.08)',
+          background:
+            'radial-gradient(circle at 36% 26%, #737a80 0%, #3d4348 26%, #191d20 64%, #050607 100%)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow:
+            '0 4px 8px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.24), inset 0 -3px 6px rgba(0,0,0,0.9)',
         }}
         role="slider"
         aria-label={label}
@@ -277,6 +282,7 @@ const KnobComponent: React.FC<KnobProps> = ({
           style={{
             width: sizePixels + 4,
             height: sizePixels + 4,
+            opacity: 0.9,
           }}
         />
 
@@ -284,28 +290,38 @@ const KnobComponent: React.FC<KnobProps> = ({
         <div
           className="relative rounded-full flex items-center justify-center transition-transform duration-75 shadow-xl"
           style={{
-            width: sizePixels,
-            height: sizePixels,
-            background: getKnobBg(),
+            width: bodyPixels,
+            height: bodyPixels,
+            background: `radial-gradient(circle at 36% 26%, rgba(255,255,255,0.3), transparent 44%), ${getKnobBg()}`,
+            border: '1px solid rgba(0,0,0,0.55)',
             boxShadow:
-              '0 4px 8px rgba(0,0,0,0.85), inset 0 1px 2px rgba(255,255,255,0.45), inset 0 -2px 3px rgba(0,0,0,0.85)',
+              '0 3px 6px rgba(0,0,0,0.85), inset 0 2px 3px rgba(255,255,255,0.36), inset 0 -4px 7px rgba(0,0,0,0.62)',
             transform: `rotate(${angle}deg)`,
           }}
         >
-          {/* Subtle knurled ring notches & concentric bevel */}
-          <div className="absolute inset-1 rounded-full border border-black/50 opacity-80 pointer-events-none" />
-          <div className="absolute inset-2 rounded-full border border-white/10 pointer-events-none" />
-
-          {/* Machined cap center dot with knurled cap */}
-          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-white/40 to-black/40 border border-white/30 shadow-inner pointer-events-none" />
-
-          {/* Pointer indicator line */}
+          {/* Machined insert bevel and a raised centre hub. */}
+          <div className="absolute inset-[2px] rounded-full border border-white/15 pointer-events-none" />
+          <div className="absolute inset-[4px] rounded-full border border-black/35 pointer-events-none" />
           <div
-            className="absolute top-1 w-[3px] rounded-full pointer-events-none"
+            className="absolute rounded-full pointer-events-none"
             style={{
-              height: sizePixels * 0.38,
+              width: Math.max(7, Math.round(bodyPixels * 0.2)),
+              height: Math.max(7, Math.round(bodyPixels * 0.2)),
+              background: 'radial-gradient(circle at 35% 28%, #f2f5f6, #aeb6ba 42%, #464d51 100%)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.65)',
+            }}
+          />
+
+          {/* Pointer indicator line, lit like a painted index mark. */}
+          <div
+            className="absolute w-[2px] rounded-full pointer-events-none"
+            style={{
+              top: 3,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              height: Math.round(bodyPixels * 0.32),
               backgroundColor: getPointerColor(),
-              boxShadow: '0 0 5px rgba(255,255,255,0.9)',
+              boxShadow: '0 0 4px rgba(255,255,255,0.65), 0 1px 1px rgba(0,0,0,0.6)',
             }}
           />
         </div>
@@ -313,11 +329,11 @@ const KnobComponent: React.FC<KnobProps> = ({
 
       {/* Label and readout */}
       {label && (
-        <span className="text-[11px] uppercase font-bold tracking-wider text-neutral-300 mt-1 line-clamp-1 max-w-[76px] text-center font-mono">
+        <span className="text-[11px] uppercase font-semibold tracking-wider text-neutral-300 mt-1 line-clamp-1 max-w-[76px] text-center font-mono">
           {label}
         </span>
       )}
-      <span className="text-[11px] font-mono font-semibold text-neutral-400 tabular-nums">
+      <span className="text-[11px] font-mono font-medium text-neutral-400 tabular-nums">
         {displayString}
         {unit}
       </span>

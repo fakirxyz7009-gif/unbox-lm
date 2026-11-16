@@ -41,11 +41,21 @@ interface KnobProps {
   accent: string;
   text: string;
   size?: number;
+  /** Tighter cell for bespoke, space-constrained hardware panels. */
+  compact?: boolean;
+  /** Explicit cell width for a bespoke fixed-column panel. */
+  cellWidth?: number;
+  /** Single-line label and value for dense multi-row panels. */
+  dense?: boolean;
+  /** Shorter visible label while keeping the full parameter label for assistive text. */
+  displayLabel?: string;
+  /** One-line label + value for a dense synth matrix. */
+  inlineValue?: boolean;
   /** Right-click (opens the automate menu at the pointer). */
   onMenu?: (e: React.MouseEvent) => void;
 }
 
-const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, accent, text, size = 40, onMenu }) => {
+const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, accent, text, size = 40, compact = false, cellWidth: fixedWidth, dense = false, displayLabel, inlineValue = false, onMenu }) => {
   const drag = useRef<{ lastY: number; norm: number } | null>(null);
   const [active, setActive] = useState(false);
   const n = Math.max(0, Math.min(1, toNorm(def, value)));
@@ -74,39 +84,49 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
       case 'moog':
         return (
           <>
-            <circle cx={r} cy={r} r={r * 0.86} fill="url(#skirt)" stroke="#555" />
-            <circle cx={r} cy={r} r={r * 0.62} fill="#121212" stroke="#000" />
+            <circle cx={r} cy={r} r={r * 0.88} fill="url(#metalSkirt)" stroke="#17130e" />
+            <circle cx={r} cy={r} r={r * 0.62} fill="url(#blackCap)" stroke="#000" />
+            <circle cx={r} cy={r} r={r * 0.48} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
             <g transform={`rotate(${ang} ${r} ${r})`}>
-              <line x1={r} y1={r * 0.16} x2={r} y2={r * 0.48} stroke="#f5f5f5" strokeWidth={2} />
+              <line x1={r} y1={r * 0.16} x2={r} y2={r * 0.48} stroke="#f5f5f5" strokeWidth={2} strokeLinecap="round" />
             </g>
+            <circle cx={r} cy={r} r={r * 0.13} fill="url(#chrome)" stroke="#333" strokeWidth={0.5} />
           </>
         );
       case 'metal':
         return (
           <>
-            <circle cx={r} cy={r} r={r * 0.78} fill="url(#metal)" stroke="#333" />
+            <circle cx={r} cy={r} r={r * 0.88} fill="url(#metalSkirt)" stroke="#1a1a1a" />
+            <circle cx={r} cy={r} r={r * 0.74} fill="url(#metal)" stroke="#3d4347" />
+            <circle cx={r} cy={r} r={r * 0.6} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth={0.8} />
             <g transform={`rotate(${ang} ${r} ${r})`}>
-              <line x1={r} y1={r * 0.25} x2={r} y2={r * 0.55} stroke="#111" strokeWidth={2} />
+              <line x1={r} y1={r * 0.24} x2={r} y2={r * 0.54} stroke="#151719" strokeWidth={2.2} strokeLinecap="round" />
             </g>
+            <circle cx={r} cy={r} r={r * 0.14} fill="url(#chrome)" stroke="#4a4f52" strokeWidth={0.6} />
           </>
         );
       case 'plastic':
         return (
           <>
-            <circle cx={r} cy={r} r={r * 0.74} fill={accent} stroke="#000" strokeOpacity={0.5} />
+            <circle cx={r} cy={r} r={r * 0.88} fill="url(#metalSkirt)" stroke="#17191b" />
+            <circle cx={r} cy={r} r={r * 0.74} fill={accent} stroke="#111" strokeWidth={0.9} />
+            <ellipse cx={r * 0.86} cy={r * 0.7} rx={r * 0.36} ry={r * 0.2} fill="rgba(255,255,255,0.28)" transform={`rotate(-28 ${r * 0.86} ${r * 0.7})`} />
             <g transform={`rotate(${ang} ${r} ${r})`}>
-              <line x1={r} y1={r * 0.28} x2={r} y2={r * 0.6} stroke="#fff" strokeWidth={2} />
+              <line x1={r} y1={r * 0.27} x2={r} y2={r * 0.58} stroke="#fff" strokeWidth={2.2} strokeLinecap="round" />
             </g>
+            <circle cx={r} cy={r} r={r * 0.13} fill="url(#chrome)" />
           </>
         );
       case 'vintage':
         return (
           <>
-            <circle cx={r} cy={r} r={r * 0.8} fill="#efe6cf" stroke="#6b5b3e" />
-            <circle cx={r} cy={r} r={r * 0.55} fill="#e2d6b8" stroke="#a89670" />
+            <circle cx={r} cy={r} r={r * 0.9} fill="url(#vintageSkirt)" stroke="#3d2d19" strokeWidth={0.9} />
+            <circle cx={r} cy={r} r={r * 0.74} fill="url(#vintageCap)" stroke="rgba(255,255,255,0.4)" strokeWidth={0.8} />
+            <circle cx={r} cy={r} r={r * 0.57} fill="none" stroke="rgba(76,55,25,0.45)" strokeWidth={0.8} />
             <g transform={`rotate(${ang} ${r} ${r})`}>
-              <circle cx={r} cy={r * 0.32} r={2} fill="#3a2a14" />
+              <line x1={r} y1={r * 0.26} x2={r} y2={r * 0.45} stroke="#3a2a14" strokeWidth={2.4} strokeLinecap="round" />
             </g>
+            <circle cx={r} cy={r} r={r * 0.16} fill="url(#chrome)" stroke="#655235" strokeWidth={0.6} />
           </>
         );
       case 'pot':
@@ -137,17 +157,21 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
       default:
         return (
           <>
-            <circle cx={r} cy={r} r={r * 0.74} fill="url(#cap)" stroke="#000" />
+            <circle cx={r} cy={r} r={r * 0.88} fill="url(#metalSkirt)" stroke="#141414" />
+            <circle cx={r} cy={r} r={r * 0.76} fill="url(#cap)" stroke="#050505" />
+            <circle cx={r} cy={r} r={r * 0.63} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={0.9} />
             <g transform={`rotate(${ang} ${r} ${r})`}>
               <line x1={r} y1={r * 0.24} x2={r} y2={r * 0.56} stroke={accent} strokeWidth={2.2} strokeLinecap="round" />
             </g>
+            <circle cx={r} cy={r} r={r * 0.15} fill="url(#chrome)" stroke="#383d40" strokeWidth={0.6} />
           </>
         );
     }
   };
 
+  const cellWidth = fixedWidth ?? (compact ? Math.max(size + 8, 44) : Math.max(size + 14, def.label.length > 8 ? 68 : 56));
   return (
-    <div className="flex flex-col items-center select-none" style={{ width: Math.max(size + 6, 46) }}>
+    <div className="flex flex-col items-center select-none" style={{ width: cellWidth }}>
       <svg
         width={size}
         height={size}
@@ -158,7 +182,7 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
         aria-valuemax={def.max}
         aria-valuenow={Number(value.toFixed(4))}
         aria-valuetext={formatParam(def, value)}
-        className="cursor-ns-resize outline-none focus-visible:ring-2 rounded-full touch-none"
+        className="spec-knob-svg cursor-ns-resize outline-none focus-visible:ring-2 rounded-full touch-none"
         onContextMenu={onMenu}
         onPointerDown={(e) => {
           if (e.button !== 0) return; // right-click is the menu, not a drag
@@ -197,9 +221,10 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
         }}
       >
         <defs>
-          <radialGradient id="cap" cx="40%" cy="35%">
-            <stop offset="0%" stopColor="#4a4a4a" />
-            <stop offset="100%" stopColor="#141414" />
+          <radialGradient id="cap" cx="36%" cy="28%" r="78%">
+            <stop offset="0%" stopColor="#666a63" />
+            <stop offset="48%" stopColor="#2c312b" />
+            <stop offset="100%" stopColor="#10130f" />
           </radialGradient>
           <radialGradient id="metal" cx="40%" cy="35%">
             <stop offset="0%" stopColor="#f4f4f4" />
@@ -210,19 +235,82 @@ const SpecKnobComponent: React.FC<KnobProps> = ({ def, value, onChange, style, a
             <stop offset="60%" stopColor="#bdbdbd" />
             <stop offset="100%" stopColor="#7d7d7d" />
           </radialGradient>
+          <radialGradient id="metalSkirt" cx="38%" cy="28%" r="78%">
+            <stop offset="0%" stopColor="#9aa0a3" />
+            <stop offset="48%" stopColor="#4c5256" />
+            <stop offset="100%" stopColor="#15181a" />
+          </radialGradient>
+          <radialGradient id="blackCap" cx="34%" cy="24%" r="80%">
+            <stop offset="0%" stopColor="#55595d" />
+            <stop offset="46%" stopColor="#24272a" />
+            <stop offset="100%" stopColor="#08090a" />
+          </radialGradient>
+          <radialGradient id="vintageSkirt" cx="38%" cy="28%" r="80%">
+            <stop offset="0%" stopColor="#d8c8a8" />
+            <stop offset="55%" stopColor="#8a7551" />
+            <stop offset="100%" stopColor="#3c2e1b" />
+          </radialGradient>
+          <radialGradient id="vintageCap" cx="34%" cy="24%" r="82%">
+            <stop offset="0%" stopColor="#fff9eb" />
+            <stop offset="38%" stopColor="#f0e5ca" />
+            <stop offset="76%" stopColor="#c9b88f" />
+            <stop offset="100%" stopColor="#8e7a55" />
+          </radialGradient>
+          <linearGradient id="chrome" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f7f9fa" />
+            <stop offset="45%" stopColor="#aeb6bb" />
+            <stop offset="100%" stopColor="#4b5256" />
+          </linearGradient>
         </defs>
-        {style !== 'led' && <path d={arc(-135, 135, r * 0.94)} stroke="#000" strokeOpacity={0.35} strokeWidth={2} fill="none" />}
+        <g aria-hidden="true">
+          {Array.from({ length: 11 }, (_, i) => {
+            const a = -135 + (i / 10) * 270;
+            const rad = (a * Math.PI) / 180;
+            const major = i % 5 === 0;
+            return (
+              <line
+                key={i}
+                x1={r + r * (major ? 0.8 : 0.83) * Math.sin(rad)}
+                y1={r - r * (major ? 0.8 : 0.83) * Math.cos(rad)}
+                x2={r + r * 0.92 * Math.sin(rad)}
+                y2={r - r * 0.92 * Math.cos(rad)}
+                stroke={text}
+                strokeWidth={major ? 1 : 0.7}
+                opacity={major ? 0.4 : 0.2}
+              />
+            );
+          })}
+        </g>
+        {style !== 'led' && <circle cx={r} cy={r} r={r * 0.88} fill="url(#skirt)" stroke="#050705" strokeWidth={1.2} />}
+        {style !== 'led' && <circle cx={r} cy={r} r={r * 0.81} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth={0.8} />}
+        {style !== 'led' && <path d={arc(-135, 135, r * 0.94)} stroke="#000" strokeOpacity={0.4} strokeWidth={2.2} fill="none" />}
+        {style !== 'led' && <path d={arc(-130, -34, r * 0.9)} stroke="rgba(255,255,255,0.14)" strokeWidth={1.2} fill="none" />}
         {style !== 'led' && n > 0.001 && (
-          <path d={bipolar ? arc(Math.min(0, ang), Math.max(0, ang), r * 0.94) : arc(-135, ang, r * 0.94)} stroke={accent} strokeWidth={2} fill="none" />
+          <path d={bipolar ? arc(Math.min(0, ang), Math.max(0, ang), r * 0.94) : arc(-135, ang, r * 0.94)} stroke={accent} strokeWidth={2.2} fill="none" />
         )}
         {body()}
       </svg>
-      <span className="text-[11px] leading-tight font-bold uppercase tracking-wide text-center truncate max-w-full" style={{ color: text }} title={def.label}>
-        {def.label}
-      </span>
-      <span className="text-[11px] leading-tight font-mono opacity-80" style={{ color: active ? accent : text }}>
-        {formatParam(def, value)}
-      </span>
+      {inlineValue ? (
+        <span className="spec-knob-readout" title={`${def.label}: ${formatParam(def, value)}`}>
+          <span className="spec-knob-readout__label">{displayLabel ?? def.label}</span>
+          <span className="spec-knob-readout__value" style={{ color: active ? accent : text }}>
+            {formatParam(def, value)}
+          </span>
+        </span>
+      ) : (
+        <>
+          <span
+            className={`spec-knob-label text-[11px] ${dense ? 'leading-none' : 'leading-tight'} font-bold uppercase text-center max-w-full ${def.label.length > 8 ? 'spec-knob-label--long' : 'truncate'}`}
+            style={{ color: text }}
+            title={def.label}
+          >
+            {displayLabel ?? def.label}
+          </span>
+          <span className={`spec-knob-value text-[11px] ${dense ? 'leading-none' : 'leading-tight'} font-mono`} style={{ color: active ? accent : text }}>
+            {formatParam(def, value)}
+          </span>
+        </>
+      )}
     </div>
   );
 };

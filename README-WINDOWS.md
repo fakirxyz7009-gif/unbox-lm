@@ -2,11 +2,35 @@
 
 ## Get the .exe
 1. Install Node.js LTS from https://nodejs.org (one time).
-2. Double-click **build-exe.bat**. It installs everything and builds `release\Unbox-Studio.exe` (portable, no installer).
-3. Double-click `Unbox-Studio.exe` to run.
+2. Double-click **build-exe.bat**. It installs everything and builds `release\Unbox-Studio-Setup-1.0.0.exe`. Run that installer once; the installed app then starts immediately instead of unpacking itself on every launch.
+3. Launch **Unbox Studio** from the Start menu or the desktop shortcut (both created by the installer).
 
 ## Run without building an exe
 Double-click **run-app.bat** (opens the app in a desktop window).
+
+## Release checklist
+
+1. Build the full installer with `npm run dist:win`.
+2. Smoke-test the installed full build:
+
+   ```bat
+   npm run test:full-installed -- release\Unbox-Studio-Setup-1.0.0.exe
+   ```
+
+   This installs into a temporary per-user folder, launches with a disposable
+   profile, verifies the full catalog plus local library and stems, checks the
+   API and renderer, then uninstalls and removes the test files. It does not
+   replace a manual installer-UI or audio-output check.
+3. For a share release, build and test that artifact separately:
+
+   ```bat
+   npm run dist:win:share
+   npm run test:share-installed -- release\Unbox-Studio-Share-Setup-1.0.0.exe
+   ```
+
+   The share build already runs its browser runtime gate before packaging; the
+   installed check adds archive and share-content verification. Rebuild the full
+   local build with `npm run dist:win` afterward if needed.
 
 ## Plugin library (D:\vsr)
 - Index the library once: `npm run scan:vsr` (or **Rack → Library → Scan now / Rescan**).

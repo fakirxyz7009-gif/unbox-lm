@@ -1,5 +1,5 @@
 /**
- * Durable, best-effort journal for an audio take that has not reached the project yet.
+ * Durable, best-effort journal for a recording that has not reached the project yet.
  *
  * The AudioWorklet only posts fixed-size Float32 chunks. This module copies and batches those
  * chunks on the main thread into IndexedDB; it never performs I/O from an audio callback. A
@@ -55,6 +55,8 @@ export interface RecordingJournalManifest {
   /** Present for a MIDI journal. Mixed recordings use independent audio and MIDI journals. */
   midiMode?: PlaybackMode;
   hasMidiNotes?: boolean;
+  /** Targets represented by successfully committed rows, independent of final clip placement. */
+  durableMidiTrackIds?: string[];
   placedMidiTrackIds?: string[];
   finalizingAt?: number;
   /** Present only after normal placement; retained until a project save clears it. */
@@ -104,6 +106,29 @@ export interface LoadedRecordingJournal {
 
 const BATCH_CHUNKS = 4;
 const BATCH_MS = 350;
+const JOURNAL_LOCK_PREFIX = 'unbox_recording_';
+
+function journalLocks(): LockManager | undefined {
+  const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
+  return typeof locks?.request === 'function' ? locks : undefined;
+}
+
+/** Recovery and discard may only run after a capture owner releases the session. */
+export async function withRecordingJournalLock<T>(sessionId: string, task: () => Promise<T>): Promise<T | undefined> {
+  const locks = journalLocks();
+  if (!locks) return task();
+  return locks.request(`${JOURNAL_LOCK_PREFIX}${sessionId}`, { ifAvailable: true }, (lock) => lock ? task() : undefined);
+}
+
+/** Advisory UI snapshot. Always check ownership again before using or deleting a journal. */
+export async function heldRecordingJournalIds(): Promise<Set<string>> {
+  const snapshot = await journalLocks()?.query();
+  const ids = new Set<string>();
+  for (const { name } of snapshot?.held ?? []) {
+    if (name?.startsWith(JOURNAL_LOCK_PREFIX)) ids.add(name.slice(JOURNAL_LOCK_PREFIX.length));
+  }
+  return ids;
+}
 
 const sessionId = () => `take_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
 const manifestId = (id: string) => `manifest:${id}`;
@@ -134,6 +159,8 @@ export class ActiveRecordingJournal {
   private flushTimer: ReturnType<typeof setTimeout> | null = null;
   private started = false;
   private closed = false;
+  private releaseLock: (() => void) | null = null;
+  private lockRequest: Promise<void> | null = null;
 
   constructor(start: RecordingJournalStart) {
     this.sessionId = sessionId();
@@ -163,8 +190,41 @@ export class ActiveRecordingJournal {
 
   /** Commit the manifest before capture begins, so a crash can at least identify the take. */
   async start(): Promise<void> {
-    await dbPut('recordingJournal', this.snapshot);
-    this.started = true;
+    try {
+      if (journalLocks()) {
+        const hold = new Promise<void>((resolve) => { this.releaseLock = resolve; });
+        await new Promise<void>((resolve, reject) => {
+          this.lockRequest = withRecordingJournalLock(this.sessionId, async () => {
+            resolve();
+            await hold;
+            return true;
+          }).then((entered) => {
+            if (!entered) throw new Error('Recording journal is already in use.');
+          });
+          void this.lockRequest.catch(reject);
+        });
+      }
+      await dbPut('recordingJournal', this.snapshot);
+      this.started = true;
+    } catch (error) {
+      await this.release();
+      throw error;
+    }
+  }
+
+  /** Release cross-window ownership only after the recorder has finished its journal writes. */
+  async release(): Promise<void> {
+    this.closed = true;
+    try {
+      // Failed finalization can reach here before `finish()`. Flush and stop accepting late
+      // blocks before a different renderer may recover or discard the partial take.
+      await this.flush();
+    } finally {
+      const unlock = this.releaseLock;
+      this.releaseLock = null;
+      unlock?.();
+      await this.lockRequest?.catch(() => {});
+    }
   }
 
   /** Update musical placement once the transport has actually scheduled the record edge. */
@@ -247,17 +307,23 @@ export class ActiveRecordingJournal {
       // Build this snapshot in the serialized write, after earlier batches have committed.
       // Do not advance the in-memory durable edge until this transaction actually completes:
       // a fallback manifest after quota/IndexedDB failure must never claim missing chunks exist.
-      const durableThroughFrame = Math.max(this.manifest.durableThroughFrame ?? 0, latest);
+      const durableThroughFrame = latest ? Math.max(this.manifest.durableThroughFrame ?? 0, latest) : this.manifest.durableThroughFrame;
+      const midiTrackIds = new Set(this.manifest.durableMidiTrackIds);
+      for (const block of batch) {
+        if (block.kind === 'midi') midiTrackIds.add(block.trackId);
+      }
       const updatedAt = Date.now();
       const snapshot: RecordingJournalManifest = {
         ...this.snapshot,
         durableThroughFrame,
-        hasMidiNotes: this.manifest.hasMidiNotes || batch.some((row) => row.kind === 'midi'),
+        hasMidiNotes: midiTrackIds.size > 0 || this.manifest.hasMidiNotes,
+        durableMidiTrackIds: midiTrackIds.size ? [...midiTrackIds] : undefined,
         updatedAt,
       };
       await dbPutMany<JournalEntry>('recordingJournal', [...batch, snapshot]);
       this.manifest.durableThroughFrame = durableThroughFrame;
       this.manifest.hasMidiNotes = snapshot.hasMidiNotes;
+      this.manifest.durableMidiTrackIds = snapshot.durableMidiTrackIds;
       this.manifest.updatedAt = Math.max(this.manifest.updatedAt, updatedAt);
     });
   }
@@ -281,20 +347,26 @@ export class ActiveRecordingJournal {
   }
 
   async markMidiCompleted(trackIds: string[]): Promise<void> {
+    const durable = this.manifest.durableMidiTrackIds;
+    if (!durable?.length || !durable.every((id) => trackIds.includes(id))) return;
     this.manifest.completedAt = Date.now();
     this.manifest.updatedAt = this.manifest.completedAt;
     this.manifest.placedMidiTrackIds = [...new Set(trackIds)];
     await this.queueManifest();
   }
 
-  /** Used only for cancelled arming: no recording ever reached the project. */
+  /** Drop a cancelled or empty take. */
   async discard(): Promise<void> {
     this.closed = true;
     if (this.flushTimer !== null) clearTimeout(this.flushTimer);
     this.flushTimer = null;
     this.pending.clear();
-    await this.writeQueue;
-    await deleteRecordingJournal(this.sessionId);
+    try {
+      await this.writeQueue;
+      await deleteRecordingJournal(this.sessionId);
+    } finally {
+      await this.release();
+    }
   }
 }
 
@@ -341,5 +413,6 @@ export async function discardCompletedRecordingJournals(
       ? !!journal.placedMidiTrackIds?.length && journal.placedMidiTrackIds.every((id) => savedMidiTakes.get(id)?.has(journal.sessionId))
       : Array.isArray(journal.placedAudioIds) && journal.placedAudioIds.every((id) => saved.has(id))),
   );
-  await Promise.all(completed.map((journal) => deleteRecordingJournal(journal.sessionId)));
+  await Promise.all(completed.map((journal) =>
+    withRecordingJournalLock(journal.sessionId, () => deleteRecordingJournal(journal.sessionId))));
 }

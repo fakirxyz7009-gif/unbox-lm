@@ -10,7 +10,8 @@ external folder.
   `public/favicon.svg` (rendered to `build/icon.png` for electron-builder).
 - Server: Express 4 run with `tsx` (`server.ts`), hosts `/api/*` (Gemini AI + library) and serves
   the app (Vite middleware in dev, `dist/` in production) and the library bundle at `/library`.
-- Desktop: Electron 45 (`electron/main.cjs`) → portable `release/Unbox-Studio.exe`; it embeds the
+- Desktop: Electron 45 (`electron/main.cjs`) → NSIS installer `release/Unbox-Studio-Setup-1.0.0.exe`
+  (installed once; no per-launch self-extraction); it embeds the
   same API via the esbuild bundle `electron/api-server.cjs` (fixed loopback ports 47821–47825 so
   IndexedDB projects survive restarts).
 - AI provider: Google Gemini via `@google/genai` (server-side only, key in `.env`). Every AI
@@ -29,8 +30,8 @@ external folder.
 | Build a recorded instrument pack → `public/instruments/<id>/` | `npm run instrument -- sfz\|recipe\|chop\|list\|remove …` (scripts/instruments/README.md) |
 | Bundle the API for Electron → `electron/api-server.cjs` | `npm run build:api` |
 | Run desktop app from source | `npm run electron` or `run-app.bat` |
-| Build portable exe (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio.exe` |
-| Build the exe to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
+| Build the Windows installer (yours, with the in-app library) | `build-exe.bat` (= `npm run dist:win`) → `release/Unbox-Studio-Setup-1.0.0.exe` |
+| Build the installer to give to other people | `npm run dist:win:share` → `release/Unbox-Studio-Share-Setup-1.0.0.exe`: `vite build --mode share` (flag `__UNBOX_SHARE__`: only CC0 / CC-BY packs become devices, `shared/instruments/packs.ts`), then `scripts/prune-share-build.ts` deletes `dist/library` (your D:\vsr previews), `dist/stems` (song stems) and the non-redistributable packs' files; the API bundle gets the same flag. Run `npm run dist:win` (or `build:api`) afterwards to get the full local build back |
 
 **Type-check baseline: 0 errors**, and `npx tsc --noEmit --noUnusedLocals` reports only unused
 `React` default imports (harmless with the JSX transform). Keep both clean.
@@ -306,7 +307,7 @@ transport MIDI LED). Settings · MIDI shows ports, the map with Learn / Clear, a
   Only four sizes render: 11 label, 13 body, 18 title, 22 readout (@theme text tokens); the
   .unbox-cabinet rule raises any legacy sub-11px utility class to 11px. Measured on the
   workstation, rack and mixer at 1600 and 1280: min 11px, no clipped text, no per-device scrollers.
-- Contrast: audit the three tabs at 1600�1000 with a canvas-resolved colour walker before changing
+- Contrast: audit the three tabs at 1600×1000 with a canvas-resolved colour walker before changing
   chrome colours; the current pass reports 0 text pairs below 4.5:1 on solid surfaces.
 - Skin tokens: `@theme` in `src/index.css` (`bg-metal-1`, `text-lcd-ink`, `font-label`, `font-lcd` …) and
   the `.us-*` classes inside `@layer components` (so Tailwind utilities on the same element still win).
@@ -314,7 +315,7 @@ transport MIDI LED). Settings · MIDI shows ports, the map with Learn / Clear, a
 - Pages render inside `.us-page` (raw text fields / checkboxes take the skin there) and build on
   `src/studio/ui/controls.tsx`: `Panel` (dark chassis, metal name plate, screws), `Btn` (lit when on),
   `Sel`, `NumField` (LCD), `Slide` (skinned range + LCD readout).
-- The arrangement timeline takes `theme="light"` (Workstation) or dark; colours in `timelineTheme.ts`.
+- The arrangement timeline renders the light palette in the Workstation (`theme="light"`); `timelineTheme.ts` also keeps the dark palette for editors that ask for it.
 
 ### Rack UI (Reason workflow)
 - Three columns with wood rails in ONE scroll container (`.rack-content`): jacks and the cable SVG

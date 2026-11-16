@@ -285,7 +285,12 @@ export function polyEngine(host: SpecHost): SpecEngine {
       }
     },
     meter() {
-      return { voices: pool.held().length };
+      // `sounding` keeps released voices counted until their amp tail has actually ended.
+      const now = ctx.currentTime;
+      pool.gc(now);
+      let sounding = 0;
+      for (const v of pool.list) if (v.startTime <= now && v.endTime > now) sounding++;
+      return { voices: pool.held().length, sounding };
     },
     dispose() {
       pool.killAll(ctx.currentTime);
