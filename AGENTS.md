@@ -459,7 +459,7 @@ cables (all / selected unit / hidden).
 Sequencer: `Enter` opens the selected clip (Edit Mode) · `Shift+1..6` editor tabs · `1..9` piano-roll
 tools · `Q` snap to scale (piano roll) · `-`/`=` pattern length · `Alt+arrows` length / transpose ·
 `Shift+L` legato · `Ctrl+D` generate.
-Arrangement section (the loop region): `Shift+D` duplicate after it · `Shift+Backspace` delete · `Shift+X` ripple delete · `Shift+I` ripple insert · `Alt+Shift+←/→` move by its length. Each is one undo step and carries automation, markers, block placements, folder regions and the loop.
+Arrangement section (the loop region): `Shift+D` duplicate after it · `Shift+Backspace` delete · `Shift+X` ripple delete · `Shift+I` ripple insert (same gap and position as the section strip's RIPPLE INSERT, from `arrangement/sectionInsert.ts`) · `Alt+Shift+←/→` move by its length. Each is one undo step and carries automation, markers, block placements, folder regions and the loop.
 `ShortcutHelpModal` lists only real keys — update it with any change here.
 
 ## Environment variables (`.env`, never committed)

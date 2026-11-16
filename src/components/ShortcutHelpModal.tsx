@@ -100,7 +100,7 @@ const GROUPS: { title: string; icon: typeof Layers; accent: string; items: Item[
       { key: 'Shift+D', label: 'Duplicate the looped section after it (clips, automation, markers, blocks, groups)' },
       { key: 'Shift+Backspace', label: 'Delete the looped section (asks first; Ctrl+Z restores it)' },
       { key: 'Shift+X', label: 'Ripple delete the section: asks first, then everything after it pulls left' },
-      { key: 'Shift+I', label: 'Ripple insert: open a gap at the loop start, everything pushes right' },
+      { key: 'Shift+I', label: 'Ripple insert: open a gap where the section strip says (section start or playhead), everything pushes right' },
       { key: 'Alt+Shift+← / →', label: 'Move the looped section left / right by its own length' },
     ],
   },

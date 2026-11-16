@@ -58,6 +58,7 @@ import { gainToDb, meterPos } from '../../../studio/ui/levels.ts';
 import { rememberUi, setUi, useUi, type SeqTool } from '../../../shell/uiStore.ts';
 import { focusClip } from '../../../shell/clipFocus.ts';
 import { showAlert, showConfirm, showPrompt } from '../../../shell/dialogService.ts';
+import { sectionInsertSettings } from './sectionInsert.ts';
 import { setText, setWidth } from '../../../ui/skin/dom.ts';
 import { useEngineVersion, useFrame, useMeterFrame, useSequencerVersion } from '../../../nexa/useEngine.ts';
 import { DARK_TIMELINE, LIGHT_TIMELINE } from './timelineTheme.ts';
@@ -716,6 +717,18 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
   };
 
   /**
+   * Where and how wide a ripple insert is — the one answer used by the strip, Shift+I and the
+   * ruler menu, so none of the three can disagree.
+   */
+  const insertTarget = () => {
+    const { mode, gapBars } = sectionInsertSettings.get();
+    return {
+      at: mode === 'playhead' ? Math.max(0, Math.round(audioEngine.getPlayheadPosition() / audioEngine.stepsPerBar)) : audioEngine.loopStartBar,
+      gap: gapBars ?? audioEngine.loopEndBar - audioEngine.loopStartBar,
+    };
+  };
+
+  /**
    * Section keys on the loop region (no Ctrl): Shift+D duplicate, Shift+Backspace delete,
    * Shift+X ripple delete, Shift+I ripple insert, Alt+Shift+←/→ move by the section length.
    */
@@ -793,12 +806,14 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
       return true;
     }
     if (e.shiftKey && key === 'i') {
-      const r = audioEngine.rippleInsertSection(a);
+      // Same position and gap as the strip's RIPPLE INSERT button: whatever the user chose there.
+      const { at, gap: gapLen } = insertTarget();
+      const r = audioEngine.rippleInsertSection(at, gapLen);
       const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
       toast(
         changed
-          ? `Opened a ${len} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
-          : 'Nothing at or after this point to push right',
+          ? `Opened a ${gapLen} bar gap at bar ${+(at + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+          : `Nothing at or after bar ${+(at + 1).toFixed(2)} to push right`,
         changed ? 'success' : 'info'
       );
       return true;
@@ -2214,12 +2229,13 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
             </button>
             <button
               onClick={() => {
-                const r = audioEngine.rippleInsertSection(a);
+                const { at, gap: gapLen } = insertTarget();
+                const r = audioEngine.rippleInsertSection(at, gapLen);
                 const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
                 toast(
                   changed
-                    ? `Opened a ${b - a} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
-                    : 'Nothing at or after this point to push right',
+                    ? `Opened a ${gapLen} bar gap at bar ${+(at + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+                    : `Nothing at or after bar ${+(at + 1).toFixed(2)} to push right`,
                   changed ? 'success' : 'info'
                 );
                 setSectionMenu(null);
@@ -2227,7 +2243,10 @@ export const ArrangementTimeline: React.FC<Props> = ({ audioEngine, tracks, acti
               className="w-full text-left px-3 py-1 hover:bg-slate-800 text-emerald-300"
               data-testid="section-menu-insert"
             >
-              Ripple insert here (open a gap of {b - a} bars)
+              {(() => {
+                const { at, gap: gapLen } = insertTarget();
+                return `Ripple insert — ${gapLen} bar${gapLen === 1 ? '' : 's'} at bar ${+(at + 1).toFixed(2)} (${sectionInsertSettings.get().mode === 'playhead' ? 'playhead' : 'section start'})`;
+              })()}
             </button>
             <div className="px-3 py-1 mt-1 border-t border-slate-800 text-slate-500">
               Alt-drag the loop region to move · Alt+Shift to copy · carries clips, automation, markers, blocks, folder groups and the loop

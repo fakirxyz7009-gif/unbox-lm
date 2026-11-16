@@ -9,6 +9,7 @@ import { useEngineVersion } from '../../../nexa/useEngine.ts';
 import { toast } from '../../../shell/toast.ts';
 import { capturePointer } from '../../../ui/skin/pointer.ts';
 import { showConfirm } from '../../../shell/dialogService.ts';
+import { sectionInsertSettings, useSectionInsertSettings } from './sectionInsert.ts';
 
 export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }> = ({ audioEngine, light }) => {
   useEngineVersion();
@@ -18,6 +19,7 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
   const active = len > 0;
   const [draft, setDraft] = useState<{ a: string; b: string } | null>(null);
   const [gapDraft, setGapDraft] = useState<string | null>(null);
+  const insert = useSectionInsertSettings();
   const [grab, setGrab] = useState<{ x: number; a0: number; b0: number } | null>(null);
   const spb = Math.max(1, audioEngine.stepsPerBar);
   const step = 1 / spb;
@@ -109,18 +111,17 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
       changed ? 'success' : 'info'
     );
   };
-  /** Gap the RIPPLE INSERT button opens: typed in the strip, defaulting to the section length. */
-  const gap = (() => {
-    const typed = Number(gapDraft);
-    return Number.isFinite(typed) && typed > 0 ? typed : len;
-  })();
+  /** Gap RIPPLE INSERT opens: typed in the strip (shared with Shift+I), defaulting to the section length. */
+  const gap = insert.gapBars ?? len;
+  /** Where RIPPLE INSERT opens its gap: the section start, or the playhead (shared with Shift+I). */
+  const insertBar = insert.mode === 'playhead' ? Math.max(0, Math.round(audioEngine.getPlayheadPosition() / spb)) : a;
   const rippleIns = () => {
-    const r = audioEngine.rippleInsertSection(a, gap);
+    const r = audioEngine.rippleInsertSection(insertBar, gap);
     const changed = r.clips + r.lanes + r.markers + r.blocks + r.folders + (r.loop ? 1 : 0);
     toast(
       changed
-        ? `Opened a ${gap} bar gap at bar ${+(a + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
-        : 'Nothing at or after this point to push right',
+        ? `Opened a ${gap} bar gap at bar ${+(insertBar + 1).toFixed(2)} — ${r.clips} clip${r.clips === 1 ? '' : 's'} pushed right (Ctrl+Z restores it)`
+        : `Nothing at or after bar ${+(insertBar + 1).toFixed(2)} to push right`,
       changed ? 'success' : 'info'
     );
   };
@@ -207,22 +208,43 @@ export const SectionStrip: React.FC<{ audioEngine: AudioEngine; light: boolean }
         className={btn('text-emerald-300')}
         disabled={!active}
         onClick={rippleIns}
-        title={`Open a ${gap} bar gap at the section start and push everything after it right (Shift+I uses the section length)`}
+        title={`Open a ${gap} bar gap at the ${insert.mode === 'playhead' ? 'playhead' : 'section start'} and push everything after it right (Shift+I does the same)`}
         data-testid="section-strip-ripple-insert"
       >
         RIPPLE INSERT
       </button>
+      <select
+        value={insert.mode}
+        onChange={(e) => sectionInsertSettings.setMode(e.target.value as 'section' | 'playhead')}
+        className={`px-1 py-0 rounded border text-[11px] ${light ? 'bg-[#181c20] border-[#3a4047] text-[#e8e5df]' : 'bg-slate-900 border-slate-700 text-white'}`}
+        title="Where RIPPLE INSERT opens the gap"
+        aria-label="Ripple insert position"
+        data-testid="section-strip-insert-at"
+      >
+        <option value="section">at section</option>
+        <option value="playhead">at playhead</option>
+      </select>
       <label className="flex items-center gap-1 opacity-90" title="Length of the gap RIPPLE INSERT opens (defaults to the section length)">
         <span className="opacity-70">gap</span>
         <input
-          value={gapDraft ?? String(len)}
-          onChange={(e) => setGapDraft(e.target.value)}
+          value={gapDraft ?? String(gap)}
+          onChange={(e) => {
+            setGapDraft(e.target.value);
+            const typed = Number(e.target.value);
+            sectionInsertSettings.setGapBars(Number.isFinite(typed) && typed > 0 ? typed : null);
+          }}
           onBlur={() => {
             const typed = Number(gapDraft);
-            if (!Number.isFinite(typed) || typed <= 0) setGapDraft(null);
+            if (!Number.isFinite(typed) || typed <= 0) {
+              setGapDraft(null);
+              sectionInsertSettings.setGapBars(null);
+            }
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Escape') setGapDraft(null);
+            if (e.key === 'Escape') {
+              setGapDraft(null);
+              sectionInsertSettings.setGapBars(null);
+            }
             e.stopPropagation();
           }}
           type="number"
